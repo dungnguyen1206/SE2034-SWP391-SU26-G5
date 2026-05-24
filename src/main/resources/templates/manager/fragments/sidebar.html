@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+
+<body>
+<!--Common SideBar-->
+<aside th:fragment="managerSidebar" class="manager-sidebar" >
+    <header class="manager-header">
+        <div class="manager-header-title">
+            <div class="manager-brand-icon"> <i class="bi bi-hospital"></i> </div>
+            <div class="manager-brand-text"><h1>HMS</h1>
+                <p>HAMEMS System</p>
+            </div>
+        </div>
+    </header>
+    <nav class="sidebar-section-title">Hospital Management</nav>
+    <nav class="manager-nav">
+        <ul class="manager-nav-list">
+            <li><a href="#" class="manager-nav-link active"><i class="bi bi-grid"></i>Dashboard</a></li>
+            <li><a href="#" class="manager-nav-link"><i class="bi bi-people"></i>Staff Accounts</a></li>
+            <li><a href="#" class="manager-nav-link"><i class="bi bi-person-badge"></i>Doctor List</a></li>
+            <li><a href="#" class="manager-nav-link"><i class="bi bi-headset"></i>Receptionist List</a></li>
+            <li><a href="#" class="manager-nav-link"><i class="bi bi-clipboard2-pulse"></i>Service List</a></li>
+            <li><a href="#" class="manager-nav-link"><i class="bi bi-calendar-week"></i>Schedule Management</a></li>
+            <li><a href="#" class="manager-nav-link"><i class="bi bi-newspaper"></i>Article List</a></li>
+            <li><a href="#" class="manager-nav-link"><i class="bi bi-megaphone"></i>News List</a></li>
+            <li><a href="#" class="manager-nav-link"><i class="bi bi-calendar-check"></i>Appointment List</a></li>
+            <li><a href="#" class="manager-nav-link"><i class="bi bi-file-earmark-medical"></i>Medical Records</a></li>
+            <li><a href="#" class="manager-nav-link"><i class="bi bi-receipt"></i>Invoice Overview</a></li>
+        </ul>
+    </nav>
+    <div class="manager-sidebar-footer">
+        <div class="manager-user-avatar">
+            HM
+        </div>
+
+        <div class="manager-user-info">
+            <strong> Hospital Manager</strong>
+            <span>manager@hms.vn</span>
+        </div>
+
+        <div class="manager-logout-link">
+            <a href="#"><i class="bi bi-box-arrow-right"></i></a>
+        </div>
+
+    </div>
+</aside>
+
+</body>
+</html>
