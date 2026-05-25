@@ -1,10 +1,180 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Lịch hẹn bệnh nhân</title>
+    <link rel="stylesheet" href="appointments-list.css">
 </head>
 <body>
+
+<div class="layout">
+
+    <aside class="sidebar">
+        <div class="logo">
+            <h2>Hospital HAMS</h2>
+            <p>Dr. Professional</p>
+        </div>
+
+        <nav class="menu">
+            <a href="dashboard.html">▦ Dashboard</a>
+            <a href="schedule.html">▣ Lịch làm việc</a>
+            <a class="active" href="appointments/list.html">▣ Lịch hẹn</a>
+            <a href="#">♢ Thông báo</a>
+            <a href="#">⚙ Cài đặt</a>
+        </nav>
+
+        <div class="doctor-account">
+            <div class="avatar">👤</div>
+            <div>
+                <h4>Bác sĩ Minh</h4>
+                <p>Chuyên Môn Nội</p>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main">
+
+        <div class="top-bar">
+            <div class="search-box">
+                <span>⌕</span>
+                <input type="text" placeholder="Tìm kiếm bệnh nhân, hồ sơ...">
+            </div>
+        </div>
+
+        <div class="page-header">
+            <div>
+                <h1>Lịch hẹn bệnh nhân</h1>
+                <p>Thứ Sáu, ngày 24 tháng 05, 2024</p>
+            </div>
+
+            <div class="actions">
+                <button>▣ Chọn ngày</button>
+                <button>▽ Bộ lọc trạng thái</button>
+            </div>
+        </div>
+
+        <section class="appointment-card">
+
+            <table>
+                <thead>
+                <tr>
+                    <th>BỆNH NHÂN</th>
+                    <th>GIỜ HẸN</th>
+                    <th>LOẠI LỊCH HẸN</th>
+                    <th>TRẠNG THÁI</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr>
+                    <td>
+                        <div class="patient">
+                            <span>LT</span>
+                            <div>
+                                <h3>Lê Thị Mai Anh</h3>
+                                <p>ID: BN-30241 • 45 tuổi</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="time">09:00</td>
+                    <td><span class="type">Tái khám định kỳ</span></td>
+                    <td><span class="badge cyan">ĐANG KHÁM</span></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <div class="patient">
+                            <span>TP</span>
+                            <div>
+                                <h3>Trần Văn Phong</h3>
+                                <p>ID: BN-30235 • 38 tuổi</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="time">09:30</td>
+                    <td><span class="type">Khám lần đầu</span></td>
+                    <td><span class="badge gray">ĐANG ĐỢI</span></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <div class="patient">
+                            <span>PH</span>
+                            <div>
+                                <h3>Phạm Hoàng Nam</h3>
+                                <p>ID: BN-16122 • 52 tuổi</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="time">10:00</td>
+                    <td><span class="type">Khám lưu động quạt</span></td>
+                    <td><span class="badge green">HOÀN THÀNH</span></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <div class="patient">
+                            <span>ND</span>
+                            <div>
+                                <h3>Nguyễn Diệu Nhi</h3>
+                                <p>ID: BN-77119 • 29 tuổi</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="time">10:30</td>
+                    <td><span class="type">Khám lần đầu</span></td>
+                    <td><span class="badge gray">ĐANG ĐỢI</span></td>
+                </tr>
+
+                <tr>
+                    <td>
+                        <div class="patient">
+                            <span>HM</span>
+                            <div>
+                                <h3>Hoàng Minh Tuấn</h3>
+                                <p>ID: BN-55231 • 41 tuổi</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="time">11:00</td>
+                    <td><span class="type">Tái khám</span></td>
+                    <td><span class="badge gray">ĐANG ĐỢI</span></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="table-footer">
+                <p>Hiển thị 1-5 trong tổng số 7 lịch hẹn</p>
+
+                <div class="pagination">
+                    <button class="disabled">‹ Trước</button>
+                    <button class="active">1</button>
+                    <button>2</button>
+                    <button>Sau ›</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="summary">
+            <div class="summary-card">
+                <p>TỔNG CA KHÁM</p>
+                <h2 class="blue-text">7</h2>
+            </div>
+
+            <div class="summary-card">
+                <p>ĐÃ KHÁM THÀNH</p>
+                <h2 class="green-text">1</h2>
+            </div>
+
+            <div class="summary-card">
+                <p>ĐANG ĐỢI</p>
+                <h2 class="orange-text">4</h2>
+            </div>
+        </section>
+
+    </main>
+
+</div>
 
 </body>
 </html>

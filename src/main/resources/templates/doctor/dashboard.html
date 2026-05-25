@@ -1,10 +1,178 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Doctor Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
+
+<div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <h2>Hospital HAMS</h2>
+            <p>Dr. Professional</p>
+        </div>
+
+        <nav class="menu">
+            <a class="active" href="dashboard.html">▦ Dashboard</a>
+            <a href="schedule.html">▣ Lịch làm việc</a>
+            <a href="appoiment/list.html">▣ Lịch hẹn</a>
+            <a href="#">♢ Thông báo</a>
+            <a href="#">⚙ Cài đặt</a>
+        </nav>
+
+        <div class="doctor-account">
+            <div class="avatar">👤</div>
+            <div>
+                <h4>Bác sĩ Minh</h4>
+                <p>Chuyên Môn Nội</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main content -->
+    <main class="main">
+
+        <div class="search-box">
+            <input type="text" placeholder="Tìm kiếm bệnh nhân, mã hồ sơ...">
+        </div>
+
+        <h1>Chào bác sĩ, Minh!</h1>
+
+        <!-- Statistics -->
+        <section class="stats">
+            <div class="stat-card">
+                <div>
+                    <p>BỆNH NHÂN HÔM NAY</p>
+                    <h2>02</h2>
+                </div>
+                <span class="icon blue">👥</span>
+            </div>
+
+            <div class="stat-card">
+                <div>
+                    <p>HỒ SƠ CHỜ DUYỆT</p>
+                    <h2>02</h2>
+                </div>
+                <span class="icon orange">📄</span>
+            </div>
+
+            <div class="stat-card">
+                <div>
+                    <p>SỐ HỒ SƠ ĐÃ HOÀN THÀNH</p>
+                    <h2>0</h2>
+                </div>
+                <span class="icon green">✓</span>
+            </div>
+
+            <div class="stat-card">
+                <div>
+                    <p>CA KHẨN CẤP</p>
+                    <h2>0</h2>
+                </div>
+                <span class="icon red">!</span>
+            </div>
+        </section>
+
+        <!-- Appointment today -->
+        <section class="card-section">
+            <h2>Lịch hẹn trong ngày</h2>
+
+            <div class="table-box">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>THỜI GIAN</th>
+                        <th>BỆNH NHÂN</th>
+                        <th>DỊCH VỤ</th>
+                        <th>TRẠNG THÁI</th>
+                        <th>THAO TÁC</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr>
+                        <td class="time">10:15 AM</td>
+                        <td>
+                            <div class="patient-info">
+                                <span class="circle">TB</span>
+                                <b>Trần Thị Bích</b>
+                            </div>
+                        </td>
+                        <td>Tái khám định kỳ</td>
+                        <td><span class="status">CHƯA XÁC NHẬN</span></td>
+                        <td>👁</td>
+                    </tr>
+
+                    <tr>
+                        <td class="time">11:00 AM</td>
+                        <td>
+                            <div class="patient-info">
+                                <span class="circle">LT</span>
+                                <b>Lê Minh Tâm</b>
+                            </div>
+                        </td>
+                        <td>Tư vấn xét nghiệm</td>
+                        <td><span class="status">CHƯA XÁC NHẬN</span></td>
+                        <td>👁</td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <a href="#" class="view-all">Xem tất cả ›</a>
+            </div>
+        </section>
+
+        <!-- Recent patients -->
+        <section class="card-section">
+            <h2>Danh sách bệnh nhân gần đây</h2>
+
+            <div class="patient-list">
+                <div class="patient-card">
+                    <span class="patient-avatar">N</span>
+                    <div>
+                        <h3>Nguyễn Văn Ân</h3>
+                        <p>ID: BN-103</p>
+                        <small>Lần khám cuối: 12/10/2023</small>
+                    </div>
+                </div>
+
+                <div class="patient-card">
+                    <span class="patient-avatar">P</span>
+                    <div>
+                        <h3>Phạm Minh Hoàng</h3>
+                        <p>ID: BN-205</p>
+                        <small>Lần khám cuối: 08/10/2023</small>
+                    </div>
+                </div>
+
+                <div class="patient-card">
+                    <span class="patient-avatar">H</span>
+                    <div>
+                        <h3>Hoàng Diệu Linh</h3>
+                        <p>ID: BN-312</p>
+                        <small>Lần khám cuối: 05/10/2023</small>
+                    </div>
+                </div>
+
+                <div class="patient-card">
+                    <span class="patient-avatar">Đ</span>
+                    <div>
+                        <h3>Đặng Thu Thảo</h3>
+                        <p>ID: BN-118</p>
+                        <small>Lần khám cuối: 02/10/2023</small>
+                    </div>
+                </div>
+            </div>
+
+            <a href="#" class="view-all">Xem tất cả ›</a>
+        </section>
+
+    </main>
+</div>
 
 </body>
 </html>

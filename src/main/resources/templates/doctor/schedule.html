@@ -1,10 +1,154 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Lịch làm việc bác sĩ</title>
+    <link rel="stylesheet" href="schedule.css">
 </head>
 <body>
+
+<div class="layout">
+
+    <aside class="sidebar">
+        <div class="logo">
+            <h2>Hospital HAMS</h2>
+            <p>Dr. Professional</p>
+        </div>
+
+        <nav class="menu">
+            <a href="dashboard.html">▦ Dashboard</a>
+            <a class="active" href="schedule.html">▣ Lịch làm việc</a>
+            <a href="#">▣ Lịch hẹn</a>
+            <a href="#">♢ Thông báo</a>
+            <a href="#">⚙ Cài đặt</a>
+        </nav>
+
+        <div class="doctor-account">
+            <div class="avatar">👤</div>
+            <div>
+                <h4>Bác sĩ Minh</h4>
+                <p>Chuyên Môn Nội</p>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main">
+
+        <div class="breadcrumb">
+            Trang chủ / <span>Lịch làm việc</span>
+        </div>
+
+        <div class="header">
+            <div>
+                <h1>Lịch làm việc hằng tuần</h1>
+                <p>Chào mừng trở lại, Bác sĩ Minh. Quản lý lịch làm việc của bạn tuần này.</p>
+            </div>
+
+            <div class="week-control">
+                <button>‹</button>
+                <b>Tuần trước</b>
+                <span>|</span>
+                <b>Tuần tiếp theo</b>
+                <button>›</button>
+            </div>
+        </div>
+
+        <section class="week-days">
+
+            <div class="day">
+                <p>THỨ 2</p>
+                <h2>15</h2>
+                <div class="day-box">
+                    <div class="shift morning">
+                        <span>Morning</span>
+                        <h3>Morning Shift</h3>
+                        <p>07:30 - 12:00</p>
+                        <small>Phòng Khám - Tầng 1</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="day">
+                <p>THỨ 3</p>
+                <h2>16</h2>
+                <div class="day-box empty">▣</div>
+            </div>
+
+            <div class="day">
+                <p>THỨ 4</p>
+                <h2>17</h2>
+                <div class="day-box">
+                    <div class="shift afternoon">
+                        <span>Afternoon</span>
+                        <h3>Afternoon Shift</h3>
+                        <p>13:00 - 18:00</p>
+                        <small>Hội chẩn - Phòng Nội</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="day">
+                <p>THỨ 5</p>
+                <h2>18</h2>
+                <div class="day-box empty">▣</div>
+            </div>
+
+            <div class="day">
+                <p>THỨ 6</p>
+                <h2>19</h2>
+                <div class="day-box">
+                    <div class="shift full">
+                        <span>Full</span>
+                        <h3>Full Day</h3>
+                        <p>Toàn ngày</p>
+                        <small>Cơ sở Bệnh 2</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="day">
+                <p>THỨ 7</p>
+                <h2>20</h2>
+                <div class="day-box empty">▣</div>
+            </div>
+
+            <div class="day">
+                <p>CHỦ NHẬT</p>
+                <h2>21</h2>
+                <div class="day-box empty">▣</div>
+            </div>
+
+        </section>
+
+        <section class="summary">
+            <div class="summary-card">
+                <div class="summary-icon blue">◷</div>
+                <div>
+                    <p>TỔNG GIỜ LÀM VIỆC</p>
+                    <h2>21.5 Giờ</h2>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-icon green">▣</div>
+                <div>
+                    <p>SỐ CA TRỰC</p>
+                    <h2>03 Ca</h2>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-icon orange">↗</div>
+                <div>
+                    <p>HIỆU SUẤT TUẦN</p>
+                    <h2>Tốt</h2>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+</div>
 
 </body>
 </html>
