@@ -1,10 +1,244 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Tạo tài khoản nhân viên</title>
+    <link rel="stylesheet" th:href="@{/css/manager/manager-common.css}">
+    <link rel="stylesheet" th:href="@{/css/manager/manager-staff.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
 <body>
+    <div class="manager-layout">
 
+        <div th:replace="~{manager/fragments/sidebar :: managerSidebar('staff')}"></div>
+
+        <!--MAIN CONTENT-->
+        <main class="manager-main">
+
+            <!--STAFF FORM HEADER-->
+            <header class="staff-form-header">
+                <a th:href="@{/manager/staff}" class="staff-back-link">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div class="staff-header-title">
+                    <h2>Tạo tài khoản nhân viên</h2>
+                    <p>Tạo tài khoản mới và tự động gán vai trò theo loại nhân viên</p>
+                </div>
+            </header>
+
+            <form class="staff-form">
+
+                <!--STAFF TYPE-->
+                <section class="staff-form-card staff-type-section">
+                    <div class="staff-form-section-title">Loại nhân viên <span>*</span></div>
+
+                    <div class="staff-type-options">
+                        <a th:href="@{/manager/staff/create(type='doctor')}"
+                           class="staff-type-option doctor"
+                           th:classappend="${staffType == 'doctor'} ? 'selected'">
+                            <i class="bi bi-shield-plus"></i>
+                            <strong>Bác sĩ</strong>
+                        </a>
+
+                        <a th:href="@{/manager/staff/create(type='receptionist')}"
+                           class="staff-type-option receptionist"
+                           th:classappend="${staffType == 'receptionist'} ? 'selected'">
+                            <i class="bi bi-person"></i>
+                            <strong>Lễ tân</strong>
+                        </a>
+                    </div>
+
+                    <div class="staff-role-note">
+                        <i class="bi bi-lock"></i>
+                        <span>Vai trò được gán:</span>
+                        <strong th:text="${roleName}">ROLE_DOCTOR</strong>
+                        <em>Tự động theo loại nhân viên, không nhập thủ công</em>
+                    </div>
+                </section>
+
+                <div class="staff-form-layout">
+                    <div class="staff-form-main">
+
+                        <!--ACCOUNT INFORMATION-->
+                        <section class="staff-form-card">
+                            <div class="staff-form-card-header">
+                                <i class="bi bi-person"></i>
+                                <h3>Thông tin tài khoản</h3>
+                            </div>
+
+                            <div class="staff-form-grid">
+                                <label class="staff-form-field">
+                                    <span>Tên đăng nhập <strong>*</strong></span>
+                                    <input type="text" placeholder="VD: tuan.tran">
+                                </label>
+
+                                <label class="staff-form-field">
+                                    <span>Email <strong>*</strong></span>
+                                    <input type="email" th:placeholder="${staffType == 'doctor'} ? 'doctor@hms.vn' : 'receptionist@hms.vn'">
+                                </label>
+
+                                <label class="staff-form-field">
+                                    <span>Mật khẩu tạm thời <strong>*</strong></span>
+                                    <input type="password" placeholder="Tối thiểu 8 ký tự">
+                                </label>
+
+                                <label class="staff-form-field">
+                                    <span>Xác nhận mật khẩu <strong>*</strong></span>
+                                    <input type="password" placeholder="Nhập lại mật khẩu">
+                                </label>
+                            </div>
+                        </section>
+
+                        <!--PROFILE INFORMATION-->
+                        <section class="staff-form-card">
+                            <div class="staff-form-card-header">
+                                <i class="bi bi-card-text"></i>
+                                <h3>Thông tin hồ sơ</h3>
+                            </div>
+
+                            <div class="staff-form-grid">
+                                <label class="staff-form-field staff-form-full">
+                                    <span>Họ và tên <strong>*</strong></span>
+                                    <input type="text" th:placeholder="${staffType == 'doctor'} ? 'VD: Trần Minh Tuấn' : 'VD: Lê Thị Hoa'">
+                                </label>
+
+                                <label class="staff-form-field">
+                                    <span>Số điện thoại <strong>*</strong></span>
+                                    <input type="text" placeholder="VD: 0987 654 321">
+                                </label>
+
+                                <label class="staff-form-field">
+                                    <span>Giới tính <strong>*</strong></span>
+                                    <select>
+                                        <option>Chọn giới tính...</option>
+                                        <option>Nam</option>
+                                        <option>Nữ</option>
+                                        <option>Khác</option>
+                                    </select>
+                                </label>
+                            </div>
+                        </section>
+
+                        <!--DOCTOR PROFILE-->
+                        <section class="staff-form-card staff-doctor-card" th:if="${staffType == 'doctor'}">
+                            <div class="staff-form-card-header">
+                                <i class="bi bi-shield-plus"></i>
+                                <h3>Hồ sơ bác sĩ</h3>
+                                <span class="staff-section-badge doctor">Chỉ dành cho bác sĩ</span>
+                            </div>
+
+                            <div class="staff-form-grid">
+                                <label class="staff-form-field">
+                                    <span>Khoa <strong>*</strong></span>
+                                    <select>
+                                        <option>Chọn khoa...</option>
+                                        <option>Tim mạch</option>
+                                        <option>Mắt</option>
+                                        <option>Nhi khoa</option>
+                                    </select>
+                                </label>
+
+                                <label class="staff-form-field">
+                                    <span>Bằng cấp <strong>*</strong></span>
+                                    <input type="text" placeholder="VD: Bác sĩ chuyên khoa I">
+                                </label>
+
+                                <label class="staff-form-field">
+                                    <span>Số giấy phép hành nghề</span>
+                                    <input type="text" placeholder="VD: VN-MED-2021-0042">
+                                </label>
+
+                                <label class="staff-form-field">
+                                    <span>Số năm kinh nghiệm <strong>*</strong></span>
+                                    <input type="number" placeholder="VD: 8">
+                                </label>
+
+                                <label class="staff-form-field">
+                                    <span>Trạng thái bác sĩ <strong>*</strong></span>
+                                    <select>
+                                        <option>Đang hoạt động</option>
+                                        <option>Ngưng hoạt động</option>
+                                    </select>
+                                </label>
+
+                                <label class="staff-form-field staff-form-full">
+                                    <span>Tiểu sử chuyên môn</span>
+                                    <textarea placeholder="Mô tả ngắn về kinh nghiệm, chuyên môn của bác sĩ..."></textarea>
+                                </label>
+                            </div>
+                        </section>
+
+                        <!--RECEPTIONIST PROFILE-->
+                        <section class="staff-form-card staff-receptionist-card" th:if="${staffType == 'receptionist'}">
+                            <div class="staff-form-card-header">
+                                <i class="bi bi-person"></i>
+                                <h3>Hồ sơ lễ tân</h3>
+                                <span class="staff-section-badge receptionist">Chỉ dành cho lễ tân</span>
+                            </div>
+
+                            <div class="staff-form-grid">
+                                <label class="staff-form-field">
+                                    <span>Trạng thái lễ tân <strong>*</strong></span>
+                                    <select>
+                                        <option>Đang hoạt động</option>
+                                        <option>Ngưng hoạt động</option>
+                                    </select>
+                                </label>
+
+                                <label class="staff-form-field staff-form-full">
+                                    <span>Ghi chú</span>
+                                    <textarea placeholder="Ghi chú nội bộ nếu có..."></textarea>
+                                </label>
+                            </div>
+                        </section>
+                    </div>
+
+                    <aside class="staff-form-side">
+
+                        <!--ACCOUNT STATUS-->
+                        <section class="staff-form-card">
+                            <div class="staff-form-side-title">Trạng thái tài khoản</div>
+
+                            <label class="staff-radio-card selected">
+                                <input type="radio" name="accountStatus" checked>
+                                <span class="staff-radio-dot active"></span>
+                                Đang hoạt động
+                            </label>
+
+                            <label class="staff-radio-card">
+                                <input type="radio" name="accountStatus">
+                                <span class="staff-radio-dot inactive"></span>
+                                Ngưng hoạt động
+                            </label>
+                        </section>
+
+                        <!--PROFILE PHOTO-->
+                        <section class="staff-form-card">
+                            <div class="staff-form-side-title">Ảnh đại diện</div>
+                            <div class="staff-photo-preview">?</div>
+                            <button type="button" class="staff-upload-button">Tải ảnh lên</button>
+                        </section>
+
+                        <!--FORM ACTIONS-->
+                        <section class="staff-form-card">
+                            <button type="button" class="staff-save-button">
+                                <i class="bi bi-save"></i>
+                                <span th:text="${staffType == 'doctor'} ? 'Lưu tài khoản bác sĩ' : 'Lưu tài khoản lễ tân'">Lưu tài khoản</span>
+                            </button>
+                            <a th:href="@{/manager/staff}" class="staff-cancel-button">Hủy</a>
+                        </section>
+
+                        <!--ROLE ASSIGNMENT NOTE-->
+                        <section class="staff-role-help">
+                            <h4>Ghi chú về gán vai trò</h4>
+                            <p>Hệ thống sẽ tự động gán:</p>
+                            <div><span class="staff-help-badge doctor">ROLE_DOCTOR</span> khi loại nhân viên là Bác sĩ</div>
+                            <div><span class="staff-help-badge receptionist">ROLE_RECEPTIONIST</span> khi loại nhân viên là Lễ tân</div>
+                        </section>
+                    </aside>
+                </div>
+            </form>
+        </main>
+    </div>
 </body>
 </html>

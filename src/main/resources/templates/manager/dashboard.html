@@ -2,14 +2,15 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Hospital Manager Dashboard</title>
-    <link rel="stylesheet" href="../../static/css/manager/manager-layout.css">
+    <title>Tổng quan quản lý bệnh viện</title>
+    <link rel="stylesheet" th:href="@{/css/manager/manager-dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/manager/manager-common.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
 <body>
      <div class="manager-layout">
 
-         <div th:replace="manager/fragments/sidebar :: managerSidebar"></div>
+         <div th:replace="~{manager/fragments/sidebar :: managerSidebar('dashboard')}"></div>
 
     <!--MAIN CONTENT -->
 
@@ -17,12 +18,12 @@
          <main class="manager-main">
             <header class="dashboard-header">
                 <div class="dashboard-header-title">
-                    <h2>Hospital Manager Dashboard</h2>
+                    <h2>Tổng quan quản lý bệnh viện</h2>
                     <div class="dashboard-header-subtitle">
-                        <p>Overview - Today / This month</p>
+                        <p>Tổng quan - Hôm nay / Tháng này</p>
                     </div>
                 </div>
-                <span class="dashboard-status-badge">All Systems Normal</span>
+                <span class="dashboard-status-badge">Hệ thống hoạt động bình thường</span>
 
             </header>
              <div class="manager-dashboard">
@@ -32,27 +33,27 @@
                 <div class="dashboard-stats">
 
                     <div class="dashboard-stat-card">
-                        <div class="dashboard-stat-label">Total Appointments</div>
+                        <div class="dashboard-stat-label">Tổng lịch hẹn</div>
                         <div class="dashboard-stat-value">1,284</div>
-                        <div class="dashboard-stat-note">+64 this month</div>
+                        <div class="dashboard-stat-note">+64 trong tháng này</div>
                     </div>
 
                     <div class="dashboard-stat-card">
-                        <div class="dashboard-stat-label">Total Patients</div>
+                        <div class="dashboard-stat-label">Tổng bệnh nhân</div>
                         <div class="dashboard-stat-value">892</div>
-                        <div class="dashboard-stat-note">+28 this month</div>
+                        <div class="dashboard-stat-note">+28 trong tháng này</div>
                     </div>
 
                     <div class="dashboard-stat-card">
-                        <div class="dashboard-stat-label">Active Doctors</div>
+                        <div class="dashboard-stat-label">Bác sĩ đang hoạt động</div>
                         <div class="dashboard-stat-value">18</div>
-                        <div class="dashboard-stat-note">2 on leave</div>
+                        <div class="dashboard-stat-note">2 bác sĩ đang nghỉ</div>
                     </div>
 
                     <div class="dashboard-stat-card">
-                        <div class="dashboard-stat-label">Revenue This Month</div>
-                        <div class="dashboard-stat-value">VND 128.4M</div>
-                        <div class="dashboard-stat-note">+12% vs last month</div>
+                        <div class="dashboard-stat-label">Doanh thu tháng này</div>
+                        <div class="dashboard-stat-value">128,4 triệu VND</div>
+                        <div class="dashboard-stat-note">+12% so với tháng trước</div>
                     </div>
 
                 </div>
@@ -60,14 +61,14 @@
                  <!--Block 2-->
                  <div class="dashboard-status-card">
                      <div class="status-card-title">
-                         Today's Appointment Status Breakdown
+                         Thống kê trạng thái lịch hẹn hôm nay
                      </div>
                      <div class="status-card-list">
-                         <div class="status-card-badge status-pending">34 Pending</div>
-                         <div class="status-card-badge status-confirmed">87 Confirmed</div>
-                         <div class="status-card-badge status-checked-in">22 Checked-in</div>
-                         <div class="status-card-badge status-completed">156 Completed</div>
-                         <div class="status-card-badge status-cancelled">12 Cancelled</div>
+                         <div class="status-card-badge status-pending">34 Chờ xử lý</div>
+                         <div class="status-card-badge status-confirmed">87 Đã xác nhận</div>
+                         <div class="status-card-badge status-checked-in">22 Đã check-in</div>
+                         <div class="status-card-badge status-completed">156 Đã hoàn thành</div>
+                         <div class="status-card-badge status-cancelled">12 Đã hủy</div>
                      </div>
                  </div>
 
@@ -75,26 +76,26 @@
                  <div class="dashboard-grid">
                      <div class="dashboard-panel">
                             <div class="dashboard-panel-header">
-                                Today's Appointment
+                                Lịch hẹn hôm nay
                             </div>
                             <div class="dashboard-panel-body">
                                 <table class="dashboard-table">
                                     <thead>
                                     <tr>
-                                        <th>Patient</th>
-                                        <th>Doctor</th>
-                                        <th>Service</th>
-                                        <th>Time</th>
-                                        <th>Status</th>
+                                        <th>Bệnh nhân</th>
+                                        <th>Bác sĩ</th>
+                                        <th>Dịch vụ</th>
+                                        <th>Thời gian</th>
+                                        <th>Trạng thái</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     <tr>
-                                        <td>Nguyen Viet Dung</td>
-                                        <td>Dr. Nguyen Van A</td>
-                                        <td>Eye Examination</td>
+                                        <td>Nguyễn Việt Dũng</td>
+                                        <td>BS. Nguyễn Văn A</td>
+                                        <td>Khám mắt</td>
                                         <td>09:00 - 10:00</td>
-                                        <td>Confirmed</td>
+                                        <td>Đã xác nhận</td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -103,24 +104,24 @@
                      </div>
                      <div class="dashboard-panel">
                             <div class="dashboard-panel-header">
-                                Doctor on Duty
+                                Bác sĩ trực hôm nay
                             </div>
                          <div class="dashboard-panel-body">
                              <table class="dashboard-table">
                                  <thead>
                                  <tr>
-                                     <th>Doctor</th>
-                                     <th>Department</th>
-                                     <th>Shift</th>
-                                     <th>Status</th>
+                                     <th>Bác sĩ</th>
+                                     <th>Khoa</th>
+                                     <th>Ca trực</th>
+                                     <th>Trạng thái</th>
                                  </tr>
                                  </thead>
                                  <tbody>
                                  <tr>
-                                     <td>Dr. Tran Minh Tuan</td>
-                                     <td>Cardiology</td>
-                                     <td>Morning</td>
-                                     <td>On duty</td>
+                                     <td>BS. Trần Minh Tuấn</td>
+                                     <td>Tim mạch</td>
+                                     <td>Ca sáng</td>
+                                     <td>Đang trực</td>
 
                                  </tr>
                                  </tbody>
