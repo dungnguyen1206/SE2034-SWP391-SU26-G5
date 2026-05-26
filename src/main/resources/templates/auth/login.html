@@ -1,10 +1,61 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - HIMS</title>
+    <!-- FontAwesome CDN for modern vector icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Local preview fallback + Thymeleaf reference -->
+    <link rel="stylesheet" href="../../static/css/common.css" th:href="@{/css/common.css}">
+    <link rel="stylesheet" href="../../static/css/auth/auth.css" th:href="@{/css/auth/auth.css}">
 </head>
 <body>
-
+    <div class="auth-container">
+        <!-- Left Side: Login Card with Dark Slate-Blue Background Pane -->
+        <div class="auth-left">
+            <div class="auth-card">
+                <h2 class="auth-card-title">Đăng nhập</h2>
+                
+                <form th:action="@{/login}" method="POST">
+                    <!-- Username Input -->
+                    <div class="input-group">
+                        <label class="input-label" for="username">Tên đăng nhập</label>
+                        <input type="text" id="username" name="username" class="auth-input" placeholder="Nhập tên đăng nhập của bạn" required autofocus>
+                    </div>
+                    
+                    <!-- Password Input -->
+                    <div class="input-group">
+                        <label class="input-label" for="password">Mật khẩu</label>
+                        <input type="password" id="password" name="password" class="auth-input" placeholder="Nhập mật khẩu của bạn" required>
+                    </div>
+                    
+                    <!-- Form Actions: Login Button + Forgot Password Link -->
+                    <div class="auth-footer-actions">
+                        <button type="submit" class="auth-btn">Đăng nhập</button>
+                        <a href="forgot-password.html" th:href="@{/forgot-password}" class="forgot-link">Quên mật khẩu?</a>
+                    </div>
+                </form>
+                
+                <!-- Registration Link Hint -->
+                <div class="auth-nav-hint">
+                    Chưa có tài khoản?
+                    <a href="register.html" th:href="@{/register}">Đăng ký ngay</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Side: Brand Logo and Illustration on Light Gray -->
+        <div class="auth-right">
+            <div class="auth-logo-top">
+                <span class="logo-circle"></span>
+                <span>HIMS</span>
+            </div>
+            
+            <div class="auth-illustration-container">
+                <img src="../../static/images/illustration.png" th:src="@{/images/illustration.png}" alt="HIMS Illustration" class="auth-illustration">
+            </div>
+        </div>
+    </div>
 </body>
 </html>

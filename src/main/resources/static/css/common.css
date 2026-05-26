@@ -1,0 +1,57 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* Main Brand Colors (from management page blue & sidebar) */
+    --primary-blue: #1e56a0;      /* Royal blue for active pagination/pills */
+    --primary-hover: #163f7a;     /* Slightly darker blue for hover states */
+    --dark-sidebar: #192231;      /* Dark slate blue for sidebar / login split screen background */
+    --sidebar-active-bg: #223c61; /* Dark blue hover/active background for sidebar items */
+    
+    /* Backgrounds and Neutrals */
+    --light-bg: #f5f7fb;          /* Main admin page content background */
+    --white: #ffffff;
+    --border-color: #e5e9f0;      /* Soft border lines */
+    
+    /* Typography Colors */
+    --text-main: #1f2937;         /* Neutral dark text */
+    --text-muted: #6b7280;        /* Gray text for labels & inactive breadcrumbs */
+    
+    /* Role Badges (Tailored matching the mockups) */
+    --badge-patient-bg: #e0f2fe;
+    --badge-patient-text: #0284c7;
+    
+    --badge-doctor-bg: #dcfce7;
+    --badge-doctor-text: #16a34a;
+    
+    --badge-receptionist-bg: #ffedd5;
+    --badge-receptionist-text: #d97706;
+    
+    --badge-manager-bg: #f3e8ff;
+    --badge-manager-text: #7c3aed;
+    
+    --badge-admin-bg: #f1f5f9;
+    --badge-admin-text: #475569;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text-main);
+    background-color: var(--light-bg);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+button, input, select {
+    font-family: inherit;
+}
