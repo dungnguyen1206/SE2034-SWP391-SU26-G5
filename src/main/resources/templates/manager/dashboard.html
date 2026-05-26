@@ -1,10 +1,165 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"><head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Hospital Manager Dashboard</title>
+    <link rel="stylesheet" href="../../static/css/manager/manager-layout.css">
+
 </head>
 <body>
+     <div class="manager-layout">
+
+         <!--Common SideBar-->
+         <aside class="manager-sidebar">
+             <header class="manager-header">
+                 <div class="manager-header-title">
+                     <h3>HMS</h3>
+                     <p>Hospital Appointment Management System</p>
+                 </div>
+             </header>
+             <nav class="sidebar-section-title">Hospital Management</nav>
+             <nav class="manager-nav">
+                 <ul class="manager-nav-list">
+                     <li><a href="#" class="manager-nav-link active">Dashboard</a></li>
+                     <li><a href="#" class="manager-nav-link">Staff Accounts</a></li>
+                     <li><a href="#" class="manager-nav-link">Doctor List</a></li>
+                     <li><a href="#" class="manager-nav-link">Receptionist List</a></li>
+                     <li><a href="#" class="manager-nav-link">Service List</a></li>
+                     <li><a href="#" class="manager-nav-link">Schedule Management</a></li>
+                     <li><a href="#" class="manager-nav-link">Article List</a></li>
+                     <li><a href="#" class="manager-nav-link">News List</a></li>
+                     <li><a href="#" class="manager-nav-link">Appointment List</a></li>
+                     <li><a href="#" class="manager-nav-link">Medical Records</a></li>
+                     <li><a href="#" class="manager-nav-link">Invoice Overview</a></li>
+                 </ul>
+             </nav>
+             <div class="manager-sidebar-footer">
+                  <strong> Hospital Manager</strong>
+                 <span>manager@hms.vn</span>
+             </div>
+         </aside>
+
+
+    <!--MAIN CONTENT -->
+
+
+         <main class="manager-main">
+            <header class="dashboard-header">
+                <div class="dashboard-header-title">
+                    <h2>Hospital Manager Dashboard</h2>
+                    <div class="dashboard-header-subtitle">
+                        <p>Overview - Today / This month</p>
+                    </div>
+                </div>
+                <span class="dashboard-status-badge">All Systems Normal</span>
+
+            </header>
+             <div class="manager-dashboard">
+                <div class="dashboard-stats">
+
+                    <div class="dashboard-stat-card">
+                        <div class="dashboard-stat-label">Total Appointments</div>
+                        <div class="dashboard-stat-value">1,284</div>
+                        <div class="dashboard-stat-note">+64 this month</div>
+                    </div>
+
+                    <div class="dashboard-stat-card">
+                        <div class="dashboard-stat-label">Total Patient</div>
+                        <div class="dashboard-stat-value">1,284</div>
+                        <div class="dashboard-stat-note">+64 this month</div>
+                    </div>
+
+                    <div class="dashboard-stat-card">
+                        <div class="dashboard-stat-label">Active Doctor Value</div>
+                        <div class="dashboard-stat-value">1,284</div>
+                        <div class="dashboard-stat-note">+64 this month</div>
+                    </div>
+
+                    <div class="dashboard-stat-card">
+                        <div class="dashboard-stat-label">Revenue</div>
+                        <div class="dashboard-stat-value">1,284</div>
+                        <div class="dashboard-stat-note">+64 this month</div>
+                    </div>
+
+                </div>
+
+                 <!--Block 2-->
+                 <div class="dashboard-status-card">
+                     <div class="status-card-title">
+                         Today's Appointment Status Breakdown
+                     </div>
+                     <div class="status-card-list">
+                         <div class="status-card-badge status-pending">34 Pending</div>
+                         <div class="status-card-badge status-confirmed">87 Confirmed</div>
+                         <div class="status-card-badge status-checked-in">22 Checked-in</div>
+                         <div class="status-card-badge status-Completed">34 Completed</div>
+                         <div class="status-card-badge status-Cancelled">87 Cancelled</div>
+                     </div>
+                 </div>
+
+                 <!--Block 3-->
+                 <div class="dashboard-grid">
+                     <div class="dashboard-panel">
+                            <div class="dashboard-panel-header">
+                                Today's Appointment
+                            </div>
+                            <div class="dashboard-panel-body">
+                                <table class="dashboard-table">
+                                    <thead>
+                                    <tr>
+                                        <th>Patient</th>
+                                        <th>Doctor</th>
+                                        <th>Service</th>
+                                        <th>Time</th>
+                                        <th>Status</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td>Nguyen Viet Dung</td>
+                                        <td>Dr. Nguyen Van A</td>
+                                        <td>Eye Examination</td>
+                                        <td>09:00 - 10:00</td>
+                                        <td>Confirmed</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+
+                            </div>
+                     </div>
+                     <div class="dashboard-panel">
+                            <div class="dashboard-panel-header">
+                                Doctor on Duty
+                            </div>
+                         <div class="dashboard-panel-body">
+                             <table class="dashboard-table">
+                                 <thead>
+                                 <tr>
+                                     <th>Doctor</th>
+                                     <th>Department</th>
+                                     <th>Shift</th>
+                                     <th>Status</th>
+                                 </tr>
+                                 </thead>
+                                 <tbody>
+                                 <tr>
+                                     <td>Nguyen Viet Dung</td>
+                                     <td>Dr. Nguyen Van A</td>
+                                     <td>Eye Examination</td>
+                                     <td>09:00 - 10:00</td>
+
+                                 </tr>
+                                 </tbody>
+                             </table>
+                         </div>
+                     </div>
+
+                 </div>
+             </div>
+         </main>
+
+
+     </div>
+
 
 </body>
 </html>
