@@ -11,46 +11,31 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "appointments")
+@Table(name = "patient_addresses")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Appointment {
+public class PatientAddress {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "appointment_code")
-    private String appointmentCode;
-
     @Column(name = "patient_id")
     private Long patientId;
 
-    @Column(name = "doctor_id")
-    private Long doctorId;
+    @Column(name = "province_id")
+    private Integer provinceId;
 
-    @Column(name = "service_id")
-    private Long serviceId;
+    @Column(name = "address_line")
+    private String addressLine;
 
-    @Column(name = "slot_id")
-    private Long slotId;
-
-    @Column(name = "booking_date")
-    private LocalDate bookingDate;
-
-    @Column(name = "check_in_time")
-    private LocalDateTime checkInTime;
-
-    @Column(columnDefinition = "NVARCHAR(MAX)")
-    private String note;
-
-    private String status;
+    @Column(name = "is_default")
+    private Boolean isDefault;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
