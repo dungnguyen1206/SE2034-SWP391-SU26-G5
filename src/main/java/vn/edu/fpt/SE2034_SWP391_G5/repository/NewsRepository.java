@@ -1,4 +1,9 @@
 package vn.edu.fpt.SE2034_SWP391_G5.repository;
 
-public interface NewsRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.News;
+
+@Repository
+public interface NewsRepository extends JpaRepository<News, Long> {
 }
