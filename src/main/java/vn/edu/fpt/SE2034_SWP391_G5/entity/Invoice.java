@@ -2,9 +2,13 @@ package vn.edu.fpt.SE2034_SWP391_G5.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,8 +33,9 @@ public class Invoice {
     @Column(name = "invoice_code")
     private String invoiceCode;
 
-    @Column(name = "medical_record_id")
-    private Long medicalRecordId;
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "medical_record_id")
+    private MedicalRecord medicalRecord;
 
     @Column(name = "total_amount")
     private BigDecimal totalAmount;
@@ -49,4 +54,7 @@ public class Invoice {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "invoice")
+    private java.util.Set<InvoiceItem> invoiceItems;
 }

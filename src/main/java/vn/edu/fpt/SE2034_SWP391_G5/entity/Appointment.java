@@ -2,9 +2,13 @@ package vn.edu.fpt.SE2034_SWP391_G5.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,17 +33,21 @@ public class Appointment {
     @Column(name = "appointment_code")
     private String appointmentCode;
 
-    @Column(name = "patient_id")
-    private Long patientId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "patient_id")
+    private User patient;
 
-    @Column(name = "doctor_id")
-    private Long doctorId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "doctor_id")
+    private User doctor;
 
-    @Column(name = "service_id")
-    private Long serviceId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "service_id")
+    private MedicalService service;
 
-    @Column(name = "slot_id")
-    private Long slotId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "slot_id")
+    private TimeSlot slot;
 
     @Column(name = "booking_date")
     private LocalDate bookingDate;
@@ -57,4 +65,7 @@ public class Appointment {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @OneToOne(mappedBy = "appointment")
+    private MedicalRecord medicalRecord;
 }
