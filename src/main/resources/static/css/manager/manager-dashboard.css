@@ -1,0 +1,165 @@
+/*
+ Dashboard
+*/
+
+.manager-main {
+    flex: 1;
+    padding: 32px;
+    background: #f4f6f9;
+}
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+.dashboard-header-title h2 {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+    color: #0f172a;
+}
+.dashboard-header-subtitle p {
+    margin-top: 2px;
+    margin-bottom: 0;
+    font-size: 14px;
+    color: #64748b;
+}
+.dashboard-status-badge {
+    display: inline-flex;
+    align-items: center;
+    background: #dcfce7;
+    color: #166534;
+    border: 1px solid #86efac;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+}
+/*
+Block 1
+*/
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+.dashboard-stat-card{
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #dde3ea;
+    padding: 20px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+.dashboard-stat-label{
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 10px;
+}
+
+.dashboard-stat-value{
+    font-size: 28px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+.dashboard-stat-note{
+    font-size: 13px;
+    color: #64748b;
+}
+
+/*Block 2*/
+.dashboard-status-card{
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #dde3ea;
+    padding: 20px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    margin-bottom: 24px;
+}
+.status-card-title{
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom:14px;
+}
+.status-card-list {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.status-card-badge{
+    display: inline-flex;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+}
+.status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+.status-confirmed {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+.status-checked-in {
+    background: #cffafe;
+    color: #0e7490;
+}
+.status-completed {
+    background: #dcfce7;
+    color: #166534;
+}
+.status-cancelled {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+/*Block 3*/
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+.dashboard-panel{
+    background: #ffffff;
+    border: 1px solid #dde3ea;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    overflow: hidden;
+}
+
+.dashboard-panel-header{
+    padding: 18px 20px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #0f172a;
+    border-bottom: 1px solid #dde3ea;
+}
+.dashboard-panel-body{
+    padding: 16px 20px;
+}
+.dashboard-table{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+.dashboard-table th{
+    text-align: left;
+    color: #64748b;
+    font-weight: 600;
+    padding: 12px;
+    border-bottom: 1px solid #dde3ea;
+}
+.dashboard-table td{
+    padding: 12px;
+    border-bottom: 1px solid #dde3ea;
+    color: #334155;
+}
+.dashboard-table tbody tr:last-child td {
+    border-bottom: none;
+}
