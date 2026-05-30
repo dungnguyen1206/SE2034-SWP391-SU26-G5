@@ -28,9 +28,9 @@ public class AppointmentServiceImpl implements AppointmentService {
     public Map<String,Long> findTodayAppointmentsByStatus(LocalDate localDate){
         List<AppointmentStatusCountResponse> appointmentStatusCountResponseList = appointmentRepository.findTodayAppointmentsByStatus(localDate);
         Map<String,Long> statusCount = new HashMap<>();
-        statusCount.put("PENDING", 0L);
+        statusCount.put("WAITING", 0L);
         statusCount.put("CONFIRMED", 0L);
-        statusCount.put("CHECKED_IN", 0L);
+        statusCount.put("EXAMINING", 0L);
         statusCount.put("COMPLETED", 0L);
         statusCount.put("CANCELLED", 0L);
         appointmentStatusCountResponseList.stream().forEach(appointment -> {

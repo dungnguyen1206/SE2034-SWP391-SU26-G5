@@ -46,14 +46,15 @@ public class ManagerDashboardController {
         Map<String,Long> appointmentStatusCountResponseMap = appointmentServiceImpl.findTodayAppointmentsByStatus(LocalDate.now());
         List<AppointmentResponse> todayAppointmentsList = appointmentServiceImpl.findAppointmentsByBookingDate(LocalDate.now());
         List<DoctorOnDutyResponse> doctorOnDutyResponses = scheduleServiceImpl.findDoctorScheduleByDate(LocalDate.now());
+
         model.addAttribute("totalPatient", totalPatient);
         model.addAttribute("totalAppointment", totalAppointment);
         model.addAttribute("doctorActive", doctorActive);
         model.addAttribute("doctorInactive", doctorInactive);
         model.addAttribute("totalAmount", totalAmount);
-        model.addAttribute("pendingAppointment", appointmentStatusCountResponseMap.get("PENDING"));
+        model.addAttribute("waitingAppointment", appointmentStatusCountResponseMap.get("WAITING"));
         model.addAttribute("confirmedAppointment", appointmentStatusCountResponseMap.get("CONFIRMED"));
-        model.addAttribute("checkedInAppointment", appointmentStatusCountResponseMap.get("CHECKED_IN"));
+        model.addAttribute("examiningAppointment", appointmentStatusCountResponseMap.get("EXAMINING"));
         model.addAttribute("completedAppointment", appointmentStatusCountResponseMap.get("COMPLETED"));
         model.addAttribute("cancelledAppointment", appointmentStatusCountResponseMap.get("CANCELLED"));
         model.addAttribute("todayAppointmentsList", todayAppointmentsList);
