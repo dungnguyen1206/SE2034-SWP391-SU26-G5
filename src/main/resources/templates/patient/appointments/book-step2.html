@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Đặt lịch khám - Chọn bác sĩ</title>
+    <link rel="stylesheet" th:href="@{/css/patient/patient-common.css}">
+    <link rel="stylesheet" th:href="@{/css/patient/patient-appointment.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+</head>
+<body>
+
+<div class="patient-layout">
+
+    <div th:replace="~{patient/fragments/sidebar :: patientSidebar('book')}"></div>
+
+    <main class="patient-main">
+
+        <!-- Flash messages -->
+        <div th:if="${errorMessage}" class="alert alert-error">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <!-- Header -->
+        <div class="patient-page-header">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <a th:href="@{/patient/appointments/book}" class="patient-back-link">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div>
+                    <h2>Đặt lịch khám</h2>
+                    <p>Bước 2 / 2 — Khoa: <strong th:text="${department.name}">Nội tổng quát</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step indicator -->
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:24px;">
+            <div style="display:flex;align-items:center;gap:8px;background:#dcfce7;color:#166534;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;">
+                <span style="width:22px;height:22px;border-radius:50%;background:#86efac;display:flex;align-items:center;justify-content:center;font-size:12px;">
+                    <i class="bi bi-check"></i>
+                </span>
+                Chọn chuyên khoa
+            </div>
+            <div style="width:40px;height:2px;background:#0f4c81;"></div>
+            <div style="display:flex;align-items:center;gap:8px;background:#0f4c81;color:#fff;border-radius:999px;padding:8px 16px;font-size:13px;font-weight:700;">
+                <span style="width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;font-size:12px;">2</span>
+                Chọn bác sĩ & đặt lịch
+            </div>
+        </div>
+
+        <!-- Main layout: doctor list + booking form -->
+        <div class="book-layout">
+
+            <!-- LEFT: Doctor list -->
+            <div>
+                <div class="patient-card" style="margin-bottom:16px;">
+                    <div class="patient-card-header">
+                        <i class="bi bi-person-badge"></i>
+                        <h3>Bác sĩ chuyên khoa</h3>
+                    </div>
+                    <div th:if="${#lists.isEmpty(doctors)}" class="empty-state" style="padding:30px 0;">
+                        <i class="bi bi-person-x" style="font-size:32px;"></i>
+                        <p style="font-size:13px;">Chưa có bác sĩ trong khoa này</p>
+                    </div>
+                    <div class="doctor-list" th:unless="${#lists.isEmpty(doctors)}">
+                        <a th:each="doc : ${doctors}"
+                           th:href="@{/patient/appointments/book/step2(departmentId=${department.id},doctorId=${doc.id})}"
+                           class="doctor-card"
+                           th:classappend="${selectedDoctorId != null and selectedDoctorId == doc.id} ? ' selected'">
+                            <div class="doctor-avatar"
+                                 th:text="${doc.firstName != null} ? ${doc.firstName.substring(0,1).toUpperCase()} : 'BS'">
+                                BS
+                            </div>
+                            <div class="doctor-info">
+                                <strong th:text="${doc.fullName}">BS. Nguyễn Văn A</strong>
+                                <span th:text="${doc.degree}">Thạc sĩ Y khoa</span>
+                                <span th:if="${doc.experienceYears != null and doc.experienceYears > 0}"
+                                      style="display:block;font-size:11px;color:#94a3b8;"
+                                      th:text="${doc.experienceYears} + ' năm kinh nghiệm'"></span>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Schedule + Form -->
+            <div>
+                <!-- No doctor selected -->
+                <div th:if="${selectedDoctor == null}" class="patient-card">
+                    <div class="empty-state">
+                        <i class="bi bi-person-check"></i>
+                        <p>Vui lòng chọn bác sĩ ở bên trái để xem lịch khám</p>
+                    </div>
+                </div>
+
+                <!-- Doctor selected -->
+                <div th:if="${selectedDoctor != null}">
+
+                    <!-- Doctor info banner -->
+                    <div class="patient-card" style="margin-bottom:16px;background:linear-gradient(135deg,#eff6ff,#dbeafe);border-color:#bfdbfe;">
+                        <div style="display:flex;align-items:center;gap:16px;">
+                            <div class="doctor-avatar" style="width:52px;height:52px;font-size:20px;"
+                                 th:text="${selectedDoctor.firstName != null} ? ${selectedDoctor.firstName.substring(0,1).toUpperCase()} : 'BS'">
+                            </div>
+                            <div>
+                                <div style="font-size:16px;font-weight:700;color:#0f172a;" th:text="${selectedDoctor.fullName}">BS. Nguyễn Văn A</div>
+                                <div style="font-size:13px;color:#1d4ed8;" th:text="${selectedDoctor.degree}">Thạc sĩ Y khoa</div>
+                                <div style="font-size:12px;color:#64748b;" th:text="${selectedDoctor.bio}"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Schedule & Slots -->
+                    <div class="patient-card" style="margin-bottom:16px;">
+                        <div class="patient-card-header">
+                            <i class="bi bi-calendar-week"></i>
+                            <h3>Chọn ngày & khung giờ</h3>
+                        </div>
+
+                        <div th:if="${#lists.isEmpty(schedules)}" class="empty-state" style="padding:30px 0;">
+                            <i class="bi bi-calendar-x" style="font-size:32px;"></i>
+                            <p style="font-size:13px;">Bác sĩ chưa có lịch làm việc trong thời gian tới</p>
+                        </div>
+
+                        <div th:unless="${#lists.isEmpty(schedules)}">
+                            <div th:each="schedule : ${schedules}" class="schedule-section">
+                                <div class="schedule-date-header">
+                                    <span class="schedule-date-badge"
+                                          th:text="${#temporals.format(schedule.workDate, 'dd/MM/yyyy')}">
+                                    </span>
+                                    <span class="schedule-shift-label" th:text="${schedule.shiftLabel}">Ca sáng</span>
+                                    <span class="schedule-room"
+                                          th:if="${schedule.roomNumber != null and !schedule.roomNumber.isEmpty()}"
+                                          th:text="'Phòng ' + ${schedule.roomNumber}">
+                                    </span>
+                                </div>
+                                <div class="slot-grid">
+                                    <button th:each="slot : ${schedule.slots}"
+                                            type="button"
+                                            class="slot-btn"
+                                            th:classappend="${!slot.available} ? ' full'"
+                                            th:disabled="${!slot.available}"
+                                            th:data-slot-id="${slot.slotId}"
+                                            th:data-slot-label="${#temporals.format(slot.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(slot.endTime, 'HH:mm')} + ' (' + ${schedule.shiftLabel} + ', ' + ${#temporals.format(schedule.workDate, 'dd/MM')} + ')'"
+                                            onclick="selectSlot(this)">
+                                        <span th:text="${#temporals.format(slot.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(slot.endTime, 'HH:mm')}">
+                                        </span>
+                                        <span class="slot-capacity"
+                                              th:text="${slot.available} ? (${slot.maxCapacity - slot.bookedCapacity} + ' chỗ trống') : 'Đã đầy'">
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Booking form -->
+                    <div th:unless="${#lists.isEmpty(schedules)}" class="book-form-card">
+                        <div class="patient-card-header" style="margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #f1f5f9;">
+                            <i class="bi bi-pencil-square" style="color:#0f4c81;font-size:18px;"></i>
+                            <h3 style="margin:0;font-size:16px;font-weight:700;color:#0f172a;">Xác nhận đặt lịch</h3>
+                        </div>
+
+                        <form th:action="@{/patient/appointments/book}" method="post"
+                              th:object="${bookRequest}" id="bookingForm">
+
+                            <!-- Hidden fields -->
+                            <input type="hidden" th:field="*{doctorId}" th:value="${selectedDoctor.id}">
+                            <input type="hidden" th:field="*{slotId}" id="selectedSlotId">
+
+                            <!-- Slot hiển thị -->
+                            <div class="book-form-field">
+                                <label>Khung giờ đã chọn <span style="color:#dc2626;">*</span></label>
+                                <div class="selected-slot-display" id="slotDisplay">
+                                    <span class="no-slot-selected">Chưa chọn khung giờ — vui lòng chọn ở trên</span>
+                                </div>
+                            </div>
+
+                            <!-- Dịch vụ -->
+                            <div class="book-form-field">
+                                <label>Dịch vụ khám <span style="color:#dc2626;">*</span></label>
+                                <select th:field="*{serviceId}" required>
+                                    <option value="">-- Chọn dịch vụ --</option>
+                                    <option th:each="svc : ${services}"
+                                            th:value="${svc.id}"
+                                            th:text="${svc.name} + ' — ' + ${#numbers.formatDecimal(svc.referencePrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                                    </option>
+                                </select>
+                            </div>
+
+                            <!-- Triệu chứng -->
+                            <div class="book-form-field">
+                                <label>Triệu chứng / Ghi chú</label>
+                                <textarea th:field="*{note}"
+                                          placeholder="Mô tả triệu chứng, lý do khám hoặc ghi chú cho bác sĩ...">
+                                </textarea>
+                            </div>
+
+                            <button type="submit" class="btn-primary" style="width:100%;justify-content:center;"
+                                    id="submitBtn" disabled>
+                                <i class="bi bi-calendar-check"></i> Xác nhận đặt lịch
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script>
+let selectedSlotId = null;
+
+function selectSlot(btn) {
+    // Bỏ chọn cũ
+    document.querySelectorAll('.slot-btn.selected').forEach(b => b.classList.remove('selected'));
+
+    // Chọn mới
+    btn.classList.add('selected');
+    selectedSlotId = btn.dataset.slotId;
+
+    // Cập nhật hidden input và display
+    document.getElementById('selectedSlotId').value = selectedSlotId;
+    document.getElementById('slotDisplay').innerHTML =
+        '<i class="bi bi-clock" style="margin-right:8px;"></i>' + btn.dataset.slotLabel;
+    document.getElementById('slotDisplay').classList.remove('no-slot-selected');
+
+    // Enable submit
+    document.getElementById('submitBtn').disabled = false;
+}
+
+// Validate trước khi submit
+document.getElementById('bookingForm').addEventListener('submit', function(e) {
+    if (!selectedSlotId) {
+        e.preventDefault();
+        alert('Vui lòng chọn khung giờ khám');
+    }
+});
+</script>
+
+</body>
+</html>

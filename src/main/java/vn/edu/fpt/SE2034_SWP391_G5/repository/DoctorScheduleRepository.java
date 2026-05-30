@@ -16,5 +16,15 @@ public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, 
     public List<DoctorSchedule> findByDate(@Param("date") LocalDate date);
 
 
-  
+
+
+    // Lấy lịch làm việc của bác sĩ từ ngày hôm nay trở đi
+    @Query("SELECT ds FROM DoctorSchedule ds " +
+           "WHERE ds.doctor.id = :doctorId " +
+           "AND ds.workDate >= :fromDate " +
+           "AND ds.status = 'ACTIVE' " +
+           "ORDER BY ds.workDate ASC, ds.shift ASC")
+    List<DoctorSchedule> findAvailableSchedulesByDoctorId(
+            @Param("doctorId") Long doctorId,
+            @Param("fromDate") LocalDate fromDate);
 }

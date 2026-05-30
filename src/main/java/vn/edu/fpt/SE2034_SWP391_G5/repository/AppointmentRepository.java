@@ -9,6 +9,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.entity.Appointment;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
@@ -29,4 +30,13 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
 
 
+
+    List<Appointment> findByPatientIdOrderByCreatedAtDesc(Long patientId);
+
+    Optional<Appointment> findByAppointmentCode(String appointmentCode);
+
+    boolean existsBySlotIdAndPatientIdAndStatusNotIn(Long slotId, Long patientId, List<String> excludedStatuses);
+
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.patient.id = :patientId AND a.status = :status")
+    long countByPatientIdAndStatus(@Param("patientId") Long patientId, @Param("status") String status);
 }
