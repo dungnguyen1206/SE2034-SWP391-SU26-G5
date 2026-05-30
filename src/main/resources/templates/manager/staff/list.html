@@ -27,53 +27,61 @@
 
             <section class="staff-stats">
                 <div class="staff-stat-card">
-                    <div class="staff-stat-value">8</div>
+                    <div class="staff-stat-value" th:text="${totalStaff}">8</div>
                     <div class="staff-stat-label">Tổng nhân viên</div>
                 </div>
 
                 <div class="staff-stat-card staff-stat-doctor">
-                    <div class="staff-stat-value">5</div>
+                    <div class="staff-stat-value" th:text="${doctorCount}">5</div>
                     <div class="staff-stat-label">Bác sĩ</div>
                 </div>
 
                 <div class="staff-stat-card staff-stat-receptionist">
-                    <div class="staff-stat-value">3</div>
+                    <div class="staff-stat-value" th:text="${receptionistCount}">3</div>
                     <div class="staff-stat-label">Lễ tân</div>
                 </div>
 
-                <div class="staff-stat-card staff-stat-inactive">
-                    <div class="staff-stat-value">1</div>
-                    <div class="staff-stat-label">Ngưng hoạt động</div>
-                </div>
             </section>
 
             <section class="staff-filter-card">
                 <div class="staff-filter-row">
                     <div class="staff-search-box">
                         <i class="bi bi-search"></i>
-                        <input type="text" placeholder="Tìm theo tên, email, số điện thoại hoặc mã nhân viên...">
+                        <input type="text" placeholder="Tìm theo tên, email, số điện thoại...">
                     </div>
 
                     <div class="staff-filter-actions">
                         <button class="staff-filter-icon" type="button">
                             <i class="bi bi-funnel"></i>
                         </button>
-                        <button class="staff-filter-button active" type="button">Tất cả</button>
-                        <button class="staff-filter-button" type="button">Bác sĩ</button>
-                        <button class="staff-filter-button" type="button">Lễ tân</button>
-                        <button class="staff-filter-button" type="button">Đang hoạt động</button>
-                        <button class="staff-filter-button" type="button">Ngưng hoạt động</button>
+                        <a class="staff-filter-button"
+                           th:href="@{/manager/staff}"
+                           th:classappend="${selectedRole == null} ? ' active'">
+                            Tất cả
+                        </a>
+
+                        <a class="staff-filter-button"
+                           th:href="@{/manager/staff(role='DOCTOR')}"
+                           th:classappend="${selectedRole == 'DOCTOR'} ? ' active'">
+                            Bác sĩ
+                        </a>
+
+                        <a class="staff-filter-button"
+                           th:href="@{/manager/staff(role='RECEPTIONIST')}"
+                           th:classappend="${selectedRole == 'RECEPTIONIST'} ? ' active'">
+                            Lễ tân
+                        </a>
+<!--                        <button class="staff-filter-button" type="button">Đang hoạt động</button>-->
                     </div>
                 </div>
 
-                <p class="staff-filter-note">Tìm thấy 8 tài khoản</p>
+                <p class="staff-filter-note" th:text="'Tìm thấy ' + ${numberOfResult} + ' tài khoản'" >Tìm thấy 8 tài khoản</p>
             </section>
 
             <section class="staff-table-card">
                 <table class="staff-table">
                     <thead>
                     <tr>
-                        <th>Mã NV</th>
                         <th>Họ và tên</th>
                         <th>Email</th>
                         <th>Số điện thoại</th>
@@ -85,20 +93,20 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr>
-                        <td>STF-001</td>
+                    <tr th:each="staff : ${staffResponses}">
                         <td>
                             <div class="staff-profile">
                                 <div class="staff-avatar">T</div>
-                                <strong>BS. Trần Minh Tuấn</strong>
+                                <strong th:text="${staff.getName()}">BS. Trần Minh Tuấn</strong>
                             </div>
                         </td>
-                        <td>tuan.tran@hms.vn</td>
-                        <td>0987 654 321</td>
-                        <td><span class="staff-type-badge doctor">Bác sĩ</span></td>
+                        <td th:text="${staff.getEmail()}">tuan.tran@hms.vn</td>
+                        <td th:text="${staff.getPhone()}">0987 654 321</td>
+                        <td><span class="staff-type-badge" th:classappend="${staff.getRole() == 'DOCTOR'} ? ' doctor' : ' receptionist'"
+                               th:text="${staff.getRole()=='DOCTOR'} ? 'Bác sĩ' : 'Lễ tân' ">Bác sĩ</span></td>
                         <td><span class="staff-status active"><span></span>Đang hoạt động</span></td>
-                        <td>Hoàng Thị Mai</td>
-                        <td>15/03/2021</td>
+                        <td th:text="${staff.getCreatedBy()}">Hoàng Thị Mai</td>
+                        <td th:text="${staff.getCreatedDate()}">15/03/2021</td>
                         <td>
                             <div class="staff-actions">
                                 <a href="#" class="staff-action-view"><i class="bi bi-eye"></i></a>
@@ -111,9 +119,9 @@
                     </tbody>
                 </table>
 
-                <div class="staff-table-footer">
-                    1 dòng dữ liệu mẫu - Sau này render danh sách bằng Thymeleaf th:each
-                </div>
+<!--                <div class="staff-table-footer">-->
+<!--                    1 dòng dữ liệu mẫu - Sau này render danh sách bằng Thymeleaf th:each-->
+<!--                </div>-->
             </section>
         </main>
     </div>

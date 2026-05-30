@@ -12,6 +12,9 @@ import java.util.List;
 @Repository
 public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, Long> {
 
-    @Query("SELECT ds from DoctorSchedule ds Join fetch ds.doctor d where ds.workDate= :date")
+    @Query("SELECT ds from DoctorSchedule ds Join fetch ds.doctor d join fetch d.department dpt join fetch dpt.rooms r where ds.workDate= :date")
     public List<DoctorSchedule> findByDate(@Param("date") LocalDate date);
+
+
+  
 }

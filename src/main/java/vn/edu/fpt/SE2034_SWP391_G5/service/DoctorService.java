@@ -6,5 +6,6 @@ import java.util.List;
 
 public interface DoctorService {
     List<User> findByDoctorStatus(String doctorStatus);
+    List<User> findByRoleNameAndStatus(String roleName, String status);
 
 }

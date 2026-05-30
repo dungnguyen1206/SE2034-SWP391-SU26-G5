@@ -92,10 +92,10 @@
                                     <tbody>
 
                                     <tr th:each="appointment : ${todayAppointmentsList}">
-                                        <td th:text="${appointment.getPatientName()}">Nguyễn Việt Dũng</td>
-                                        <td th:text="${appointment.getDoctorName()}">BS. Nguyễn Văn A</td>
+                                        <td th:text="${appointment.getPatientFullName()}">Nguyễn Việt Dũng</td>
+                                        <td th:text="${appointment.getDoctorFullName()}">BS. Nguyễn Văn A</td>
                                         <td th:text="${appointment.getServiceName()}">Khám mắt</td>
-                                        <td th:text="${appointment.getStartTime()}+'-'+ ${appointment.getEndTime()}">09:00 - 10:00</td>
+                                        <td th:text="${appointment.getSlotStartTime()}+'-'+ ${appointment.getSlotEndTime()}">09:00 - 10:00</td>
                                         <td th:text="${appointment.getStatus()}">Đã xác nhận</td>
                                     </tr>
                                     </tbody>

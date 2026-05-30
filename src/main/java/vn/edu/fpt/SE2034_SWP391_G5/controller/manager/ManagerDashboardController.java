@@ -5,6 +5,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentStatusCountResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorOnDutyResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Appointment;
 import vn.edu.fpt.SE2034_SWP391_G5.service.PatientService;
@@ -12,7 +13,9 @@ import vn.edu.fpt.SE2034_SWP391_G5.service.impl.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/manager/dashboard")
@@ -40,24 +43,19 @@ public class ManagerDashboardController {
         long doctorActive = doctorServiceImpl.findByDoctorStatus("ACTIVE").size();
         long doctorInactive = doctorServiceImpl.findByDoctorStatus("INACTIVE").size();
         BigDecimal totalAmount = invoiceServiceImpl.getTotalAmount("PAID", LocalDate.now().getMonthValue(),LocalDate.now().getYear());
-        int pendingAppointment = appointmentServiceImpl.findAppointmentsByStatus("PENDING").size();
-        int confirmedAppointment = appointmentServiceImpl.findAppointmentsByStatus("CONFIRMED").size();
-        int checkedInAppointment = appointmentServiceImpl.findAppointmentsByStatus("CHECKED_IN").size();
-        int completedAppointment = appointmentServiceImpl.findAppointmentsByStatus("COMPLETED").size();
-        int cancelledAppointment = appointmentServiceImpl.findAppointmentsByStatus("CANCELLED").size();
-        List<AppointmentResponse> todayAppointmentsList = appointmentServiceImpl.findAppointmentsByBookingDate(LocalDate.now().getDayOfMonth());
+        Map<String,Long> appointmentStatusCountResponseMap = appointmentServiceImpl.findTodayAppointmentsByStatus(LocalDate.now());
+        List<AppointmentResponse> todayAppointmentsList = appointmentServiceImpl.findAppointmentsByBookingDate(LocalDate.now());
         List<DoctorOnDutyResponse> doctorOnDutyResponses = scheduleServiceImpl.findDoctorScheduleByDate(LocalDate.now());
-
         model.addAttribute("totalPatient", totalPatient);
         model.addAttribute("totalAppointment", totalAppointment);
         model.addAttribute("doctorActive", doctorActive);
         model.addAttribute("doctorInactive", doctorInactive);
         model.addAttribute("totalAmount", totalAmount);
-        model.addAttribute("pendingAppointment", pendingAppointment);
-        model.addAttribute("confirmedAppointment", confirmedAppointment);
-        model.addAttribute("checkedInAppointment", checkedInAppointment);
-        model.addAttribute("completedAppointment", completedAppointment);
-        model.addAttribute("cancelledAppointment", cancelledAppointment);
+        model.addAttribute("pendingAppointment", appointmentStatusCountResponseMap.get("PENDING"));
+        model.addAttribute("confirmedAppointment", appointmentStatusCountResponseMap.get("CONFIRMED"));
+        model.addAttribute("checkedInAppointment", appointmentStatusCountResponseMap.get("CHECKED_IN"));
+        model.addAttribute("completedAppointment", appointmentStatusCountResponseMap.get("COMPLETED"));
+        model.addAttribute("cancelledAppointment", appointmentStatusCountResponseMap.get("CANCELLED"));
         model.addAttribute("todayAppointmentsList", todayAppointmentsList);
         model.addAttribute("doctorOnDutyResponses", doctorOnDutyResponses);
         return "manager/dashboard";

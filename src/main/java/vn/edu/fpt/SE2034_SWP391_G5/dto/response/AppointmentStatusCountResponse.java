@@ -4,7 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
-public class DoctorResponse {
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class AppointmentStatusCountResponse {
+    private String status;
+    private Long count;
 
 }

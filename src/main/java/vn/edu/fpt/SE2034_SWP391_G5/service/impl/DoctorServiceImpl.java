@@ -18,4 +18,11 @@ public class DoctorServiceImpl implements DoctorService {
         return  userRepository.findByDoctorStatus(doctorStatus);
     }
 
+    //Count active doctor
+    public List<User> findByRoleNameAndStatus(String roleName, String status) {
+        return userRepository.countByRoleNameAndStatus(roleName, status);
+    }
+
+
+
 }
