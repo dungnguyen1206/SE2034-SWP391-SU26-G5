@@ -2,6 +2,7 @@ package vn.edu.fpt.SE2034_SWP391_G5.controller.patient;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -11,6 +12,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.dto.request.UpdateProfileRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.PatientResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Province;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.ProvinceRepository;
+import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.PatientService;
 
 import java.util.List;
@@ -23,18 +25,22 @@ public class PatientProfileController {
     private final PatientService patientService;
     private final ProvinceRepository provinceRepository;
 
-    private static final Long DEMO_PATIENT_ID = 14L;
+    // private static final Long DEMO_PATIENT_ID = 14L;
 
     @GetMapping
-    public String viewProfile(Model model) {
-        PatientResponse profile = patientService.getProfile(DEMO_PATIENT_ID);
+    // public String viewProfile(Model model) {
+    //     PatientResponse profile = patientService.getProfile(DEMO_PATIENT_ID);
+    public String viewProfile(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        PatientResponse profile = patientService.getProfile(userDetails.getUser().getId());
         model.addAttribute("profile", profile);
         return "patient/profile/detail";
     }
 
     @GetMapping("/edit")
-    public String editProfileForm(Model model) {
-        PatientResponse profile = patientService.getProfile(DEMO_PATIENT_ID);
+    // public String editProfileForm(Model model) {
+    //     PatientResponse profile = patientService.getProfile(DEMO_PATIENT_ID);
+    public String editProfileForm(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        PatientResponse profile = patientService.getProfile(userDetails.getUser().getId());
         List<Province> provinces = provinceRepository.findAll();
 
         UpdateProfileRequest form = new UpdateProfileRequest();
@@ -54,19 +60,21 @@ public class PatientProfileController {
     }
 
     @PostMapping("/edit")
+    // public String updateProfile(..., Model model) { patientService.updateProfile(DEMO_PATIENT_ID, form); }
     public String updateProfile(@Valid @ModelAttribute("form") UpdateProfileRequest form,
                                 BindingResult bindingResult,
+                                @AuthenticationPrincipal CustomUserDetails userDetails,
                                 RedirectAttributes redirectAttributes,
                                 Model model) {
         if (bindingResult.hasErrors()) {
             List<Province> provinces = provinceRepository.findAll();
-            PatientResponse profile = patientService.getProfile(DEMO_PATIENT_ID);
+            PatientResponse profile = patientService.getProfile(userDetails.getUser().getId());
             model.addAttribute("profile", profile);
             model.addAttribute("provinces", provinces);
             return "patient/profile/edit";
         }
         try {
-            patientService.updateProfile(DEMO_PATIENT_ID, form);
+            patientService.updateProfile(userDetails.getUser().getId(), form);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật hồ sơ thành công");
             return "redirect:/patient/profile";
         } catch (Exception e) {

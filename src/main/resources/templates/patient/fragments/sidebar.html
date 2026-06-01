@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <body>
 
 <aside th:fragment="patientSidebar(activeMenu)" class="patient-sidebar">
@@ -54,10 +55,28 @@
     </nav>
 
     <div class="patient-sidebar-footer">
-        <div class="patient-user-avatar">P</div>
+        <!-- Lấy chữ cái đầu từ tên hiển thị trong session -->
+        <div class="patient-user-avatar">
+            <!-- Cũ: hardcode "P" -->
+            <!-- <div class="patient-user-avatar">P</div> -->
+            <span sec:authentication="principal.username"
+                  th:text="${#strings.substring(#authentication.principal.username, 0, 1).toUpperCase()}">P</span>
+        </div>
         <div class="patient-user-info">
-            <strong th:text="${profile != null} ? ${profile.fullName} : 'Bệnh nhân'">Bệnh nhân</strong>
-            <span th:text="${profile != null} ? ${profile.username} : 'patient'">patient</span>
+            <!-- Cũ: dùng ${profile.fullName} và ${profile.username} từ model -->
+            <!-- <strong th:text="${profile != null} ? ${profile.fullName} : 'Bệnh nhân'">Bệnh nhân</strong> -->
+            <!-- <span th:text="${profile != null} ? ${profile.username} : 'patient'">patient</span> -->
+            <strong th:text="${profile != null} ? ${profile.fullName} : 'Bệnh nhân'"
+                    sec:authentication="principal.username">Bệnh nhân</strong>
+            <span sec:authentication="principal.username">email</span>
+        </div>
+        <div class="patient-logout-link">
+            <form th:action="@{/logout}" method="post" style="margin:0">
+                <button type="submit"
+                        style="background:none;border:none;cursor:pointer;padding:0;color:#bfdbfe;font-size:18px;padding:8px;border-radius:8px;display:inline-flex;text-decoration:none;transition:background 0.2s ease,color 0.2s ease;">
+                    <i class="bi bi-box-arrow-right"></i>
+                </button>
+            </form>
         </div>
     </div>
 

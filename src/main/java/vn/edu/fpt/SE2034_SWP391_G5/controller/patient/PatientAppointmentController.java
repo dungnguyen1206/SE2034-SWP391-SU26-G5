@@ -2,6 +2,7 @@ package vn.edu.fpt.SE2034_SWP391_G5.controller.patient;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -15,6 +16,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ScheduleSlotResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Department;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalService;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalServiceRepository;
+import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DepartmentService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DoctorService;
@@ -32,20 +34,26 @@ public class PatientAppointmentController {
     private final MedicalServiceRepository medicalServiceRepository;
 
     // TODO: thay bằng @AuthenticationPrincipal khi auth sẵn sàng
-    private static final Long DEMO_PATIENT_ID = 14L;
+    // private static final Long DEMO_PATIENT_ID = 14L;
 
     @GetMapping
-    public String listAppointments(Model model) {
+    // public String listAppointments(Model model) {
+    //     List<AppointmentResponse> appointments = appointmentService.getAppointmentsByPatient(DEMO_PATIENT_ID);
+    public String listAppointments(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         List<AppointmentResponse> appointments =
-                appointmentService.getAppointmentsByPatient(DEMO_PATIENT_ID);
+                appointmentService.getAppointmentsByPatient(userDetails.getUser().getId());
         model.addAttribute("appointments", appointments);
         return "patient/appointments/list";
     }
 
     @GetMapping("/{id}")
-    public String appointmentDetail(@PathVariable Long id, Model model) {
+    // public String appointmentDetail(@PathVariable Long id, Model model) {
+    //     AppointmentResponse appointment = appointmentService.getAppointmentDetail(id, DEMO_PATIENT_ID);
+    public String appointmentDetail(@PathVariable Long id,
+                                    @AuthenticationPrincipal CustomUserDetails userDetails,
+                                    Model model) {
         AppointmentResponse appointment =
-                appointmentService.getAppointmentDetail(id, DEMO_PATIENT_ID);
+                appointmentService.getAppointmentDetail(id, userDetails.getUser().getId());
         model.addAttribute("appointment", appointment);
         return "patient/appointments/detail";
     }
@@ -76,7 +84,6 @@ public class PatientAppointmentController {
             List<ScheduleSlotResponse> schedules = appointmentService.getAvailableSchedules(doctorId);
             DoctorResponse selectedDoctor = doctorService.getDoctorById(doctorId);
 
-            // Convert sang JSON-safe DTO (LocalDate/LocalTime → String)
             List<ScheduleSlotJsonResponse> schedulesJson = schedules.stream()
                     .map(s -> ScheduleSlotJsonResponse.builder()
                             .scheduleId(s.getScheduleId())
@@ -110,15 +117,18 @@ public class PatientAppointmentController {
     }
 
     @PostMapping("/book")
+    // public String confirmBooking(...) { ... appointmentService.bookAppointment(DEMO_PATIENT_ID, request); }
     public String confirmBooking(@Valid @ModelAttribute("bookRequest") CreateAppointmentRequest request,
                                  BindingResult bindingResult,
+                                 @AuthenticationPrincipal CustomUserDetails userDetails,
                                  RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng điền đầy đủ thông tin");
             return "redirect:/patient/appointments/book/step2?doctorId=" + request.getDoctorId();
         }
         try {
-            AppointmentResponse result = appointmentService.bookAppointment(DEMO_PATIENT_ID, request);
+            AppointmentResponse result = appointmentService.bookAppointment(
+                    userDetails.getUser().getId(), request);
             redirectAttributes.addFlashAttribute("successMessage",
                     "Đặt lịch thành công! Mã lịch hẹn: " + result.getAppointmentCode());
             return "redirect:/patient/appointments/" + result.getId();
@@ -129,9 +139,12 @@ public class PatientAppointmentController {
     }
 
     @PostMapping("/{id}/cancel")
-    public String cancelAppointment(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+    // public String cancelAppointment(@PathVariable Long id, ...) { appointmentService.cancelAppointment(id, DEMO_PATIENT_ID); }
+    public String cancelAppointment(@PathVariable Long id,
+                                    @AuthenticationPrincipal CustomUserDetails userDetails,
+                                    RedirectAttributes redirectAttributes) {
         try {
-            appointmentService.cancelAppointment(id, DEMO_PATIENT_ID);
+            appointmentService.cancelAppointment(id, userDetails.getUser().getId());
             redirectAttributes.addFlashAttribute("successMessage", "Đã hủy lịch hẹn thành công");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
