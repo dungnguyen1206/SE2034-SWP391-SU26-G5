@@ -10,6 +10,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateAppointmentRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ScheduleSlotJsonResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ScheduleSlotResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Department;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalService;
@@ -74,8 +75,35 @@ public class PatientAppointmentController {
         if (doctorId != null) {
             List<ScheduleSlotResponse> schedules = appointmentService.getAvailableSchedules(doctorId);
             DoctorResponse selectedDoctor = doctorService.getDoctorById(doctorId);
-            model.addAttribute("schedules", schedules);
+
+            // Convert sang JSON-safe DTO (LocalDate/LocalTime → String)
+            List<ScheduleSlotJsonResponse> schedulesJson = schedules.stream()
+                    .map(s -> ScheduleSlotJsonResponse.builder()
+                            .scheduleId(s.getScheduleId())
+                            .workDate(s.getWorkDate() != null ? s.getWorkDate().toString() : "")
+                            .shift(s.getShift())
+                            .shiftLabel(s.getShiftLabel())
+                            .roomNumber(s.getRoomNumber())
+                            .slots(s.getSlots() == null ? List.of() : s.getSlots().stream()
+                                    .map(sl -> ScheduleSlotJsonResponse.SlotInfo.builder()
+                                            .slotId(sl.getSlotId())
+                                            .startTime(sl.getStartTime() != null
+                                                    ? sl.getStartTime().toString().substring(0, 5) : "")
+                                            .endTime(sl.getEndTime() != null
+                                                    ? sl.getEndTime().toString().substring(0, 5) : "")
+                                            .bookedCapacity(sl.getBookedCapacity())
+                                            .maxCapacity(sl.getMaxCapacity())
+                                            .status(sl.getStatus())
+                                            .available(sl.isAvailable())
+                                            .build())
+                                    .toList())
+                            .build())
+                    .toList();
+
+            model.addAttribute("schedules", schedulesJson);
             model.addAttribute("selectedDoctor", selectedDoctor);
+        } else {
+            model.addAttribute("schedules", List.of());
         }
 
         return "patient/appointments/book-step2";
@@ -111,4 +139,3 @@ public class PatientAppointmentController {
         return "redirect:/patient/appointments";
     }
 }
-

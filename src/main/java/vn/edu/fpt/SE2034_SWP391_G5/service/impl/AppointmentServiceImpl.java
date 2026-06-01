@@ -93,7 +93,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         // Kiểm tra bệnh nhân chưa đặt slot này
         boolean alreadyBooked = appointmentRepository.existsBySlotIdAndPatientIdAndStatusNotIn(
-                slot.getId(), patientId, List.of("CANCELLED", "REJECTED", "NO_SHOW"));
+                slot.getId(), patientId, List.of("CANCELLED", "NO_SHOW"));
         if (alreadyBooked) {
             throw new BadRequestException("Bạn đã đặt lịch trong khung giờ này rồi");
         }
@@ -114,7 +114,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setSlot(slot);
         appointment.setBookingDate(slot.getSchedule().getWorkDate());
         appointment.setNote(request.getNote());
-        appointment.setStatus("PENDING");
+        appointment.setStatus("WAITING");
         appointment.setCreatedAt(LocalDateTime.now());
         appointment.setUpdatedAt(LocalDateTime.now());
 
@@ -151,7 +151,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new BadRequestException("Bạn không có quyền hủy lịch hẹn này");
         }
 
-        if (!List.of("PENDING", "CONFIRMED").contains(appointment.getStatus())) {
+        if (!List.of("WAITING", "CONFIRMED").contains(appointment.getStatus())) {
             throw new BadRequestException("Không thể hủy lịch hẹn ở trạng thái: " + appointment.getStatus());
         }
 

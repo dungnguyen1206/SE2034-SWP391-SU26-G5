@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<aside th:fragment="patientSidebar(activeMenu)" class="patient-sidebar">
+
+    <div class="patient-sidebar-header">
+        <div class="patient-brand">
+            <div class="patient-brand-icon">
+                <i class="bi bi-hospital"></i>
+            </div>
+            <div class="patient-brand-text">
+                <h1>HAMS</h1>
+                <p>Cổng bệnh nhân</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="patient-sidebar-section">Chức năng</div>
+
+    <nav class="patient-nav">
+        <ul class="patient-nav-list">
+            <li>
+                <a th:href="@{/patient/dashboard}" class="patient-nav-link"
+                   th:classappend="${activeMenu == 'dashboard'} ? ' active'">
+                    <i class="bi bi-grid"></i> Tổng quan
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/patient/appointments/book}" class="patient-nav-link"
+                   th:classappend="${activeMenu == 'book'} ? ' active'">
+                    <i class="bi bi-calendar-plus"></i> Đặt lịch khám
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/patient/appointments}" class="patient-nav-link"
+                   th:classappend="${activeMenu == 'appointments'} ? ' active'">
+                    <i class="bi bi-calendar-check"></i> Lịch hẹn của tôi
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/patient/records}" class="patient-nav-link"
+                   th:classappend="${activeMenu == 'records'} ? ' active'">
+                    <i class="bi bi-file-earmark-medical"></i> Hồ sơ bệnh án
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/patient/profile}" class="patient-nav-link"
+                   th:classappend="${activeMenu == 'profile'} ? ' active'">
+                    <i class="bi bi-person-circle"></i> Hồ sơ cá nhân
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="patient-sidebar-footer">
+        <div class="patient-user-avatar">P</div>
+        <div class="patient-user-info">
+            <strong th:text="${profile != null} ? ${profile.fullName} : 'Bệnh nhân'">Bệnh nhân</strong>
+            <span th:text="${profile != null} ? ${profile.username} : 'patient'">patient</span>
+        </div>
+    </div>
+
+</aside>
+
+</body>
+</html>
