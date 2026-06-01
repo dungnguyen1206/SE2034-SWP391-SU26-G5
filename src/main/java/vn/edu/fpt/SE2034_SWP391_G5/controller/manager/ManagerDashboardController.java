@@ -8,7 +8,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentStatusCountResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorOnDutyResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Appointment;
-import vn.edu.fpt.SE2034_SWP391_G5.service.PatientService;
+import vn.edu.fpt.SE2034_SWP391_G5.service.*;
 import vn.edu.fpt.SE2034_SWP391_G5.service.impl.*;
 
 import java.math.BigDecimal;
@@ -21,31 +21,30 @@ import java.util.Map;
 @RequestMapping("/manager/dashboard")
 public class ManagerDashboardController {
 
-    private PatientServiceImpl  patientServiceImpl;
-    private AppointmentServiceImpl appointmentServiceImpl;
-    private DoctorServiceImpl doctorServiceImpl;
-    private InvoiceServiceImpl invoiceServiceImpl;
-    private ScheduleServiceImpl scheduleServiceImpl;
-    public ManagerDashboardController(PatientServiceImpl patientServiceImpl, AppointmentServiceImpl appointmentServiceImpl, DoctorServiceImpl doctorServiceImpl,
-        InvoiceServiceImpl invoiceServiceImpl, ScheduleServiceImpl scheduleServiceImpl
-    ) {
-        this.patientServiceImpl = patientServiceImpl;
-        this.appointmentServiceImpl = appointmentServiceImpl;
-        this.doctorServiceImpl = doctorServiceImpl;
-        this.invoiceServiceImpl = invoiceServiceImpl;
-        this.scheduleServiceImpl = scheduleServiceImpl;
+    private PatientService  patientService;
+    private AppointmentService appointmentService;
+    private DoctorService doctorService;
+    private InvoiceService invoiceService;
+    private ScheduleService scheduleService;
+
+    public ManagerDashboardController(PatientService patientService,AppointmentService appointmentService,DoctorService doctorService,InvoiceService invoiceService,ScheduleService scheduleService) {
+        this.patientService = patientService;
+        this.appointmentService = appointmentService;
+        this.doctorService = doctorService;
+        this.invoiceService = invoiceService;
+        this.scheduleService = scheduleService;
     }
     @GetMapping
     public String dashboard(Model model) {
 
-        long totalPatient= patientServiceImpl.findUsersByRoleName("PATIENT").size();
-        long totalAppointment = appointmentServiceImpl.getAllAppointment();
-        long doctorActive = doctorServiceImpl.findByDoctorStatus("ACTIVE").size();
-        long doctorInactive = doctorServiceImpl.findByDoctorStatus("INACTIVE").size();
-        BigDecimal totalAmount = invoiceServiceImpl.getTotalAmount("PAID", LocalDate.now().getMonthValue(),LocalDate.now().getYear());
-        Map<String,Long> appointmentStatusCountResponseMap = appointmentServiceImpl.findTodayAppointmentsByStatus(LocalDate.now());
-        List<AppointmentResponse> todayAppointmentsList = appointmentServiceImpl.findAppointmentsByBookingDate(LocalDate.now());
-        List<DoctorOnDutyResponse> doctorOnDutyResponses = scheduleServiceImpl.findDoctorScheduleByDate(LocalDate.now());
+        long totalPatient= patientService.findUsersByRoleName("PATIENT").size();
+        long totalAppointment = appointmentService.getAllAppointment();
+        long doctorActive = doctorService.findByDoctorStatus("ACTIVE").size();
+        long doctorInactive = doctorService.findByDoctorStatus("INACTIVE").size();
+        BigDecimal totalAmount = invoiceService.getTotalAmount("PAID", LocalDate.now().getMonthValue(),LocalDate.now().getYear());
+        Map<String,Long> appointmentStatusCountResponseMap = appointmentService.findTodayAppointmentsByStatus(LocalDate.now());
+        List<AppointmentResponse> todayAppointmentsList = appointmentService.findAppointmentsByBookingDate(LocalDate.now());
+        List<DoctorOnDutyResponse> doctorOnDutyResponses = scheduleService.findDoctorScheduleByDate(LocalDate.now());
 
         model.addAttribute("totalPatient", totalPatient);
         model.addAttribute("totalAppointment", totalAppointment);

@@ -65,10 +65,10 @@
                      </div>
                      <div class="status-card-list">
                          <div class="status-card-badge status-confirmed" th:text="${confirmedAppointment} + ' Đã xác nhận'">87 Đã xác nhận</div>
-                         <div class="status-card-badge status-pending" th:text="${waitingAppointment} + ' Chờ khám'">34 Chờ xử lý</div>
-                         <div class="status-card-badge status-checked-in" th:text="${examiningAppointment}+ ' Đang khám'">22 Đã check-in</div>
+                         <div class="status-card-badge status-waiting" th:text="${waitingAppointment} + ' Chờ khám'">34 Chờ khám</div>
+                         <div class="status-card-badge status-examining" th:text="${examiningAppointment}+ ' Đang khám'">22 Đang khám</div>
                          <div class="status-card-badge status-completed" th:text="${completedAppointment} + ' Đã hoàn thành'">156 Đã hoàn thành</div>
-                         <div class="status-card-badge status-cancelled" th:text="${cancelledAppointment} + 'Đã hủy'">12 Đã hủy</div>
+                         <div class="status-card-badge status-cancelled" th:text="${cancelledAppointment} + ' Đã hủy'">12 Đã hủy</div>
                      </div>
                  </div>
 

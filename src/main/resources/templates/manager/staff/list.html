@@ -44,30 +44,32 @@
             </section>
 
             <section class="staff-filter-card">
-                <div class="staff-filter-row">
-                    <div class="staff-search-box">
-                        <i class="bi bi-search"></i>
-                        <input type="text" placeholder="Tìm theo tên, email, số điện thoại...">
-                    </div>
 
-                    <div class="staff-filter-actions">
-                        <button class="staff-filter-icon" type="button">
+                        <!--                Searching-->
+                <div class="staff-filter-row">
+                    <form method="get" th:action="@{/manager/staff/list}"  class="staff-search-box" >
+                        <input type="hidden" name="selectedRole" th:value="${selectedRole}" >
                             <i class="bi bi-funnel"></i>
-                        </button>
+                        <input type="text" name="filterKey" th:value="${filterKey}" placeholder="Tìm theo tên, email, số điện thoại...">
+                    </form>
+
+                    <div class="staff-filter-actions" >
+
                         <a class="staff-filter-button"
-                           th:href="@{/manager/staff}"
+                           th:href="@{/manager/staff/list(filterKey=${filterKey})}"
                            th:classappend="${selectedRole == null} ? ' active'">
                             Tất cả
                         </a>
 
                         <a class="staff-filter-button"
-                           th:href="@{/manager/staff(role='DOCTOR')}"
+                           th:href="@{/manager/staff/list(role='DOCTOR', filterKey=${filterKey})}"
                            th:classappend="${selectedRole == 'DOCTOR'} ? ' active'">
                             Bác sĩ
                         </a>
 
+
                         <a class="staff-filter-button"
-                           th:href="@{/manager/staff(role='RECEPTIONIST')}"
+                           th:href="@{/manager/staff/list(role='RECEPTIONIST',filterKey=${filterKey})}"
                            th:classappend="${selectedRole == 'RECEPTIONIST'} ? ' active'">
                             Lễ tân
                         </a>
@@ -111,17 +113,15 @@
                             <div class="staff-actions">
                                 <a href="#" class="staff-action-view"><i class="bi bi-eye"></i></a>
                                 <a href="#" class="staff-action-edit"><i class="bi bi-pencil"></i></a>
-                                <a href="#" class="staff-action-key"><i class="bi bi-key"></i></a>
-                                <a href="#" class="staff-action-lock"><i class="bi bi-slash-circle"></i></a>
+                                <a href="#" class="staff-action-lock"><i class="bi bi-trash"></i></a>
+<!--                                <a href="#" class="staff-action-key"><i class="bi bi-key"></i></a>-->
+
                             </div>
                         </td>
                     </tr>
                     </tbody>
                 </table>
 
-<!--                <div class="staff-table-footer">-->
-<!--                    1 dòng dữ liệu mẫu - Sau này render danh sách bằng Thymeleaf th:each-->
-<!--                </div>-->
             </section>
         </main>
     </div>

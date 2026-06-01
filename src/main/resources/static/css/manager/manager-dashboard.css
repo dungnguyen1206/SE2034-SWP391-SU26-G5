@@ -98,7 +98,7 @@ Block 1
     font-size: 13px;
     font-weight: 600;
 }
-.status-pending {
+.status-waiting {
     background: #fef3c7;
     color: #92400e;
 }
@@ -106,7 +106,7 @@ Block 1
     background: #dbeafe;
     color: #1d4ed8;
 }
-.status-checked-in {
+.status-examining {
     background: #cffafe;
     color: #0e7490;
 }

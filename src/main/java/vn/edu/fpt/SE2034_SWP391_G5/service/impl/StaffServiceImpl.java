@@ -11,13 +11,16 @@ import java.util.List;
 
 @Service
 public class StaffServiceImpl implements StaffService {
+
     private final UserRepository userRepository;
     public StaffServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
     //find all active staff
-    public List<StaffResponse> getAllActiveStaff(String roleName) {
-       return userRepository.findActiveStaffList(roleName);
+    public  List<StaffResponse> findStaff(String roleName, String filterKey) {
+       return userRepository.findActiveStaffList(roleName,filterKey);
     }
+
+
 }
