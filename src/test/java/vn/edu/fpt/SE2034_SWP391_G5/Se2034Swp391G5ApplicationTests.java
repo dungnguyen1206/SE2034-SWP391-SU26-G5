@@ -9,5 +9,4 @@ class Se2034Swp391G5ApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }

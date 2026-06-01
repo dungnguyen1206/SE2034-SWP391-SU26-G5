@@ -1,10 +1,160 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Quản Lý Lịch Hẹn</title>
 
-</body>
+        <link rel="stylesheet" th:href="@{/css/receptionist/common/sidebar.css}">
+        <link rel="stylesheet" th:href="@{/css/receptionist/common/header.css}">
+        <link rel="stylesheet" th:href="@{/css/receptionist/appointment/list.css}">
+    </head>
+
+    <body>
+        <div class="layout">
+
+            <!-- Sidebar -->
+            <div th:replace="~{receptionist/common/sidebar :: sidebar('appointment')}"></div>
+
+            <main class="main">
+
+                <!-- Header -->
+                <div th:replace="~{receptionist/common/header :: header('Lịch Hẹn')}"></div>
+
+                <section class="appointment-stats">
+                    <div class="stat-card">
+                        <h2 th:text="${confirmedCount}"></h2>
+                        <p>Đã Xác Nhận</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <h2 th:text="${waitingCount}"></h2>
+                        <p>Chờ Khám</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <h2 th:text="${examiningCount}"></h2>
+                        <p>Đang Khám</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <h2 th:text="${completedCount}"></h2>
+                        <p>Đã Khám Xong</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <h2 th:text="${cancelledCount}"></h2>
+                        <p>Đã Hủy</p>
+                    </div>
+
+                    <div class="stat-card">
+                        <h2 th:text="${noShowCount}"></h2>
+                        <p>Vắng Mặt</p>
+                    </div>
+                </section>
+
+                <!-- Appointment List -->
+                <section class="appointment-card">
+
+                    <!-- Search And Filter -->
+                    <form class="appointment-toolbar" th:action="@{/receptionist/appointment}" method="get">
+                        <div class="search-box">
+                            <span class="search-icon"> ⌕ </span>
+                            <input type="text" name="search" placeholder="Tìm kiếm bệnh nhân..." th:value="${search}">
+                        </div>
+
+                        <select class="status-filter" name="status">
+                            <option value="" th:selected="${selectedStatus == null || selectStatus == ''}"> Tất cả trạng
+                                thái
+                            </option>
+                            <option value="CONFIRMED" th:selected="${selectStatus == 'CONFIRMED'}"> Đã xác nhận</option>
+                            <option value="WAITING" th:selected="${selectStatus == 'WAITING'}"> Chờ khám</option>
+                            <option value="EXAMINING" th:selected="${selectStatus == 'EXAMINING'}"> Đang khám</option>
+                            <option value="COMPLETED" th:selected="${selectStatus == 'COMPLETED'}"> Đã khám xong
+                            </option>
+                            <option value="CANCELLED" th:selected="${selectStatus == 'CANCELLED'}"> Đã hủy</option>
+                            <option value="NO_SHOW" th:selected="${selectStatus == 'NO_SHOW'}"> Vắng mặt</option>
+                        </select>
+
+                        <button type="submit" class="btn-search"> Tìm Kiếm</button>
+
+                        <a th:href="@{/receptionist/appointment}" class="btn-reset"> Làm Mới </a>
+                    </form>
+
+                    <div class="table-wrapper">
+                        <table class="appointment-table">
+                            <thead>
+                                <tr>
+                                    <th>Mã LH</th>
+                                    <th>Slot</th>
+                                    <th>Phòng</th>
+                                    <th>Bệnh nhân</th>
+                                    <th>SĐT</th>
+                                    <th>Bác sĩ</th>
+                                    <th>Chuyên khoa</th>
+                                    <th>Ngày giờ</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr th:each="appointment : ${appointments}">
+                                    <td>
+                                        <a class="appointment-code"
+                                           th:href="@{/receptionist/appointment/{id}(id=${appointment.id})}"
+                                           th:text="${appointment.appointmentCode}">
+                                        </a>
+                                    </td>
+
+                                    <td th:text="${appointment.slotText}"></td>
+
+                                    <td>
+                                        <span class="room-badge" th:text="${appointment.roomNumber}"></span>
+                                    </td>
+
+                                    <td th:text="${appointment.patientName}"></td>
+
+                                    <td th:text="${appointment.patientPhone}"></td>
+
+                                    <td th:text="${appointment.doctorName}"></td>
+
+                                    <td th:text="${appointment.departmentName}"></td>
+
+                                    <td>
+                                        <span th:text="${#temporals.format(appointment.bookingDate, 'dd/MM/yyyy')}"></span>
+                                        <span> · </span>
+                                        <span th:text="${#temporals.format(appointment.slotStartTime, 'HH:mm')}"></span>
+                                    </td>
+
+                                    <td>
+                                        <span class="status-badge" th:classappend="${appointment.statusClass}"
+                                              th:text="${appointment.statusLabel}"></span>
+                                    </td>
+
+                                    <td class="action-cell">
+                                        <a class="btn-detail"
+                                           th:href="@{/receptionist/appointment/{id}(id=${appointment.id})}">
+                                            Chi tiết
+                                        </a>
+
+                                        <a th:if="${appointment.status == 'CONFIRMED'}"
+                                           class="btn-checkin"
+                                           th:href="@{/receptionist/appointment/{id}/check-in-ticket(id=${appointment.id})}">
+                                            Check-in
+                                        </a>
+                                    </td>
+                                </tr>
+
+                                <tr th:if="${appointments == null || appointments.isEmpty()}">
+                                    <td colspan="10" class="empty-row"> Không có lịch hẹn nào</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="pagination-footer"></div>
+                </section>
+            </main>
+        </div>
+    </body>
 </html>

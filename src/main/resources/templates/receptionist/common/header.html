@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+    <body>
+
+        <header class="top-header" th:fragment="header(pageTitle)">
+
+            <div class="header-left">
+                <span class="header-close">×</span>
+
+                <span class="breadcrumb-text">Tiếp Tân</span>
+                <span class="breadcrumb-separator">›</span>
+                <strong class="breadcrumb-current" th:text="${pageTitle}"></strong>
+            </div>
+
+            <div class="header-right">
+
+                <div class="system-status">
+                    <span class="status-icon">⌁</span>
+                    <span>Đang Hoạt Động</span>
+                </div>
+
+                <div class="header-divider"></div>
+
+                <div class="datetime-box">
+                    <span class="time-icon">◷</span>
+                    <span th:text="${currentDateTime}"></span>
+                </div>
+
+                <div class="notification-box">
+                    <span class="notification-icon">🔔</span>
+                    <span class="notification-dot"></span>
+                </div>
+
+                <div class="header-user">
+                    <div class="header-avatar" th:text="${receptionist.avatarText}"></div>
+
+                    <div class="header-user-info">
+                        <strong th:text="${receptionist.fullName}"></strong>
+                        <p>Tiếp tân</p>
+                    </div>
+
+                    <span class="header-arrow">⌄</span>
+                </div>
+
+            </div>
+
+        </header>
+
+    </body>
+</html>

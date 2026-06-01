@@ -1,30 +1,66 @@
 package vn.edu.fpt.SE2034_SWP391_G5.dto.response;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @NoArgsConstructor
-@AllArgsConstructor
 @Getter
 @Setter
-public class AppointmentResponse {
+public class AppointmentPrintResponse {
 
     private Long id;
     private String appointmentCode;
-    private LocalTime slotStartTime;
-    private LocalTime slotEndTime;
-    private String roomNumber;
+
     private String patientName;
     private String patientPhone;
+
     private String doctorName;
     private String departmentName;
+
+    private String roomNumber;
+
     private LocalDate bookingDate;
+    private LocalTime slotStartTime;
+    private LocalTime slotEndTime;
+
+    private LocalDateTime checkInTime;
+
     private String status;
+
+    private Long queueNumber;
+
+    public AppointmentPrintResponse(
+            Long id,
+            String appointmentCode,
+            LocalTime slotStartTime,
+            LocalTime slotEndTime,
+            String roomNumber,
+            String patientName,
+            String patientPhone,
+            String doctorName,
+            String departmentName,
+            LocalDate bookingDate,
+            LocalDateTime checkInTime,
+            String status
+    ) {
+        this.id = id;
+        this.appointmentCode = appointmentCode;
+        this.slotStartTime = slotStartTime;
+        this.slotEndTime = slotEndTime;
+        this.roomNumber = roomNumber;
+        this.patientName = patientName;
+        this.patientPhone = patientPhone;
+        this.doctorName = doctorName;
+        this.departmentName = departmentName;
+        this.bookingDate = bookingDate;
+        this.checkInTime = checkInTime;
+        this.status = status;
+    }
 
     public String getSlotText() {
         if (slotStartTime == null || slotEndTime == null) {
@@ -34,14 +70,6 @@ public class AppointmentResponse {
         return slotStartTime.toString().substring(0, 5)
                 + " - "
                 + slotEndTime.toString().substring(0, 5);
-    }
-
-    public String getRoomText() {
-        if (roomNumber == null) {
-            return "";
-        }
-
-        return roomNumber;
     }
 
     public String getStatusLabel() {
@@ -57,22 +85,6 @@ public class AppointmentResponse {
             case "CANCELLED" -> "Đã hủy";
             case "NO_SHOW" -> "Vắng mặt";
             default -> status;
-        };
-    }
-
-    public String getStatusClass() {
-        if (status == null) {
-            return "status-default";
-        }
-
-        return switch (status) {
-            case "CONFIRMED" -> "status-confirmed";
-            case "WAITING" -> "status-waiting";
-            case "EXAMINING" -> "status-examining";
-            case "COMPLETED" -> "status-completed";
-            case "CANCELLED" -> "status-cancelled";
-            case "NO_SHOW" -> "status-no-show";
-            default -> "status-default";
         };
     }
 }
