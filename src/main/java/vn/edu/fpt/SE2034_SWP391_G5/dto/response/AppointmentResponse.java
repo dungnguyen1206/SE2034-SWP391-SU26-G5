@@ -1,17 +1,16 @@
 package vn.edu.fpt.SE2034_SWP391_G5.dto.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
+@Builder
 public class AppointmentResponse {
 
     private Long id;
@@ -25,6 +24,18 @@ public class AppointmentResponse {
     private String departmentName;
     private LocalDate bookingDate;
     private String status;
+
+    private Long patientId;
+    private Long doctorId;
+
+    private Long serviceId;
+    private String serviceName;
+
+    private String shift;
+
+    private String note;
+    private LocalDateTime createdAt;
+    private boolean hasMedicalRecord;
 
     public String getSlotText() {
         if (slotStartTime == null || slotEndTime == null) {

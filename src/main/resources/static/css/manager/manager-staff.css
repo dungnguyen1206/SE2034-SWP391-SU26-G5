@@ -1,0 +1,713 @@
+/*
+    Staff Accounts
+*/
+
+.manager-main {
+    flex: 1;
+    padding: 32px;
+    background: #f4f6f9;
+}
+
+.staff-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.staff-header-title h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 26px;
+    font-weight: 700;
+}
+
+.staff-header-title p {
+    margin: 6px 0 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.staff-create-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #145cff;
+    color: #ffffff;
+    border-radius: 10px;
+    padding: 12px 18px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: 0 4px 10px rgba(20, 92, 255, 0.25);
+}
+
+.staff-create-button:hover {
+    background: #0f4edb;
+}
+
+.staff-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.staff-stat-card {
+    min-height: 76px;
+    background: #ffffff;
+    border: 1px solid #dde3ea;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.staff-stat-doctor {
+    border-color: #86efac;
+}
+
+.staff-stat-receptionist {
+    border-color: #fde047;
+}
+
+.staff-stat-inactive {
+    border-color: #fca5a5;
+}
+
+.staff-stat-value {
+    color: #0f172a;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.staff-stat-doctor .staff-stat-value {
+    color: #008236;
+}
+
+.staff-stat-receptionist .staff-stat-value {
+    color: #b45309;
+}
+
+.staff-stat-inactive .staff-stat-value {
+    color: #dc2626;
+}
+
+.staff-stat-label {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.staff-filter-card {
+    background: #ffffff;
+    border: 1px solid #dde3ea;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    margin-bottom: 20px;
+}
+
+.staff-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.staff-search-box {
+    flex: 1;
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #dde3ea;
+    border-radius: 10px;
+    padding: 0 14px;
+    background: #f8fafc;
+}
+
+.staff-search-box i {
+    color: #94a3b8;
+    font-size: 15px;
+}
+
+.staff-search-box input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #334155;
+    font-size: 14px;
+}
+
+.staff-search-box input::placeholder {
+    color: #94a3b8;
+}
+
+.staff-filter-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.staff-filter-icon,
+.staff-filter-button {
+    border: none;
+    border-radius: 9px;
+    min-height: 34px;
+    background: #f1f5f9;
+    color: #334155;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.staff-filter-icon {
+    width: 34px;
+    color: #94a3b8;
+}
+
+.staff-filter-button {
+    padding: 0 12px;
+    font-weight: 600;
+}
+
+.staff-filter-button.active {
+    background: #145cff;
+    color: #ffffff;
+}
+
+.staff-filter-note {
+    margin: 10px 0 0;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.staff-table-card {
+    background: #ffffff;
+    border: 1px solid #dde3ea;
+    border-radius: 12px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+    overflow: hidden;
+}
+
+.staff-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+.staff-table th {
+    background: #f8fafc;
+    border-bottom: 1px solid #dde3ea;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 14px 20px;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.staff-table td {
+    border-bottom: 1px solid #eef2f7;
+    color: #475569;
+    padding: 14px 20px;
+    vertical-align: middle;
+}
+
+.staff-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.staff-profile strong {
+    color: #0f172a;
+    font-size: 14px;
+}
+
+.staff-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #86a7ff;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.staff-type-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.staff-type-badge.doctor {
+    background: #dcfce7;
+    color: #008236;
+}
+
+.staff-type-badge.receptionist {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.staff-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+}
+
+.staff-status span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.staff-status.active {
+    color: #008236;
+}
+
+.staff-status.active span {
+    background: #00b85f;
+}
+
+.staff-status.inactive {
+    color: #64748b;
+}
+
+.staff-status.inactive span {
+    background: #94a3b8;
+}
+
+.staff-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.staff-actions a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 15px;
+}
+
+.staff-action-view {
+    color: #145cff;
+}
+
+.staff-action-edit,
+.staff-action-unlock {
+    color: #00a651;
+}
+
+.staff-action-key {
+    color: #8b19ff;
+}
+
+.staff-action-lock {
+    color: #f59e0b;
+}
+
+.staff-table-footer {
+    padding: 14px 20px;
+    color: #94a3b8;
+    font-size: 13px;
+    background: #f8fafc;
+}
+
+/*
+    Staff Form - Header
+*/
+.staff-form-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.staff-back-link {
+    width: 34px;
+    height: 34px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 18px;
+}
+
+.staff-back-link:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.staff-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.staff-form-card {
+    background: #ffffff;
+    border: 1px solid #dde3ea;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+/*
+    Staff Form - Staff Type
+*/
+.staff-type-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.staff-form-section-title {
+    color: #0f172a;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.staff-form-section-title span,
+.staff-form-field strong {
+    color: #dc2626;
+}
+
+.staff-type-options {
+    display: flex;
+    gap: 12px;
+}
+
+.staff-type-option {
+    width: 180px;
+    min-height: 86px;
+    border: 2px solid #dde3ea;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #64748b;
+    text-decoration: none;
+    font-size: 14px;
+    background: #ffffff;
+}
+
+.staff-type-option i {
+    font-size: 22px;
+}
+
+.staff-type-option.doctor.selected {
+    border-color: #00c46a;
+    background: #ecfdf5;
+    color: #008236;
+}
+
+.staff-type-option.receptionist.selected {
+    border-color: #f2b705;
+    background: #fffbeb;
+    color: #b45309;
+}
+
+.staff-role-note {
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid #dde3ea;
+    border-radius: 9px;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 13px;
+}
+
+.staff-role-note strong {
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: #dcfce7;
+    color: #008236;
+    font-size: 12px;
+}
+
+.staff-role-note em {
+    font-style: normal;
+    color: #94a3b8;
+}
+
+/*
+    Staff Form - Main Layout
+*/
+.staff-form-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 360px;
+    gap: 20px;
+    align-items: start;
+}
+
+.staff-form-main,
+.staff-form-side {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.staff-form-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.staff-form-card-header i {
+    color: #145cff;
+    font-size: 17px;
+}
+
+.staff-form-card-header h3 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 17px;
+}
+
+/*
+    Staff Form - Account Information and Profile Information
+*/
+.staff-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.staff-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.staff-form-field span {
+    color: #334155;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.staff-form-field input,
+.staff-form-field select,
+.staff-form-field textarea {
+    width: 100%;
+    border: 1px solid #dde3ea;
+    border-radius: 9px;
+    background: #f8fafc;
+    color: #0f172a;
+    font-size: 14px;
+    outline: none;
+    padding: 12px;
+}
+
+.staff-form-field input,
+.staff-form-field select {
+    height: 42px;
+}
+
+.staff-form-field textarea {
+    min-height: 88px;
+    resize: vertical;
+    font-family: Arial, sans-serif;
+}
+
+.staff-form-field input::placeholder,
+.staff-form-field textarea::placeholder {
+    color: #94a3b8;
+}
+
+.staff-form-full {
+    grid-column: 1 / -1;
+}
+
+/*
+    Staff Form - Doctor Profile and Receptionist Profile
+*/
+.staff-doctor-card {
+    border-color: #86efac;
+}
+
+.staff-receptionist-card {
+    border-color: #fde047;
+}
+
+.staff-section-badge {
+    margin-left: auto;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.staff-section-badge.doctor {
+    background: #dcfce7;
+    color: #008236;
+}
+
+.staff-section-badge.receptionist {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+/*
+    Staff Form - Side Cards
+*/
+.staff-form-side-title {
+    color: #0f172a;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 14px;
+}
+
+.staff-radio-card {
+    height: 42px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #dde3ea;
+    border-radius: 9px;
+    padding: 0 12px;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.staff-radio-card input {
+    display: none;
+}
+
+.staff-radio-card.selected {
+    border-color: #78adff;
+    background: #eff6ff;
+    color: #145cff;
+}
+
+.staff-radio-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.staff-radio-dot.active {
+    background: #00b85f;
+}
+
+.staff-radio-dot.inactive {
+    background: #94a3b8;
+}
+
+.staff-photo-preview {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 4px auto 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #b7ccff;
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.staff-upload-button,
+.staff-save-button,
+.staff-cancel-button {
+    width: 100%;
+    height: 42px;
+    border-radius: 9px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.staff-upload-button {
+    border: 1px dashed #cbd5e1;
+    background: #ffffff;
+    color: #64748b;
+}
+
+.staff-save-button {
+    border: none;
+    background: #145cff;
+    color: #ffffff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.staff-cancel-button {
+    margin-top: 10px;
+    border: 1px solid #dde3ea;
+    background: #ffffff;
+    color: #334155;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/*
+    Staff Form - Role Assignment Note
+*/
+.staff-role-help {
+    border: 1px solid #93c5fd;
+    border-radius: 12px;
+    background: #eff6ff;
+    padding: 16px;
+    color: #145cff;
+    font-size: 13px;
+}
+
+.staff-role-help h4 {
+    margin: 0 0 8px;
+    font-size: 14px;
+}
+
+.staff-role-help p {
+    margin: 0 0 8px;
+}
+
+.staff-role-help div {
+    margin-top: 6px;
+}
+
+.staff-help-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-right: 6px;
+}
+
+.staff-help-badge.doctor {
+    background: #dcfce7;
+    color: #008236;
+}
+
+.staff-help-badge.receptionist {
+    background: #fef3c7;
+    color: #b45309;
+}

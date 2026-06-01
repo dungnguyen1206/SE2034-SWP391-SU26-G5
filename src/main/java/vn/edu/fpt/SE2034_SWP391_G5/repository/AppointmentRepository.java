@@ -16,31 +16,16 @@ import java.util.Optional;
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
-    @Query("""
-            SELECT new vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse(
-                a.id,
-                a.appointmentCode,
-                sl.startTime,
-                sl.endTime,
-                r.roomNumber,
-                CONCAT(p.lastName, ' ', COALESCE(CONCAT(p.middleName, ' '), ''), p.firstName),
-                p.phone,
-                CONCAT(d.lastName, ' ', COALESCE(CONCAT(d.middleName, ' '), ''), d.firstName),
-                dep.name,
-                a.bookingDate,
-                a.status
-            )
-            FROM Appointment a
-            JOIN a.patient p
-            JOIN a.doctor d
-            JOIN a.service sv
-            JOIN sv.department dep
-            JOIN a.slot sl
-            JOIN sl.schedule sch
-            JOIN sch.room r
-            ORDER BY a.bookingDate DESC, sl.startTime ASC
-            """)
-    List<AppointmentResponse> findAllForReceptionistList();
+    @Query("SELECT a FROM Appointment a " +
+            "LEFT JOIN FETCH a.patient " +
+            "LEFT JOIN FETCH a.doctor " +
+            "LEFT JOIN FETCH a.service sv " +
+            "LEFT JOIN FETCH sv.department " +
+            "LEFT JOIN FETCH a.slot sl " +
+            "LEFT JOIN FETCH sl.schedule sch " +
+            "LEFT JOIN FETCH sch.room " +
+            "ORDER BY a.bookingDate DESC, sl.startTime ASC")
+    List<Appointment> findAllForReceptionistList();
 
     @Query("""
         SELECT new vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentPrintResponse(
@@ -95,4 +80,13 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("bookingDate") LocalDate bookingDate,
             @Param("checkInTime") LocalDateTime checkInTime
     );
+
+    List<Appointment> findByPatientIdOrderByCreatedAtDesc(Long patientId);
+
+    Optional<Appointment> findByAppointmentCode(String appointmentCode);
+
+    boolean existsBySlotIdAndPatientIdAndStatusNotIn(Long slotId, Long patientId, List<String> excludedStatuses);
+
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.patient.id = :patientId AND a.status = :status")
+    long countByPatientIdAndStatus(@Param("patientId") Long patientId, @Param("status") String status);
 }
