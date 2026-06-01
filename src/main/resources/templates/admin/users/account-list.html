@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý tài khoản - HAMS</title>
+    <!-- FontAwesome CDN for modern vector icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Local preview fallback + Thymeleaf reference -->
+    <link rel="stylesheet" href="../../../static/css/admin/admin.css" th:href="@{/css/admin/admin.css}">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- 1. LEFT SIDEBAR -->
+        <aside class="admin-sidebar">
+            <!-- Sidebar Header Brand -->
+            <div class="sidebar-header">
+                <div class="sidebar-header-icon">
+                    <i class="fa-solid fa-hospital-user"></i>
+                </div>
+                <div class="sidebar-header-text">
+                    <span class="sidebar-header-title">Hệ thống</span>
+                    <span class="sidebar-header-subtitle">Quản trị viên</span>
+                </div>
+            </div>
+            
+            <!-- Sidebar Navigation Menu -->
+            <nav class="sidebar-menu">
+                <div class="sidebar-menu-section">
+                    <span class="sidebar-section-title">Quản trị</span>
+                    
+                    <!-- active user list menu item -->
+                    <a href="#" class="sidebar-item active">
+                        <div class="sidebar-item-left">
+                            <span class="sidebar-item-icon"><i class="fa-solid fa-users-gear"></i></span>
+                            <span>Danh sách tài khoản</span>
+                        </div>
+                        <span class="sidebar-badge">128</span>
+                    </a>
+                </div>
+            </nav>
+            
+            <!-- Sidebar Bottom Profile info -->
+            <div class="sidebar-profile">
+                <div class="profile-info">
+                    <div class="profile-avatar">AD</div>
+                    <div class="profile-details">
+                        <span class="profile-name">Quản trị viên</span>
+                        <span class="profile-email">admin@hethong.vn</span>
+                    </div>
+                </div>
+                <!-- Redirects back to login as a demo logout action -->
+                <a href="../../auth/login.html" th:href="@{/login}" class="profile-signout" title="Đăng xuất">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </a>
+            </div>
+        </aside>
+        
+        <!-- 2. MAIN CONTAINER -->
+        <main class="admin-main">
+            <!-- Top Header -->
+            <header class="admin-header">
+                <!-- Left Breadcrumbs -->
+                <div class="breadcrumbs">
+                    <span>Quản trị</span>
+                    <span class="breadcrumb-separator"><i class="fa-solid fa-angle-right"></i></span>
+                    <span class="breadcrumb-active">Quản lý tài khoản</span>
+                </div>
+                
+                <!-- Right Header Info (Search and Bell notifications removed as requested) -->
+                <div class="header-right">
+                    <div class="header-user">
+                        <div class="header-avatar">AD</div>
+                        <span class="header-username">Admin</span>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Main Content panel -->
+            <div class="admin-content">
+                <!-- Page Title -->
+                <div class="page-title-section">
+                    <h1 class="page-title">Quản lý tài khoản</h1>
+                    <p class="page-subtitle">Tổng số 12 tài khoản trong hệ thống</p>
+                </div>
+                
+                <!-- Filter Bar actions -->
+                <div class="filter-bar">
+                    <div class="filter-left">
+                        <div class="search-wrapper">
+                            <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+                            <input type="text" class="search-input" placeholder="Tìm kiếm theo tên hoặc email...">
+                        </div>
+                        <button class="filter-btn-trigger" title="Bộ lọc nâng cao">
+                            <i class="fa-solid fa-filter"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Filter Pills -->
+                    <div class="filter-pills">
+                        <button class="filter-pill active">Tất cả</button>
+                        <button class="filter-pill">Bệnh nhân</button>
+                        <button class="filter-pill">Bác sĩ</button>
+                        <button class="filter-pill">Lễ tân</button>
+                        <button class="filter-pill">Quản lý</button>
+                        <button class="filter-pill">Quản trị</button>
+                    </div>
+                </div>
+                
+                <!-- Display results count -->
+                <div class="results-summary">
+                    Hiển thị 8 kết quả
+                </div>
+                
+                <!-- Accounts Table -->
+                <div class="table-container">
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Họ và tên</th>
+                                <th>Email</th>
+                                <th>Số điện thoại</th>
+                                <th>Vai trò</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày tạo</th>
+                                <th style="text-align: center;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Row 1 -->
+                            <tr>
+                                <td>
+                                    <div class="user-identity">
+                                        <div class="user-name-avatar" style="background-color: #e0f2fe; color: #0284c7;">L</div>
+                                        <span class="user-name">Nguyễn Thị Lan</span>
+                                    </div>
+                                </td>
+                                <td>lan.nguyen@email.vn</td>
+                                <td>0912 345 678</td>
+                                <td><span class="role-badge patient">Bệnh nhân</span></td>
+                                <td>
+                                    <div class="status-indicator">
+                                        <span class="status-dot active"></span>
+                                        <span>Hoạt động</span>
+                                    </div>
+                                </td>
+                                <td>2026-05-18</td>
+                                <td style="text-align: center;">
+                                    <div style="display: flex; justify-content: center; gap: 8px;">
+                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('Nguyễn Thị Lan', 'Bệnh nhân', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
+                                        <a href="#" class="action-btn delete" title="Xóa tài khoản" onclick="openDeleteModal('Nguyễn Thị Lan', this); return false;"><i class="fa-regular fa-trash-can"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Row 2 -->
+                            <tr>
+                                <td>
+                                    <div class="user-identity">
+                                        <div class="user-name-avatar" style="background-color: #dcfce7; color: #16a34a;">T</div>
+                                        <span class="user-name">BS. Trần Minh Tuấn</span>
+                                    </div>
+                                </td>
+                                <td>tuan.tran@hms.vn</td>
+                                <td>0987 654 321</td>
+                                <td><span class="role-badge doctor">Bác sĩ</span></td>
+                                <td>
+                                    <div class="status-indicator">
+                                        <span class="status-dot active"></span>
+                                        <span>Hoạt động</span>
+                                    </div>
+                                </td>
+                                <td>2026-05-15</td>
+                                <td style="text-align: center;">
+                                    <div style="display: flex; justify-content: center; gap: 8px;">
+                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('BS. Trần Minh Tuấn', 'Bác sĩ', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
+                                        <a href="#" class="action-btn delete" title="Xóa tài khoản" onclick="openDeleteModal('BS. Trần Minh Tuấn', this); return false;"><i class="fa-regular fa-trash-can"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Row 3 -->
+                            <tr>
+                                <td>
+                                    <div class="user-identity">
+                                        <div class="user-name-avatar" style="background-color: #ffedd5; color: #d97706;">H</div>
+                                        <span class="user-name">Lê Thị Hoa</span>
+                                    </div>
+                                </td>
+                                <td>hoa.le@hms.vn</td>
+                                <td>0934 567 890</td>
+                                <td><span class="role-badge receptionist">Lễ tân</span></td>
+                                <td>
+                                    <div class="status-indicator">
+                                        <span class="status-dot active"></span>
+                                        <span>Hoạt động</span>
+                                    </div>
+                                </td>
+                                <td>2026-05-12</td>
+                                <td style="text-align: center;">
+                                    <div style="display: flex; justify-content: center; gap: 8px;">
+                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('Lê Thị Hoa', 'Lễ tân', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
+                                        <a href="#" class="action-btn delete" title="Xóa tài khoản" onclick="openDeleteModal('Lê Thị Hoa', this); return false;"><i class="fa-regular fa-trash-can"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Row 4 -->
+                            <tr>
+                                <td>
+                                    <div class="user-identity">
+                                        <div class="user-name-avatar" style="background-color: #f1f5f9; color: #475569;">Đ</div>
+                                        <span class="user-name">Phạm Văn Đức</span>
+                                    </div>
+                                </td>
+                                <td>duc.pham@email.vn</td>
+                                <td>0901 234 567</td>
+                                <td><span class="role-badge patient">Bệnh nhân</span></td>
+                                <td>
+                                    <div class="status-indicator">
+                                        <span class="status-dot inactive"></span>
+                                        <span style="color: var(--text-muted);">Tạm khóa</span>
+                                    </div>
+                                </td>
+                                <td>2026-05-10</td>
+                                <td style="text-align: center;">
+                                    <div style="display: flex; justify-content: center; gap: 8px;">
+                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('Phạm Văn Đức', 'Bệnh nhân', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
+                                        <a href="#" class="action-btn delete" title="Xóa tài khoản" onclick="openDeleteModal('Phạm Văn Đức', this); return false;"><i class="fa-regular fa-trash-can"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Row 5 -->
+                            <tr>
+                                <td>
+                                    <div class="user-identity">
+                                        <div class="user-name-avatar" style="background-color: #f3e8ff; color: #7c3aed;">M</div>
+                                        <span class="user-name">Hoàng Thị Mai</span>
+                                    </div>
+                                </td>
+                                <td>mai.hoang@hms.vn</td>
+                                <td>0976 543 210</td>
+                                <td><span class="role-badge manager">Quản lý</span></td>
+                                <td>
+                                    <div class="status-indicator">
+                                        <span class="status-dot active"></span>
+                                        <span>Hoạt động</span>
+                                    </div>
+                                </td>
+                                <td>2026-05-08</td>
+                                <td style="text-align: center;">
+                                    <div style="display: flex; justify-content: center; gap: 8px;">
+                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('Hoàng Thị Mai', 'Quản lý', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
+                                        <a href="#" class="action-btn delete" title="Xóa tài khoản" onclick="openDeleteModal('Hoàng Thị Mai', this); return false;"><i class="fa-regular fa-trash-can"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Row 6 -->
+                            <tr>
+                                <td>
+                                    <div class="user-identity">
+                                        <div class="user-name-avatar" style="background-color: #dcfce7; color: #16a34a;">T</div>
+                                        <span class="user-name">BS. Vũ Thị Thu</span>
+                                    </div>
+                                </td>
+                                <td>thu.vu@hms.vn</td>
+                                <td>0965 432 109</td>
+                                <td><span class="role-badge doctor">Bác sĩ</span></td>
+                                <td>
+                                    <div class="status-indicator">
+                                        <span class="status-dot active"></span>
+                                        <span>Hoạt động</span>
+                                    </div>
+                                </td>
+                                <td>2026-05-05</td>
+                                <td style="text-align: center;">
+                                    <div style="display: flex; justify-content: center; gap: 8px;">
+                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('BS. Vũ Thị Thu', 'Bác sĩ', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
+                                        <a href="#" class="action-btn delete" title="Xóa tài khoản" onclick="openDeleteModal('BS. Vũ Thị Thu', this); return false;"><i class="fa-regular fa-trash-can"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Row 7 -->
+                            <tr>
+                                <td>
+                                    <div class="user-identity">
+                                        <div class="user-name-avatar" style="background-color: #e0f2fe; color: #0284c7;">N</div>
+                                        <span class="user-name">Bùi Văn Nam</span>
+                                    </div>
+                                </td>
+                                <td>nam.bui@email.vn</td>
+                                <td>0954 321 098</td>
+                                <td><span class="role-badge patient">Bệnh nhân</span></td>
+                                <td>
+                                    <div class="status-indicator">
+                                        <span class="status-dot active"></span>
+                                        <span>Hoạt động</span>
+                                    </div>
+                                </td>
+                                <td>2026-05-02</td>
+                                <td style="text-align: center;">
+                                    <div style="display: flex; justify-content: center; gap: 8px;">
+                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('Bùi Văn Nam', 'Bệnh nhân', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
+                                        <a href="#" class="action-btn delete" title="Xóa tài khoản" onclick="openDeleteModal('Bùi Văn Nam', this); return false;"><i class="fa-regular fa-trash-can"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <!-- Row 8 -->
+                            <tr>
+                                <td>
+                                    <div class="user-identity">
+                                        <div class="user-name-avatar" style="background-color: #ffedd5; color: #d97706;">H</div>
+                                        <span class="user-name">Đinh Thị Hương</span>
+                                    </div>
+                                </td>
+                                <td>huong.dinh@hms.vn</td>
+                                <td>0943 210 987</td>
+                                <td><span class="role-badge receptionist">Lễ tân</span></td>
+                                <td>
+                                    <div class="status-indicator">
+                                        <span class="status-dot active"></span>
+                                        <span>Hoạt động</span>
+                                    </div>
+                                </td>
+                                <td>2026-04-28</td>
+                                <td style="text-align: center;">
+                                    <div style="display: flex; justify-content: center; gap: 8px;">
+                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('Đinh Thị Hương', 'Lễ tân', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
+                                        <a href="#" class="action-btn delete" title="Xóa tài khoản" onclick="openDeleteModal('Đinh Thị Hương', this); return false;"><i class="fa-regular fa-trash-can"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="pagination-container">
+                    <span>Trang 1 / 2 &bull; Tổng số 12 tài khoản</span>
+                    <div class="pagination-controls">
+                        <button class="pagination-btn" disabled><i class="fa-solid fa-chevron-left"></i></button>
+                        <button class="pagination-btn active">1</button>
+                        <button class="pagination-btn">2</button>
+                        <button class="pagination-btn"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MODAL 1: THAY ĐỔI VAI TRÒ -->
+    <div id="editRoleModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title">Thay đổi vai trò</h3>
+                <button class="modal-close-btn" onclick="closeModal('editRoleModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p>Thay đổi vai trò hệ thống cho tài khoản <strong id="editRoleUserName">...</strong>:</p>
+                <form id="editRoleForm" onsubmit="handleEditRoleSubmit(event)">
+                    <div class="modal-form-group">
+                        <label for="roleSelect" style="font-size: 0.8rem; font-weight: 600; color: #475569; text-transform: uppercase;">Vai trò mới</label>
+                        <select id="roleSelect" class="modal-select">
+                            <option value="Bệnh nhân">Bệnh nhân</option>
+                            <option value="Bác sĩ">Bác sĩ</option>
+                            <option value="Lễ tân">Lễ tân</option>
+                            <option value="Quản lý">Quản lý</option>
+                            <option value="Quản trị">Quản trị</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel" onclick="closeModal('editRoleModal')">Hủy</button>
+                <button type="submit" form="editRoleForm" class="modal-btn save">Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: XÁC NHẬN XÓA TÀI KHOẢN -->
+    <div id="deleteModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title" style="color: #ef4444;">Xóa tài khoản</h3>
+                <button class="modal-close-btn" onclick="closeModal('deleteModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa tài khoản của <strong id="deleteUserName">...</strong> không?</p>
+                <p style="margin-top: 10px; color: #ef4444; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Hành động này sẽ xóa vĩnh viễn dữ liệu tài khoản và không thể hoàn tác!</span>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel" onclick="closeModal('deleteModal')">Hủy</button>
+                <button class="modal-btn danger" onclick="handleDeleteConfirm()">Xóa tài khoản</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT FOR MODALS DEMO -->
+    <script>
+        let currentTargetRow = null;
+
+        // Open Modal Edit Role
+        function openEditRoleModal(userName, currentRole, element) {
+            document.getElementById('editRoleUserName').innerText = userName;
+            document.getElementById('roleSelect').value = currentRole;
+            currentTargetRow = element.closest('tr');
+            document.getElementById('editRoleModal').classList.add('active');
+        }
+
+        // Open Modal Delete
+        function openDeleteModal(userName, element) {
+            document.getElementById('deleteUserName').innerText = userName;
+            currentTargetRow = element.closest('tr');
+            document.getElementById('deleteModal').classList.add('active');
+        }
+
+        // Close Modals
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            currentTargetRow = null;
+        }
+
+        // Handle Save Edit Role
+        function handleEditRoleSubmit(event) {
+            event.preventDefault();
+            const newRole = document.getElementById('roleSelect').value;
+            if (currentTargetRow) {
+                const badgeCell = currentTargetRow.querySelector('.role-badge');
+                
+                // Clear old role classes
+                badgeCell.className = 'role-badge';
+                
+                // Update text and apply new class
+                badgeCell.innerText = newRole;
+                if (newRole === 'Bệnh nhân') {
+                    badgeCell.classList.add('patient');
+                } else if (newRole === 'Bác sĩ') {
+                    badgeCell.classList.add('doctor');
+                } else if (newRole === 'Lễ tân') {
+                    badgeCell.classList.add('receptionist');
+                } else if (newRole === 'Quản lý') {
+                    badgeCell.classList.add('manager');
+                } else if (newRole === 'Quản trị') {
+                    badgeCell.classList.add('admin');
+                }
+            }
+            closeModal('editRoleModal');
+            alert('Đã cập nhật vai trò tài khoản thành công!');
+        }
+
+        // Handle Confirm Delete
+        function handleDeleteConfirm() {
+            if (currentTargetRow) {
+                currentTargetRow.remove();
+                alert('Đã xóa tài khoản thành công!');
+            }
+            closeModal('deleteModal');
+        }
+
+        // Click outside backdrop to close
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                event.target.classList.remove('active');
+                currentTargetRow = null;
+            }
+        }
+    </script>
+</body>
+</html>
+

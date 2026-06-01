@@ -6,11 +6,13 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.StaffResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
+import java.util.Optional;
 
 import java.util.List;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
+
     @Query("Select u from User u JOIN u.userRoles r where r.role.name =:roleName")
     List<User> findByRoleName(@Param("roleName") String roleName);
 
@@ -48,7 +50,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
             "AND u.department.id = :departmentId " +
             "AND u.doctorStatus = 'ACTIVE'")
     List<User> findActiveDoctorsByDepartmentId(@Param("departmentId") Integer departmentId);
-
+    Optional<User> findByEmail(String email);
+    Optional<User> findByUsername(String username);
+    boolean existsByEmail(String email);
+    boolean existsByUsername(String username);
 
 
 }
