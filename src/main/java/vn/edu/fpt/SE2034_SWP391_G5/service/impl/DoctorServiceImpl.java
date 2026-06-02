@@ -1,6 +1,6 @@
 package vn.edu.fpt.SE2034_SWP391_G5.service.impl;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
@@ -11,10 +11,22 @@ import vn.edu.fpt.SE2034_SWP391_G5.service.DoctorService;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class DoctorServiceImpl implements DoctorService {
 
-    private final UserRepository userRepository;
+    private UserRepository userRepository;
+
+    public DoctorServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+    public List<User> findByDoctorStatus(String doctorStatus){
+        return  userRepository.findByDoctorStatus(doctorStatus);
+    }
+
+    //Count active doctor
+    public List<User> findByRoleNameAndStatus(String roleName, String status) {
+        return userRepository.countByRoleNameAndStatus(roleName, status);
+    }
+
 
     @Override
     public List<DoctorResponse> getDoctorsByDepartment(Integer departmentId) {

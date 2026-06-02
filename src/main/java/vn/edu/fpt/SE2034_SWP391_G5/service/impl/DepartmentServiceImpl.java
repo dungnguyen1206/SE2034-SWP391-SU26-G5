@@ -1,5 +1,6 @@
 package vn.edu.fpt.SE2034_SWP391_G5.service.impl;
 
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Department;
@@ -27,4 +28,5 @@ public class DepartmentServiceImpl implements DepartmentService {
         return departmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khoa với id: " + id));
     }
+
 }

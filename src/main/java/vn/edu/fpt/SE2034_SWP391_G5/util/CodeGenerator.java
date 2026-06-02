@@ -1,4 +1,7 @@
 package vn.edu.fpt.SE2034_SWP391_G5.util;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -14,3 +17,4 @@ public class CodeGenerator {
         return String.format("APT-%s%04d", year, seq);
     }
 }
+

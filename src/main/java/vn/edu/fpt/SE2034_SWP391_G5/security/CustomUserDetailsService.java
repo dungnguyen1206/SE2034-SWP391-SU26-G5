@@ -23,12 +23,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         
         // Cần truy xuất trước các Role vì fetch type trong entity UserRole thường là Lazy
         if (user.getUserRoles() != null) {
-            // Cũ: user.getUserRoles().size(); → chỉ load UserRole, chưa load Role bên trong → LazyInitializationException
-            user.getUserRoles().size();
-            // Fix: force-load Role của từng UserRole trong cùng transaction
-            user.getUserRoles().forEach(ur -> {
-                if (ur.getRole() != null) {
-                    ur.getRole().getName(); // trigger load Role proxy
+            user.getUserRoles().forEach(userRole -> {
+                if (userRole.getRole() != null) {
+                    userRole.getRole().getName(); // Kích hoạt (initialize) proxy của Role
                 }
             });
         }

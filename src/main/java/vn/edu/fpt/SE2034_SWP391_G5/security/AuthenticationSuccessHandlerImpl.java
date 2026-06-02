@@ -20,27 +20,26 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
 
         for (GrantedAuthority authority : authorities) {
             String role = authority.getAuthority();
-            if (role.equals("ROLE_PATIENT")) {
-                // response.sendRedirect("/patient/home");
-                response.sendRedirect("/patient/dashboard");
-                return;
-            } else if (role.equals("ROLE_DOCTOR")) {
-                response.sendRedirect("/doctor/home");
-                return;
-            } else if (role.equals("ROLE_ADMIN")) {
-                response.sendRedirect("/admin/home");
-                return;
-            }else if (role.equals("ROLE_MANAGER")) {
-                response.sendRedirect("/manager/dashboard");
-                return;
-            }else if (role.equals("ROLE_RECEPTIONIST")) {
-                response.sendRedirect("/receptionist/dashboard");
-                return;
+
+            switch (role) {
+                case "ROLE_PATIENT":
+                    response.sendRedirect("/patient/dashboard");
+                    return;
+                case "ROLE_DOCTOR":
+                    response.sendRedirect("/doctor/dashboard");
+                    return;
+                case "ROLE_RECEPTIONIST":
+                    response.sendRedirect("/receptionist/dashboard");
+                    return;
+                case "ROLE_MANAGER":
+                    response.sendRedirect("/manager/dashboard");
+                    return;
+                case "ROLE_ADMIN":
+                    response.sendRedirect("/admin/account-list");
+                    return;
             }
         }
 
-        // Chuyển hướng mặc định nếu không khớp vai trò
         response.sendRedirect("/");
     }
 }
-

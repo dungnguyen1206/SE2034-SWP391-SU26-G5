@@ -1,14 +1,15 @@
 package vn.edu.fpt.SE2034_SWP391_G5.dto.response;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.*;
 
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class DoctorResponse {
-
     private Long id;
     private String fullName;
     private String firstName;
@@ -22,4 +23,5 @@ public class DoctorResponse {
     private String departmentName;
     private Integer departmentId;
     private String doctorStatus;
+
 }

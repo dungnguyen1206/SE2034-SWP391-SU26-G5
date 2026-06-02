@@ -16,10 +16,16 @@ import vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalRecordRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.ProvinceRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.UserAddressRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRepository;
+import org.springframework.stereotype.Service;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
+import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.service.PatientService;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.time.LocalDateTime;
+
+
+
 
 @Service
 @RequiredArgsConstructor
@@ -160,4 +166,14 @@ public class PatientServiceImpl implements PatientService {
         if (firstName != null) sb.append(firstName);
         return sb.toString().trim();
     }
+
+    private UserRepository userRepository;
+    public PatientServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+   public List<User> findUsersByRoleName(String roleName){
+        return userRepository.findByRoleName(roleName);
+    };
+
 }

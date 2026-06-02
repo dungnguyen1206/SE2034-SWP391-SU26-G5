@@ -6,6 +6,12 @@ import vn.edu.fpt.SE2034_SWP391_G5.dto.response.PatientResponse;
 
 import java.util.List;
 
+import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
+
+import java.util.List;
+
+
+
 public interface PatientService {
 
     PatientResponse getProfile(Long patientId);
@@ -15,4 +21,5 @@ public interface PatientService {
     List<MedicalRecordResponse> getMedicalRecords(Long patientId);
 
     MedicalRecordResponse getMedicalRecordDetail(Long recordId, Long patientId);
+    List<User> findUsersByRoleName(String roleName);
 }
