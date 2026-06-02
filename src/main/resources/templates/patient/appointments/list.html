@@ -32,8 +32,7 @@
         <!-- Filter bar -->
         <div class="appt-filter-bar">
             <button class="appt-filter-btn active" onclick="filterTable('ALL', this)">Tất cả</button>
-            <button class="appt-filter-btn" onclick="filterTable('WAITING', this)">Chờ xác nhận</button>
-            <button class="appt-filter-btn" onclick="filterTable('CONFIRMED', this)">Đã xác nhận</button>
+            <button class="appt-filter-btn" onclick="filterTable('CONFIRMED', this)">Đã đặt lịch</button>
             <button class="appt-filter-btn" onclick="filterTable('EXAMINING', this)">Đang khám</button>
             <button class="appt-filter-btn" onclick="filterTable('COMPLETED', this)">Hoàn thành</button>
             <button class="appt-filter-btn" onclick="filterTable('CANCELLED', this)">Đã hủy</button>
@@ -84,8 +83,8 @@
                                                   (${appt.status == 'EXAMINING'} ? 'status-checked-in' :
                                                   (${appt.status == 'COMPLETED'} ? 'status-completed' :
                                                   (${appt.status == 'CANCELLED'} ? 'status-cancelled' : 'status-no-show'))))"
-                                  th:text="${appt.status == 'WAITING'} ? 'Chờ xác nhận' :
-                                           (${appt.status == 'CONFIRMED'} ? 'Đã xác nhận' :
+                                  th:text="${appt.status == 'WAITING'} ? 'Đã đặt lịch' :
+                                           (${appt.status == 'CONFIRMED'} ? 'Đã đặt lịch' :
                                            (${appt.status == 'EXAMINING'} ? 'Đang khám' :
                                            (${appt.status == 'COMPLETED'} ? 'Hoàn thành' :
                                            (${appt.status == 'CANCELLED'} ? 'Đã hủy' : 'Vắng mặt'))))">

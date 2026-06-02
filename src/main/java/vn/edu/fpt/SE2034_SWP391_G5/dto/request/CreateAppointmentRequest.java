@@ -17,5 +17,9 @@ public class CreateAppointmentRequest {
     @NotNull(message = "Vui lòng chọn khung giờ")
     private Long slotId;
 
+    // Cần để redirect về step2 đúng URL khi có lỗi
+    // Trước đây không có field này nên redirect mất departmentId
+    private Integer departmentId;
+
     private String note;
 }

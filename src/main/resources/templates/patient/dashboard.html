@@ -40,15 +40,12 @@
                 <div class="dashboard-stat-value" th:text="${totalAppointments}">0</div>
                 <div class="dashboard-stat-label">Tổng lịch hẹn</div>
             </div>
+            <!-- Trước đây có 2 card riêng: "Chờ xác nhận" (WAITING) + "Đã xác nhận" (CONFIRMED) -->
+            <!-- Fix: gộp lại thành 1 card "Đã đặt lịch" vì patient đặt vào slot có sẵn, không cần chờ xác nhận -->
             <div class="dashboard-stat-card">
-                <div class="dashboard-stat-icon icon-yellow"><i class="bi bi-hourglass-split"></i></div>
-                <div class="dashboard-stat-value" th:text="${pendingCount}">0</div>
-                <div class="dashboard-stat-label">Chờ xác nhận</div>
-            </div>
-            <div class="dashboard-stat-card">
-                <div class="dashboard-stat-icon icon-cyan"><i class="bi bi-check2-circle"></i></div>
-                <div class="dashboard-stat-value" th:text="${confirmedCount}">0</div>
-                <div class="dashboard-stat-label">Đã xác nhận</div>
+                <div class="dashboard-stat-icon icon-cyan"><i class="bi bi-calendar2-check"></i></div>
+                <div class="dashboard-stat-value" th:text="${bookedCount}">0</div>
+                <div class="dashboard-stat-label">Đã đặt lịch</div>
             </div>
             <div class="dashboard-stat-card">
                 <div class="dashboard-stat-icon icon-green"><i class="bi bi-patch-check"></i></div>
@@ -103,8 +100,8 @@
                                                   (${appt.status == 'CONFIRMED'} ? 'status-confirmed' :
                                                   (${appt.status == 'COMPLETED'} ? 'status-completed' :
                                                   (${appt.status == 'CANCELLED'} ? 'status-cancelled' : 'status-pending')))"
-                                  th:text="${appt.status == 'WAITING'} ? 'Chờ xác nhận' :
-                                           (${appt.status == 'CONFIRMED'} ? 'Đã xác nhận' :
+                                  th:text="${appt.status == 'WAITING'} ? 'Đã đặt lịch' :
+                                           (${appt.status == 'CONFIRMED'} ? 'Đã đặt lịch' :
                                            (${appt.status == 'COMPLETED'} ? 'Hoàn thành' :
                                            (${appt.status == 'CANCELLED'} ? 'Đã hủy' : ${appt.status})))">
                             </span>

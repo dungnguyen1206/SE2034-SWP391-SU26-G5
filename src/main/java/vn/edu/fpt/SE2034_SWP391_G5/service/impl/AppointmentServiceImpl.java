@@ -211,7 +211,27 @@ public class AppointmentServiceImpl implements AppointmentService {
         List<DoctorSchedule> schedules = doctorScheduleRepository
                 .findAvailableSchedulesByDoctorId(doctorId, LocalDate.now());
 
-        return schedules.stream().map(schedule -> {
+        LocalDate today = LocalDate.now();
+        // Giờ hiện tại để lọc ca trong ngày hôm nay
+        // Trước đây không có filter theo giờ → buổi tối vẫn thấy ca sáng cùng ngày
+        java.time.LocalTime now = java.time.LocalTime.now();
+
+        return schedules.stream()
+                // Lọc ca đã qua trong ngày hôm nay
+                .filter(schedule -> {
+                    if (!schedule.getWorkDate().isEqual(today)) {
+                        return true; // Ngày tương lai → giữ lại tất cả
+                    }
+                    // Ngày hôm nay: chỉ giữ ca chưa bắt đầu
+                    if ("MORNING".equals(schedule.getShift())) {
+                        // Ca sáng 07:00–12:00, chỉ hiện nếu chưa tới 12:00
+                        return now.isBefore(java.time.LocalTime.of(12, 0));
+                    } else {
+                        // Ca chiều 13:00–17:00, chỉ hiện nếu chưa tới 17:00
+                        return now.isBefore(java.time.LocalTime.of(17, 0));
+                    }
+                })
+                .map(schedule -> {
             List<TimeSlot> slots = timeSlotRepository
                     .findByScheduleIdOrderByStartTimeAsc(schedule.getId());
 
@@ -254,7 +274,9 @@ public class AppointmentServiceImpl implements AppointmentService {
         MedicalService service = medicalServiceRepository.findById(request.getServiceId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dịch vụ"));
 
-        TimeSlot slot = timeSlotRepository.findById(request.getSlotId())
+        TimeSlot slot = timeSlotRepository.findByIdWithSchedule(request.getSlotId())
+                // Fallback: nếu query trên không tìm thấy vì lý do nào đó
+                // TimeSlot slot = timeSlotRepository.findById(request.getSlotId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khung giờ"));
 
         // Kiểm tra slot còn chỗ
@@ -295,7 +317,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public List<AppointmentResponse> getAppointmentsByPatient(Long patientId) {
-        return appointmentRepository.findByPatientIdOrderByCreatedAtDesc(patientId)
+        // Trước: appointmentRepository.findByPatientIdOrderByCreatedAtDesc(patientId)
+        //        → gây LazyInitializationException khi toResponse() truy cập slot.getSchedule()
+        return appointmentRepository.findByPatientIdWithDetails(patientId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -303,7 +327,11 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public AppointmentResponse getAppointmentDetail(Long appointmentId, Long patientId) {
-        Appointment appointment = appointmentRepository.findById(appointmentId)
+        // Trước: appointmentRepository.findById(appointmentId) → LAZY load
+        Appointment appointment = appointmentRepository.findByPatientIdWithDetails(patientId)
+                .stream()
+                .filter(a -> a.getId().equals(appointmentId))
+                .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lịch hẹn"));
 
         if (!appointment.getPatient().getId().equals(patientId)) {
