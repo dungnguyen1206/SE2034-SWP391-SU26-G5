@@ -34,8 +34,8 @@
                                       (${appointment.status == 'EXAMINING'} ? 'status-checked-in' :
                                       (${appointment.status == 'COMPLETED'} ? 'status-completed' :
                                       (${appointment.status == 'CANCELLED'} ? 'status-cancelled' : 'status-no-show'))))"
-                      th:text="${appointment.status == 'WAITING'} ? 'Chờ xác nhận' :
-                               (${appointment.status == 'CONFIRMED'} ? 'Đã xác nhận' :
+                      th:text="${appointment.status == 'WAITING'} ? 'Đã đặt lịch' :
+                               (${appointment.status == 'CONFIRMED'} ? 'Đã đặt lịch' :
                                (${appointment.status == 'EXAMINING'} ? 'Đang khám' :
                                (${appointment.status == 'COMPLETED'} ? 'Hoàn thành' :
                                (${appointment.status == 'CANCELLED'} ? 'Đã hủy' : 'Vắng mặt'))))">

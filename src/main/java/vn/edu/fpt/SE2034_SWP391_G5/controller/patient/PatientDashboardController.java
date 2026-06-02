@@ -35,15 +35,17 @@ public class PatientDashboardController {
         List<AppointmentResponse> appointments = appointmentService.getAppointmentsByPatient(patientId);
 
         long totalAppointments = appointments.size();
-        long pendingCount   = appointments.stream().filter(a -> "WAITING".equals(a.getStatus())).count();
-        long confirmedCount = appointments.stream().filter(a -> "CONFIRMED".equals(a.getStatus())).count();
+        // Trước đây tách pendingCount (WAITING) và confirmedCount (CONFIRMED) riêng
+        // → hiện "Chờ xác nhận" trên dashboard không hợp lý vì patient đặt vào slot có sẵn
+        // Fix: gộp WAITING + CONFIRMED thành 1 nhóm "Đã đặt lịch"
+        long bookedCount    = appointments.stream()
+                .filter(a -> "WAITING".equals(a.getStatus()) || "CONFIRMED".equals(a.getStatus())).count();
         long completedCount = appointments.stream().filter(a -> "COMPLETED".equals(a.getStatus())).count();
         List<AppointmentResponse> recentAppointments = appointments.stream().limit(5).toList();
 
         model.addAttribute("profile", profile);
         model.addAttribute("totalAppointments", totalAppointments);
-        model.addAttribute("pendingCount", pendingCount);
-        model.addAttribute("confirmedCount", confirmedCount);
+        model.addAttribute("bookedCount", bookedCount);
         model.addAttribute("completedCount", completedCount);
         model.addAttribute("recentAppointments", recentAppointments);
 
