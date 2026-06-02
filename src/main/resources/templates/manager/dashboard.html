@@ -34,25 +34,25 @@
 
                     <div class="dashboard-stat-card">
                         <div class="dashboard-stat-label">Tổng lịch hẹn</div>
-                        <div class="dashboard-stat-value">1,284</div>
+                        <div class="dashboard-stat-value" th:text="${totalAppointment}">1,284</div>
                         <div class="dashboard-stat-note">+64 trong tháng này</div>
                     </div>
 
                     <div class="dashboard-stat-card">
                         <div class="dashboard-stat-label">Tổng bệnh nhân</div>
-                        <div class="dashboard-stat-value" th:text="${totalPatients}">892</div>
+                        <div class="dashboard-stat-value" th:text="${totalPatient}">892</div>
                         <div class="dashboard-stat-note">+28 trong tháng này</div>
                     </div>
 
                     <div class="dashboard-stat-card">
                         <div class="dashboard-stat-label">Bác sĩ đang hoạt động</div>
-                        <div class="dashboard-stat-value">18</div>
-                        <div class="dashboard-stat-note">2 bác sĩ đang nghỉ</div>
+                        <div class="dashboard-stat-value" th:text="${doctorActive}">18</div>
+                        <div class="dashboard-stat-note" th:text="${doctorInactive + ' Bác sĩ đang nghỉ'}">2 Bác sĩ đang nghỉ</div>
                     </div>
 
                     <div class="dashboard-stat-card">
                         <div class="dashboard-stat-label">Doanh thu tháng này</div>
-                        <div class="dashboard-stat-value">128,4 triệu VND</div>
+                        <div class="dashboard-stat-value" th:text="${totalAmount} + 'VND'">128,4 triệu VND</div>
                         <div class="dashboard-stat-note">+12% so với tháng trước</div>
                     </div>
 
@@ -64,11 +64,11 @@
                          Thống kê trạng thái lịch hẹn hôm nay
                      </div>
                      <div class="status-card-list">
-                         <div class="status-card-badge status-pending">34 Chờ xử lý</div>
-                         <div class="status-card-badge status-confirmed">87 Đã xác nhận</div>
-                         <div class="status-card-badge status-checked-in">22 Đã check-in</div>
-                         <div class="status-card-badge status-completed">156 Đã hoàn thành</div>
-                         <div class="status-card-badge status-cancelled">12 Đã hủy</div>
+                         <div class="status-card-badge status-confirmed" th:text="${confirmedAppointment} + ' Đã xác nhận'">87 Đã xác nhận</div>
+                         <div class="status-card-badge status-waiting" th:text="${waitingAppointment} + ' Chờ khám'">34 Chờ khám</div>
+                         <div class="status-card-badge status-examining" th:text="${examiningAppointment}+ ' Đang khám'">22 Đang khám</div>
+                         <div class="status-card-badge status-completed" th:text="${completedAppointment} + ' Đã hoàn thành'">156 Đã hoàn thành</div>
+                         <div class="status-card-badge status-cancelled" th:text="${cancelledAppointment} + ' Đã hủy'">12 Đã hủy</div>
                      </div>
                  </div>
 
@@ -90,12 +90,13 @@
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    <tr>
-                                        <td>Nguyễn Việt Dũng</td>
-                                        <td>BS. Nguyễn Văn A</td>
-                                        <td>Khám mắt</td>
-                                        <td>09:00 - 10:00</td>
-                                        <td>Đã xác nhận</td>
+
+                                    <tr th:each="appointment : ${todayAppointmentsList}">
+                                        <td th:text="${appointment.getPatientFullName()}">Nguyễn Việt Dũng</td>
+                                        <td th:text="${appointment.getDoctorFullName()}">BS. Nguyễn Văn A</td>
+                                        <td th:text="${appointment.getServiceName()}">Khám mắt</td>
+                                        <td th:text="${appointment.getSlotStartTime()}+'-'+ ${appointment.getSlotEndTime()}">09:00 - 10:00</td>
+                                        <td th:text="${appointment.getStatus()}">Đã xác nhận</td>
                                     </tr>
                                     </tbody>
                                 </table>
@@ -117,11 +118,11 @@
                                  </tr>
                                  </thead>
                                  <tbody>
-                                 <tr>
-                                     <td>BS. Trần Minh Tuấn</td>
-                                     <td>Tim mạch</td>
-                                     <td>Ca sáng</td>
-                                     <td>Đang trực</td>
+                                 <tr th:each="doctor : ${doctorOnDutyResponses}">
+                                     <td th:text="${doctor.getDoctorName()}">BS. Trần Minh Tuấn</td>
+                                     <td th:text="${doctor.getDepartmentName()}">Tim mạch</td>
+                                     <td th:text="${doctor.getShift()}">Ca sáng</td>
+                                     <td th:text="${doctor.getStatus()}">Đang trực</td>
 
                                  </tr>
                                  </tbody>

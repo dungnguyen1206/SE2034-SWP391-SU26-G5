@@ -1,12 +1,15 @@
 package vn.edu.fpt.SE2034_SWP391_G5.service.impl;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
+import org.springframework.stereotype.Service;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentStatusCountResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.Appointment;
+import vn.edu.fpt.SE2034_SWP391_G5.repository.AppointmentRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateAppointmentRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentPrintResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ScheduleSlotResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.*;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException;
@@ -16,9 +19,12 @@ import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
 import vn.edu.fpt.SE2034_SWP391_G5.util.CodeGenerator;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.time.LocalDateTime;
+
 
 
 @Service
@@ -148,6 +154,58 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final UserRepository userRepository;
     private final MedicalServiceRepository medicalServiceRepository;
 
+
+//    public AppointmentServiceImpl(AppointmentRepository appointmentRepository,
+//                                  DoctorScheduleRepository doctorScheduleRepository,
+//                                  TimeSlotRepository timeSlotRepository,
+//                                  UserRepository userRepository,
+//                                  MedicalServiceRepository medicalServiceRepository){
+//
+//        this.appointmentRepository =  appointmentRepository;
+//        this.doctorScheduleRepository = doctorScheduleRepository;
+//        this.timeSlotRepository = timeSlotRepository;
+//        this.userRepository = userRepository;
+//        this.medicalServiceRepository = medicalServiceRepository;
+//    }
+
+    public long getAllAppointment(){
+        return appointmentRepository.count();
+    };
+
+    public Map<String,Long> findTodayAppointmentsByStatus(LocalDate localDate){
+        List<AppointmentStatusCountResponse> appointmentStatusCountResponseList = appointmentRepository.findTodayAppointmentsByStatus(localDate);
+        Map<String,Long> statusCount = new HashMap<>();
+        statusCount.put("WAITING", 0L);
+        statusCount.put("CONFIRMED", 0L);
+        statusCount.put("EXAMINING", 0L);
+        statusCount.put("COMPLETED", 0L);
+        statusCount.put("CANCELLED", 0L);
+        appointmentStatusCountResponseList.stream().forEach(appointment -> {
+            statusCount.put(appointment.getStatus(),appointment.getCount());
+        });
+            return statusCount;
+    };
+
+    // Find all today's appointment
+    public List<AppointmentResponse> findAppointmentsByBookingDate(LocalDate today){
+       List<Appointment> todayListAppointment = appointmentRepository.findAppointmentsByBookingDate(today);
+       List<AppointmentResponse> todayListAppointmentResponse = new ArrayList<>();
+       todayListAppointment.forEach(a -> {
+          AppointmentResponse appointmentResponse = new AppointmentResponse();
+          appointmentResponse.setAppointmentCode(a.getAppointmentCode());
+          appointmentResponse.setPatientFullName(a.getPatient().getFirstName() + " "+a.getPatient().getMiddleName()+" " +  a.getPatient().getLastName());
+          appointmentResponse.setDoctorFullName(a.getDoctor().getFirstName() + " "+a.getDoctor().getMiddleName()+" " +  a.getDoctor().getLastName());
+          appointmentResponse.setServiceName(a.getService().getName());
+          appointmentResponse.setSlotStartTime(a.getSlot().getStartTime());
+          appointmentResponse.setSlotEndTime(a.getSlot().getEndTime());
+          appointmentResponse.setStatus(a.getStatus());
+          todayListAppointmentResponse.add(appointmentResponse);
+       });
+       return todayListAppointmentResponse;
+    };
+
+
+
     @Override
     public List<ScheduleSlotResponse> getAvailableSchedules(Long doctorId) {
         List<DoctorSchedule> schedules = doctorScheduleRepository
@@ -206,7 +264,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         // Kiểm tra bệnh nhân chưa đặt slot này
         boolean alreadyBooked = appointmentRepository.existsBySlotIdAndPatientIdAndStatusNotIn(
-                slot.getId(), patientId, List.of("CANCELLED", "REJECTED", "NO_SHOW"));
+                slot.getId(), patientId, List.of("CANCELLED", "NO_SHOW"));
         if (alreadyBooked) {
             throw new BadRequestException("Bạn đã đặt lịch trong khung giờ này rồi");
         }
@@ -227,7 +285,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setSlot(slot);
         appointment.setBookingDate(slot.getSchedule().getWorkDate());
         appointment.setNote(request.getNote());
-        appointment.setStatus("PENDING");
+        appointment.setStatus("CONFIRMED");
         appointment.setCreatedAt(LocalDateTime.now());
         appointment.setUpdatedAt(LocalDateTime.now());
 
@@ -264,7 +322,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new BadRequestException("Bạn không có quyền hủy lịch hẹn này");
         }
 
-        if (!List.of("PENDING", "CONFIRMED").contains(appointment.getStatus())) {
+        if (!List.of("WAITING", "CONFIRMED").contains(appointment.getStatus())) {
             throw new BadRequestException("Không thể hủy lịch hẹn ở trạng thái: " + appointment.getStatus());
         }
 

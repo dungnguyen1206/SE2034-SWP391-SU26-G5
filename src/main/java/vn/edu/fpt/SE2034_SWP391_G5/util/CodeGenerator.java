@@ -3,6 +3,10 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class CodeGenerator {
 
     private static final AtomicInteger counter = new AtomicInteger(0);
@@ -13,3 +17,4 @@ public class CodeGenerator {
         return String.format("APT-%s%04d", year, seq);
     }
 }
+

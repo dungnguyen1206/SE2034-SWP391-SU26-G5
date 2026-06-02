@@ -52,7 +52,7 @@ public class ReceptionistAppointmentController {
     }
 
     private void addReceptionistInfo(Model model){
-        model.addAttribute("receptionist", receptionistService.getReceptionistByUsername("recept.linh"));
+        model.addAttribute("receptionist", receptionistService.getReceptionistByUsername("recept.linh@hams.vn"));
     }
 
     private void addPageInfo(Model model, String search, String status){

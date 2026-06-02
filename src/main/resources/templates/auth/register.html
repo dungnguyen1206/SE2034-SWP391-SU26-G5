@@ -1,10 +1,104 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký tài khoản - HAMS</title>
+    <!-- FontAwesome CDN for modern vector icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Local preview fallback + Thymeleaf reference -->
+    <link rel="stylesheet" href="../../static/css/auth/auth.css" th:href="@{/css/auth/auth.css}">
 </head>
 <body>
+    <div class="auth-container">
+        <!-- Left Side: Register Card with Dark Slate-Blue Background Pane -->
+        <div class="auth-left">
+            <div class="auth-card">
+                <h2 class="auth-card-title">Đăng ký</h2>
+                
+                <!-- Alert Messages -->
+                <div th:if="${error != null}" class="auth-alert error" style="display: flex; background-color: #fce4e4; border: 1px solid #fcc2c2; color: #cc0000; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 0.9rem; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-circle-exclamation"></i> <span th:text="${error}">Lỗi đăng ký</span>
+                </div>
 
+                <form th:action="@{/register}" th:object="${registerRequest}" method="POST">
+                    <!-- Names Group: Họ, Tên đệm, Tên -->
+                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                        <!-- LastName Input -->
+                        <div class="input-group" style="flex: 1; margin-bottom: 0;">
+                            <label class="input-label" for="lastName">Họ</label>
+                            <input type="text" id="lastName" th:field="*{lastName}" class="auth-input" placeholder="Họ" required autofocus>
+                            <span style="color: #e74c3c; font-size: 0.8rem; margin-top: 5px; display: block;" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></span>
+                        </div>
+                        
+                        <!-- MiddleName Input -->
+                        <div class="input-group" style="flex: 1; margin-bottom: 0;">
+                            <label class="input-label" for="middleName">Tên đệm</label>
+                            <input type="text" id="middleName" th:field="*{middleName}" class="auth-input" placeholder="Tên đệm">
+                            <span style="color: #e74c3c; font-size: 0.8rem; margin-top: 5px; display: block;" th:if="${#fields.hasErrors('middleName')}" th:errors="*{middleName}"></span>
+                        </div>
+
+                        <!-- FirstName Input -->
+                        <div class="input-group" style="flex: 1; margin-bottom: 0;">
+                            <label class="input-label" for="firstName">Tên</label>
+                            <input type="text" id="firstName" th:field="*{firstName}" class="auth-input" placeholder="Tên" required>
+                            <span style="color: #e74c3c; font-size: 0.8rem; margin-top: 5px; display: block;" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></span>
+                        </div>
+                    </div>
+                    
+                    <!-- Email (Gmail) Input -->
+                    <div class="input-group">
+                        <label class="input-label" for="email">Gmail</label>
+                        <input type="email" id="email" th:field="*{email}" class="auth-input" placeholder="nguyenvana@gmail.com" required>
+                        <span style="color: #e74c3c; font-size: 0.8rem; margin-top: 5px; display: block;" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                    </div>
+                    
+                    <!-- Phone Input -->
+                    <div class="input-group">
+                        <label class="input-label" for="phone">Số điện thoại</label>
+                        <input type="tel" id="phone" th:field="*{phone}" class="auth-input" placeholder="Nhập số điện thoại" required>
+                        <span style="color: #e74c3c; font-size: 0.8rem; margin-top: 5px; display: block;" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></span>
+                    </div>
+                    
+                    <!-- Password Input -->
+                    <div class="input-group">
+                        <label class="input-label" for="password">Mật khẩu</label>
+                        <input type="password" id="password" th:field="*{password}" class="auth-input" placeholder="Tạo mật khẩu" required>
+                        <span style="color: #e74c3c; font-size: 0.8rem; margin-top: 5px; display: block;" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+                    </div>
+                    
+                    <!-- Confirm Password Input -->
+                    <div class="input-group">
+                        <label class="input-label" for="confirmPassword">Xác nhận mật khẩu</label>
+                        <input type="password" id="confirmPassword" th:field="*{confirmPassword}" class="auth-input" placeholder="Nhập lại mật khẩu" required>
+                        <span style="color: #e74c3c; font-size: 0.8rem; margin-top: 5px; display: block;" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></span>
+                    </div>
+                    
+                    <!-- Form Actions: Register Button -->
+                    <div class="auth-footer-actions">
+                        <button type="submit" class="auth-btn" style="width: 100%;">Đăng ký</button>
+                    </div>
+                </form>
+                
+                <!-- Login Link Hint -->
+                <div class="auth-nav-hint">
+                    Đã có tài khoản?
+                    <a href="login.html" th:href="@{/login}">Đăng nhập</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Side: Brand Logo and Illustration on Light Gray -->
+        <div class="auth-right">
+            <div class="auth-logo-top">
+                <span class="logo-circle"></span>
+                <span>HAMS</span>
+            </div>
+            
+            <div class="auth-illustration-container">
+                <img src="../../static/images/khoa-san-benh-vien-fv-2022.jpg" th:src="@{/images/khoa-san-benh-vien-fv-2022.jpg}" alt="HAMS Illustration" class="auth-illustration">
+            </div>
+        </div>
+    </div>
 </body>
 </html>

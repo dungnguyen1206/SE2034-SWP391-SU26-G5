@@ -1,8 +1,8 @@
 package vn.edu.fpt.SE2034_SWP391_G5.exception;
 
 public class ResourceNotFoundException extends RuntimeException {
-
     public ResourceNotFoundException(String message) {
         super(message);
     }
 }
+
