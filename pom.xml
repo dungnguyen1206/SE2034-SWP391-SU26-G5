@@ -87,6 +87,7 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-mail</artifactId>
 		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -138,6 +139,10 @@
 						</configuration>
 					</execution>
 				</executions>
+				<configuration>
+					<source>25</source>
+					<target>25</target>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
