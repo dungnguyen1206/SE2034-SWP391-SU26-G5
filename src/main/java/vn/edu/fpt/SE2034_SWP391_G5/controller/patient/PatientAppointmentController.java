@@ -78,7 +78,12 @@ public class PatientAppointmentController {
         model.addAttribute("doctors", doctors);
         model.addAttribute("services", services);
         model.addAttribute("selectedDoctorId", doctorId);
-        model.addAttribute("bookRequest", new CreateAppointmentRequest());
+        // Trước: model.addAttribute("bookRequest", new CreateAppointmentRequest());
+        //        → doctorId và departmentId null → hidden fields render value="" → POST gửi null
+        CreateAppointmentRequest bookRequest = new CreateAppointmentRequest();
+        bookRequest.setDoctorId(doctorId);
+        bookRequest.setDepartmentId(departmentId);
+        model.addAttribute("bookRequest", bookRequest);
 
         if (doctorId != null) {
             List<ScheduleSlotResponse> schedules = appointmentService.getAvailableSchedules(doctorId);
@@ -122,9 +127,13 @@ public class PatientAppointmentController {
                                  BindingResult bindingResult,
                                  @AuthenticationPrincipal CustomUserDetails userDetails,
                                  RedirectAttributes redirectAttributes) {
+        // Trước đây redirect về step2?doctorId=... thiếu departmentId → MissingServletRequestParameterException
+        String step2Url = "/patient/appointments/book/step2?departmentId=" + request.getDepartmentId()
+                + "&doctorId=" + request.getDoctorId();
+
         if (bindingResult.hasErrors()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng điền đầy đủ thông tin");
-            return "redirect:/patient/appointments/book/step2?doctorId=" + request.getDoctorId();
+            return "redirect:" + step2Url;
         }
         try {
             AppointmentResponse result = appointmentService.bookAppointment(
@@ -134,7 +143,7 @@ public class PatientAppointmentController {
             return "redirect:/patient/appointments/" + result.getId();
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            return "redirect:/patient/appointments/book/step2?doctorId=" + request.getDoctorId();
+            return "redirect:" + step2Url;
         }
     }
 

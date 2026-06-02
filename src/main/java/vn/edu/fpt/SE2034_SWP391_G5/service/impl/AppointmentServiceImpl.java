@@ -145,7 +145,9 @@ public class AppointmentServiceImpl implements AppointmentService {
         MedicalService service = medicalServiceRepository.findById(request.getServiceId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dịch vụ"));
 
-        TimeSlot slot = timeSlotRepository.findById(request.getSlotId())
+        TimeSlot slot = timeSlotRepository.findByIdWithSchedule(request.getSlotId())
+                // Fallback: nếu query trên không tìm thấy vì lý do nào đó
+                // TimeSlot slot = timeSlotRepository.findById(request.getSlotId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khung giờ"));
 
         // Kiểm tra slot còn chỗ
@@ -186,7 +188,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public List<AppointmentResponse> getAppointmentsByPatient(Long patientId) {
-        return appointmentRepository.findByPatientIdOrderByCreatedAtDesc(patientId)
+        // Trước: appointmentRepository.findByPatientIdOrderByCreatedAtDesc(patientId)
+        //        → gây LazyInitializationException khi toResponse() truy cập slot.getSchedule()
+        return appointmentRepository.findByPatientIdWithDetails(patientId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -194,7 +198,11 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public AppointmentResponse getAppointmentDetail(Long appointmentId, Long patientId) {
-        Appointment appointment = appointmentRepository.findById(appointmentId)
+        // Trước: appointmentRepository.findById(appointmentId) → LAZY load
+        Appointment appointment = appointmentRepository.findByPatientIdWithDetails(patientId)
+                .stream()
+                .filter(a -> a.getId().equals(appointmentId))
+                .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lịch hẹn"));
 
         if (!appointment.getPatient().getId().equals(patientId)) {

@@ -168,7 +168,8 @@
                             <form th:action="@{/patient/appointments/book}" method="post"
                                   th:object="${bookRequest}" id="bookingForm">
 
-                                <input type="hidden" th:field="*{doctorId}" th:value="${selectedDoctor.id}">
+                                <input type="hidden" th:field="*{doctorId}">
+                                <input type="hidden" th:field="*{departmentId}">
                                 <input type="hidden" th:field="*{slotId}" id="selectedSlotId">
 
                                 <!-- Dịch vụ -->

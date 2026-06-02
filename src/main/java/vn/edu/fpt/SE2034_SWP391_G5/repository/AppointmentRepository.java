@@ -33,6 +33,19 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     List<Appointment> findByPatientIdOrderByCreatedAtDesc(Long patientId);
 
+    // Fetch appointment cùng slot và schedule để tránh LazyInitializationException
+    // Trước đây: chỉ dùng findByPatientIdOrderByCreatedAtDesc không JOIN FETCH
+    @Query("SELECT DISTINCT a FROM Appointment a " +
+           "LEFT JOIN FETCH a.slot sl " +
+           "LEFT JOIN FETCH sl.schedule sc " +
+           "LEFT JOIN FETCH sc.room " +
+           "LEFT JOIN FETCH a.doctor d " +
+           "LEFT JOIN FETCH d.department " +
+           "LEFT JOIN FETCH a.service " +
+           "WHERE a.patient.id = :patientId " +
+           "ORDER BY a.createdAt DESC")
+    List<Appointment> findByPatientIdWithDetails(@Param("patientId") Long patientId);
+
     Optional<Appointment> findByAppointmentCode(String appointmentCode);
 
     boolean existsBySlotIdAndPatientIdAndStatusNotIn(Long slotId, Long patientId, List<String> excludedStatuses);
