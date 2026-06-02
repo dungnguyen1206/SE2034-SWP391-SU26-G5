@@ -7,6 +7,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.SecurityFilterChain;
 import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetailsService;
 
@@ -19,6 +20,9 @@ public class SecurityConfig {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AuthenticationSuccessHandler successHandler;
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -33,7 +37,12 @@ public class SecurityConfig {
         http
             .authenticationProvider(authenticationProvider())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/register", "/verify-otp", "/login", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/", "/register", "/verify-otp", "/login", "/css/**", "/js/**", "/images/**").permitAll()
+                .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+                .requestMatchers("/manager/**").hasAuthority("ROLE_MANAGER")
+                .requestMatchers("/doctor/**").hasAuthority("ROLE_DOCTOR")
+                .requestMatchers("/receptionist/**").hasAuthority("ROLE_RECEPTIONIST")
+                .requestMatchers("/patient/**").hasAuthority("ROLE_PATIENT")
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -41,7 +50,7 @@ public class SecurityConfig {
                 .loginProcessingUrl("/login")
                 .usernameParameter("username")
                 .passwordParameter("password")
-                .defaultSuccessUrl("/", true)
+                .successHandler(successHandler)
                 .failureUrl("/login?error=true")
                 .permitAll()
             )

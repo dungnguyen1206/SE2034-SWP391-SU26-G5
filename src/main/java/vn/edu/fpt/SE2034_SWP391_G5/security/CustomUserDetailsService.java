@@ -23,7 +23,11 @@ public class CustomUserDetailsService implements UserDetailsService {
         
         // Cần truy xuất trước các Role vì fetch type trong entity UserRole thường là Lazy
         if (user.getUserRoles() != null) {
-            user.getUserRoles().size(); 
+            user.getUserRoles().forEach(userRole -> {
+                if (userRole.getRole() != null) {
+                    userRole.getRole().getName(); // Kích hoạt (initialize) proxy của Role
+                }
+            });
         }
         
         return new CustomUserDetails(user);
