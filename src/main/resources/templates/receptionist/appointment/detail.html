@@ -1,10 +1,156 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Chi Tiết Lịch Hẹn</title>
 
-</body>
+        <link rel="stylesheet" th:href="@{/css/receptionist/common/sidebar.css}">
+        <link rel="stylesheet" th:href="@{/css/receptionist/common/header.css}">
+        <link rel="stylesheet" th:href="@{/css/receptionist/appointment/detail.css}">
+    </head>
+
+    <body>
+        <div class="layout">
+
+            <!-- Sidebar dùng chung -->
+            <div th:replace="~{receptionist/common/sidebar :: sidebar('appointment')}"></div>
+
+            <main class="main">
+
+                <!-- Header dùng chung -->
+                <div th:replace="~{receptionist/common/header :: header('Chi tiết lịch hẹn')}"></div>
+
+                <section class="detail-page">
+
+                    <div class="detail-actions">
+                        <a th:href="@{/receptionist/appointment}" class="btn-back">
+                            Quay lại danh sách
+                        </a>
+                    </div>
+
+                    <div class="detail-ticket">
+
+                        <!-- Header phiếu -->
+                        <div class="ticket-header">
+                            <h1>CHI TIẾT LỊCH HẸN</h1>
+                            <p>Thông tin lịch hẹn và thông tin bệnh nhân</p>
+                        </div>
+
+                        <!-- Mã lịch hẹn + trạng thái -->
+                        <div class="ticket-summary">
+                            <div>
+                                <span>Mã lịch hẹn</span>
+                                <strong th:text="${appointment.appointmentCode}"></strong>
+                            </div>
+
+                            <div>
+                                <span>Trạng thái</span>
+                                <strong class="status-badge" th:classappend="${appointment.statusClass}" th:text="${appointment.statusLabel}">
+                                </strong>
+                            </div>
+                        </div>
+
+                        <!-- Thông tin bệnh nhân -->
+                        <div class="ticket-section">
+                            <h2>Thông tin bệnh nhân</h2>
+
+                            <div class="info-grid">
+                                <div class="info-row">
+                                    <span>Họ và tên:</span>
+                                    <strong th:text="${appointment.patientFullName}"></strong>
+                                </div>
+
+                                <div class="info-row">
+                                    <span>Số điện thoại:</span>
+                                    <strong th:text="${appointment.patientPhone != null ? appointment.patientPhone : '-'}"></strong>
+                                </div>
+
+                                <div class="info-row">
+                                    <span>Địa chỉ:</span>
+                                    <strong th:text="${appointment.patientAddress != null && appointment.patientAddress != '' ? appointment.patientAddress : '-'}"></strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thông tin lịch khám -->
+                        <div class="ticket-section">
+                            <h2>Thông tin lịch khám</h2>
+
+                            <div class="info-grid">
+                                <div class="info-row">
+                                    <span>Ngày khám:</span>
+                                    <strong th:if="${appointment.bookingDate != null}"
+                                            th:text="${#temporals.format(appointment.bookingDate, 'dd/MM/yyyy')}">
+                                    </strong>
+                                    <strong th:if="${appointment.bookingDate == null}">-</strong>
+                                </div>
+
+                                <div class="info-row">
+                                    <span>Slot khám:</span>
+                                    <strong th:text="${appointment.slotText}"></strong>
+                                </div>
+
+                                <div class="info-row">
+                                    <span>Ca khám:</span>
+                                    <strong th:text="${appointment.shift != null ? appointment.shift : '-'}"></strong>
+                                </div>
+
+                                <div class="info-row">
+                                    <span>Phòng khám:</span>
+                                    <strong th:text="${appointment.roomNumber != null ? appointment.roomNumber : '-'}"></strong>
+                                </div>
+
+                                <div class="info-row">
+                                    <span>Thời gian tạo:</span>
+                                    <strong th:if="${appointment.createdAt != null}"
+                                            th:text="${#temporals.format(appointment.createdAt, 'dd/MM/yyyy HH:mm')}">
+                                    </strong>
+                                    <strong th:if="${appointment.createdAt == null}">-</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Thông tin bác sĩ / dịch vụ -->
+                        <div class="ticket-section">
+                            <h2>Thông tin bác sĩ và dịch vụ</h2>
+
+                            <div class="info-grid">
+                                <div class="info-row">
+                                    <span>Bác sĩ:</span>
+                                    <strong th:text="${appointment.doctorFullName != null ? appointment.doctorFullName : '-'}"></strong>
+                                </div>
+
+                                <div class="info-row">
+                                    <span>Học vị:</span>
+                                    <strong th:text="${appointment.doctorDegree != null ? appointment.doctorDegree : '-'}"></strong>
+                                </div>
+
+                                <div class="info-row">
+                                    <span>Chuyên khoa:</span>
+                                    <strong th:text="${appointment.departmentName != null ? appointment.departmentName : '-'}"></strong>
+                                </div>
+
+                                <div class="info-row">
+                                    <span>Dịch vụ:</span>
+                                    <strong th:text="${appointment.serviceName != null ? appointment.serviceName : '-'}"></strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Ghi chú -->
+                        <div class="ticket-section">
+                            <h2>Ghi chú</h2>
+
+                            <div class="note-box">
+                                <p th:text="${appointment.note != null && appointment.note != '' ? appointment.note : 'Không có ghi chú'}"></p>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </section>
+
+            </main>
+        </div>
+    </body>
 </html>

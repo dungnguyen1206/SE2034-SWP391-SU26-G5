@@ -9,5 +9,6 @@ public class Se2034Swp391G5Application {
 
 	public static void main(String[] args) {
 		SpringApplication.run(Se2034Swp391G5Application.class, args);
+		System.out.println("Hello Word");
 	}
 }

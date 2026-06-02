@@ -20,7 +20,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng với email: " + email));
-        
+
         // Cần truy xuất trước các Role vì fetch type trong entity UserRole thường là Lazy
         if (user.getUserRoles() != null) {
             user.getUserRoles().forEach(userRole -> {
@@ -29,7 +29,7 @@ public class CustomUserDetailsService implements UserDetailsService {
                 }
             });
         }
-        
+
         return new CustomUserDetails(user);
     }
 }

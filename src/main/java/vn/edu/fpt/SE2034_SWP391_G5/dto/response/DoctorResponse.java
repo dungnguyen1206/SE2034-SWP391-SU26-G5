@@ -27,5 +27,4 @@ public class DoctorResponse {
     private String departmentName;
     private Integer departmentId;
     private String doctorStatus;
-
 }

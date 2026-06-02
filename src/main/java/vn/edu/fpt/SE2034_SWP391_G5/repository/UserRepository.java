@@ -7,6 +7,10 @@ import org.springframework.stereotype.Repository;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.StaffResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 import java.util.Optional;
+
+import java.util.List;
+import java.util.Optional;
+
 import java.util.List;
 
 @Repository
@@ -56,7 +60,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u.id, " +
             "CONCAT(CONCAT(CONCAT(u.lastName, ' '), COALESCE(CONCAT(u.middleName, ' '), '')), u.firstName), " +
-            "UPPER(CONCAT(SUBSTRING(u.lastName, 1, 1), SUBSTRING(u.firstName, 1, 1))) " + "FROM User u " +
+            "UPPER(CONCAT(SUBSTRING(u.lastName, 1, 1), SUBSTRING(u.firstName, 1, 1))) " +
+            "FROM User u " +
             "WHERE u.email = :email")
     List<Object[]> findReceptionistInfoByEmail(@Param("email") String email);
 }

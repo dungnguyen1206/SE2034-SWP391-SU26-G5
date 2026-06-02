@@ -1,28 +1,25 @@
 package vn.edu.fpt.SE2034_SWP391_G5.service.impl;
 
-import org.springframework.stereotype.Service;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentStatusCountResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.Appointment;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.AppointmentRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateAppointmentRequest;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentPrintResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentStatusCountResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ScheduleSlotResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.DoctorSchedule;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalService;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.TimeSlot;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.*;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
+import vn.edu.fpt.SE2034_SWP391_G5.repository.AppointmentRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.DoctorScheduleRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalServiceRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.TimeSlotRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
 import vn.edu.fpt.SE2034_SWP391_G5.util.CodeGenerator;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,8 +28,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.time.LocalDateTime;
-
 
 @Service
 @RequiredArgsConstructor
@@ -44,57 +39,165 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final UserRepository userRepository;
     private final MedicalServiceRepository medicalServiceRepository;
 
+    @Override
+    public List<AppointmentResponse> getAppointmentListForReceptionist() {
+        return appointmentRepository.findAllForReceptionistList()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
 
-//    public AppointmentServiceImpl(AppointmentRepository appointmentRepository,
-//                                  DoctorScheduleRepository doctorScheduleRepository,
-//                                  TimeSlotRepository timeSlotRepository,
-//                                  UserRepository userRepository,
-//                                  MedicalServiceRepository medicalServiceRepository){
-//
-//        this.appointmentRepository =  appointmentRepository;
-//        this.doctorScheduleRepository = doctorScheduleRepository;
-//        this.timeSlotRepository = timeSlotRepository;
-//        this.userRepository = userRepository;
-//        this.medicalServiceRepository = medicalServiceRepository;
-//    }
+    @Override
+    public long countByStatus(List<AppointmentResponse> appointments, String status) {
+        long count = 0;
+        for (AppointmentResponse appointment : appointments) {
+            if (status.equals(appointment.getStatus())) {
+                count++;
+            }
+        }
+        return count;
+    }
 
-    public long getAllAppointment(){
+    @Override
+    public List<AppointmentResponse> filterAppointments(List<AppointmentResponse> appointments, String search, String status) {
+        List<AppointmentResponse> result = new ArrayList<>();
+
+        String keyword = search != null ? search.trim().toLowerCase() : "";
+        String selectedStatus = status != null ? status.trim() : "";
+
+        for (AppointmentResponse appointment : appointments) {
+            boolean matchesSearch = true;
+            boolean matchesStatus = true;
+
+            if (!keyword.isEmpty()) {
+                matchesSearch =
+                        containsIgnoreCase(appointment.getAppointmentCode(), keyword)
+                                || containsIgnoreCase(appointment.getPatientFullName(), keyword)
+                                || containsIgnoreCase(appointment.getPatientPhone(), keyword)
+                                || containsIgnoreCase(appointment.getDoctorFullName(), keyword)
+                                || containsIgnoreCase(appointment.getDepartmentName(), keyword)
+                                || containsIgnoreCase(appointment.getRoomNumber(), keyword);
+            }
+
+            if (!selectedStatus.isEmpty()) {
+                matchesStatus = selectedStatus.equals(appointment.getStatus());
+            }
+
+            if (matchesSearch && matchesStatus) {
+                result.add(appointment);
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public AppointmentPrintResponse getCheckInTicket(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findCheckInTicketById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin lịch hẹn"));
+
+        AppointmentPrintResponse ticket = toPrintResponse(appointment);
+
+        if (ticket.getCheckInTime() != null) {
+            Long queueNumber = appointmentRepository.countQueueNumberForTicket(
+                    ticket.getId(),
+                    ticket.getBookingDate(),
+                    ticket.getCheckInTime()
+            );
+            ticket.setQueueNumber(queueNumber);
+        }
+
+        return ticket;
+    }
+
+    @Override
+    @Transactional
+    public void confirmCheckInAppointment(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lịch hẹn"));
+
+        if (!"CONFIRMED".equals(appointment.getStatus())) {
+            throw new BadRequestException("Chỉ lịch hẹn đã xác nhận mới được check-in");
+        }
+
+        if (!LocalDate.now().equals(appointment.getBookingDate())) {
+            throw new BadRequestException("Chỉ được check-in lịch hẹn trong ngày khám");
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        appointment.setStatus("WAITING");
+        appointment.setCheckInTime(now);
+        appointment.setUpdatedAt(now);
+
+        appointmentRepository.save(appointment);
+    }
+
+    @Override
+    public AppointmentResponse getAppointmentDetailForReceptionist(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findAppointmentDetailById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lịch hẹn"));
+
+        AppointmentResponse response = toResponse(appointment);
+        response.setPatientAddress(buildPatientAddress(appointment.getPatient()));
+
+        return response;
+    }
+
+    private boolean containsIgnoreCase(String value, String keyword) {
+        return value != null && value.toLowerCase().contains(keyword);
+    }
+
+    public long getAllAppointment() {
         return appointmentRepository.count();
-    };
+    }
 
-    public Map<String,Long> findTodayAppointmentsByStatus(LocalDate localDate){
-        List<AppointmentStatusCountResponse> appointmentStatusCountResponseList = appointmentRepository.findTodayAppointmentsByStatus(localDate);
-        Map<String,Long> statusCount = new HashMap<>();
+    public Map<String, Long> findTodayAppointmentsByStatus(LocalDate localDate) {
+        List<AppointmentStatusCountResponse> list =
+                appointmentRepository.findTodayAppointmentsByStatus(localDate);
+
+        Map<String, Long> statusCount = new HashMap<>();
         statusCount.put("WAITING", 0L);
         statusCount.put("CONFIRMED", 0L);
-        statusCount.put("EXAMINING", 0L);
+        statusCount.put("IN_PROGRESS", 0L);
         statusCount.put("COMPLETED", 0L);
         statusCount.put("CANCELLED", 0L);
-        appointmentStatusCountResponseList.stream().forEach(appointment -> {
-            statusCount.put(appointment.getStatus(),appointment.getCount());
+
+        list.forEach(appointment -> {
+            statusCount.put(appointment.getStatus(), appointment.getCount());
         });
-            return statusCount;
-    };
 
-    // Find all today's appointment
-    public List<AppointmentResponse> findAppointmentsByBookingDate(LocalDate today){
-       List<Appointment> todayListAppointment = appointmentRepository.findAppointmentsByBookingDate(today);
-       List<AppointmentResponse> todayListAppointmentResponse = new ArrayList<>();
-       todayListAppointment.forEach(a -> {
-          AppointmentResponse appointmentResponse = new AppointmentResponse();
-          appointmentResponse.setAppointmentCode(a.getAppointmentCode());
-          appointmentResponse.setPatientFullName(a.getPatient().getFirstName() + " "+a.getPatient().getMiddleName()+" " +  a.getPatient().getLastName());
-          appointmentResponse.setDoctorFullName(a.getDoctor().getFirstName() + " "+a.getDoctor().getMiddleName()+" " +  a.getDoctor().getLastName());
-          appointmentResponse.setServiceName(a.getService().getName());
-          appointmentResponse.setSlotStartTime(a.getSlot().getStartTime());
-          appointmentResponse.setSlotEndTime(a.getSlot().getEndTime());
-          appointmentResponse.setStatus(a.getStatus());
-          todayListAppointmentResponse.add(appointmentResponse);
-       });
-       return todayListAppointmentResponse;
-    };
+        return statusCount;
+    }
 
+    public List<AppointmentResponse> findAppointmentsByBookingDate(LocalDate today) {
+        List<Appointment> appointments = appointmentRepository.findAppointmentsByBookingDate(today);
+        List<AppointmentResponse> responses = new ArrayList<>();
 
+        appointments.forEach(a -> {
+            AppointmentResponse response = new AppointmentResponse();
+
+            response.setAppointmentCode(a.getAppointmentCode());
+            response.setPatientFullName(buildFullName(
+                    a.getPatient().getLastName(),
+                    a.getPatient().getMiddleName(),
+                    a.getPatient().getFirstName()
+            ));
+            response.setDoctorFullName(buildFullName(
+                    a.getDoctor().getLastName(),
+                    a.getDoctor().getMiddleName(),
+                    a.getDoctor().getFirstName()
+            ));
+            response.setServiceName(a.getService().getName());
+            response.setSlotStartTime(a.getSlot().getStartTime());
+            response.setSlotEndTime(a.getSlot().getEndTime());
+            response.setStatus(a.getStatus());
+
+            responses.add(response);
+        });
+
+        return responses;
+    }
 
     @Override
     public List<ScheduleSlotResponse> getAvailableSchedules(Long doctorId) {
@@ -102,59 +205,54 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .findAvailableSchedulesByDoctorId(doctorId, LocalDate.now());
 
         LocalDate today = LocalDate.now();
-        // Giờ hiện tại để lọc ca trong ngày hôm nay
-        // Trước đây không có filter theo giờ → buổi tối vẫn thấy ca sáng cùng ngày
         java.time.LocalTime now = java.time.LocalTime.now();
 
         return schedules.stream()
-                // Lọc ca đã qua trong ngày hôm nay
                 .filter(schedule -> {
                     if (!schedule.getWorkDate().isEqual(today)) {
-                        return true; // Ngày tương lai → giữ lại tất cả
+                        return true;
                     }
-                    // Ngày hôm nay: chỉ giữ ca chưa bắt đầu
+
                     if ("MORNING".equals(schedule.getShift())) {
-                        // Ca sáng 07:00–12:00, chỉ hiện nếu chưa tới 12:00
                         return now.isBefore(java.time.LocalTime.of(12, 0));
                     } else {
-                        // Ca chiều 13:00–17:00, chỉ hiện nếu chưa tới 17:00
                         return now.isBefore(java.time.LocalTime.of(17, 0));
                     }
                 })
                 .map(schedule -> {
-            List<TimeSlot> slots = timeSlotRepository
-                    .findByScheduleIdOrderByStartTimeAsc(schedule.getId());
+                    List<TimeSlot> slots = timeSlotRepository
+                            .findByScheduleIdOrderByStartTimeAsc(schedule.getId());
 
-            List<ScheduleSlotResponse.SlotInfo> slotInfos = slots.stream()
-                    .map(slot -> ScheduleSlotResponse.SlotInfo.builder()
-                            .slotId(slot.getId())
-                            .startTime(slot.getStartTime())
-                            .endTime(slot.getEndTime())
-                            .bookedCapacity(slot.getBookedCapacity())
-                            .maxCapacity(slot.getMaxCapacity())
-                            .status(slot.getStatus())
-                            .available("AVAILABLE".equals(slot.getStatus())
-                                    && slot.getBookedCapacity() < slot.getMaxCapacity())
-                            .build())
-                    .toList();
+                    List<ScheduleSlotResponse.SlotInfo> slotInfos = slots.stream()
+                            .map(slot -> ScheduleSlotResponse.SlotInfo.builder()
+                                    .slotId(slot.getId())
+                                    .startTime(slot.getStartTime())
+                                    .endTime(slot.getEndTime())
+                                    .bookedCapacity(slot.getBookedCapacity())
+                                    .maxCapacity(slot.getMaxCapacity())
+                                    .status(slot.getStatus())
+                                    .available("AVAILABLE".equals(slot.getStatus())
+                                            && slot.getBookedCapacity() < slot.getMaxCapacity())
+                                    .build())
+                            .toList();
 
-            String shiftLabel = "MORNING".equals(schedule.getShift()) ? "Ca sáng" : "Ca chiều";
+                    String shiftLabel = "MORNING".equals(schedule.getShift()) ? "Ca sáng" : "Ca chiều";
 
-            return ScheduleSlotResponse.builder()
-                    .scheduleId(schedule.getId())
-                    .workDate(schedule.getWorkDate())
-                    .shift(schedule.getShift())
-                    .shiftLabel(shiftLabel)
-                    .roomNumber(schedule.getRoom() != null ? schedule.getRoom().getRoomNumber() : "")
-                    .slots(slotInfos)
-                    .build();
-        }).toList();
+                    return ScheduleSlotResponse.builder()
+                            .scheduleId(schedule.getId())
+                            .workDate(schedule.getWorkDate())
+                            .shift(schedule.getShift())
+                            .shiftLabel(shiftLabel)
+                            .roomNumber(schedule.getRoom() != null ? schedule.getRoom().getRoomNumber() : "")
+                            .slots(slotInfos)
+                            .build();
+                })
+                .toList();
     }
 
     @Override
     @Transactional
     public AppointmentResponse bookAppointment(Long patientId, CreateAppointmentRequest request) {
-        // Lấy các entity cần thiết
         User patient = userRepository.findById(patientId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bệnh nhân"));
 
@@ -165,30 +263,32 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dịch vụ"));
 
         TimeSlot slot = timeSlotRepository.findByIdWithSchedule(request.getSlotId())
-                // Fallback: nếu query trên không tìm thấy vì lý do nào đó
-                // TimeSlot slot = timeSlotRepository.findById(request.getSlotId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khung giờ"));
 
-        // Kiểm tra slot còn chỗ
         if (!"AVAILABLE".equals(slot.getStatus()) || slot.getBookedCapacity() >= slot.getMaxCapacity()) {
             throw new BadRequestException("Khung giờ này đã đầy, vui lòng chọn khung giờ khác");
         }
 
-        // Kiểm tra bệnh nhân chưa đặt slot này
         boolean alreadyBooked = appointmentRepository.existsBySlotIdAndPatientIdAndStatusNotIn(
-                slot.getId(), patientId, List.of("CANCELLED", "NO_SHOW"));
+                slot.getId(),
+                patientId,
+                List.of("CANCELLED", "NO_SHOW")
+        );
+
         if (alreadyBooked) {
             throw new BadRequestException("Bạn đã đặt lịch trong khung giờ này rồi");
         }
 
-        // Tăng booked_capacity
         slot.setBookedCapacity(slot.getBookedCapacity() + 1);
+
         if (slot.getBookedCapacity() >= slot.getMaxCapacity()) {
             slot.setStatus("FULL");
         }
+
         timeSlotRepository.save(slot);
 
-        // Tạo appointment
+        LocalDateTime now = LocalDateTime.now();
+
         Appointment appointment = new Appointment();
         appointment.setAppointmentCode(CodeGenerator.generateAppointmentCode());
         appointment.setPatient(patient);
@@ -198,8 +298,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setBookingDate(slot.getSchedule().getWorkDate());
         appointment.setNote(request.getNote());
         appointment.setStatus("CONFIRMED");
-        appointment.setCreatedAt(LocalDateTime.now());
-        appointment.setUpdatedAt(LocalDateTime.now());
+        appointment.setCreatedAt(now);
+        appointment.setUpdatedAt(now);
 
         Appointment saved = appointmentRepository.save(appointment);
         return toResponse(saved);
@@ -207,8 +307,6 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public List<AppointmentResponse> getAppointmentsByPatient(Long patientId) {
-        // Trước: appointmentRepository.findByPatientIdOrderByCreatedAtDesc(patientId)
-        //        → gây LazyInitializationException khi toResponse() truy cập slot.getSchedule()
         return appointmentRepository.findByPatientIdWithDetails(patientId)
                 .stream()
                 .map(this::toResponse)
@@ -217,7 +315,6 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public AppointmentResponse getAppointmentDetail(Long appointmentId, Long patientId) {
-        // Trước: appointmentRepository.findById(appointmentId) → LAZY load
         Appointment appointment = appointmentRepository.findByPatientIdWithDetails(patientId)
                 .stream()
                 .filter(a -> a.getId().equals(appointmentId))
@@ -227,6 +324,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (!appointment.getPatient().getId().equals(patientId)) {
             throw new BadRequestException("Bạn không có quyền xem lịch hẹn này");
         }
+
         return toResponse(appointment);
     }
 
@@ -244,8 +342,8 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new BadRequestException("Không thể hủy lịch hẹn ở trạng thái: " + appointment.getStatus());
         }
 
-        // Giảm booked_capacity
         TimeSlot slot = appointment.getSlot();
+
         if (slot.getBookedCapacity() > 0) {
             slot.setBookedCapacity(slot.getBookedCapacity() - 1);
             slot.setStatus("AVAILABLE");
@@ -254,40 +352,41 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         appointment.setStatus("CANCELLED");
         appointment.setUpdatedAt(LocalDateTime.now());
+
         appointmentRepository.save(appointment);
     }
 
-    // ---- Helper ----
     private AppointmentResponse toResponse(Appointment a) {
         TimeSlot slot = a.getSlot();
         DoctorSchedule schedule = slot != null ? slot.getSchedule() : null;
-        User doctor = a.getDoctor();
-        String doctorFullName = doctor != null
-                ? buildFullName(doctor.getLastName(), doctor.getMiddleName(), doctor.getFirstName())
-                : "";
-
         User patient = a.getPatient();
+        User doctor = a.getDoctor();
+
         String patientFullName = patient != null
                 ? buildFullName(patient.getLastName(), patient.getMiddleName(), patient.getFirstName())
                 : "";
 
-        //linhNH 01/06/2026
-        // Tính tuổi bệnh nhân từ ngày sinh
+        String doctorFullName = doctor != null
+                ? buildFullName(doctor.getLastName(), doctor.getMiddleName(), doctor.getFirstName())
+                : "";
+
         Integer patientAge = null;
         if (patient != null && patient.getDateOfBirth() != null) {
             patientAge = Period.between(patient.getDateOfBirth(), LocalDate.now()).getYears();
         }
+
         String patientGender = patient != null ? patient.getGender() : null;
 
-        // Tạo chữ cái viết tắt (Initials) cho Avatar bệnh nhân
         String patientInitials = "";
-        if (patientFullName != null && !patientFullName.trim().isEmpty()) {
+        if (!patientFullName.trim().isEmpty()) {
             String[] parts = patientFullName.trim().split("\\s+");
+
             if (parts.length > 0) {
-                patientInitials += parts[0].substring(0, 1).toUpperCase(); // Chữ cái đầu của Họ
+                patientInitials += parts[0].substring(0, 1).toUpperCase();
             }
+
             if (parts.length > 1) {
-                patientInitials += parts[parts.length - 1].substring(0, 1).toUpperCase(); // Chữ cái đầu của Tên
+                patientInitials += parts[parts.length - 1].substring(0, 1).toUpperCase();
             }
         }
 
@@ -297,6 +396,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .status(a.getStatus())
                 .patientId(patient != null ? patient.getId() : null)
                 .patientFullName(patientFullName)
+                .patientPhone(patient != null ? patient.getPhone() : null)
                 .patientAge(patientAge)
                 .patientGender(patientGender)
                 .patientInitials(patientInitials)
@@ -304,7 +404,8 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .doctorFullName(doctorFullName)
                 .doctorDegree(doctor != null ? doctor.getDegree() : null)
                 .departmentName(doctor != null && doctor.getDepartment() != null
-                        ? doctor.getDepartment().getName() : null)
+                        ? doctor.getDepartment().getName()
+                        : null)
                 .serviceId(a.getService() != null ? a.getService().getId() : null)
                 .serviceName(a.getService() != null ? a.getService().getName() : null)
                 .bookingDate(a.getBookingDate())
@@ -312,29 +413,129 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .slotStartTime(slot != null ? slot.getStartTime() : null)
                 .slotEndTime(slot != null ? slot.getEndTime() : null)
                 .roomNumber(schedule != null && schedule.getRoom() != null
-                        ? schedule.getRoom().getRoomNumber() : null)
+                        ? schedule.getRoom().getRoomNumber()
+                        : null)
                 .note(a.getNote())
                 .createdAt(a.getCreatedAt())
                 .hasMedicalRecord(a.getMedicalRecord() != null)
                 .build();
     }
 
+    private AppointmentPrintResponse toPrintResponse(Appointment appointment) {
+        TimeSlot slot = appointment.getSlot();
+        DoctorSchedule schedule = slot != null ? slot.getSchedule() : null;
+        User patient = appointment.getPatient();
+        User doctor = appointment.getDoctor();
+        MedicalService service = appointment.getService();
+
+        String patientFullName = patient != null
+                ? buildFullName(patient.getLastName(), patient.getMiddleName(), patient.getFirstName())
+                : "";
+
+        String doctorFullName = doctor != null
+                ? buildFullName(doctor.getLastName(), doctor.getMiddleName(), doctor.getFirstName())
+                : "";
+
+        String departmentName = "";
+        if (service != null && service.getDepartment() != null) {
+            departmentName = service.getDepartment().getName();
+        }
+
+        String roomNumber = "";
+        if (schedule != null && schedule.getRoom() != null) {
+            roomNumber = schedule.getRoom().getRoomNumber();
+        }
+
+        return new AppointmentPrintResponse(
+                appointment.getId(),
+                appointment.getAppointmentCode(),
+                patientFullName,
+                patient != null ? patient.getPhone() : "",
+                doctorFullName,
+                departmentName,
+                roomNumber,
+                appointment.getBookingDate(),
+                slot != null ? slot.getStartTime() : null,
+                slot != null ? slot.getEndTime() : null,
+                appointment.getCheckInTime(),
+                appointment.getStatus()
+        );
+    }
+
     private String buildFullName(String lastName, String middleName, String firstName) {
         StringBuilder sb = new StringBuilder();
-        if (lastName != null) sb.append(lastName).append(" ");
-        if (middleName != null) sb.append(middleName).append(" ");
-        if (firstName != null) sb.append(firstName);
+
+        if (lastName != null) {
+            sb.append(lastName).append(" ");
+        }
+
+        if (middleName != null) {
+            sb.append(middleName).append(" ");
+        }
+
+        if (firstName != null) {
+            sb.append(firstName);
+        }
+
         return sb.toString().trim();
+    }
+
+    private String buildPatientAddress(User patient) {
+        if (patient == null || patient.getAddresses() == null || patient.getAddresses().isEmpty()) {
+            return "";
+        }
+
+        UserAddress defaultAddress = null;
+
+        for (UserAddress address : patient.getAddresses()) {
+            if (Boolean.TRUE.equals(address.getIsDefault())) {
+                defaultAddress = address;
+                break;
+            }
+        }
+
+        if (defaultAddress == null) {
+            defaultAddress = patient.getAddresses().iterator().next();
+        }
+
+        return buildAddress(defaultAddress);
+    }
+
+    private String buildAddress(UserAddress address) {
+        if (address == null) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        if (address.getAddressLine() != null && !address.getAddressLine().isBlank()) {
+            sb.append(address.getAddressLine().trim());
+        }
+
+        if (address.getProvince() != null
+                && address.getProvince().getName() != null
+                && !address.getProvince().getName().isBlank()) {
+
+            if (!sb.isEmpty()) {
+                sb.append(", ");
+            }
+
+            sb.append(address.getProvince().getName().trim());
+        }
+
+        return sb.toString();
     }
 
     @Override
     public Page<AppointmentResponse> getAppointmentsForDoctor(Long doctorId, String status, Pageable pageable) {
         List<String> statuses;
+
         if (status == null || status.trim().isEmpty() || "ALL".equalsIgnoreCase(status)) {
             statuses = List.of("WAITING", "IN_PROGRESS", "COMPLETED");
         } else {
             statuses = List.of(status.toUpperCase());
         }
+
         return appointmentRepository.findByDoctorIdAndStatusIn(doctorId, statuses, pageable)
                 .map(this::toResponse);
     }
@@ -342,8 +543,12 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public long countAppointmentsForDoctor(Long doctorId, String status) {
         if (status == null || status.trim().isEmpty() || "ALL".equalsIgnoreCase(status)) {
-            return appointmentRepository.countByDoctorIdAndStatusIn(doctorId, List.of("WAITING", "IN_PROGRESS", "COMPLETED"));
+            return appointmentRepository.countByDoctorIdAndStatusIn(
+                    doctorId,
+                    List.of("WAITING", "IN_PROGRESS", "COMPLETED")
+            );
         }
+
         return appointmentRepository.countByDoctorIdAndStatus(doctorId, status.toUpperCase());
     }
 
@@ -351,9 +556,13 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Transactional
     public void updateAppointmentStatus(Long appointmentId, String newStatus) {
         Appointment appointment = appointmentRepository.findById(appointmentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lịch hẹn với ID: " + appointmentId));
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Không tìm thấy lịch hẹn với ID: " + appointmentId
+                ));
+
         appointment.setStatus(newStatus.toUpperCase());
         appointment.setUpdatedAt(LocalDateTime.now());
+
         appointmentRepository.save(appointment);
     }
 }
