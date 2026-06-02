@@ -3,10 +3,19 @@ package vn.edu.fpt.SE2034_SWP391_G5.controller.manager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateStaffRequest;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorOnDutyResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorStaffDetailResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ReceptionistStaffDetailResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.StaffResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.Department;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
+import vn.edu.fpt.SE2034_SWP391_G5.enums.AppointmentStatus;
+import vn.edu.fpt.SE2034_SWP391_G5.repository.DepartmentRepository;
+import vn.edu.fpt.SE2034_SWP391_G5.service.DepartmentService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DoctorService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.ReceptionistService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.StaffService;
@@ -23,16 +32,18 @@ public class ManagerStaffController {
     private final DoctorService doctorService;
     private final StaffService staffService;
     private final ReceptionistService receptionistService;
+    private final DepartmentService departmentService;
 
-    public ManagerStaffController(DoctorService doctorService, StaffService staffService, ReceptionistService receptionistService) {
+    public ManagerStaffController(DoctorService doctorService, StaffService staffService, ReceptionistService receptionistService, DepartmentService departmentService) {
         this.doctorService = doctorService;
         this.staffService = staffService;
         this.receptionistService = receptionistService;
+        this.departmentService =  departmentService;
     }
 
     @GetMapping("/list")
     public String staff(@RequestParam(required = false) String role,
-                        @RequestParam(required = false) String filterKey,Model  model) {
+                            @RequestParam(required = false) String filterKey,Model  model) {
          String selectedRole = ("DOCTOR".equals(role) || "RECEPTIONIST".equals(role)) ? role : null;
 
          
@@ -59,10 +70,41 @@ public class ManagerStaffController {
     public String createStaffForm(@RequestParam(defaultValue = "doctor") String type, Model model) {
         String staffType = "receptionist".equalsIgnoreCase(type) ? "receptionist" : "doctor";
 
+        List<Department> departmentList = departmentService.getAllActiveDepartments();
+        model.addAttribute("departmentList", departmentList);
+        model.addAttribute("createStaffForm", new CreateStaffRequest());
         model.addAttribute("staffType", staffType);
         model.addAttribute("roleName", "doctor".equals(staffType) ? "ROLE_DOCTOR" : "ROLE_RECEPTIONIST");
         model.addAttribute("roleLabel", "doctor".equals(staffType) ? "Bác sĩ" : "Lễ tân");
 
         return "manager/staff/form";
+    }
+
+    @GetMapping("/{staffId}")
+    public String staffDetail(@PathVariable Long staffId,@RequestParam String staffRole, Model model) {
+
+        if(staffRole.equalsIgnoreCase("receptionist")) {
+            ReceptionistStaffDetailResponse receptionist = staffService.findReceptionistStaffDetailById(staffId);
+            model.addAttribute("staff", receptionist);
+            model.addAttribute("receptionist", receptionist);
+        }
+        else{
+            DoctorStaffDetailResponse doctor = staffService.findDoctorStaffDetailById(staffId);
+
+            Long numberOfUpcomingAppointment = staffService.countDoctorsAppointmentByAppointmentStatus(AppointmentStatus.CONFIRMED.toString(), doctor.getId());
+            Long numberOfCompletedAppointment = staffService.countDoctorsAppointmentByAppointmentStatus(AppointmentStatus.COMPLETED.toString(), doctor.getId());
+            Long numberOfCancelledAppointment = staffService.countDoctorsAppointmentByAppointmentStatus(AppointmentStatus.CANCELLED.toString(), doctor.getId());
+            Long numberOfNoShowAppointment = staffService.countDoctorsAppointmentByAppointmentStatus(AppointmentStatus.NO_SHOW.toString(), doctor.getId());
+            Long totalCancelled = numberOfCancelledAppointment + numberOfNoShowAppointment;
+            Long totalAppointment = totalCancelled + numberOfCompletedAppointment + numberOfUpcomingAppointment;
+
+            model.addAttribute("totalCancelled", totalCancelled);
+            model.addAttribute("totalAppointment", totalAppointment);
+            model.addAttribute("totalUpcomingAppointment", numberOfUpcomingAppointment);
+            model.addAttribute("totalCompletedAppointment", numberOfCompletedAppointment);
+            model.addAttribute("staff", doctor);
+            model.addAttribute("doctor", doctor);
+        }
+        return "manager/staff/detail";
     }
 }

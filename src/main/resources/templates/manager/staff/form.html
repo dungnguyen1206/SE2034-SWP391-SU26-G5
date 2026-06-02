@@ -26,7 +26,7 @@
                 </div>
             </header>
 
-            <form class="staff-form">
+            <form class="staff-form" method="post" th:action="@{/manager/staff/create}" th:object="${createStaffForm}">
 
                 <!--STAFF TYPE-->
                 <section class="staff-form-card staff-type-section">
@@ -68,13 +68,8 @@
 
                             <div class="staff-form-grid">
                                 <label class="staff-form-field">
-                                    <span>Tên đăng nhập <strong>*</strong></span>
-                                    <input type="text" placeholder="VD: tuan.tran">
-                                </label>
-
-                                <label class="staff-form-field">
                                     <span>Email <strong>*</strong></span>
-                                    <input type="email" th:placeholder="${staffType == 'doctor'} ? 'doctor@hms.vn' : 'receptionist@hms.vn'">
+                                    <input type="email" th:field="" th:placeholder="${staffType == 'doctor'} ? 'doctor@hms.vn' : 'receptionist@hms.vn'">
                                 </label>
 
                                 <label class="staff-form-field">
@@ -87,6 +82,12 @@
                                     <input type="password" placeholder="Nhập lại mật khẩu">
                                 </label>
                             </div>
+
+                            <div class="staff-role-note staff-account-note">
+                                <i class="bi bi-info-circle"></i>
+                                <span>Email sẽ được dùng để đăng nhập.</span>
+                                <em>Tên đăng nhập sẽ được hệ thống tự đồng bộ theo email.</em>
+                            </div>
                         </section>
 
                         <!--PROFILE INFORMATION-->
@@ -97,14 +98,29 @@
                             </div>
 
                             <div class="staff-form-grid">
-                                <label class="staff-form-field staff-form-full">
-                                    <span>Họ và tên <strong>*</strong></span>
-                                    <input type="text" th:placeholder="${staffType == 'doctor'} ? 'VD: Trần Minh Tuấn' : 'VD: Lê Thị Hoa'">
+                                <label class="staff-form-field">
+                                    <span>Họ <strong>*</strong></span>
+                                    <input type="text" placeholder="VD: Nguyễn">
+                                </label>
+
+                                <label class="staff-form-field">
+                                    <span>Tên đệm</span>
+                                    <input type="text" th:placeholder="${staffType == 'doctor'} ? 'VD: Văn' : 'VD: Thị'">
+                                </label>
+
+                                <label class="staff-form-field">
+                                    <span>Tên <strong>*</strong></span>
+                                    <input type="text" th:placeholder="${staffType == 'doctor'} ? 'VD: An' : 'VD: Hoa'">
                                 </label>
 
                                 <label class="staff-form-field">
                                     <span>Số điện thoại <strong>*</strong></span>
                                     <input type="text" placeholder="VD: 0987 654 321">
+                                </label>
+
+                                <label class="staff-form-field">
+                                    <span>Ngày sinh <strong>*</strong></span>
+                                    <input type="date">
                                 </label>
 
                                 <label class="staff-form-field">
@@ -130,11 +146,8 @@
                             <div class="staff-form-grid">
                                 <label class="staff-form-field">
                                     <span>Khoa <strong>*</strong></span>
-                                    <select>
-                                        <option>Chọn khoa...</option>
-                                        <option>Tim mạch</option>
-                                        <option>Mắt</option>
-                                        <option>Nhi khoa</option>
+                                    <select th:each="department : ${departmentList}">
+                                        <option th:field="" th:text="${department.getName()}">Chọn khoa...</option>
                                     </select>
                                 </label>
 

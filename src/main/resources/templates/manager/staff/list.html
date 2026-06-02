@@ -111,7 +111,7 @@
                         <td th:text="${staff.getCreatedDate()}">15/03/2021</td>
                         <td>
                             <div class="staff-actions">
-                                <a href="#" class="staff-action-view"><i class="bi bi-eye"></i></a>
+                                <a th:href="@{/manager/staff/{staffId}(staffId=${staff.getId()}, staffRole=${staff.getRole()})}" class="staff-action-view"><i class="bi bi-eye"></i></a>
                                 <a href="#" class="staff-action-edit"><i class="bi bi-pencil"></i></a>
                                 <a href="#" class="staff-action-lock"><i class="bi bi-trash"></i></a>
 <!--                                <a href="#" class="staff-action-key"><i class="bi bi-key"></i></a>-->

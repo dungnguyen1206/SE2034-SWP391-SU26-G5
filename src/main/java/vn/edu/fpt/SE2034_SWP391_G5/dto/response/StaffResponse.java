@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StaffResponse {
+    private Long id;
     private String name;
     private String email;
     private String phone;
