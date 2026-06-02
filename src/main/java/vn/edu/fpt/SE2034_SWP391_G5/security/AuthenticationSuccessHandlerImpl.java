@@ -20,7 +20,7 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
 
         for (GrantedAuthority authority : authorities) {
             String role = authority.getAuthority();
-            
+
             switch (role) {
                 case "ROLE_PATIENT":
                     response.sendRedirect("/patient/dashboard");

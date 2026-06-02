@@ -1,0 +1,399 @@
+/* ============================================================
+   PATIENT APPOINTMENTS
+   ============================================================ */
+
+/* ---- Filter bar ---- */
+.appt-filter-bar {
+    background: #ffffff;
+    border: 1px solid #dde3ea;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.appt-filter-btn {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    background: #f1f5f9;
+    color: #475569;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.appt-filter-btn.active,
+.appt-filter-btn:hover {
+    background: #0f4c81;
+    color: #fff;
+}
+
+/* ---- Appointment row actions ---- */
+.appt-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.appt-action-view {
+    color: #0f4c81;
+    font-size: 15px;
+    text-decoration: none;
+}
+
+.appt-action-cancel {
+    color: #b91c1c;
+    font-size: 15px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+/* ---- Appointment detail ---- */
+.appt-detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.appt-detail-section {
+    background: #ffffff;
+    border: 1px solid #dde3ea;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.appt-detail-section h4 {
+    margin: 0 0 16px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.appt-detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px solid #f8fafc;
+    font-size: 14px;
+}
+
+.appt-detail-row:last-child {
+    border-bottom: none;
+}
+
+.appt-detail-label {
+    color: #64748b;
+    font-weight: 600;
+    flex-shrink: 0;
+    margin-right: 12px;
+}
+
+.appt-detail-value {
+    color: #0f172a;
+    text-align: right;
+}
+
+.appt-code-badge {
+    display: inline-flex;
+    align-items: center;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+/* ============================================================
+   BOOKING - STEP 1 (Chọn khoa)
+   ============================================================ */
+.dept-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.dept-card {
+    background: #ffffff;
+    border: 2px solid #dde3ea;
+    border-radius: 14px;
+    padding: 24px 20px;
+    text-align: center;
+    text-decoration: none;
+    color: #0f172a;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.dept-card:hover {
+    border-color: #0f4c81;
+    box-shadow: 0 4px 16px rgba(15, 76, 129, 0.12);
+    transform: translateY(-2px);
+    color: #0f172a;
+}
+
+.dept-card-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: #dbeafe;
+    color: #0f4c81;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+}
+
+.dept-card-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.dept-card-desc {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+.dept-card-arrow {
+    font-size: 13px;
+    color: #0f4c81;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* ============================================================
+   BOOKING - STEP 2 (Chọn bác sĩ + slot)
+   ============================================================ */
+.book-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+/* Doctor list sidebar */
+.doctor-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.doctor-card {
+    background: #ffffff;
+    border: 2px solid #dde3ea;
+    border-radius: 12px;
+    padding: 14px;
+    text-decoration: none;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: border-color 0.2s ease;
+}
+
+.doctor-card:hover,
+.doctor-card.selected {
+    border-color: #0f4c81;
+    background: #eff6ff;
+    color: #0f172a;
+}
+
+.doctor-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #bfdbfe;
+    color: #0f4c81;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.doctor-info strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.doctor-info span {
+    font-size: 12px;
+    color: #64748b;
+}
+
+/* Schedule & Slot picker */
+.schedule-section {
+    margin-bottom: 20px;
+}
+
+.schedule-date-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.schedule-date-badge {
+    background: #0f4c81;
+    color: white;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.schedule-shift-label {
+    background: #f1f5f9;
+    color: #475569;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.schedule-room {
+    font-size: 12px;
+    color: #94a3b8;
+}
+
+.slot-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.slot-btn {
+    border: 2px solid #dde3ea;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    background: #ffffff;
+    color: #334155;
+    cursor: pointer;
+    transition: border-color 0.2s ease, background 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 100px;
+}
+
+.slot-btn:hover:not(:disabled) {
+    border-color: #0f4c81;
+    background: #eff6ff;
+    color: #0f4c81;
+}
+
+.slot-btn.selected {
+    border-color: #0f4c81;
+    background: #0f4c81;
+    color: #fff;
+}
+
+.slot-btn:disabled,
+.slot-btn.full {
+    background: #f8fafc;
+    color: #cbd5e1;
+    border-color: #e2e8f0;
+    cursor: not-allowed;
+}
+
+.slot-capacity {
+    font-size: 11px;
+    font-weight: 400;
+    opacity: 0.8;
+}
+
+/* Booking form */
+.book-form-card {
+    background: #ffffff;
+    border: 1px solid #dde3ea;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.book-form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.book-form-field label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #334155;
+}
+
+.book-form-field select,
+.book-form-field textarea {
+    width: 100%;
+    border: 1px solid #dde3ea;
+    border-radius: 9px;
+    background: #f8fafc;
+    color: #0f172a;
+    font-size: 14px;
+    outline: none;
+    padding: 10px 12px;
+    font-family: Arial, sans-serif;
+}
+
+.book-form-field select {
+    height: 42px;
+}
+
+.book-form-field textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.book-form-field textarea::placeholder {
+    color: #94a3b8;
+}
+
+.selected-slot-display {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 9px;
+    padding: 12px;
+    font-size: 14px;
+    color: #1d4ed8;
+    font-weight: 600;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+}
+
+.no-slot-selected {
+    color: #94a3b8;
+    font-weight: 400;
+    font-style: italic;
+}
