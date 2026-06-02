@@ -1,19 +1,20 @@
 package vn.edu.fpt.SE2034_SWP391_G5.service.impl;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentStatusCountResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.Appointment;
+import vn.edu.fpt.SE2034_SWP391_G5.repository.AppointmentRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateAppointmentRequest;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ScheduleSlotResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.Appointment;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.DoctorSchedule;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalService;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.TimeSlot;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.AppointmentRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.DoctorScheduleRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalServiceRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.TimeSlotRepository;
@@ -26,7 +27,12 @@ import org.springframework.data.domain.Pageable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.time.LocalDateTime;
+
 
 @Service
 @RequiredArgsConstructor
@@ -38,12 +44,84 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final UserRepository userRepository;
     private final MedicalServiceRepository medicalServiceRepository;
 
+
+//    public AppointmentServiceImpl(AppointmentRepository appointmentRepository,
+//                                  DoctorScheduleRepository doctorScheduleRepository,
+//                                  TimeSlotRepository timeSlotRepository,
+//                                  UserRepository userRepository,
+//                                  MedicalServiceRepository medicalServiceRepository){
+//
+//        this.appointmentRepository =  appointmentRepository;
+//        this.doctorScheduleRepository = doctorScheduleRepository;
+//        this.timeSlotRepository = timeSlotRepository;
+//        this.userRepository = userRepository;
+//        this.medicalServiceRepository = medicalServiceRepository;
+//    }
+
+    public long getAllAppointment(){
+        return appointmentRepository.count();
+    };
+
+    public Map<String,Long> findTodayAppointmentsByStatus(LocalDate localDate){
+        List<AppointmentStatusCountResponse> appointmentStatusCountResponseList = appointmentRepository.findTodayAppointmentsByStatus(localDate);
+        Map<String,Long> statusCount = new HashMap<>();
+        statusCount.put("WAITING", 0L);
+        statusCount.put("CONFIRMED", 0L);
+        statusCount.put("EXAMINING", 0L);
+        statusCount.put("COMPLETED", 0L);
+        statusCount.put("CANCELLED", 0L);
+        appointmentStatusCountResponseList.stream().forEach(appointment -> {
+            statusCount.put(appointment.getStatus(),appointment.getCount());
+        });
+            return statusCount;
+    };
+
+    // Find all today's appointment
+    public List<AppointmentResponse> findAppointmentsByBookingDate(LocalDate today){
+       List<Appointment> todayListAppointment = appointmentRepository.findAppointmentsByBookingDate(today);
+       List<AppointmentResponse> todayListAppointmentResponse = new ArrayList<>();
+       todayListAppointment.forEach(a -> {
+          AppointmentResponse appointmentResponse = new AppointmentResponse();
+          appointmentResponse.setAppointmentCode(a.getAppointmentCode());
+          appointmentResponse.setPatientFullName(a.getPatient().getFirstName() + " "+a.getPatient().getMiddleName()+" " +  a.getPatient().getLastName());
+          appointmentResponse.setDoctorFullName(a.getDoctor().getFirstName() + " "+a.getDoctor().getMiddleName()+" " +  a.getDoctor().getLastName());
+          appointmentResponse.setServiceName(a.getService().getName());
+          appointmentResponse.setSlotStartTime(a.getSlot().getStartTime());
+          appointmentResponse.setSlotEndTime(a.getSlot().getEndTime());
+          appointmentResponse.setStatus(a.getStatus());
+          todayListAppointmentResponse.add(appointmentResponse);
+       });
+       return todayListAppointmentResponse;
+    };
+
+
+
     @Override
     public List<ScheduleSlotResponse> getAvailableSchedules(Long doctorId) {
         List<DoctorSchedule> schedules = doctorScheduleRepository
                 .findAvailableSchedulesByDoctorId(doctorId, LocalDate.now());
 
-        return schedules.stream().map(schedule -> {
+        LocalDate today = LocalDate.now();
+        // Giờ hiện tại để lọc ca trong ngày hôm nay
+        // Trước đây không có filter theo giờ → buổi tối vẫn thấy ca sáng cùng ngày
+        java.time.LocalTime now = java.time.LocalTime.now();
+
+        return schedules.stream()
+                // Lọc ca đã qua trong ngày hôm nay
+                .filter(schedule -> {
+                    if (!schedule.getWorkDate().isEqual(today)) {
+                        return true; // Ngày tương lai → giữ lại tất cả
+                    }
+                    // Ngày hôm nay: chỉ giữ ca chưa bắt đầu
+                    if ("MORNING".equals(schedule.getShift())) {
+                        // Ca sáng 07:00–12:00, chỉ hiện nếu chưa tới 12:00
+                        return now.isBefore(java.time.LocalTime.of(12, 0));
+                    } else {
+                        // Ca chiều 13:00–17:00, chỉ hiện nếu chưa tới 17:00
+                        return now.isBefore(java.time.LocalTime.of(17, 0));
+                    }
+                })
+                .map(schedule -> {
             List<TimeSlot> slots = timeSlotRepository
                     .findByScheduleIdOrderByStartTimeAsc(schedule.getId());
 
@@ -86,7 +164,9 @@ public class AppointmentServiceImpl implements AppointmentService {
         MedicalService service = medicalServiceRepository.findById(request.getServiceId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dịch vụ"));
 
-        TimeSlot slot = timeSlotRepository.findById(request.getSlotId())
+        TimeSlot slot = timeSlotRepository.findByIdWithSchedule(request.getSlotId())
+                // Fallback: nếu query trên không tìm thấy vì lý do nào đó
+                // TimeSlot slot = timeSlotRepository.findById(request.getSlotId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khung giờ"));
 
         // Kiểm tra slot còn chỗ
@@ -96,7 +176,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         // Kiểm tra bệnh nhân chưa đặt slot này
         boolean alreadyBooked = appointmentRepository.existsBySlotIdAndPatientIdAndStatusNotIn(
-                slot.getId(), patientId, List.of("CANCELLED", "REJECTED", "NO_SHOW"));
+                slot.getId(), patientId, List.of("CANCELLED", "NO_SHOW"));
         if (alreadyBooked) {
             throw new BadRequestException("Bạn đã đặt lịch trong khung giờ này rồi");
         }
@@ -117,7 +197,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setSlot(slot);
         appointment.setBookingDate(slot.getSchedule().getWorkDate());
         appointment.setNote(request.getNote());
-        appointment.setStatus("PENDING");
+        appointment.setStatus("CONFIRMED");
         appointment.setCreatedAt(LocalDateTime.now());
         appointment.setUpdatedAt(LocalDateTime.now());
 
@@ -127,7 +207,9 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public List<AppointmentResponse> getAppointmentsByPatient(Long patientId) {
-        return appointmentRepository.findByPatientIdOrderByCreatedAtDesc(patientId)
+        // Trước: appointmentRepository.findByPatientIdOrderByCreatedAtDesc(patientId)
+        //        → gây LazyInitializationException khi toResponse() truy cập slot.getSchedule()
+        return appointmentRepository.findByPatientIdWithDetails(patientId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -135,7 +217,11 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public AppointmentResponse getAppointmentDetail(Long appointmentId, Long patientId) {
-        Appointment appointment = appointmentRepository.findById(appointmentId)
+        // Trước: appointmentRepository.findById(appointmentId) → LAZY load
+        Appointment appointment = appointmentRepository.findByPatientIdWithDetails(patientId)
+                .stream()
+                .filter(a -> a.getId().equals(appointmentId))
+                .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lịch hẹn"));
 
         if (!appointment.getPatient().getId().equals(patientId)) {
@@ -154,7 +240,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new BadRequestException("Bạn không có quyền hủy lịch hẹn này");
         }
 
-        if (!List.of("PENDING", "CONFIRMED").contains(appointment.getStatus())) {
+        if (!List.of("WAITING", "CONFIRMED").contains(appointment.getStatus())) {
             throw new BadRequestException("Không thể hủy lịch hẹn ở trạng thái: " + appointment.getStatus());
         }
 

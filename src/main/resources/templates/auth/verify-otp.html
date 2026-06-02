@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xác thực OTP - HAMS</title>
+    <!-- FontAwesome CDN for modern vector icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Local preview fallback + Thymeleaf reference -->
+    <link rel="stylesheet" href="../../static/css/auth/auth.css" th:href="@{/css/auth/auth.css}">
+</head>
+<body>
+    <div class="auth-container">
+        <!-- Left Side: OTP Card with Dark Slate-Blue Background Pane -->
+        <div class="auth-left">
+            <div class="auth-card">
+                <h2 class="auth-card-title">Xác thực Email</h2>
+                <p style="color: #6b7280; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.5;">
+                    Hệ thống đã gửi một mã xác thực OTP gồm 6 chữ số đến Gmail của bạn. Vui lòng kiểm tra và nhập mã vào ô bên dưới để hoàn tất đăng ký.
+                </p>
+                
+                <!-- Alert Messages -->
+                <div th:if="${error != null}" class="auth-alert error" style="display: flex; background-color: #fce4e4; border: 1px solid #fcc2c2; color: #cc0000; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 0.9rem; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-circle-exclamation"></i> <span th:text="${error}">Mã OTP không chính xác</span>
+                </div>
+                
+                <form th:action="@{/verify-otp}" method="POST">
+                    <!-- OTP Input -->
+                    <div class="input-group">
+                        <label class="input-label" for="otp">Mã xác thực OTP</label>
+                        <input type="text" id="otp" name="otp" class="auth-input" placeholder="Nhập mã 6 chữ số" required autofocus maxlength="6" pattern="\d{6}" style="text-align: center; font-size: 1.3rem; letter-spacing: 5px;">
+                    </div>
+                    
+                    <!-- Form Actions: Verify Button -->
+                    <div class="auth-footer-actions">
+                        <button type="submit" class="auth-btn" style="width: 100%;">Xác nhận</button>
+                    </div>
+                </form>
+                
+                <!-- Back Link Hint -->
+                <div class="auth-nav-hint">
+                    Muốn đăng ký lại? 
+                    <a href="register.html" th:href="@{/register}">Quay lại trang đăng ký</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Side: Brand Logo and Illustration on Light Gray -->
+        <div class="auth-right">
+            <div class="auth-logo-top">
+                <span class="logo-circle"></span>
+                <span>HAMS</span>
+            </div>
+            
+            <div class="auth-illustration-container">
+                <img src="../../static/images/khoa-san-benh-vien-fv-2022.jpg" th:src="@{/images/khoa-san-benh-vien-fv-2022.jpg}" alt="HAMS Illustration" class="auth-illustration">
+            </div>
+        </div>
+    </div>
+</body>
+</html>

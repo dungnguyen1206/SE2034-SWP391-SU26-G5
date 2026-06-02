@@ -10,12 +10,10 @@
 <body>
 
 <div class="patient-layout">
-
     <div th:replace="~{patient/fragments/sidebar :: patientSidebar('book')}"></div>
 
     <main class="patient-main">
 
-        <!-- Flash messages -->
         <div th:if="${errorMessage}" class="alert alert-error">
             <i class="bi bi-exclamation-circle-fill"></i>
             <span th:text="${errorMessage}"></span>
@@ -49,12 +47,12 @@
             </div>
         </div>
 
-        <!-- Main layout: doctor list + booking form -->
+        <!-- Main layout -->
         <div class="book-layout">
 
             <!-- LEFT: Doctor list -->
             <div>
-                <div class="patient-card" style="margin-bottom:16px;">
+                <div class="patient-card">
                     <div class="patient-card-header">
                         <i class="bi bi-person-badge"></i>
                         <h3>Bác sĩ chuyên khoa</h3>
@@ -69,9 +67,7 @@
                            class="doctor-card"
                            th:classappend="${selectedDoctorId != null and selectedDoctorId == doc.id} ? ' selected'">
                             <div class="doctor-avatar"
-                                 th:text="${doc.firstName != null} ? ${doc.firstName.substring(0,1).toUpperCase()} : 'BS'">
-                                BS
-                            </div>
+                                 th:text="${doc.firstName != null} ? ${doc.firstName.substring(0,1).toUpperCase()} : 'BS'">BS</div>
                             <div class="doctor-info">
                                 <strong th:text="${doc.fullName}">BS. Nguyễn Văn A</strong>
                                 <span th:text="${doc.degree}">Thạc sĩ Y khoa</span>
@@ -84,13 +80,14 @@
                 </div>
             </div>
 
-            <!-- RIGHT: Schedule + Form -->
+            <!-- RIGHT: Date + Shift + Slot + Form -->
             <div>
+
                 <!-- No doctor selected -->
                 <div th:if="${selectedDoctor == null}" class="patient-card">
                     <div class="empty-state">
                         <i class="bi bi-person-check"></i>
-                        <p>Vui lòng chọn bác sĩ ở bên trái để xem lịch khám</p>
+                        <p>Vui lòng chọn bác sĩ ở bên trái để tiếp tục</p>
                     </div>
                 </div>
 
@@ -101,109 +98,106 @@
                     <div class="patient-card" style="margin-bottom:16px;background:linear-gradient(135deg,#eff6ff,#dbeafe);border-color:#bfdbfe;">
                         <div style="display:flex;align-items:center;gap:16px;">
                             <div class="doctor-avatar" style="width:52px;height:52px;font-size:20px;"
-                                 th:text="${selectedDoctor.firstName != null} ? ${selectedDoctor.firstName.substring(0,1).toUpperCase()} : 'BS'">
-                            </div>
+                                 th:text="${selectedDoctor.firstName != null} ? ${selectedDoctor.firstName.substring(0,1).toUpperCase()} : 'BS'"></div>
                             <div>
-                                <div style="font-size:16px;font-weight:700;color:#0f172a;" th:text="${selectedDoctor.fullName}">BS. Nguyễn Văn A</div>
-                                <div style="font-size:13px;color:#1d4ed8;" th:text="${selectedDoctor.degree}">Thạc sĩ Y khoa</div>
+                                <div style="font-size:16px;font-weight:700;color:#0f172a;" th:text="${selectedDoctor.fullName}"></div>
+                                <div style="font-size:13px;color:#1d4ed8;" th:text="${selectedDoctor.degree}"></div>
                                 <div style="font-size:12px;color:#64748b;" th:text="${selectedDoctor.bio}"></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Schedule & Slots -->
-                    <div class="patient-card" style="margin-bottom:16px;">
-                        <div class="patient-card-header">
-                            <i class="bi bi-calendar-week"></i>
-                            <h3>Chọn ngày & khung giờ</h3>
-                        </div>
-
-                        <div th:if="${#lists.isEmpty(schedules)}" class="empty-state" style="padding:30px 0;">
-                            <i class="bi bi-calendar-x" style="font-size:32px;"></i>
-                            <p style="font-size:13px;">Bác sĩ chưa có lịch làm việc trong thời gian tới</p>
-                        </div>
-
-                        <div th:unless="${#lists.isEmpty(schedules)}">
-                            <div th:each="schedule : ${schedules}" class="schedule-section">
-                                <div class="schedule-date-header">
-                                    <span class="schedule-date-badge"
-                                          th:text="${#temporals.format(schedule.workDate, 'dd/MM/yyyy')}">
-                                    </span>
-                                    <span class="schedule-shift-label" th:text="${schedule.shiftLabel}">Ca sáng</span>
-                                    <span class="schedule-room"
-                                          th:if="${schedule.roomNumber != null and !schedule.roomNumber.isEmpty()}"
-                                          th:text="'Phòng ' + ${schedule.roomNumber}">
-                                    </span>
-                                </div>
-                                <div class="slot-grid">
-                                    <button th:each="slot : ${schedule.slots}"
-                                            type="button"
-                                            class="slot-btn"
-                                            th:classappend="${!slot.available} ? ' full'"
-                                            th:disabled="${!slot.available}"
-                                            th:data-slot-id="${slot.slotId}"
-                                            th:data-slot-label="${#temporals.format(slot.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(slot.endTime, 'HH:mm')} + ' (' + ${schedule.shiftLabel} + ', ' + ${#temporals.format(schedule.workDate, 'dd/MM')} + ')'"
-                                            onclick="selectSlot(this)">
-                                        <span th:text="${#temporals.format(slot.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(slot.endTime, 'HH:mm')}">
-                                        </span>
-                                        <span class="slot-capacity"
-                                              th:text="${slot.available} ? (${slot.maxCapacity - slot.bookedCapacity} + ' chỗ trống') : 'Đã đầy'">
-                                        </span>
-                                    </button>
-                                </div>
-                            </div>
+                    <!-- No schedules at all -->
+                    <div th:if="${#lists.isEmpty(schedules)}" class="patient-card" style="margin-bottom:16px;">
+                        <div class="empty-state" style="padding:30px 0;">
+                            <i class="bi bi-calendar-x" style="font-size:36px;"></i>
+                            <p>Bác sĩ này hiện chưa có lịch làm việc trong thời gian tới</p>
+                            <p style="font-size:13px;color:#94a3b8;">Vui lòng chọn bác sĩ khác hoặc quay lại sau</p>
                         </div>
                     </div>
 
-                    <!-- Booking form -->
-                    <div th:unless="${#lists.isEmpty(schedules)}" class="book-form-card">
-                        <div class="patient-card-header" style="margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #f1f5f9;">
-                            <i class="bi bi-pencil-square" style="color:#0f4c81;font-size:18px;"></i>
-                            <h3 style="margin:0;font-size:16px;font-weight:700;color:#0f172a;">Xác nhận đặt lịch</h3>
+                    <!-- Has schedules: show date picker + shift + slots -->
+                    <div th:unless="${#lists.isEmpty(schedules)}">
+
+                        <!-- STEP A: Chọn ngày -->
+                        <div class="patient-card" style="margin-bottom:16px;">
+                            <div class="patient-card-header">
+                                <i class="bi bi-calendar3"></i>
+                                <h3>Chọn ngày khám</h3>
+                            </div>
+                            <div style="display:flex;align-items:center;gap:12px;">
+                                <input type="date" id="datePicker"
+                                       style="height:42px;border:1px solid #dde3ea;border-radius:9px;background:#f8fafc;color:#0f172a;font-size:14px;padding:0 12px;outline:none;flex:1;"
+                                       onchange="onDateChange(this.value)">
+                                <span id="dateHint" style="font-size:13px;color:#94a3b8;">Chọn ngày để xem lịch</span>
+                            </div>
                         </div>
 
-                        <form th:action="@{/patient/appointments/book}" method="post"
-                              th:object="${bookRequest}" id="bookingForm">
+                        <!-- STEP B: Chọn ca (hiện sau khi chọn ngày) -->
+                        <div class="patient-card" id="shiftSection" style="margin-bottom:16px;display:none;">
+                            <div class="patient-card-header">
+                                <i class="bi bi-clock"></i>
+                                <h3>Chọn ca khám</h3>
+                            </div>
+                            <div id="shiftMessage" style="font-size:14px;color:#ef4444;padding:8px 0;display:none;">
+                                <i class="bi bi-exclamation-circle"></i>
+                                Bác sĩ bạn chọn không có lịch trong ngày này, vui lòng đổi ngày hoặc đổi bác sĩ.
+                            </div>
+                            <div id="shiftButtons" style="display:flex;gap:12px;flex-wrap:wrap;"></div>
+                        </div>
 
-                            <!-- Hidden fields -->
-                            <input type="hidden" th:field="*{doctorId}" th:value="${selectedDoctor.id}">
-                            <input type="hidden" th:field="*{slotId}" id="selectedSlotId">
+                        <!-- STEP C: Chọn slot (hiện sau khi chọn ca) -->
+                        <div class="patient-card" id="slotSection" style="margin-bottom:16px;display:none;">
+                            <div class="patient-card-header">
+                                <i class="bi bi-grid-3x3-gap"></i>
+                                <h3 id="slotSectionTitle">Chọn khung giờ</h3>
+                            </div>
+                            <div id="slotGrid" class="slot-grid"></div>
+                        </div>
 
-                            <!-- Slot hiển thị -->
-                            <div class="book-form-field">
-                                <label>Khung giờ đã chọn <span style="color:#dc2626;">*</span></label>
-                                <div class="selected-slot-display" id="slotDisplay">
-                                    <span class="no-slot-selected">Chưa chọn khung giờ — vui lòng chọn ở trên</span>
+                        <!-- STEP D: Form xác nhận (hiện sau khi chọn slot) -->
+                        <div class="book-form-card" id="confirmSection" style="display:none;">
+                            <div class="patient-card-header" style="margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #f1f5f9;">
+                                <i class="bi bi-pencil-square" style="color:#0f4c81;font-size:18px;"></i>
+                                <h3 style="margin:0;font-size:16px;font-weight:700;color:#0f172a;">Xác nhận đặt lịch</h3>
+                            </div>
+
+                            <!-- Summary -->
+                            <div id="bookingSummary" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:9px;padding:14px;margin-bottom:16px;font-size:14px;color:#334155;line-height:2;"></div>
+
+                            <form th:action="@{/patient/appointments/book}" method="post"
+                                  th:object="${bookRequest}" id="bookingForm">
+
+                                <input type="hidden" th:field="*{doctorId}">
+                                <input type="hidden" th:field="*{departmentId}">
+                                <input type="hidden" th:field="*{slotId}" id="selectedSlotId">
+
+                                <!-- Dịch vụ -->
+                                <div class="book-form-field">
+                                    <label>Dịch vụ khám <span style="color:#dc2626;">*</span></label>
+                                    <select th:field="*{serviceId}" required>
+                                        <option value="">-- Chọn dịch vụ --</option>
+                                        <option th:each="svc : ${services}"
+                                                th:value="${svc.id}"
+                                                th:text="${svc.name} + ' — ' + ${#numbers.formatDecimal(svc.referencePrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
+                                        </option>
+                                    </select>
                                 </div>
-                            </div>
 
-                            <!-- Dịch vụ -->
-                            <div class="book-form-field">
-                                <label>Dịch vụ khám <span style="color:#dc2626;">*</span></label>
-                                <select th:field="*{serviceId}" required>
-                                    <option value="">-- Chọn dịch vụ --</option>
-                                    <option th:each="svc : ${services}"
-                                            th:value="${svc.id}"
-                                            th:text="${svc.name} + ' — ' + ${#numbers.formatDecimal(svc.referencePrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
-                                    </option>
-                                </select>
-                            </div>
+                                <!-- Triệu chứng -->
+                                <div class="book-form-field">
+                                    <label>Triệu chứng / Ghi chú</label>
+                                    <textarea th:field="*{note}"
+                                              placeholder="Mô tả triệu chứng, lý do khám hoặc ghi chú cho bác sĩ..."></textarea>
+                                </div>
 
-                            <!-- Triệu chứng -->
-                            <div class="book-form-field">
-                                <label>Triệu chứng / Ghi chú</label>
-                                <textarea th:field="*{note}"
-                                          placeholder="Mô tả triệu chứng, lý do khám hoặc ghi chú cho bác sĩ...">
-                                </textarea>
-                            </div>
+                                <button type="submit" class="btn-primary" style="width:100%;justify-content:center;">
+                                    <i class="bi bi-calendar-check"></i> Xác nhận đặt lịch
+                                </button>
+                            </form>
+                        </div>
 
-                            <button type="submit" class="btn-primary" style="width:100%;justify-content:center;"
-                                    id="submitBtn" disabled>
-                                <i class="bi bi-calendar-check"></i> Xác nhận đặt lịch
-                            </button>
-                        </form>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -211,35 +205,203 @@
     </main>
 </div>
 
+<!-- Embed schedule data as JSON for JS -->
+<script th:inline="javascript">
+/*<![CDATA[*/
+const SCHEDULES = /*[[${schedules}]]*/ [];
+const DOCTOR_NAME = /*[[${selectedDoctor != null ? selectedDoctor.fullName : ''}]]*/ '';
+/*]]>*/
+</script>
+
 <script>
-let selectedSlotId = null;
+// ---- Khởi tạo date picker ----
+(function() {
+    const picker = document.getElementById('datePicker');
+    if (!picker) return;
 
-function selectSlot(btn) {
-    // Bỏ chọn cũ
-    document.querySelectorAll('.slot-btn.selected').forEach(b => b.classList.remove('selected'));
+    // Min = hôm nay
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    picker.min = `${yyyy}-${mm}-${dd}`;
 
-    // Chọn mới
-    btn.classList.add('selected');
-    selectedSlotId = btn.dataset.slotId;
+    // Max = 30 ngày tới
+    const maxDate = new Date(today);
+    maxDate.setDate(maxDate.getDate() + 30);
+    const mxYyyy = maxDate.getFullYear();
+    const mxMm = String(maxDate.getMonth() + 1).padStart(2, '0');
+    const mxDd = String(maxDate.getDate()).padStart(2, '0');
+    picker.max = `${mxYyyy}-${mxMm}-${mxDd}`;
+})();
 
-    // Cập nhật hidden input và display
-    document.getElementById('selectedSlotId').value = selectedSlotId;
-    document.getElementById('slotDisplay').innerHTML =
-        '<i class="bi bi-clock" style="margin-right:8px;"></i>' + btn.dataset.slotLabel;
-    document.getElementById('slotDisplay').classList.remove('no-slot-selected');
+// ---- Khi chọn ngày ----
+function onDateChange(dateStr) {
+    if (!dateStr) return;
 
-    // Enable submit
-    document.getElementById('submitBtn').disabled = false;
+    const shiftSection = document.getElementById('shiftSection');
+    const shiftMessage = document.getElementById('shiftMessage');
+    const shiftButtons = document.getElementById('shiftButtons');
+    const slotSection  = document.getElementById('slotSection');
+    const confirmSection = document.getElementById('confirmSection');
+    const dateHint = document.getElementById('dateHint');
+
+    // Reset các bước sau
+    slotSection.style.display = 'none';
+    confirmSection.style.display = 'none';
+    document.getElementById('selectedSlotId').value = '';
+
+    // Tìm schedule của ngày được chọn
+    const daySchedules = SCHEDULES.filter(s => s.workDate === dateStr);
+
+    shiftSection.style.display = 'block';
+    shiftButtons.innerHTML = '';
+
+    // Format ngày hiển thị
+    const [y, m, d] = dateStr.split('-');
+    dateHint.textContent = `Ngày ${d}/${m}/${y}`;
+
+    if (daySchedules.length === 0) {
+        shiftMessage.style.display = 'block';
+        return;
+    }
+
+    shiftMessage.style.display = 'none';
+
+    // Render nút ca
+    daySchedules.forEach(schedule => {
+        const isMorning = schedule.shift === 'MORNING';
+        const label = isMorning ? '☀️ Ca sáng' : '🌙 Ca chiều';
+        const timeRange = isMorning ? '07:00 – 12:00' : '13:00 – 17:00';
+
+        // Đếm slot còn trống
+        const availableCount = (schedule.slots || []).filter(sl => sl.available).length;
+        const totalSlots = (schedule.slots || []).length;
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'shift-select-btn';
+        btn.dataset.scheduleId = schedule.scheduleId;
+        btn.dataset.shift = schedule.shift;
+        btn.dataset.shiftLabel = schedule.shiftLabel;
+        btn.dataset.workDate = schedule.workDate;
+        btn.dataset.roomNumber = schedule.roomNumber || '';
+        btn.innerHTML = `
+            <div style="font-size:18px;margin-bottom:4px;">${label}</div>
+            <div style="font-size:12px;color:#64748b;">${timeRange}</div>
+            <div style="font-size:12px;margin-top:4px;font-weight:600;color:${availableCount > 0 ? '#166534' : '#b91c1c'}">
+                ${availableCount > 0 ? availableCount + ' slot trống / ' + totalSlots : 'Hết slot'}
+            </div>
+        `;
+        btn.onclick = () => onShiftSelect(btn, schedule);
+        shiftButtons.appendChild(btn);
+    });
 }
 
-// Validate trước khi submit
+// ---- Khi chọn ca ----
+function onShiftSelect(btn, schedule) {
+    // Highlight nút ca được chọn
+    document.querySelectorAll('.shift-select-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+
+    const slotSection = document.getElementById('slotSection');
+    const slotGrid = document.getElementById('slotGrid');
+    const slotSectionTitle = document.getElementById('slotSectionTitle');
+    const confirmSection = document.getElementById('confirmSection');
+
+    confirmSection.style.display = 'none';
+    document.getElementById('selectedSlotId').value = '';
+
+    slotSectionTitle.textContent = `Chọn khung giờ — ${schedule.shiftLabel}`;
+    slotGrid.innerHTML = '';
+
+    const slots = schedule.slots || [];
+    if (slots.length === 0) {
+        slotGrid.innerHTML = '<p style="color:#94a3b8;font-size:13px;">Không có slot nào trong ca này.</p>';
+        slotSection.style.display = 'block';
+        return;
+    }
+
+    slots.forEach(slot => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'slot-btn' + (!slot.available ? ' full' : '');
+        btn.disabled = !slot.available;
+        btn.dataset.slotId = slot.slotId;
+        btn.dataset.startTime = slot.startTime;
+        btn.dataset.endTime = slot.endTime;
+        btn.dataset.shiftLabel = schedule.shiftLabel;
+        btn.dataset.workDate = schedule.workDate;
+        btn.dataset.roomNumber = schedule.roomNumber || '';
+
+        const remaining = slot.maxCapacity - slot.bookedCapacity;
+        btn.innerHTML = `
+            <span>${slot.startTime} – ${slot.endTime}</span>
+            <span class="slot-capacity">${slot.available ? remaining + ' chỗ' : 'Đã đầy'}</span>
+        `;
+        btn.onclick = () => onSlotSelect(btn);
+        slotGrid.appendChild(btn);
+    });
+
+    slotSection.style.display = 'block';
+}
+
+// ---- Khi chọn slot ----
+function onSlotSelect(btn) {
+    document.querySelectorAll('.slot-btn.selected').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+
+    document.getElementById('selectedSlotId').value = btn.dataset.slotId;
+
+    // Hiện summary
+    const [y, m, d] = btn.dataset.workDate.split('-');
+    const dateFormatted = `${d}/${m}/${y}`;
+    const room = btn.dataset.roomNumber ? ` — Phòng ${btn.dataset.roomNumber}` : '';
+
+    document.getElementById('bookingSummary').innerHTML = `
+        <div><i class="bi bi-person-badge" style="color:#0f4c81;margin-right:6px;"></i><strong>Bác sĩ:</strong> ${DOCTOR_NAME}</div>
+        <div><i class="bi bi-calendar3" style="color:#0f4c81;margin-right:6px;"></i><strong>Ngày:</strong> ${dateFormatted}</div>
+        <div><i class="bi bi-clock" style="color:#0f4c81;margin-right:6px;"></i><strong>Giờ:</strong> ${btn.dataset.startTime} – ${btn.dataset.endTime} (${btn.dataset.shiftLabel})${room}</div>
+    `;
+
+    document.getElementById('confirmSection').style.display = 'block';
+}
+
+// ---- Validate submit ----
 document.getElementById('bookingForm').addEventListener('submit', function(e) {
-    if (!selectedSlotId) {
+    const slotId = document.getElementById('selectedSlotId').value;
+    if (!slotId) {
         e.preventDefault();
         alert('Vui lòng chọn khung giờ khám');
     }
 });
 </script>
+
+<style>
+.shift-select-btn {
+    border: 2px solid #dde3ea;
+    border-radius: 12px;
+    padding: 16px 24px;
+    background: #fff;
+    cursor: pointer;
+    text-align: center;
+    min-width: 160px;
+    transition: border-color 0.2s, background 0.2s;
+    font-family: Arial, sans-serif;
+}
+.shift-select-btn:hover {
+    border-color: #0f4c81;
+    background: #eff6ff;
+}
+.shift-select-btn.selected {
+    border-color: #0f4c81;
+    background: #0f4c81;
+    color: #fff;
+}
+.shift-select-btn.selected div {
+    color: #fff !important;
+}
+</style>
 
 </body>
 </html>

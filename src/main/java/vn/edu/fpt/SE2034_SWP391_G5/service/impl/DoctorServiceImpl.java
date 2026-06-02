@@ -1,6 +1,6 @@
 package vn.edu.fpt.SE2034_SWP391_G5.service.impl;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
@@ -11,38 +11,53 @@ import vn.edu.fpt.SE2034_SWP391_G5.service.DoctorService;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class DoctorServiceImpl implements DoctorService {
 
-    private final UserRepository userRepository;
+    private UserRepository userRepository;
+
+    public DoctorServiceImpl(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+    public List<User> findByDoctorStatus(String doctorStatus){
+        return  userRepository.findByDoctorStatus(doctorStatus);
+    }
+
+    //Count active doctor
+    public List<User> findByRoleNameAndStatus(String roleName, String status) {
+        return userRepository.countByRoleNameAndStatus(roleName, status);
+    }
+
 
     @Override
     public List<DoctorResponse> getDoctorsByDepartment(Integer departmentId) {
-        List<User> users = userRepository.findByDepartmentId(departmentId);
-        return users.stream()
-                .map(this::mapToDoctorResponse)
+        return userRepository.findActiveDoctorsByDepartmentId(departmentId)
+                .stream()
+                .map(this::toResponse)
                 .toList();
     }
 
     @Override
     public DoctorResponse getDoctorById(Long doctorId) {
-        User user = userRepository.findById(doctorId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bác sĩ với ID: " + doctorId));
-        return mapToDoctorResponse(user);
+        User doctor = userRepository.findById(doctorId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bác sĩ với id: " + doctorId));
+        return toResponse(doctor);
     }
 
-    private DoctorResponse mapToDoctorResponse(User user) {
-        if (user == null) return null;
-        String fullName = buildFullName(user.getLastName(), user.getMiddleName(), user.getFirstName());
+    private DoctorResponse toResponse(User u) {
         return DoctorResponse.builder()
-                .id(user.getId())
-                .firstName(user.getFirstName())
-                .middleName(user.getMiddleName())
-                .lastName(user.getLastName())
-                .fullName(fullName)
-                .degree(user.getDegree())
-                .experienceYears(user.getExperienceYears())
-                .bio(user.getBio())
+                .id(u.getId())
+                .fullName(buildFullName(u.getLastName(), u.getMiddleName(), u.getFirstName()))
+                .firstName(u.getFirstName())
+                .middleName(u.getMiddleName())
+                .lastName(u.getLastName())
+                .degree(u.getDegree())
+                .licenseNumber(u.getLicenseNumber())
+                .bio(u.getBio())
+                .avatar(u.getAvatar())
+                .experienceYears(u.getExperienceYears())
+                .departmentName(u.getDepartment() != null ? u.getDepartment().getName() : null)
+                .departmentId(u.getDepartment() != null ? u.getDepartment().getId() : null)
+                .doctorStatus(u.getDoctorStatus())
                 .build();
     }
 

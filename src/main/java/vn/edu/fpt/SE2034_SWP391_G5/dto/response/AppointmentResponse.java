@@ -1,18 +1,21 @@
 package vn.edu.fpt.SE2034_SWP391_G5.dto.response;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Getter
 @Setter
 @Builder
 public class AppointmentResponse {
-
     private Long id;
     private String appointmentCode;
     private String status;
