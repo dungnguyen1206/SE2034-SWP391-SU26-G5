@@ -57,7 +57,7 @@ public class ReceptionistAppointmentController {
 
     private void addPageInfo(Model model, String search, String status){
         model.addAttribute("search", search);
-        model.addAttribute("selectStatus", status);
+        model.addAttribute("selectedStatus", status);
         model.addAttribute("currentDateTime", getCurrentDateTime());
     }
 
@@ -65,46 +65,12 @@ public class ReceptionistAppointmentController {
         return LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy · HH:mm"));
     }
 
-    @GetMapping("/receptionist/appointment/{id}/check-in-ticket")
-    public String showCheckInTicket(
-            @PathVariable Long id,
-            Model model
-    ) {
-        AppointmentPrintResponse ticket =
-                appointmentService.getCheckInTicket(id);
-
-        boolean checkedIn = ticket.getCheckInTime() != null;
-
-        boolean canCheckIn =
-                !checkedIn
-                        && "CONFIRMED".equals(ticket.getStatus())
-                        && LocalDate.now().equals(ticket.getBookingDate());
-
-        model.addAttribute("ticket", ticket);
-        model.addAttribute("checkedIn", checkedIn);
-        model.addAttribute("canCheckIn", canCheckIn);
-
-        return "receptionist/appointment/check-in-ticket";
-    }
-
-    @PostMapping("/receptionist/appointment/{id}/confirm-check-in")
-    public String confirmCheckIn(
-            @PathVariable Long id,
-            RedirectAttributes redirectAttributes
-    ) {
-        try {
-            appointmentService.confirmCheckInAppointment(id);
-
-            redirectAttributes.addFlashAttribute(
-                    "successMessage",
-                    "Check-in thành công. Bạn có thể in phiếu khám."
-            );
-        } catch (RuntimeException exception) {
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    exception.getMessage()
-            );
-        }
-        return "redirect:/receptionist/appointment/" + id + "/check-in-ticket";
+    @GetMapping("/receptionist/appointment/{id}")
+    public String showAppointmentDetail(@PathVariable Long id, Model model){
+        AppointmentResponse appointment = appointmentService.getAppointmentDetailForReceptionist(id);
+        model.addAttribute("appointment", appointment);
+        addReceptionistInfo(model);
+        model.addAttribute("currentDateTime", getCurrentDateTime());
+        return "receptionist/appointment/detail";
     }
 }

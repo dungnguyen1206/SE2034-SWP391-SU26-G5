@@ -20,6 +20,8 @@ public interface AppointmentService {
 
     void confirmCheckInAppointment(Long appointmentId);
 
+    AppointmentResponse getAppointmentDetailForReceptionist(Long appointmentId);
+
     // Lấy lịch + slot của bác sĩ để hiển thị trên form đặt lịch
     List<ScheduleSlotResponse> getAvailableSchedules(Long doctorId);
 

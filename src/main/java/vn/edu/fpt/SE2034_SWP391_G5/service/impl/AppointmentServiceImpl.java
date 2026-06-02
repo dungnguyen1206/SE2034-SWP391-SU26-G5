@@ -29,7 +29,10 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public List<AppointmentResponse> getAppointmentListForReceptionist() {
-        return appointmentRepository.findAllForReceptionistList();
+        return appointmentRepository.findAllForReceptionistList()
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     @Override
@@ -63,9 +66,9 @@ public class AppointmentServiceImpl implements AppointmentService {
             if (!keyword.isEmpty()) {
                 matchesSearch =
                         containsIgnoreCase(appointment.getAppointmentCode(), keyword)
-                                || containsIgnoreCase(appointment.getPatientName(), keyword)
+                                || containsIgnoreCase(appointment.getPatientFullName(), keyword)
                                 || containsIgnoreCase(appointment.getPatientPhone(), keyword)
-                                || containsIgnoreCase(appointment.getDoctorName(), keyword)
+                                || containsIgnoreCase(appointment.getDoctorFullName(), keyword)
                                 || containsIgnoreCase(appointment.getDepartmentName(), keyword)
                                 || containsIgnoreCase(appointment.getRoomNumber(), keyword);
             }
@@ -82,8 +85,10 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public AppointmentPrintResponse getCheckInTicket(Long appointmentId) {
-        AppointmentPrintResponse ticket = appointmentRepository.findCheckInTicketById(appointmentId)
+        Appointment appointment = appointmentRepository.findCheckInTicketById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin lịch hẹn"));
+
+        AppointmentPrintResponse ticket = toPrintResponse(appointment);
 
         if (ticket.getCheckInTime() != null) {
             Long queueNumber = appointmentRepository.countQueueNumberForTicket(
@@ -91,10 +96,8 @@ public class AppointmentServiceImpl implements AppointmentService {
                     ticket.getBookingDate(),
                     ticket.getCheckInTime()
             );
-
             ticket.setQueueNumber(queueNumber);
         }
-
         return ticket;
     }
 
@@ -119,6 +122,18 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setUpdatedAt(now);
 
         appointmentRepository.save(appointment);
+    }
+
+    @Override
+    public AppointmentResponse getAppointmentDetailForReceptionist(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findAppointmentDetailById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lịch hẹn"));
+
+        AppointmentResponse response = toResponse(appointment);
+
+        response.setPatientAddress(buildPatientAddress(appointment.getPatient()));
+
+        return response;
     }
 
     private boolean containsIgnoreCase(String value, String keyword){
@@ -270,18 +285,25 @@ public class AppointmentServiceImpl implements AppointmentService {
     private AppointmentResponse toResponse(Appointment a) {
         TimeSlot slot = a.getSlot();
         DoctorSchedule schedule = slot != null ? slot.getSchedule() : null;
+        User patient = a.getPatient();
         User doctor = a.getDoctor();
+
+        String patientFullName = patient != null
+                ? buildFullName(patient.getLastName(), patient.getMiddleName(), patient.getFirstName())
+                : "";
+
         String doctorFullName = doctor != null
                 ? buildFullName(doctor.getLastName(), doctor.getMiddleName(), doctor.getFirstName())
                 : "";
-
         return AppointmentResponse.builder()
                 .id(a.getId())
                 .appointmentCode(a.getAppointmentCode())
                 .status(a.getStatus())
                 .patientId(a.getPatient() != null ? a.getPatient().getId() : null)
+                .patientFullName(patientFullName)
+                .patientPhone(a.getPatient() != null ? a.getPatient().getPhone() : null)
                 .doctorId(doctor != null ? doctor.getId() : null)
-                .doctorName(doctorFullName)
+                .doctorFullName(doctorFullName)
                 .doctorDegree(doctor != null ? doctor.getDegree() : null)
                 .departmentName(doctor != null && doctor.getDepartment() != null
                         ? doctor.getDepartment().getName() : null)
@@ -299,11 +321,95 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .build();
     }
 
+    private AppointmentPrintResponse toPrintResponse(Appointment appointment) {
+        TimeSlot slot = appointment.getSlot();
+        DoctorSchedule schedule = slot != null ? slot.getSchedule() : null;
+        User patient = appointment.getPatient();
+        User doctor = appointment.getDoctor();
+        MedicalService service = appointment.getService();
+
+        String patientFullName = patient != null
+                ? buildFullName(patient.getLastName(), patient.getMiddleName(), patient.getFirstName())
+                : "";
+
+        String doctorFullName = doctor != null
+                ? buildFullName(doctor.getLastName(), doctor.getMiddleName(), doctor.getFirstName())
+                : "";
+
+        String departmentName = "";
+        if (service != null && service.getDepartment() != null) {
+            departmentName = service.getDepartment().getName();
+        }
+
+        String roomNumber = "";
+        if (schedule != null && schedule.getRoom() != null) {
+            roomNumber = schedule.getRoom().getRoomNumber();
+        }
+
+        return new AppointmentPrintResponse(
+                appointment.getId(),
+                appointment.getAppointmentCode(),
+                patientFullName,
+                patient != null ? patient.getPhone() : "",
+                doctorFullName,
+                departmentName,
+                roomNumber,
+                appointment.getBookingDate(),
+                slot != null ? slot.getStartTime() : null,
+                slot != null ? slot.getEndTime() : null,
+                appointment.getCheckInTime(),
+                appointment.getStatus()
+        );
+    }
+
     private String buildFullName(String lastName, String middleName, String firstName) {
         StringBuilder sb = new StringBuilder();
         if (lastName != null) sb.append(lastName).append(" ");
         if (middleName != null) sb.append(middleName).append(" ");
         if (firstName != null) sb.append(firstName);
         return sb.toString().trim();
+    }
+
+    private String buildPatientAddress(User patient) {
+        if (patient == null || patient.getAddresses() == null || patient.getAddresses().isEmpty()) {
+            return "";
+        }
+
+        UserAddress defaultAddress = null;
+
+        for (UserAddress address : patient.getAddresses()) {
+            if (Boolean.TRUE.equals(address.getIsDefault())) {
+                defaultAddress = address;
+                break;
+            }
+        }
+
+        if (defaultAddress == null) {
+            defaultAddress = patient.getAddresses().iterator().next();
+        }
+
+        return buildAddress(defaultAddress);
+    }
+
+    private String buildAddress(UserAddress address) {
+        if (address == null) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+
+        if (address.getAddressLine() != null && !address.getAddressLine().isBlank()) {
+            sb.append(address.getAddressLine().trim());
+        }
+
+        if (address.getProvince() != null && address.getProvince().getName() != null
+                && !address.getProvince().getName().isBlank()) {
+            if (!sb.isEmpty()) {
+                sb.append(", ");
+            }
+            sb.append(address.getProvince().getName().trim());
+        }
+
+        return sb.toString();
     }
 }

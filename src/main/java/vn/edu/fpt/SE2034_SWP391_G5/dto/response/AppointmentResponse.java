@@ -18,15 +18,18 @@ public class AppointmentResponse {
     private LocalTime slotStartTime;
     private LocalTime slotEndTime;
     private String roomNumber;
-    private String patientName;
+    private String patientFullName;
     private String patientPhone;
-    private String doctorName;
+    private String patientAddress;
+    private String doctorFullName;
     private String departmentName;
     private LocalDate bookingDate;
     private String status;
+    private LocalDateTime checkInTime;
 
     private Long patientId;
     private Long doctorId;
+    private String doctorDegree;
 
     private Long serviceId;
     private String serviceName;

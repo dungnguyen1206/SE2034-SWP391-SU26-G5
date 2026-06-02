@@ -26,6 +26,66 @@
     font-weight: 600;
 }
 
+.stat-confirmed {
+    background-color: #eff6ff;
+    border-color: #bfdbfe;
+}
+
+.stat-confirmed h2,
+.stat-confirmed p {
+    color: #2563eb;
+}
+
+.stat-waiting {
+    background-color: #fff7ed;
+    border-color: #fed7aa;
+}
+
+.stat-waiting h2,
+.stat-waiting p {
+    color: #ea580c;
+}
+
+.stat-examining {
+    background-color: #faf5ff;
+    border-color: #e9d5ff;
+}
+
+.stat-examining h2,
+.stat-examining p {
+    color: #9333ea;
+}
+
+.stat-completed {
+    background-color: #f0fdf4;
+    border-color: #bbf7d0;
+}
+
+.stat-completed h2,
+.stat-completed p {
+    color: #16a34a;
+}
+
+.stat-cancelled {
+    background-color: #fef2f2;
+    border-color: #fecaca;
+}
+
+.stat-cancelled h2,
+.stat-cancelled p {
+    color: #dc2626;
+}
+
+.stat-no-show {
+    background-color: #f1f5f9;
+    border-color: #cbd5e1;
+}
+
+.stat-no-show h2,
+.stat-no-show p {
+    color: #475569;
+}
+
 .appointment-card {
     margin: 0 28px 28px;
     background-color: #ffffff;

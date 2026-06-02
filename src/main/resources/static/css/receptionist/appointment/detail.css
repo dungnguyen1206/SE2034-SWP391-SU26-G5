@@ -1,0 +1,224 @@
+.detail-page {
+    padding: 28px;
+}
+
+.detail-actions {
+    max-width: 920px;
+    margin: 0 auto 18px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-back {
+    height: 42px;
+    padding: 0 16px;
+    border-radius: 12px;
+    border: 1px solid #dbe3ef;
+    background-color: #ffffff;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 800;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-back:hover {
+    background-color: #f8fafc;
+}
+
+.detail-ticket {
+    max-width: 920px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 22px;
+    padding: 30px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.ticket-header {
+    text-align: center;
+    padding-bottom: 20px;
+    margin-bottom: 22px;
+    border-bottom: 2px solid #111827;
+}
+
+.ticket-header h1 {
+    font-size: 26px;
+    font-weight: 900;
+    color: #0f172a;
+    margin-bottom: 6px;
+}
+
+.ticket-header p {
+    font-size: 15px;
+    color: #64748b;
+    font-weight: 600;
+}
+
+.ticket-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-bottom: 26px;
+}
+
+.ticket-summary div {
+    border: 1px solid #bfdbfe;
+    background-color: #eff6ff;
+    border-radius: 16px;
+    padding: 18px;
+}
+
+.ticket-summary span {
+    display: block;
+    color: #2563eb;
+    font-size: 14px;
+    font-weight: 800;
+    margin-bottom: 8px;
+}
+
+.ticket-summary strong {
+    display: block;
+    color: #0f172a;
+    font-size: 20px;
+    font-weight: 900;
+}
+
+.status-badge {
+    display: inline-flex !important;
+    width: fit-content;
+    min-height: 34px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background-color: #ffffff;
+    color: #2563eb !important;
+    border: 1px solid #bfdbfe;
+    font-size: 14px !important;
+    align-items: center;
+    justify-content: center;
+}
+
+.status-confirmed {
+    color: #2563eb !important;
+    background-color: #eff6ff !important;
+    border: 1px solid #bfdbfe !important;
+}
+
+.status-waiting {
+    color: #ea580c !important;
+    background-color: #fff7ed !important;
+    border: 1px solid #fed7aa !important;
+}
+
+.status-examining {
+    color: #9333ea !important;
+    background-color: #faf5ff !important;
+    border: 1px solid #e9d5ff !important;
+}
+
+.status-completed {
+    color: #16a34a !important;
+    background-color: #f0fdf4 !important;
+    border: 1px solid #bbf7d0 !important;
+}
+
+.status-cancelled {
+    color: #dc2626 !important;
+    background-color: #fef2f2 !important;
+    border: 1px solid #fecaca !important;
+}
+
+.status-no-show {
+    color: #475569 !important;
+    background-color: #f1f5f9 !important;
+    border: 1px solid #cbd5e1 !important;
+}
+
+.status-default {
+    color: #475569 !important;
+    background-color: #f8fafc !important;
+    border: 1px solid #e2e8f0 !important;
+}
+
+.ticket-section {
+    margin-top: 24px;
+}
+
+.ticket-section h2 {
+    font-size: 18px;
+    font-weight: 900;
+    color: #0f172a;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 28px;
+}
+
+.info-row {
+    display: grid;
+    grid-template-columns: 145px 1fr;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 15px;
+}
+
+.info-row span {
+    color: #64748b;
+    font-weight: 700;
+}
+
+.info-row strong {
+    color: #111827;
+    font-weight: 800;
+}
+
+.note-box {
+    background-color: #f8fafc;
+    border-left: 4px solid #2563eb;
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+
+.note-box p {
+    color: #334155;
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+@media (max-width: 900px) {
+    .ticket-summary {
+        grid-template-columns: 1fr;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .detail-ticket {
+        padding: 22px;
+    }
+}
+
+@media (max-width: 600px) {
+    .detail-page {
+        padding: 18px;
+    }
+
+    .info-row {
+        grid-template-columns: 1fr;
+        gap: 4px;
+    }
+
+    .ticket-header h1 {
+        font-size: 22px;
+    }
+}
