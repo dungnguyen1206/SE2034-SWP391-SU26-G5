@@ -20,9 +20,12 @@ import vn.edu.fpt.SE2034_SWP391_G5.repository.TimeSlotRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
 import vn.edu.fpt.SE2034_SWP391_G5.util.CodeGenerator;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.List;
 
 @Service
@@ -177,11 +180,40 @@ public class AppointmentServiceImpl implements AppointmentService {
                 ? buildFullName(doctor.getLastName(), doctor.getMiddleName(), doctor.getFirstName())
                 : "";
 
+        User patient = a.getPatient();
+        String patientFullName = patient != null
+                ? buildFullName(patient.getLastName(), patient.getMiddleName(), patient.getFirstName())
+                : "";
+
+        //linhNH 01/06/2026
+        // Tính tuổi bệnh nhân từ ngày sinh
+        Integer patientAge = null;
+        if (patient != null && patient.getDateOfBirth() != null) {
+            patientAge = Period.between(patient.getDateOfBirth(), LocalDate.now()).getYears();
+        }
+        String patientGender = patient != null ? patient.getGender() : null;
+
+        // Tạo chữ cái viết tắt (Initials) cho Avatar bệnh nhân
+        String patientInitials = "";
+        if (patientFullName != null && !patientFullName.trim().isEmpty()) {
+            String[] parts = patientFullName.trim().split("\\s+");
+            if (parts.length > 0) {
+                patientInitials += parts[0].substring(0, 1).toUpperCase(); // Chữ cái đầu của Họ
+            }
+            if (parts.length > 1) {
+                patientInitials += parts[parts.length - 1].substring(0, 1).toUpperCase(); // Chữ cái đầu của Tên
+            }
+        }
+
         return AppointmentResponse.builder()
                 .id(a.getId())
                 .appointmentCode(a.getAppointmentCode())
                 .status(a.getStatus())
-                .patientId(a.getPatient() != null ? a.getPatient().getId() : null)
+                .patientId(patient != null ? patient.getId() : null)
+                .patientFullName(patientFullName)
+                .patientAge(patientAge)
+                .patientGender(patientGender)
+                .patientInitials(patientInitials)
                 .doctorId(doctor != null ? doctor.getId() : null)
                 .doctorFullName(doctorFullName)
                 .doctorDegree(doctor != null ? doctor.getDegree() : null)
@@ -207,5 +239,35 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (middleName != null) sb.append(middleName).append(" ");
         if (firstName != null) sb.append(firstName);
         return sb.toString().trim();
+    }
+
+    @Override
+    public Page<AppointmentResponse> getAppointmentsForDoctor(Long doctorId, String status, Pageable pageable) {
+        List<String> statuses;
+        if (status == null || status.trim().isEmpty() || "ALL".equalsIgnoreCase(status)) {
+            statuses = List.of("WAITING", "IN_PROGRESS", "COMPLETED");
+        } else {
+            statuses = List.of(status.toUpperCase());
+        }
+        return appointmentRepository.findByDoctorIdAndStatusIn(doctorId, statuses, pageable)
+                .map(this::toResponse);
+    }
+
+    @Override
+    public long countAppointmentsForDoctor(Long doctorId, String status) {
+        if (status == null || status.trim().isEmpty() || "ALL".equalsIgnoreCase(status)) {
+            return appointmentRepository.countByDoctorIdAndStatusIn(doctorId, List.of("WAITING", "IN_PROGRESS", "COMPLETED"));
+        }
+        return appointmentRepository.countByDoctorIdAndStatus(doctorId, status.toUpperCase());
+    }
+
+    @Override
+    @Transactional
+    public void updateAppointmentStatus(Long appointmentId, String newStatus) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lịch hẹn với ID: " + appointmentId));
+        appointment.setStatus(newStatus.toUpperCase());
+        appointment.setUpdatedAt(LocalDateTime.now());
+        appointmentRepository.save(appointment);
     }
 }

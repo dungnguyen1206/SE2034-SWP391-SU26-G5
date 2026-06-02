@@ -7,7 +7,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class Se2034Swp391G5Application {
 
 	public static void main(String[] args) {
-		System.out.println("Hello Word");
+		SpringApplication.run(Se2034Swp391G5Application.class, args);
 	}
-
 }

@@ -21,6 +21,11 @@ public class AppointmentResponse {
     private Long patientId;
     private String patientFullName;
 
+    //LinhNH 01/06/2026
+    private Integer patientAge;
+    private String patientGender;
+    private String patientInitials;
+
     // Doctor info
     private Long doctorId;
     private String doctorFullName;

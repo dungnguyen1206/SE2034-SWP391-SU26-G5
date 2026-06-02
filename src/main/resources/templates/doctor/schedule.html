@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lịch làm việc</title>
+
+    <link rel="stylesheet" href="../../static/css/doctor/dashboard-doctor.css" th:href="@{/css/doctor/dashboard-doctor.css}">
+    <link rel="stylesheet" href="../../static/css/doctor/schedule-doctor.css" th:href="@{/css/doctor/schedule-doctor.css}">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div class="layout">
+
+    <aside class="sidebar">
+        <div>
+            <div class="brand">
+                <h2>Hospital HAMS</h2>
+                <p>Dr. Professional</p>
+            </div>
+
+            <nav class="menu">
+                <a th:href="@{/doctor/dashboard}">
+                    <i class="fa-solid fa-table-cells-large"></i>
+                    Dashboard
+                </a>
+
+                <a class="active" th:href="@{/doctor/schedule}">
+                    <i class="fa-regular fa-calendar-days"></i>
+                    Lịch làm việc
+                </a>
+
+                <a th:href="@{/doctor/appointment-list}">
+                    <i class="fa-regular fa-calendar-check"></i>
+                    Danh sách bệnh nhân
+                </a>
+
+                <a th:href="@{/doctor/notification}">
+                    <i class="fa-regular fa-bell"></i>
+                    Thông báo
+                </a>
+            </nav>
+        </div>
+
+        <div class="doctor-box">
+            <div class="doctor-avatar">
+                <i class="fa-regular fa-user"></i>
+            </div>
+            <div>
+                <h4 th:text="${doctorName}">Bác sĩ Minh</h4>
+                <p th:text="${doctorDept}">Chuyên Môn Nội</p>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main schedule-main">
+
+        <div class="breadcrumb">
+            Trang chủ / <span>Lịch làm việc</span>
+        </div>
+
+        <div class="schedule-header">
+            <div>
+                <h1>Lịch làm việc hằng tuần</h1>
+                <p>Chào mừng trở lại, <span th:text="${doctorName}">Bác sĩ Minh</span>. Quản lý lịch làm việc của bạn tuần này.</p>
+            </div>
+
+            <div class="week-control">
+                <a th:href="@{/doctor/schedule(date=${prevWeekDate})}" style="text-decoration: none; color: inherit; display: flex; align-items: center;"><button><i class="fa-solid fa-chevron-left"></i></button></a>
+                <a th:href="@{/doctor/schedule(date=${prevWeekDate})}" style="text-decoration: none; color: inherit;"><b>Tuần trước</b></a>
+                <span>|</span>
+                <a th:href="@{/doctor/schedule(date=${nextWeekDate})}" style="text-decoration: none; color: inherit;"><b>Tuần tiếp theo</b></a>
+                <a th:href="@{/doctor/schedule(date=${nextWeekDate})}" style="text-decoration: none; color: inherit; display: flex; align-items: center;"><button><i class="fa-solid fa-chevron-right"></i></button></a>
+            </div>
+        </div>
+
+        <section class="week-grid">
+            <div class="day" th:each="day : ${weekSchedule}">
+                <p th:text="${day.dayOfWeekLabel}">THỨ 2</p>
+                <h2 th:text="${day.dayAndMonth}">15/06</h2>
+                
+                <!-- Empty day -->
+                <div th:if="${#lists.isEmpty(day.shifts)}" class="day-box empty">
+                    <i class="fa-regular fa-calendar"></i>
+                </div>
+                
+                <!-- Day with shifts -->
+                <div th:unless="${#lists.isEmpty(day.shifts)}" class="day-box">
+                    <div th:each="shift : ${day.shifts}" class="shift" th:classappend="${shift.shiftClass}">
+                        <span th:text="${shift.badgeText}">Morning</span>
+                        <h3 th:text="${shift.title}">Morning Shift</h3>
+                        <p th:text="${shift.timeRange}">07:30 - 12:00</p>
+                        <small th:text="${shift.roomName}">Phòng Khám - Tầng 1</small>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-icon blue-icon">
+                    <i class="fa-regular fa-clock"></i>
+                </div>
+                <div>
+                    <p>TỔNG GIỜ LÀM VIỆC</p>
+                    <h2 th:text="${totalHoursStr} + ' Giờ'">21.5 Giờ</h2>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-icon green-icon">
+                    <i class="fa-regular fa-clipboard"></i>
+                </div>
+                <div>
+                    <p>SỐ CA TRỰC</p>
+                    <h2 th:text="${shiftCountStr} + ' Ca'">03 Ca</h2>
+                </div>
+            </div>
+
+            <div class="summary-card">
+                <div class="summary-icon orange-icon">
+                    <i class="fa-solid fa-arrow-trend-up"></i>
+                </div>
+                <div>
+                    <p>HIỆU SUẤT TUẦN</p>
+                    <h2 th:text="${performance}">Tốt</h2>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+</body>
+</html>

@@ -6,10 +6,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/doctor")
-public class DoctorDashboardController {
-    @GetMapping("/dashboard")
-    public String dashboard() {
-        return "doctor/dashboard";
+public class DoctorNotificationController {
+
+    @GetMapping("/notification")
+    public String notification() {
+        return "doctor/notification";
     }
 }
-
