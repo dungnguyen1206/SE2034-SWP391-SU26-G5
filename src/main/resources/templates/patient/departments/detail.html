@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết chuyên khoa</title>
+    <link rel="stylesheet" th:href="@{/css/patient/patient-common.css}">
+    <link rel="stylesheet" th:href="@{/css/patient/patient-appointment.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+</head>
+<body>
+<div class="patient-layout">
+    <div th:replace="~{patient/fragments/sidebar :: patientSidebar('departments')}"></div>
+    <main class="patient-main">
+
+        <!-- Header -->
+        <div class="patient-page-header">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <a th:href="@{/patient/departments}" class="patient-back-link"><i class="bi bi-arrow-left"></i></a>
+                <div>
+                    <h2 th:text="${department.name}">Tên khoa</h2>
+                    <p>Thông tin chuyên khoa và đội ngũ bác sĩ</p>
+                </div>
+            </div>
+            <a th:href="@{/patient/appointments/book/step2(departmentId=${department.id})}"
+               class="btn-primary">
+                <i class="bi bi-calendar-plus"></i> Đặt lịch khoa này
+            </a>
+        </div>
+
+        <!-- Thông tin khoa -->
+        <div class="patient-card" style="padding:24px;margin-bottom:20px;">
+            <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;">
+                <div th:if="${department.imageUrl != null}" style="flex-shrink:0;">
+                    <img th:src="${department.imageUrl}" alt="department"
+                         style="width:180px;height:120px;object-fit:cover;border-radius:10px;">
+                </div>
+                <div th:if="${department.imageUrl == null}"
+                     style="width:180px;height:120px;background:linear-gradient(135deg,#eff6ff,#dbeafe);
+                            border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <i class="bi bi-hospital" style="font-size:48px;color:#3b82f6;opacity:0.5;"></i>
+                </div>
+                <div style="flex:1;min-width:200px;">
+                    <h3 style="font-size:20px;font-weight:700;color:#0f172a;margin:0 0 8px;" th:text="${department.name}"></h3>
+                    <p th:if="${department.description != null}"
+                       style="font-size:14px;color:#475569;line-height:1.7;margin:0;"
+                       th:text="${department.description}"></p>
+                    <p th:if="${department.description == null}" style="font-size:14px;color:#94a3b8;margin:0;">
+                        Chưa có mô tả
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bác sĩ trong khoa -->
+        <div class="patient-card-header" style="margin-bottom:12px;">
+            <i class="bi bi-people" style="color:#0f4c81;font-size:18px;"></i>
+            <h3 style="font-size:16px;font-weight:700;color:#0f172a;margin:0;">
+                Đội ngũ bác sĩ
+                <span style="font-size:13px;font-weight:400;color:#94a3b8;margin-left:6px;"
+                      th:text="'(' + ${#lists.size(doctors)} + ' bác sĩ)'"></span>
+            </h3>
+        </div>
+
+        <div th:if="${#lists.isEmpty(doctors)}" class="patient-card">
+            <div class="empty-state" style="padding:30px 0;">
+                <i class="bi bi-person-x" style="font-size:36px;"></i>
+                <p>Chưa có bác sĩ trong khoa này</p>
+            </div>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(doctors)}"
+             style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;">
+            <div th:each="doc : ${doctors}" class="patient-card"
+                 style="padding:18px;display:flex;flex-direction:column;gap:12px;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div class="doctor-avatar" style="width:46px;height:46px;font-size:18px;flex-shrink:0;"
+                         th:text="${doc.firstName != null} ? ${doc.firstName.substring(0,1).toUpperCase()} : 'BS'"></div>
+                    <div>
+                        <div style="font-weight:700;font-size:14px;color:#0f172a;" th:text="${doc.fullName}"></div>
+                        <div style="font-size:12px;color:#1d4ed8;" th:text="${doc.degree}"></div>
+                        <div th:if="${doc.experienceYears != null and doc.experienceYears > 0}"
+                             style="font-size:11px;color:#64748b;" th:text="${doc.experienceYears} + ' năm KN'"></div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:6px;margin-top:auto;">
+                    <a th:href="@{/patient/doctors/{id}(id=${doc.id})}"
+                       class="btn-secondary" style="flex:1;justify-content:center;font-size:12px;padding:7px 8px;">
+                        <i class="bi bi-person-lines-fill"></i> Xem
+                    </a>
+                    <a th:href="@{/patient/appointments/book/step2(departmentId=${department.id},doctorId=${doc.id})}"
+                       class="btn-primary" style="flex:1;justify-content:center;font-size:12px;padding:7px 8px;">
+                        <i class="bi bi-calendar-plus"></i> Đặt lịch
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+</body>
+</html>
