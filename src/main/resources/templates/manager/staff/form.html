@@ -26,7 +26,7 @@
                 </div>
             </header>
 
-            <form class="staff-form">
+            <form class="staff-form" method="post" enctype="multipart/form-data" th:action="@{/manager/staff/create}" th:object="${createStaffForm}">
 
                 <!--STAFF TYPE-->
                 <section class="staff-form-card staff-type-section">
@@ -60,6 +60,7 @@
                     <div class="staff-form-main">
 
                         <!--ACCOUNT INFORMATION-->
+                        <input type="hidden" th:field="*{staffType}">
                         <section class="staff-form-card">
                             <div class="staff-form-card-header">
                                 <i class="bi bi-person"></i>
@@ -68,24 +69,28 @@
 
                             <div class="staff-form-grid">
                                 <label class="staff-form-field">
-                                    <span>Tên đăng nhập <strong>*</strong></span>
-                                    <input type="text" placeholder="VD: tuan.tran">
-                                </label>
-
-                                <label class="staff-form-field">
                                     <span>Email <strong>*</strong></span>
-                                    <input type="email" th:placeholder="${staffType == 'doctor'} ? 'doctor@hms.vn' : 'receptionist@hms.vn'">
+                                    <input type="email" th:field="*{email}" th:placeholder="${staffType == 'doctor'} ? 'doctor@hms.vn' : 'receptionist@hms.vn'">
+                                    <div class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Email lỗi</div>
                                 </label>
 
                                 <label class="staff-form-field">
                                     <span>Mật khẩu tạm thời <strong>*</strong></span>
-                                    <input type="password" placeholder="Tối thiểu 8 ký tự">
+                                    <input type="password" th:field="*{password}" placeholder="Tối thiểu 8 ký tự">
+                                    <div class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Password lỗi</div>
                                 </label>
 
                                 <label class="staff-form-field">
                                     <span>Xác nhận mật khẩu <strong>*</strong></span>
-                                    <input type="password" placeholder="Nhập lại mật khẩu">
+                                    <input type="password" th:field="*{confirmPassword}" placeholder="Nhập lại mật khẩu">
+                                    <div class="field-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></div>
                                 </label>
+                            </div>
+
+                            <div class="staff-role-note staff-account-note">
+                                <i class="bi bi-info-circle"></i>
+                                <span>Email sẽ được dùng để đăng nhập.</span>
+                                <em>Tên đăng nhập sẽ được hệ thống tự đồng bộ theo email.</em>
                             </div>
                         </section>
 
@@ -97,24 +102,45 @@
                             </div>
 
                             <div class="staff-form-grid">
-                                <label class="staff-form-field staff-form-full">
-                                    <span>Họ và tên <strong>*</strong></span>
-                                    <input type="text" th:placeholder="${staffType == 'doctor'} ? 'VD: Trần Minh Tuấn' : 'VD: Lê Thị Hoa'">
+                                <label class="staff-form-field">
+                                    <span>Họ <strong>*</strong></span>
+                                    <input type="text" th:field="*{firstName}" placeholder="VD: Nguyễn">
+                                    <div class="field-error" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
+                                </label>
+
+                                <label class="staff-form-field">
+                                    <span>Tên đệm</span>
+                                    <input type="text" th:field="*{middleName}" th:placeholder="${staffType == 'doctor'} ? 'VD: Văn' : 'VD: Thị'">
+                                    <div class="field-error" th:if="${#fields.hasErrors('middleName')}" th:errors="*{middleName}"></div>
+                                </label>
+
+                                <label class="staff-form-field">
+                                    <span>Tên <strong>*</strong></span>
+                                    <input type="text" th:field="*{lastName}" th:placeholder="${staffType == 'doctor'} ? 'VD: An' : 'VD: Hoa'">
+                                    <div class="field-error" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
                                 </label>
 
                                 <label class="staff-form-field">
                                     <span>Số điện thoại <strong>*</strong></span>
-                                    <input type="text" placeholder="VD: 0987 654 321">
+                                    <input type="text" th:field="*{phone}" placeholder="VD: 0987 654 321">
+                                    <div class="field-error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
+                                </label>
+
+                                <label class="staff-form-field">
+                                    <span>Ngày sinh <strong>*</strong></span>
+                                    <input type="date" th:field="*{dateOfBirth}">
+                                    <div class="field-error" th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}"></div>
                                 </label>
 
                                 <label class="staff-form-field">
                                     <span>Giới tính <strong>*</strong></span>
-                                    <select>
-                                        <option>Chọn giới tính...</option>
-                                        <option>Nam</option>
-                                        <option>Nữ</option>
-                                        <option>Khác</option>
+                                    <select th:field="*{gender}">
+                                        <option value="">Chọn giới tính...</option>
+                                        <option value="MALE">Nam</option>
+                                        <option value="FEMALE">Nữ</option>
+                                        <option value="OTHER">Khác</option>
                                     </select>
+                                    <div class="field-error" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"></div>
                                 </label>
                             </div>
                         </section>
@@ -130,40 +156,43 @@
                             <div class="staff-form-grid">
                                 <label class="staff-form-field">
                                     <span>Khoa <strong>*</strong></span>
-                                    <select>
-                                        <option>Chọn khoa...</option>
-                                        <option>Tim mạch</option>
-                                        <option>Mắt</option>
-                                        <option>Nhi khoa</option>
+                                    <select th:field="*{departmentId}">
+                                        <option th:each="department : ${departmentList}"
+                                                th:value="${department.getId()}"
+                                                th:text="${department.getName()}">
+                                            Tim mạch
+                                        </option>
                                     </select>
                                 </label>
 
                                 <label class="staff-form-field">
                                     <span>Bằng cấp <strong>*</strong></span>
-                                    <input type="text" placeholder="VD: Bác sĩ chuyên khoa I">
+                                    <input type="text" th:field="*{degree}" placeholder= "VD: Bác sĩ chuyên khoa I">
                                 </label>
 
                                 <label class="staff-form-field">
                                     <span>Số giấy phép hành nghề</span>
-                                    <input type="text" placeholder="VD: VN-MED-2021-0042">
+                                    <input type="text" th:field="*{licenseNumber}" placeholder="VD: VN-MED-2021-0042">
+                                    <div class="field-error" th:if="${#fields.hasErrors('licenseNumber')}" th:errors="*{licenseNumber}"></div>
                                 </label>
 
                                 <label class="staff-form-field">
                                     <span>Số năm kinh nghiệm <strong>*</strong></span>
-                                    <input type="number" placeholder="VD: 8">
+                                    <input type="number" th:field="*{experienceYears}" placeholder="VD: 8">
+                                    <div class="field-error" th:if="${#fields.hasErrors('experienceYears')}" th:errors="*{experienceYears}"></div>
                                 </label>
 
                                 <label class="staff-form-field">
                                     <span>Trạng thái bác sĩ <strong>*</strong></span>
-                                    <select>
-                                        <option>Đang hoạt động</option>
-                                        <option>Ngưng hoạt động</option>
+                                    <select th:field="*{doctorStatus}">
+                                        <option value="ACTIVE">Đang hoạt động</option>
+                                        <option value="INACTIVE">Ngưng hoạt động</option>
                                     </select>
                                 </label>
 
                                 <label class="staff-form-field staff-form-full">
                                     <span>Tiểu sử chuyên môn</span>
-                                    <textarea placeholder="Mô tả ngắn về kinh nghiệm, chuyên môn của bác sĩ..."></textarea>
+                                    <textarea th:field="*{bio}" placeholder="Mô tả ngắn về kinh nghiệm, chuyên môn của bác sĩ..."></textarea>
                                 </label>
                             </div>
                         </section>
@@ -179,15 +208,15 @@
                             <div class="staff-form-grid">
                                 <label class="staff-form-field">
                                     <span>Trạng thái lễ tân <strong>*</strong></span>
-                                    <select>
-                                        <option>Đang hoạt động</option>
-                                        <option>Ngưng hoạt động</option>
+                                    <select th:field="*{accountStatus}">
+                                        <option value="ACTIVE">Đang hoạt động</option>
+                                        <option value="INACTIVE">Ngưng hoạt động</option>
                                     </select>
                                 </label>
 
                                 <label class="staff-form-field staff-form-full">
                                     <span>Ghi chú</span>
-                                    <textarea placeholder="Ghi chú nội bộ nếu có..."></textarea>
+                                    <textarea th:field="*{bio}" placeholder="Ghi chú nội bộ nếu có..."></textarea>
                                 </label>
                             </div>
                         </section>
@@ -200,13 +229,13 @@
                             <div class="staff-form-side-title">Trạng thái tài khoản</div>
 
                             <label class="staff-radio-card selected">
-                                <input type="radio" name="accountStatus" checked>
+                                <input type="radio" th:field="*{accountStatus}" value="ACTIVE" checked>
                                 <span class="staff-radio-dot active"></span>
                                 Đang hoạt động
                             </label>
 
                             <label class="staff-radio-card">
-                                <input type="radio" name="accountStatus">
+                                <input type="radio" th:field="*{accountStatus}" value="INACTIVE">
                                 <span class="staff-radio-dot inactive"></span>
                                 Ngưng hoạt động
                             </label>
@@ -216,16 +245,18 @@
                         <section class="staff-form-card">
                             <div class="staff-form-side-title">Ảnh đại diện</div>
                             <div class="staff-photo-preview">?</div>
-                            <button type="button" class="staff-upload-button">Tải ảnh lên</button>
+                            <input id="staffAvatarFile" class="staff-file-input" type="file" name="avatarFile" accept="image/*">
+                            <label for="staffAvatarFile" class="staff-upload-button">Tải ảnh lên</label>
                         </section>
+
 
                         <!--FORM ACTIONS-->
                         <section class="staff-form-card">
-                            <button type="button" class="staff-save-button">
+                            <button type="submit" class="staff-save-button">
                                 <i class="bi bi-save"></i>
                                 <span th:text="${staffType == 'doctor'} ? 'Lưu tài khoản bác sĩ' : 'Lưu tài khoản lễ tân'">Lưu tài khoản</span>
                             </button>
-                            <a th:href="@{/manager/staff}" class="staff-cancel-button">Hủy</a>
+                            <a th:href="@{/manager/staff/list}" class="staff-cancel-button">Hủy</a>
                         </section>
 
                         <!--ROLE ASSIGNMENT NOTE-->
