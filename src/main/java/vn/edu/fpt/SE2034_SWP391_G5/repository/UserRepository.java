@@ -3,6 +3,7 @@ package vn.edu.fpt.SE2034_SWP391_G5.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.StaffResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
@@ -57,9 +58,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByEmail(String email);
     Optional<User> findByUsername(String username);
+    boolean existsByPhone(String phone);
+    boolean existsByLicenseNumber(String licenseNumber);
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
-
 
     @Query("select new vn.edu.fpt.SE2034_SWP391_G5.dto.response.StaffResponse (" +
             " u.id, " +
@@ -98,5 +100,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("select count(*) from Appointment a join a.doctor d where d.id=:doctorId And a.status=:appointmentStatus")
     long countDoctorsAppointmentByAppointmentStatus(@Param("appointmentStatus") String  appointmentStatus, @Param("doctorId") Long doctorId);
+
 
 }

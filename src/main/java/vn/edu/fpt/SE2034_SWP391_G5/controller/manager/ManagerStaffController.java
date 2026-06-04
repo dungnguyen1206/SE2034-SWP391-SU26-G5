@@ -1,11 +1,11 @@
 package vn.edu.fpt.SE2034_SWP391_G5.controller.manager;
 
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateStaffRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorOnDutyResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorStaffDetailResponse;
@@ -15,6 +15,8 @@ import vn.edu.fpt.SE2034_SWP391_G5.entity.Department;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 import vn.edu.fpt.SE2034_SWP391_G5.enums.AppointmentStatus;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.DepartmentRepository;
+import vn.edu.fpt.SE2034_SWP391_G5.repository.RoleRepository;
+import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRoleRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DepartmentService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DoctorService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.ReceptionistService;
@@ -33,35 +35,42 @@ public class ManagerStaffController {
     private final StaffService staffService;
     private final ReceptionistService receptionistService;
     private final DepartmentService departmentService;
+    private final RoleRepository roleRepository;
+    private final UserRoleRepository userRoleRepository;
+    ;
 
-    public ManagerStaffController(DoctorService doctorService, StaffService staffService, ReceptionistService receptionistService, DepartmentService departmentService) {
+    public ManagerStaffController(DoctorService doctorService
+            , StaffService staffService, ReceptionistService receptionistService
+            , DepartmentService departmentService,  RoleRepository roleRepository,  UserRoleRepository userRoleRepository) {
         this.doctorService = doctorService;
         this.staffService = staffService;
         this.receptionistService = receptionistService;
-        this.departmentService =  departmentService;
+        this.departmentService = departmentService;
+        this.roleRepository = roleRepository;
+        this.userRoleRepository = userRoleRepository;
     }
 
     @GetMapping("/list")
     public String staff(@RequestParam(required = false) String role,
-                            @RequestParam(required = false) String filterKey,Model  model) {
-         String selectedRole = ("DOCTOR".equals(role) || "RECEPTIONIST".equals(role)) ? role : null;
+                        @RequestParam(required = false) String filterKey, Model model) {
+        String selectedRole = ("DOCTOR".equals(role) || "RECEPTIONIST".equals(role)) ? role : null;
 
-         
-         long doctorCount = doctorService.findByRoleNameAndStatus("DOCTOR", "ACTIVE").size();
-         long receptionistCount = receptionistService.findByRoleNameAndStatus("RECEPTIONIST", "ACTIVE").size();
-         long totalStaff  = doctorCount + receptionistCount;
+
+        long doctorCount = doctorService.findByRoleNameAndStatus("DOCTOR", "ACTIVE").size();
+        long receptionistCount = receptionistService.findByRoleNameAndStatus("RECEPTIONIST", "ACTIVE").size();
+        long totalStaff = doctorCount + receptionistCount;
 
         List<StaffResponse> staffResponses = staffService.findStaff(selectedRole, filterKey);
 
         int numberOfResult = staffResponses.size();
 
 
-         model.addAttribute("totalStaff", totalStaff);
-         model.addAttribute("doctorCount", doctorCount);
-         model.addAttribute("receptionistCount", receptionistCount);
-         model.addAttribute("staffResponses", staffResponses);
-         model.addAttribute("numberOfResult", numberOfResult);
-         model.addAttribute("selectedRole", selectedRole);
+        model.addAttribute("totalStaff", totalStaff);
+        model.addAttribute("doctorCount", doctorCount);
+        model.addAttribute("receptionistCount", receptionistCount);
+        model.addAttribute("staffResponses", staffResponses);
+        model.addAttribute("numberOfResult", numberOfResult);
+        model.addAttribute("selectedRole", selectedRole);
 
         return "manager/staff/list";
     }
@@ -70,9 +79,11 @@ public class ManagerStaffController {
     public String createStaffForm(@RequestParam(defaultValue = "doctor") String type, Model model) {
         String staffType = "receptionist".equalsIgnoreCase(type) ? "receptionist" : "doctor";
 
+        CreateStaffRequest createStaffForm = new CreateStaffRequest();
+        createStaffForm.setStaffType(staffType);
         List<Department> departmentList = departmentService.getAllActiveDepartments();
         model.addAttribute("departmentList", departmentList);
-        model.addAttribute("createStaffForm", new CreateStaffRequest());
+        model.addAttribute("createStaffForm", createStaffForm);
         model.addAttribute("staffType", staffType);
         model.addAttribute("roleName", "doctor".equals(staffType) ? "ROLE_DOCTOR" : "ROLE_RECEPTIONIST");
         model.addAttribute("roleLabel", "doctor".equals(staffType) ? "Bác sĩ" : "Lễ tân");
@@ -80,15 +91,45 @@ public class ManagerStaffController {
         return "manager/staff/form";
     }
 
-    @GetMapping("/{staffId}")
-    public String staffDetail(@PathVariable Long staffId,@RequestParam String staffRole, Model model) {
 
-        if(staffRole.equalsIgnoreCase("receptionist")) {
+    @PostMapping("/create")
+    public String createStaff(@Valid @ModelAttribute("createStaffForm") CreateStaffRequest createStaffForm,
+                              BindingResult bindingResult,
+                              Model model) {
+
+        if (bindingResult.hasErrors()) {
+            List<Department> departmentList = departmentService.getAllActiveDepartments();
+            model.addAttribute("departmentList", departmentList);
+            model.addAttribute("createStaffForm", createStaffForm);
+            model.addAttribute("staffType", createStaffForm.getStaffType());
+            model.addAttribute("roleName", "doctor".equals(createStaffForm.getStaffType()) ? "ROLE_DOCTOR" : "ROLE_RECEPTIONIST");
+            model.addAttribute("roleLabel", "doctor".equals(createStaffForm.getStaffType()) ? "Bác sĩ" : "Lễ tân");
+            return "manager/staff/form";
+        }
+
+        staffService.createStaff(createStaffForm, bindingResult);
+        if (bindingResult.hasErrors()) {
+            List<Department> departmentList = departmentService.getAllActiveDepartments();
+            model.addAttribute("departmentList", departmentList);
+            model.addAttribute("createStaffForm", createStaffForm);
+            model.addAttribute("staffType", createStaffForm.getStaffType());
+            model.addAttribute("roleName", "doctor".equals(createStaffForm.getStaffType()) ? "ROLE_DOCTOR" : "ROLE_RECEPTIONIST");
+            model.addAttribute("roleLabel", "doctor".equals(createStaffForm.getStaffType()) ? "Bác sĩ" : "Lễ tân");
+            return "manager/staff/form";
+        }
+
+        return "redirect:/manager/staff/list";
+    }
+
+
+    @GetMapping("/{staffId}")
+    public String staffDetail(@PathVariable Long staffId, @RequestParam String staffRole, Model model) {
+
+        if (staffRole.equalsIgnoreCase("receptionist")) {
             ReceptionistStaffDetailResponse receptionist = staffService.findReceptionistStaffDetailById(staffId);
             model.addAttribute("staff", receptionist);
             model.addAttribute("receptionist", receptionist);
-        }
-        else{
+        } else {
             DoctorStaffDetailResponse doctor = staffService.findDoctorStaffDetailById(staffId);
 
             Long numberOfUpcomingAppointment = staffService.countDoctorsAppointmentByAppointmentStatus(AppointmentStatus.CONFIRMED.toString(), doctor.getId());

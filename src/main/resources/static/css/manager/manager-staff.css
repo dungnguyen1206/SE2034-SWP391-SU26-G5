@@ -646,6 +646,14 @@
     border: 1px dashed #cbd5e1;
     background: #ffffff;
     color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.staff-file-input {
+    display: none;
 }
 
 .staff-save-button {
