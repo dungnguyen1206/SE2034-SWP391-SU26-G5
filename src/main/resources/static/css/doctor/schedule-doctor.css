@@ -1,93 +1,122 @@
 .schedule-main {
-    padding: 42px 38px;
-}
-
-.breadcrumb {
-    font-size: 16px;
-    color: #334155;
-    margin-bottom: 30px;
-}
-
-.breadcrumb span {
-    color: #1764ff;
+    padding: 40px 30px;
 }
 
 .schedule-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 42px;
+    margin-bottom: 32px;
+    max-width: 1050px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .schedule-header h1 {
-    font-size: 36px;
-    margin-bottom: 8px;
+    font-size: 32px;
+    margin-bottom: 6px;
 }
 
 .schedule-header p {
-    font-size: 17px;
+    font-size: 14px;
     color: #475569;
 }
+
 
 .week-control {
     display: flex;
     align-items: center;
-    gap: 14px;
-    font-size: 17px;
+    gap: 10px;
+    font-size: 14px;
 }
 
 .week-control button {
-    width: 42px;
-    height: 42px;
+    width: 34px;
+    height: 34px;
     border: 1px solid #ddd;
     background: white;
-    border-radius: 10px;
+    border-radius: 8px;
     cursor: pointer;
+}
+
+.timetable-container {
+    border: 1px solid #d9dee7;
+    border-radius: 12px;
+    background: white;
+    overflow: hidden;
+    margin-top: 30px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    max-width: 1050px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .week-grid {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
-    gap: 20px;
+    gap: 0;
 }
 
 .day {
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #e2e8f0;
     text-align: center;
 }
 
-.day > p {
-    color: #475569;
-    font-size: 16px;
-    margin-bottom: 12px;
+.day:last-child {
+    border-right: none;
 }
 
-.day > h2 {
-    font-size: 30px;
-    margin-bottom: 20px;
+.day-header {
+    padding: 12px 8px;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
 }
 
-.day-box {
-    height: 350px;
+.day-header p {
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+}
+
+.day-header h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0;
+}
+
+.day-body {
+    padding: 12px 8px;
+    height: 360px;
     background: white;
-    border: 1px solid #d9dee7;
-    border-radius: 10px;
-    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    box-sizing: border-box;
 }
 
-.day-box.empty {
+.day-empty {
     display: flex;
     align-items: center;
     justify-content: center;
+    height: 100%;
 }
 
-.day-box.empty i {
-    font-size: 42px;
-    color: #d9dee7;
+.day-empty i {
+    font-size: 32px;
+    color: #cbd5e1;
+}
+
+.shift-wrapper {
+    height: 100%;
 }
 
 .shift {
     border-radius: 10px;
-    padding: 20px 10px;
+    padding: 14px 6px;
     text-align: center;
     height: 100%;
     display: flex;
@@ -108,18 +137,22 @@
 }
 
 .shift h3 {
-    font-size: 17px;
+    font-size: 14px;
     margin-bottom: 0;
+    font-weight: 700;
 }
 
 .shift p {
     color: #334155;
     margin-bottom: 0;
+    font-size: 13px;
+    font-weight: 500;
 }
 
 .shift small {
     color: #64748b;
-    line-height: 1.5;
+    line-height: 1.4;
+    font-size: 11px;
 }
 
 .morning {
@@ -154,6 +187,9 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 28px;
     margin-top: 38px;
+    max-width: 1050px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .summary-card {

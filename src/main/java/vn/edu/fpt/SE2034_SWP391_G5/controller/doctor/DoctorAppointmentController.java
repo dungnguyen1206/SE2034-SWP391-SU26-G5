@@ -6,12 +6,14 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRepository;
+import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
 
 @Controller
@@ -22,16 +24,17 @@ public class DoctorAppointmentController {
     private final AppointmentService appointmentService;
     private final UserRepository userRepository;
 
-    private static final Long DEMO_DOCTOR_ID = 5L;
-
     @GetMapping("/appointment-list")
     public String appointmentList(
             @RequestParam(value = "status", defaultValue = "ALL") String status,
             @RequestParam(value = "page", defaultValue = "0") int page,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
 
+        Long doctorId = userDetails.getUser().getId();
+
         // Doctor Info sidebar
-        User doctor = userRepository.findById(DEMO_DOCTOR_ID).orElse(null);
+        User doctor = userRepository.findById(doctorId).orElse(null);
         if (doctor != null) {
             String doctorName = (doctor.getLastName() != null ? doctor.getLastName() + " " : "")
                     + (doctor.getMiddleName() != null ? doctor.getMiddleName() + " " : "")
@@ -55,7 +58,7 @@ public class DoctorAppointmentController {
 
         // Pagination setup (5 items per page)
         Pageable pageable = PageRequest.of(page, 5, Sort.by("id").ascending());
-        Page<AppointmentResponse> appointmentsPage = appointmentService.getAppointmentsForDoctor(DEMO_DOCTOR_ID, status, pageable);
+        Page<AppointmentResponse> appointmentsPage = appointmentService.getAppointmentsForDoctor(doctorId, status, pageable);
 
         model.addAttribute("appointments", appointmentsPage);
         model.addAttribute("currentStatus", status);
@@ -71,23 +74,26 @@ public class DoctorAppointmentController {
         model.addAttribute("totalElements", totalElements);
 
         // Tab counts
-        model.addAttribute("countAll", appointmentService.countAppointmentsForDoctor(DEMO_DOCTOR_ID, "ALL"));
-        model.addAttribute("countWaiting", appointmentService.countAppointmentsForDoctor(DEMO_DOCTOR_ID, "WAITING"));
-        model.addAttribute("countExamining", appointmentService.countAppointmentsForDoctor(DEMO_DOCTOR_ID, "IN_PROGRESS"));
-        model.addAttribute("countCompleted", appointmentService.countAppointmentsForDoctor(DEMO_DOCTOR_ID, "COMPLETED"));
+        model.addAttribute("countAll", appointmentService.countAppointmentsForDoctor(doctorId, "ALL"));
+        model.addAttribute("countWaiting", appointmentService.countAppointmentsForDoctor(doctorId, "WAITING"));
+        model.addAttribute("countExamining", appointmentService.countAppointmentsForDoctor(doctorId, "IN_PROGRESS"));
+        model.addAttribute("countCompleted", appointmentService.countAppointmentsForDoctor(doctorId, "COMPLETED"));
 
         return "doctor/appointment-list";
     }
 
     @PostMapping("/appointments/{id}/status")
-    @ResponseBody
-    public ResponseEntity<Void> updateStatus(@PathVariable Long id, @RequestParam String status) {
+    public String updateStatus(
+            @PathVariable Long id,
+            @RequestParam String status,
+            @RequestParam(value = "currentStatus", defaultValue = "ALL") String currentStatus,
+            @RequestParam(value = "page", defaultValue = "0") int page) {
         try {
             appointmentService.updateAppointmentStatus(id, status);
-            return ResponseEntity.ok().build();
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            // Log or handle error if needed
         }
+        return "redirect:/doctor/appointment-list?status=" + currentStatus + "&page=" + page;
     }
 }
 

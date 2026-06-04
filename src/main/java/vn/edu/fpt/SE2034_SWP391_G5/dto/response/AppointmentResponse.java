@@ -29,7 +29,6 @@ public class AppointmentResponse {
 
     // Patient info
     private Long patientId;
-    private String patientFullName;
 
     //LinhNH 01/06/2026
     private Integer patientAge;
@@ -38,20 +37,14 @@ public class AppointmentResponse {
 
     // Doctor info
     private Long doctorId;
-    private String doctorFullName;
     private String doctorDegree;
-    private String departmentName;
 
     // Service info
     private Long serviceId;
     private String serviceName;
 
     // Schedule info
-    private LocalDate bookingDate;
     private String shift;
-    private LocalTime slotStartTime;
-    private LocalTime slotEndTime;
-    private String roomNumber;
 
     // Other
     private String note;
