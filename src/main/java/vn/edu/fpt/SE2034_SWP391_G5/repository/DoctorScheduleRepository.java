@@ -27,4 +27,7 @@ public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, 
     List<DoctorSchedule> findAvailableSchedulesByDoctorId(
             @Param("doctorId") Long doctorId,
             @Param("fromDate") LocalDate fromDate);
+
+    List<DoctorSchedule> findByDoctorIdAndWorkDateBetweenAndStatusOrderByWorkDateAscShiftAsc(
+            Long doctorId, LocalDate startDate, LocalDate endDate, String status);
 }

@@ -1,0 +1,227 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background-color: #f1f5f9;
+    color: #111827;
+}
+
+.page {
+    min-height: 100vh;
+    padding: 32px;
+}
+
+.ticket-actions {
+    max-width: 720px;
+    margin: 0 auto 18px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn-print,
+.btn-back,
+.btn-confirm-checkin {
+    height: 42px;
+    padding: 0 16px;
+    border-radius: 10px;
+    border: none;
+    font-size: 14px;
+    font-weight: 800;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.btn-print {
+    background-color: #2563eb;
+    color: #ffffff;
+}
+
+.btn-print:hover {
+    background-color: #1d4ed8;
+}
+
+.btn-back {
+    background-color: #ffffff;
+    color: #334155;
+    border: 1px solid #cbd5e1;
+}
+
+.btn-back:hover {
+    background-color: #f8fafc;
+}
+
+.btn-confirm-checkin {
+    background-color: #16a34a;
+    color: #ffffff;
+}
+
+.btn-confirm-checkin:hover {
+    background-color: #15803d;
+}
+
+.message {
+    max-width: 720px;
+    margin: 0 auto 18px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.success-message {
+    background-color: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+.error-message {
+    background-color: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.ticket {
+    max-width: 720px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.ticket-header {
+    text-align: center;
+    border-bottom: 2px solid #111827;
+    padding-bottom: 16px;
+    margin-bottom: 22px;
+}
+
+.ticket-header h1 {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.ticket-header p {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 12px;
+}
+
+.ticket-header h2 {
+    font-size: 22px;
+    font-weight: 800;
+}
+
+.ticket-main-number {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.ticket-main-number div {
+    border: 2px solid #2563eb;
+    border-radius: 16px;
+    padding: 18px;
+    text-align: center;
+    background-color: #eff6ff;
+}
+
+.ticket-main-number span {
+    display: block;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1d4ed8;
+    margin-bottom: 8px;
+}
+
+.ticket-main-number strong {
+    display: block;
+    font-size: 42px;
+    font-weight: 900;
+    color: #1e3a8a;
+}
+
+.ticket-section {
+    margin-bottom: 22px;
+}
+
+.ticket-section h3 {
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 12px;
+    color: #0f172a;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 8px;
+}
+
+.ticket-row {
+    display: grid;
+    grid-template-columns: 170px 1fr;
+    padding: 9px 0;
+    font-size: 15px;
+}
+
+.ticket-row span {
+    color: #64748b;
+}
+
+.ticket-row strong {
+    color: #111827;
+}
+
+.ticket-note {
+    background-color: #f8fafc;
+    border-left: 4px solid #2563eb;
+    padding: 12px 14px;
+    font-size: 14px;
+    color: #475569;
+    margin-top: 10px;
+}
+
+.error-note {
+    border-left-color: #dc2626;
+    background-color: #fef2f2;
+    color: #991b1b;
+}
+
+.confirm-actions {
+    margin-top: 24px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+@media print {
+    body {
+        background-color: #ffffff;
+    }
+
+    .page {
+        padding: 0;
+    }
+
+    .ticket-actions,
+    .message,
+    .confirm-actions {
+        display: none;
+    }
+
+    .ticket {
+        max-width: none;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        padding: 24px;
+    }
+}

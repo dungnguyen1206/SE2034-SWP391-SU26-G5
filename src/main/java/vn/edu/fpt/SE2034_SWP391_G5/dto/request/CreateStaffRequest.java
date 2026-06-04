@@ -9,9 +9,12 @@ import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
-@Data
+
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class CreateStaffRequest {
     @NotBlank(message = "Loại nhân viên không được để trống")
     private String staffType; // DOCTOR or RECEPTIONIST

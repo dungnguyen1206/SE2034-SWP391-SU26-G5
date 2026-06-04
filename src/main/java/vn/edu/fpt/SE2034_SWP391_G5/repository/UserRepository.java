@@ -13,6 +13,7 @@ import java.util.Optional;
 
 import java.util.List;
 
+
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
@@ -63,6 +64,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
 
+    @Query("SELECT u.id, " +
+            "CONCAT(CONCAT(CONCAT(u.lastName, ' '), COALESCE(CONCAT(u.middleName, ' '), '')), u.firstName), " +
+            "UPPER(CONCAT(SUBSTRING(u.lastName, 1, 1), SUBSTRING(u.firstName, 1, 1))) " +
+            "FROM User u " +
+            "WHERE u.email = :email")
+    List<Object[]> findReceptionistInfoByEmail(@Param("email") String email);
     @Query("select new vn.edu.fpt.SE2034_SWP391_G5.dto.response.StaffResponse (" +
             " u.id, " +
             " concat(u.firstName,' ' , COALESCE(u.middleName,' ') ,' ', u.lastName)," +

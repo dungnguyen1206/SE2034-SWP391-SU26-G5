@@ -1,6 +1,10 @@
 package vn.edu.fpt.SE2034_SWP391_G5.dto.response;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.Data;
 import lombok.*;
 
@@ -23,5 +27,4 @@ public class DoctorResponse {
     private String departmentName;
     private Integer departmentId;
     private String doctorStatus;
-
 }

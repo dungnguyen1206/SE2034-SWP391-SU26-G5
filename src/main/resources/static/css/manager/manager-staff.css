@@ -982,3 +982,12 @@
 .staff-statistics-item.cancelled i {
     color: #ef4444;
 }
+
+/* STAFF FORM ERROR */
+.field-error {
+    margin-top: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: #dc2626;
+}

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Phiếu Khám Bệnh</title>
+
+        <link rel="stylesheet" th:href="@{/css/receptionist/appointment/check-in-ticket.css}">
+    </head>
+
+    <body>
+
+        <div class="page">
+
+            <div class="ticket-actions">
+                <button th:if="${checkedIn}"
+                        type="button"
+                        class="btn-print"
+                        onclick="window.print()">
+                    In phiếu
+                </button>
+
+                <a th:href="@{/receptionist/appointment}" class="btn-back">
+                    Quay lại danh sách
+                </a>
+            </div>
+
+            <div class="message success-message"
+                 th:if="${successMessage}"
+                 th:text="${successMessage}">
+            </div>
+
+            <div class="message error-message"
+                 th:if="${errorMessage}"
+                 th:text="${errorMessage}">
+            </div>
+
+            <div class="ticket">
+
+                <div class="ticket-header">
+                    <h1>BỆNH VIỆN HAMS</h1>
+                    <p th:if="${!checkedIn}">Kiểm tra thông tin trước khi check-in</p>
+                    <p th:if="${checkedIn}">Hệ thống quản lý lịch khám bệnh</p>
+
+                    <h2 th:if="${!checkedIn}">XÁC NHẬN CHECK-IN</h2>
+                    <h2 th:if="${checkedIn}">PHIẾU KHÁM BỆNH</h2>
+                </div>
+
+                <div class="ticket-main-number" th:if="${checkedIn}">
+                    <div>
+                        <span>Phòng khám</span>
+                        <strong th:text="${ticket.roomNumber}"></strong>
+                    </div>
+
+                    <div>
+                        <span>Số thứ tự</span>
+                        <strong th:text="${ticket.queueNumber}"></strong>
+                    </div>
+                </div>
+
+                <div class="ticket-section">
+                    <h3>Thông tin bệnh nhân</h3>
+
+                    <div class="ticket-row">
+                        <span>Bệnh nhân:</span>
+                        <strong th:text="${ticket.patientFullName}"></strong>
+                    </div>
+
+                    <div class="ticket-row">
+                        <span>Số điện thoại:</span>
+                        <strong th:text="${ticket.patientPhone}"></strong>
+                    </div>
+                </div>
+
+                <div class="ticket-section">
+                    <h3>Thông tin lịch khám</h3>
+
+                    <div class="ticket-row">
+                        <span>Mã lịch hẹn:</span>
+                        <strong th:text="${ticket.appointmentCode}"></strong>
+                    </div>
+
+                    <div class="ticket-row">
+                        <span>Bác sĩ:</span>
+                        <strong th:text="${ticket.doctorFullName}"></strong>
+                    </div>
+
+                    <div class="ticket-row">
+                        <span>Chuyên khoa:</span>
+                        <strong th:text="${ticket.departmentName}"></strong>
+                    </div>
+
+                    <div class="ticket-row">
+                        <span>Phòng khám:</span>
+                        <strong th:text="${ticket.roomNumber}"></strong>
+                    </div>
+
+                    <div class="ticket-row">
+                        <span>Ngày khám:</span>
+                        <strong th:text="${#temporals.format(ticket.bookingDate, 'dd/MM/yyyy')}"></strong>
+                    </div>
+
+                    <div class="ticket-row">
+                        <span>Giờ khám:</span>
+                        <strong th:text="${ticket.slotText}"></strong>
+                    </div>
+
+                    <div class="ticket-row" th:if="${checkedIn}">
+                        <span>Giờ check-in:</span>
+                        <strong th:text="${#temporals.format(ticket.checkInTime, 'dd/MM/yyyy HH:mm')}"></strong>
+                    </div>
+
+                    <div class="ticket-row">
+                        <span>Trạng thái:</span>
+                        <strong th:text="${ticket.statusLabel}"></strong>
+                    </div>
+                </div>
+
+                <div class="ticket-note" th:if="${!checkedIn && canCheckIn}">
+                    <p>Vui lòng kiểm tra đúng thông tin bệnh nhân trước khi xác nhận check-in.</p>
+                </div>
+
+                <div class="ticket-note error-note" th:if="${!checkedIn && !canCheckIn}">
+                    <p>Không thể check-in. Chỉ được check-in lịch hẹn đã xác nhận và đúng ngày khám.</p>
+                </div>
+
+                <div class="ticket-note" th:if="${checkedIn}">
+                    <p>Vui lòng ngồi chờ trước phòng khám và theo dõi số thứ tự.</p>
+                </div>
+
+                <div class="confirm-actions" th:if="${!checkedIn}">
+                    <form th:if="${canCheckIn}"
+                          th:action="@{/receptionist/appointment/{id}/confirm-check-in(id=${ticket.id})}"
+                          method="post">
+
+                        <button type="submit" class="btn-confirm-checkin">
+                            Xác nhận check-in
+                        </button>
+                    </form>
+
+                    <a th:href="@{/receptionist/appointment}" class="btn-back">
+                        Hủy
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+
+    </body>
+</html>

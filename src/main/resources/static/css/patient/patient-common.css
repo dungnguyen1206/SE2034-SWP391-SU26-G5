@@ -1,0 +1,84 @@
+/* ============================================================
+   PATIENT LAYOUT - Common
+   ============================================================ */
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Arial, sans-serif; background: #f4f6f9; color: #0f172a; }
+
+.patient-layout { display: flex; min-height: 100vh; background: #f4f6f9; }
+
+/* SIDEBAR */
+.patient-sidebar { width: 260px; min-height: 100vh; background: #0f4c81; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
+.patient-sidebar-header { padding: 24px; border-bottom: 1px solid rgba(255,255,255,0.12); }
+.patient-brand { display: flex; align-items: center; gap: 12px; }
+.patient-brand-icon { width: 36px; height: 36px; border-radius: 10px; background: #1a6fba; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+.patient-brand-text h1 { margin: 0; font-size: 20px; font-weight: 700; }
+.patient-brand-text p { margin: 3px 0 0; font-size: 12px; color: #93c5fd; }
+.patient-sidebar-section { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: #bfdbfe; font-weight: 600; padding: 18px 24px 8px; }
+.patient-nav { flex: 1; }
+.patient-nav-list { list-style: none; margin: 0; padding: 0; }
+.patient-nav-link { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin: 4px 12px; border-radius: 8px; text-decoration: none; color: #bfdbfe; font-size: 14px; transition: background 0.2s ease, color 0.2s ease; }
+.patient-nav-link i { width: 18px; font-size: 16px; text-align: center; flex-shrink: 0; }
+.patient-nav-link.active { background: #1a6fba; color: #fff; font-weight: 600; }
+.patient-nav-link:hover { background: rgba(255,255,255,0.08); color: #fff; }
+
+/* SIDEBAR FOOTER */
+.patient-sidebar-footer { padding: 20px 24px; border-top: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; gap: 12px; }
+.patient-user-avatar { width: 36px; height: 36px; border-radius: 50%; background: #1a6fba; color: white; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.patient-user-info { display: flex; flex-direction: column; gap: 3px; flex: 1; overflow: hidden; }
+.patient-user-info strong { font-size: 13px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.patient-user-info span { font-size: 11px; color: #93c5fd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* MAIN */
+.patient-main { flex: 1; padding: 32px; background: #f4f6f9; overflow-x: hidden; }
+
+/* PAGE HEADER */
+.patient-page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+.patient-page-header h2 { margin: 0; font-size: 24px; font-weight: 700; color: #0f172a; }
+.patient-page-header p { margin: 4px 0 0; font-size: 14px; color: #64748b; }
+
+/* CARDS */
+.patient-card { background: #ffffff; border: 1px solid #dde3ea; border-radius: 12px; padding: 20px; box-shadow: 0 1px 2px rgba(15,23,42,0.06); }
+.patient-card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid #f1f5f9; }
+.patient-card-header i { color: #0f4c81; font-size: 18px; }
+.patient-card-header h3 { margin: 0; font-size: 16px; font-weight: 700; color: #0f172a; }
+
+/* BUTTONS */
+.btn-primary { display: inline-flex; align-items: center; gap: 8px; background: #0f4c81; color: #fff; border: none; border-radius: 9px; padding: 10px 18px; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; transition: background 0.2s ease; }
+.btn-primary:hover { background: #0d3f6e; color: #fff; }
+.btn-secondary { display: inline-flex; align-items: center; gap: 8px; background: #f1f5f9; color: #334155; border: 1px solid #dde3ea; border-radius: 9px; padding: 10px 18px; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; transition: background 0.2s ease; }
+.btn-secondary:hover { background: #e2e8f0; }
+.btn-danger { display: inline-flex; align-items: center; gap: 8px; background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; border-radius: 9px; padding: 10px 18px; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; transition: background 0.2s ease; }
+.btn-danger:hover { background: #fecaca; }
+
+/* STATUS BADGES */
+.status-badge { display: inline-flex; align-items: center; padding: 5px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.status-pending    { background: #fef3c7; color: #92400e; }
+.status-confirmed  { background: #dbeafe; color: #1d4ed8; }
+.status-checked-in { background: #cffafe; color: #0e7490; }
+.status-completed  { background: #dcfce7; color: #166534; }
+.status-cancelled  { background: #fee2e2; color: #b91c1c; }
+.status-rejected   { background: #fce7f3; color: #9d174d; }
+.status-no-show    { background: #f1f5f9; color: #64748b; }
+
+/* TABLES */
+.patient-table-card { background: #ffffff; border: 1px solid #dde3ea; border-radius: 12px; box-shadow: 0 1px 2px rgba(15,23,42,0.06); overflow: hidden; }
+.patient-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.patient-table th { background: #f8fafc; border-bottom: 1px solid #dde3ea; color: #64748b; font-size: 12px; font-weight: 700; padding: 14px 20px; text-align: left; text-transform: uppercase; }
+.patient-table td { border-bottom: 1px solid #eef2f7; color: #475569; padding: 14px 20px; vertical-align: middle; }
+.patient-table tbody tr:last-child td { border-bottom: none; }
+.patient-table tbody tr:hover { background: #f8fafc; }
+.patient-table-footer { padding: 14px 20px; color: #94a3b8; font-size: 13px; background: #f8fafc; border-top: 1px solid #dde3ea; }
+
+/* BACK LINK */
+.patient-back-link { width: 34px; height: 34px; display: inline-flex; align-items: center; justify-content: center; color: #64748b; border-radius: 8px; text-decoration: none; font-size: 18px; flex-shrink: 0; }
+.patient-back-link:hover { background: #e2e8f0; color: #0f172a; }
+
+/* ALERTS */
+.alert { padding: 14px 18px; border-radius: 10px; font-size: 14px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
+.alert-success { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+.alert-error   { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+
+/* EMPTY STATE */
+.empty-state { text-align: center; padding: 60px 20px; color: #94a3b8; }
+.empty-state i { font-size: 48px; margin-bottom: 16px; display: block; }
+.empty-state p { font-size: 15px; margin: 0 0 20px; }

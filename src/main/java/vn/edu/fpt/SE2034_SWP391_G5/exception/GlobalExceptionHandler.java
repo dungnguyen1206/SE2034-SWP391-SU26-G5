@@ -5,9 +5,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
     @ExceptionHandler(ResourceNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleNotFound(ResourceNotFoundException ex, Model model) {
@@ -24,6 +26,15 @@ public class GlobalExceptionHandler {
         return "error/400";
     }
 
+    // Trước đây không có handler riêng → NoResourceFoundException (favicon.ico, static files)
+    // bị bắt bởi handleGeneral → render trang error/500 với HTTP 500
+    // Fix: để Spring xử lý tự nhiên (trả 404 cho browser, không render error page)
+    @ExceptionHandler(NoResourceFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public void handleNoResource() {
+        // Không làm gì - Spring sẽ trả 404 cho static resource không tìm thấy
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public String handleGeneral(Exception ex, Model model) {
@@ -32,3 +43,4 @@ public class GlobalExceptionHandler {
         return "error/500";
     }
 }
+

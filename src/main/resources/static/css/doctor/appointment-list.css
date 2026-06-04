@@ -1,0 +1,171 @@
+.patient-main {
+    padding: 30px 38px;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 30px;
+}
+
+.page-header h1 {
+    font-size: 38px;
+    margin-bottom: 12px;
+}
+
+.page-header p {
+    font-size: 18px;
+    color: #475569;
+}
+
+
+.filter-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.filter-tabs button {
+    padding: 13px 22px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.filter-tabs button.active {
+    background: #020617;
+    color: white;
+}
+
+.patient-table {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0 0 14px 14px;
+    overflow: hidden;
+}
+
+.patient-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.patient-table thead {
+    background: #f8fafc;
+}
+
+.patient-table th {
+    text-align: left;
+    padding: 22px 30px;
+    font-size: 16px;
+}
+
+.patient-table td {
+    padding: 24px 30px;
+    border-top: 1px solid #e5e7eb;
+    vertical-align: middle;
+}
+
+.patient-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #dbeafe;
+    color: #1764ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
+
+.patient-info h4 {
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.patient-info p {
+    color: #475569;
+}
+
+.time {
+    color: #005eff;
+    margin-top: 6px;
+    font-weight: 600;
+}
+
+.status-select {
+    width: 185px;
+    height: 42px;
+    border: none;
+    outline: none;
+    border-radius: 10px;
+    padding: 0 14px;
+    font-weight: 700;
+    cursor: pointer;
+    background: #f1f2f5;
+}
+
+.status-select.waiting {
+    color: #b45309 !important;
+    background: #fef3c7 !important;
+}
+
+.status-select.examining {
+    color: #1d4ed8 !important;
+    background: #dbeafe !important;
+}
+
+.status-select.done {
+    color: #15803d !important;
+    background: #dcfce7 !important;
+}
+
+.detail-link {
+    color: black;
+    text-decoration: none;
+    font-weight: 700;
+    display: flex;
+    gap: 18px;
+    align-items: center;
+}
+
+.table-footer {
+    padding: 20px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.table-footer p {
+    color: #475569;
+}
+
+.pagination {
+    display: flex;
+    gap: 8px;
+}
+
+.pagination button {
+    height: 40px;
+    padding: 0 15px;
+    border: 1px solid #e5e7eb;
+    background: white;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.pagination button.active {
+    background: #020617;
+    color: white;
+}

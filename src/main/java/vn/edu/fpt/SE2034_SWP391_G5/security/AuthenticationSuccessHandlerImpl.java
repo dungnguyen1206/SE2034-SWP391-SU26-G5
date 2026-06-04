@@ -35,7 +35,7 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
                     response.sendRedirect("/manager/dashboard");
                     return;
                 case "ROLE_ADMIN":
-                    response.sendRedirect("/admin/dashboard");
+                    response.sendRedirect("/admin/account-list");
                     return;
             }
         }

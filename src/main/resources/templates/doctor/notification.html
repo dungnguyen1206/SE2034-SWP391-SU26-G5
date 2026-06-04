@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Thông báo</title>
+
+    <link rel="stylesheet" href="../../static/css/doctor/dashboard-doctor.css" th:href="@{/css/doctor/dashboard-doctor.css}">
+    <link rel="stylesheet" href="../../static/css/doctor/notification-doctor.css" th:href="@{/css/doctor/notification-doctor.css}">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div class="layout">
+
+    <aside class="sidebar">
+        <div>
+            <div class="brand">
+                <h2>Hospital HAMS</h2>
+                <p>Dr. Professional</p>
+            </div>
+
+            <nav class="menu">
+                <a th:href="@{/doctor/dashboard}">
+                    <i class="fa-solid fa-table-cells-large"></i>
+                    Dashboard
+                </a>
+
+                <a th:href="@{/doctor/schedule}">
+                    <i class="fa-regular fa-calendar-days"></i>
+                    Lịch làm việc
+                </a>
+
+                <a th:href="@{/doctor/appointment-list}">
+                    <i class="fa-regular fa-calendar-check"></i>
+                    Danh sách bệnh nhân
+                </a>
+
+                <a class="active" th:href="@{/doctor/notification}">
+                    <i class="fa-regular fa-bell"></i>
+                    Thông báo
+                </a>
+            </nav>
+        </div>
+
+        <div class="doctor-box">
+            <div class="doctor-avatar">
+                <i class="fa-regular fa-user"></i>
+            </div>
+            <div>
+                <h4>Bác sĩ Minh</h4>
+                <p>Chuyên Môn Nội</p>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main notification-main">
+
+        <div class="notification-header">
+            <div class="title-box">
+                <i class="fa-regular fa-bell"></i>
+                <h1>Thông báo</h1>
+            </div>
+
+            <div class="header-actions">
+                <span class="new-count">5 mới</span>
+
+                <button class="read-all-btn">
+                    <i class="fa-solid fa-check"></i>
+                    Đánh dấu tất cả đã đọc
+                </button>
+            </div>
+        </div>
+
+        <section class="notification-list">
+
+            <div class="notification-card unread">
+                <div class="notify-icon blue">
+                    <i class="fa-regular fa-calendar-days"></i>
+                </div>
+
+                <div class="notify-content">
+                    <div class="dot"></div>
+
+                    <h3>Lịch hẹn mới</h3>
+                    <p>Bệnh nhân Nguyễn Thị Lan đã đặt lịch khám</p>
+
+                    <div class="notify-detail">
+                        <b>Bệnh nhân:</b> Nguyễn Thị Lan (BN-40521)<br>
+                        <b>Ngày:</b> 26/05/2024 - 09:00
+                    </div>
+
+                    <div class="notify-footer">
+                        <span>5 phút trước</span>
+
+                        <div class="notify-actions">
+                            <a href="#">
+                                <i class="fa-solid fa-check"></i>
+                                Đánh dấu đã đọc
+                            </a>
+
+                            <a href="#">
+                                <i class="fa-solid fa-xmark"></i>
+                                Xóa
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="notification-card unread">
+                <div class="notify-icon blue">
+                    <i class="fa-regular fa-calendar-days"></i>
+                </div>
+
+                <div class="notify-content">
+                    <div class="dot"></div>
+
+                    <h3>Lịch hẹn mới</h3>
+                    <p>Bệnh nhân Trần Văn Hải đã đặt lịch tái khám</p>
+
+                    <div class="notify-detail">
+                        <b>Bệnh nhân:</b> Trần Văn Hải (BN-40522)<br>
+                        <b>Ngày:</b> 26/05/2024 - 10:30
+                    </div>
+
+                    <div class="notify-footer">
+                        <span>15 phút trước</span>
+
+                        <div class="notify-actions">
+                            <a href="#">
+                                <i class="fa-solid fa-check"></i>
+                                Đánh dấu đã đọc
+                            </a>
+
+                            <a href="#">
+                                <i class="fa-solid fa-xmark"></i>
+                                Xóa
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="notification-card unread">
+                <div class="notify-icon green">
+                    <i class="fa-regular fa-user"></i>
+                </div>
+
+                <div class="notify-content">
+                    <div class="dot"></div>
+
+                    <h3>Bệnh nhân mới đăng ký</h3>
+                    <p>Lê Minh Đức đã đăng ký làm bệnh nhân mới</p>
+
+                    <div class="notify-detail">
+                        <b>Họ tên:</b> Lê Minh Đức<br>
+                        <b>Mã BN:</b> BN-40523
+                    </div>
+
+                    <div class="notify-footer">
+                        <span>30 phút trước</span>
+
+                        <div class="notify-actions">
+                            <a href="#">
+                                <i class="fa-solid fa-check"></i>
+                                Đánh dấu đã đọc
+                            </a>
+
+                            <a href="#">
+                                <i class="fa-solid fa-xmark"></i>
+                                Xóa
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+</html>

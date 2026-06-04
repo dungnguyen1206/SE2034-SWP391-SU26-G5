@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Danh sách bệnh nhân</title>
+
+    <link rel="stylesheet" href="../../static/css/doctor/dashboard-doctor.css" th:href="@{/css/doctor/dashboard-doctor.css}">
+    <link rel="stylesheet" href="../../static/css/doctor/schedule-doctor.css" th:href="@{/css/doctor/appointment-list.css}">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div class="layout">
+
+    <aside class="sidebar">
+        <div>
+            <div class="brand">
+                <h2>Hospital HAMS</h2>
+                <p>Dr. Professional</p>
+            </div>
+
+            <nav class="menu">
+                <a th:href="@{/doctor/dashboard}">
+                    <i class="fa-solid fa-table-cells-large"></i>
+                    Dashboard
+                </a>
+
+                <a th:href="@{/doctor/schedule}">
+                    <i class="fa-regular fa-calendar-days"></i>
+                    Lịch làm việc
+                </a>
+
+                <a class="active" th:href="@{/doctor/appointment-list}">
+                    <i class="fa-regular fa-calendar-check"></i>
+                    Danh sách bệnh nhân
+                </a>
+
+                <a th:href="@{/doctor/notification}">
+                    <i class="fa-regular fa-bell"></i>
+                    Thông báo
+                </a>
+            </nav>
+        </div>
+
+        <div class="doctor-box">
+            <div class="doctor-avatar">
+                <i class="fa-regular fa-user"></i>
+            </div>
+            <div>
+                <h4 th:text="${doctorName}">Bác sĩ Minh</h4>
+                <p th:text="${doctorDept}">Chuyên Môn Nội</p>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main patient-main">
+
+        <div class="page-header">
+            <div>
+                <h1>Danh sách bệnh nhân</h1>
+                <p th:text="${currentDate}">Thứ Sáu, ngày 24 tháng 05, 2024</p>
+            </div>
+
+        </div>
+
+        <div class="filter-tabs">
+            <button th:classappend="${currentStatus == 'ALL'} ? 'active' : ''"
+                    th:onclick="|location.href='@{/doctor/appointment-list(status='ALL')}'|">
+                Tất cả (<span th:text="${countAll}">7</span>)
+            </button>
+            <button th:classappend="${currentStatus == 'IN_PROGRESS'} ? 'active' : ''"
+                    th:onclick="|location.href='@{/doctor/appointment-list(status='IN_PROGRESS')}'|">
+                Đang khám (<span th:text="${countExamining}">1</span>)
+            </button>
+            <button th:classappend="${currentStatus == 'WAITING'} ? 'active' : ''"
+                    th:onclick="|location.href='@{/doctor/appointment-list(status='WAITING')}'|">
+                Đang đợi (<span th:text="${countWaiting}">5</span>)
+            </button>
+            <button th:classappend="${currentStatus == 'COMPLETED'} ? 'active' : ''"
+                    th:onclick="|location.href='@{/doctor/appointment-list(status='COMPLETED')}'|">
+                Hoàn thành (<span th:text="${countCompleted}">1</span>)
+            </button>
+        </div>
+
+        <div class="patient-table">
+            <table>
+                <thead>
+                <tr>
+                    <th>BỆNH NHÂN</th>
+                    <th>NGÀY HẸN</th>
+                    <th>TRẠNG THÁI</th>
+                    <th>THAO TÁC</th>
+                </tr>
+                </thead>
+
+                <tbody>
+                <tr th:each="a : ${appointments.content}">
+                    <td>
+                        <div class="patient-info">
+                            <div class="avatar" th:text="${a.patientInitials}">LT</div>
+                            <div>
+                                <h4 th:text="${a.patientFullName}">Lê Thị Mai Anh</h4>
+                                <p>
+                                    ID: <span th:text="${'BN-' + a.patientId}">BN-30241</span>
+                                    • <span th:text="${a.patientAge != null ? a.patientAge + ' tuổi' : 'Chưa rõ tuổi'}">45 tuổi</span>
+                                </p>
+                            </div>
+                        </div>
+                    </td>
+
+                    <td>
+                        <strong th:text="${#temporals.format(a.bookingDate, 'dd/MM/yyyy')}">24/05/2024</strong>
+                        <p class="time" th:text="${a.slotStartTime != null ? #temporals.format(a.slotStartTime, 'HH:mm') : ''}">09:00</p>
+                    </td>
+
+                    <td>
+                        <select class="status-select"
+                                th:data-id="${a.id}"
+                                th:classappend="${a.status == 'WAITING' ? 'waiting' : (a.status == 'IN_PROGRESS' ? 'examining' : 'done')}">
+                            <option value="WAITING" th:selected="${a.status == 'WAITING'}">ĐANG ĐỢI</option>
+                            <option value="IN_PROGRESS" th:selected="${a.status == 'IN_PROGRESS'}">ĐANG KHÁM</option>
+                            <option value="COMPLETED" th:selected="${a.status == 'COMPLETED'}">HOÀN THÀNH</option>
+                        </select>
+                    </td>
+
+                    <td>
+                        <a th:href="@{/doctor/appointment-detail(id=${a.id})}" class="detail-link">
+                            <i class="fa-solid fa-pen"></i>
+                            Xem chi tiết
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="table-footer" th:if="${totalElements > 0}">
+                <p th:text="'Hiển thị ' + ${startRow} + '-' + ${endRow} + ' trong tổng số ' + ${totalElements} + ' bệnh nhân'">Hiển thị 1-5 trong tổng số 7 bệnh nhân</p>
+
+                <div class="pagination" th:if="${totalPages > 1}">
+                    <button th:onclick="|location.href='@{/doctor/appointment-list(status=${currentStatus}, page=${currentPage - 1})}'|"
+                            th:disabled="${currentPage == 0}">‹ Trước</button>
+                    <button th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                            th:classappend="${currentPage == i} ? 'active' : ''"
+                            th:text="${i + 1}"
+                            th:onclick="|location.href='@{/doctor/appointment-list(status=${currentStatus}, page=${i})}'|">1</button>
+                    <button th:onclick="|location.href='@{/doctor/appointment-list(status=${currentStatus}, page=${currentPage + 1})}'|"
+                            th:disabled="${currentPage == totalPages - 1}">Sau ›</button>
+                </div>
+            </div>
+            <div class="table-footer" th:if="${totalElements == 0}" style="justify-content: center;">
+                <p>Không tìm thấy bệnh nhân nào</p>
+            </div>
+        </div>
+
+    </main>
+
+</div>
+
+<script>
+document.querySelectorAll('.status-select').forEach(select => {
+    select.addEventListener('change', function() {
+        const appointmentId = this.getAttribute('data-id');
+        const newStatus = this.value;
+
+        // Update select color classes dynamically
+        this.classList.remove('waiting', 'examining', 'done');
+        if (newStatus === 'WAITING') {
+            this.classList.add('waiting');
+        } else if (newStatus === 'IN_PROGRESS') {
+            this.classList.add('examining');
+        } else if (newStatus === 'COMPLETED') {
+            this.classList.add('done');
+        }
+
+        // Make AJAX call to update status
+        fetch(`/doctor/appointments/${appointmentId}/status?status=${newStatus}`, {
+            method: 'POST'
+        }).then(response => {
+            if (response.ok) {
+                // Reload page to update counts in tabs
+                window.location.reload();
+            } else {
+                alert('Có lỗi xảy ra khi cập nhật trạng thái');
+            }
+        }).catch(err => {
+            console.error(err);
+            alert('Có lỗi xảy ra khi kết nối máy chủ');
+        });
+    });
+});
+</script>
+</body>
+</html>
