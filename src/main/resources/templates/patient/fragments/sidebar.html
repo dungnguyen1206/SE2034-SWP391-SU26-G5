@@ -65,6 +65,13 @@
                 </a>
             </li>
             <li>
+                <!-- Trước: /patient/service (thiếu s), icon sai bi-person-circle -->
+                <a th:href="@{/patient/services}" class="patient-nav-link"
+                   th:classappend="${activeMenu == 'services'} ? ' active'">
+                    <i class="bi bi-clipboard2-pulse"></i> Dịch vụ khám
+                </a>
+            </li>
+            <li>
                 <a th:href="@{/patient/profile}" class="patient-nav-link"
                    th:classappend="${activeMenu == 'profile'} ? ' active'">
                     <i class="bi bi-person-circle"></i> Hồ sơ cá nhân
