@@ -6,4 +6,5 @@ import vn.edu.fpt.SE2034_SWP391_G5.entity.Department;
 
 @Repository
 public interface DepartmentRepository extends JpaRepository<Department, Integer> {
+
 }

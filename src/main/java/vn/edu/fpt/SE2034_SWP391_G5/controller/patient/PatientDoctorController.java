@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Department;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DepartmentService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DoctorService;
+import vn.edu.fpt.SE2034_SWP391_G5.service.MedicalServiceService;
 
 import java.util.List;
 
@@ -21,6 +23,7 @@ public class PatientDoctorController {
 
     private final DoctorService doctorService;
     private final DepartmentService departmentService;
+    private final MedicalServiceService medicalServiceService;
 
     // ---- Danh sách bác sĩ ----
     @GetMapping("/doctors")
@@ -69,4 +72,15 @@ public class PatientDoctorController {
         model.addAttribute("doctors", doctors);
         return "patient/departments/detail";
     }
+    // ---- dịch vụ theo khoa-----
+    @GetMapping("/services")
+    public String listServices(@RequestParam(required = false) Integer departmentId, Model model) {
+        List<Department> departments = departmentService.getAllActiveDepartments();
+        List<MedicalService> services = medicalServiceService.getMedicalServicelistByDepartment(departmentId);
+        model.addAttribute("services", services);
+        model.addAttribute("departments", departments);
+        model.addAttribute("selectedDepartmentId", departmentId);
+        return "patient/services/list";
+    }
+
 }
