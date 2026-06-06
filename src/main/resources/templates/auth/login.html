@@ -10,28 +10,36 @@
     <link rel="stylesheet" href="../../static/css/auth/auth.css" th:href="@{/css/auth/auth.css}">
 </head>
 <body>
+    <!-- Guest Home Button -->
+    <a href="/" class="btn-guest-home">
+        <i class="fa-solid fa-house"></i> Về trang chủ
+    </a>
+
     <div class="auth-container">
-        <!-- Left Side: Login Card with Dark Slate-Blue Background Pane -->
+        <!-- Left Side: Login Card -->
         <div class="auth-left">
             <div class="auth-card">
                 <h2 class="auth-card-title">Đăng nhập</h2>
                 
                 <!-- Alert Messages -->
-                <div th:if="${param.error != null}" class="auth-alert error" style="display: none;" th:style="'display: flex;'">
+                <div th:if="${param.error != null}" class="auth-alert error">
                     <i class="fa-solid fa-circle-exclamation"></i> Tên đăng nhập hoặc mật khẩu không đúng
                 </div>
-                <div th:if="${param.logout != null}" class="auth-alert success" style="display: none;" th:style="'display: flex;'">
+                <div th:if="${param.logout != null}" class="auth-alert success">
                     <i class="fa-solid fa-circle-check"></i> Đã đăng xuất thành công
                 </div>
-                <div th:if="${param.success != null}" class="auth-alert success" style="display: none; background-color: #e6f4ea; border: 1px solid #c2e7cd; color: #137333; padding: 10px; border-radius: 4px; margin-bottom: 15px;" th:style="'display: flex; align-items: center; gap: 8px;'">
+                <div th:if="${param.success != null}" class="auth-alert success">
                     <i class="fa-solid fa-circle-check"></i> Đăng ký thành công! Vui lòng đăng nhập.
+                </div>
+                <div th:if="${param.resetSuccess != null}" class="auth-alert success">
+                    <i class="fa-solid fa-circle-check"></i> Đặt lại mật khẩu thành công! Vui lòng đăng nhập.
                 </div>
                 
                 <form th:action="@{/login}" method="POST">
-                    <!-- Username Input (Gmail) -->
+                    <!-- Username Input -->
                     <div class="input-group">
-                        <label class="input-label" for="username">Gmail</label>
-                        <input type="email" id="username" name="username" class="auth-input" placeholder="Nhập Gmail của bạn" required autofocus>
+                        <label class="input-label" for="username">Tên đăng nhập</label>
+                        <input type="text" id="username" name="username" class="auth-input" placeholder="Nhập tên đăng nhập của bạn" required autofocus>
                     </div>
                     
                     <!-- Password Input -->
@@ -55,7 +63,7 @@
             </div>
         </div>
         
-        <!-- Right Side: Brand Logo and Illustration on Light Gray -->
+        <!-- Right Side: Brand Logo and Illustration -->
         <div class="auth-right">
             <div class="auth-logo-top">
                 <span class="logo-circle"></span>

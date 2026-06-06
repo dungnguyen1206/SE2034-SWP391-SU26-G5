@@ -49,10 +49,12 @@
                         <span class="profile-email">admin@hethong.vn</span>
                     </div>
                 </div>
-                <!-- Redirects back to login as a demo logout action -->
-                <a href="../../auth/login.html" th:href="@{/login}" class="profile-signout" title="Đăng xuất">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                </a>
+                <!-- Form POST to trigger real Spring Security logout -->
+                <form th:action="@{/logout}" method="post" style="margin: 0;">
+                    <button type="submit" class="profile-signout" title="Đăng xuất">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </form>
             </div>
         </aside>
         
@@ -81,7 +83,6 @@
                 <!-- Page Title -->
                 <div class="page-title-section">
                     <h1 class="page-title">Quản lý tài khoản</h1>
-                    <p class="page-subtitle">Tổng số 12 tài khoản trong hệ thống</p>
                 </div>
                 
                 <!-- Filter Bar actions -->
@@ -103,14 +104,10 @@
                         <button class="filter-pill">Bác sĩ</button>
                         <button class="filter-pill">Lễ tân</button>
                         <button class="filter-pill">Quản lý</button>
-                        <button class="filter-pill">Quản trị</button>
                     </div>
                 </div>
                 
                 <!-- Display results count -->
-                <div class="results-summary">
-                    Hiển thị 8 kết quả
-                </div>
                 
                 <!-- Accounts Table -->
                 <div class="table-container">
@@ -131,7 +128,7 @@
                             <tr>
                                 <td>
                                     <div class="user-identity">
-                                        <div class="user-name-avatar" style="background-color: #e0f2fe; color: #0284c7;">L</div>
+
                                         <span class="user-name">Nguyễn Thị Lan</span>
                                     </div>
                                 </td>
@@ -148,7 +145,7 @@
                                 <td style="text-align: center;">
                                     <div style="display: flex; justify-content: center; gap: 8px;">
                                         <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('Nguyễn Thị Lan', 'Bệnh nhân', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
-                                        <a href="#" class="action-btn delete" title="Xóa tài khoản" onclick="openDeleteModal('Nguyễn Thị Lan', this); return false;"><i class="fa-regular fa-trash-can"></i></a>
+                                        <a href="#" class="action-btn delete" title="Khóa tài khoản" onclick="openLockModal('Nguyễn Thị Lan', this); return false;"><i class="fa-solid fa-lock"></i></a>
                                     </div>
                                 </td>
                             </tr>
@@ -157,7 +154,7 @@
                             <tr>
                                 <td>
                                     <div class="user-identity">
-                                        <div class="user-name-avatar" style="background-color: #dcfce7; color: #16a34a;">T</div>
+
                                         <span class="user-name">BS. Trần Minh Tuấn</span>
                                     </div>
                                 </td>
@@ -174,7 +171,7 @@
                                 <td style="text-align: center;">
                                     <div style="display: flex; justify-content: center; gap: 8px;">
                                         <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('BS. Trần Minh Tuấn', 'Bác sĩ', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
-                                        <a href="#" class="action-btn delete" title="Xóa tài khoản" onclick="openDeleteModal('BS. Trần Minh Tuấn', this); return false;"><i class="fa-regular fa-trash-can"></i></a>
+                                        <a href="#" class="action-btn delete" title="Khóa tài khoản" onclick="openLockModal('BS. Trần Minh Tuấn', this); return false;"><i class="fa-solid fa-lock"></i></a>
                                     </div>
                                 </td>
                             </tr>
@@ -183,7 +180,7 @@
                             <tr>
                                 <td>
                                     <div class="user-identity">
-                                        <div class="user-name-avatar" style="background-color: #ffedd5; color: #d97706;">H</div>
+
                                         <span class="user-name">Lê Thị Hoa</span>
                                     </div>
                                 </td>
@@ -200,7 +197,7 @@
                                 <td style="text-align: center;">
                                     <div style="display: flex; justify-content: center; gap: 8px;">
                                         <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('Lê Thị Hoa', 'Lễ tân', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
-                                        <a href="#" class="action-btn delete" title="Xóa tài khoản" onclick="openDeleteModal('Lê Thị Hoa', this); return false;"><i class="fa-regular fa-trash-can"></i></a>
+                                        <a href="#" class="action-btn delete" title="Khóa tài khoản" onclick="openLockModal('Lê Thị Hoa', this); return false;"><i class="fa-solid fa-lock"></i></a>
                                     </div>
                                 </td>
                             </tr>
@@ -209,7 +206,7 @@
                             <tr>
                                 <td>
                                     <div class="user-identity">
-                                        <div class="user-name-avatar" style="background-color: #f1f5f9; color: #475569;">Đ</div>
+
                                         <span class="user-name">Phạm Văn Đức</span>
                                     </div>
                                 </td>
@@ -226,7 +223,7 @@
                                 <td style="text-align: center;">
                                     <div style="display: flex; justify-content: center; gap: 8px;">
                                         <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('Phạm Văn Đức', 'Bệnh nhân', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
-                                        <a href="#" class="action-btn delete" title="Xóa tài khoản" onclick="openDeleteModal('Phạm Văn Đức', this); return false;"><i class="fa-regular fa-trash-can"></i></a>
+                                        <a href="#" class="action-btn unlock" style="color: #10b981; background-color: #d1fae5;" title="Mở khóa tài khoản" onclick="openUnlockModal('Phạm Văn Đức', this); return false;"><i class="fa-solid fa-unlock"></i></a>
                                     </div>
                                 </td>
                             </tr>
@@ -235,7 +232,7 @@
                             <tr>
                                 <td>
                                     <div class="user-identity">
-                                        <div class="user-name-avatar" style="background-color: #f3e8ff; color: #7c3aed;">M</div>
+
                                         <span class="user-name">Hoàng Thị Mai</span>
                                     </div>
                                 </td>
@@ -252,7 +249,7 @@
                                 <td style="text-align: center;">
                                     <div style="display: flex; justify-content: center; gap: 8px;">
                                         <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('Hoàng Thị Mai', 'Quản lý', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
-                                        <a href="#" class="action-btn delete" title="Xóa tài khoản" onclick="openDeleteModal('Hoàng Thị Mai', this); return false;"><i class="fa-regular fa-trash-can"></i></a>
+                                        <a href="#" class="action-btn delete" title="Khóa tài khoản" onclick="openLockModal('Hoàng Thị Mai', this); return false;"><i class="fa-solid fa-lock"></i></a>
                                     </div>
                                 </td>
                             </tr>
@@ -261,7 +258,7 @@
                             <tr>
                                 <td>
                                     <div class="user-identity">
-                                        <div class="user-name-avatar" style="background-color: #dcfce7; color: #16a34a;">T</div>
+
                                         <span class="user-name">BS. Vũ Thị Thu</span>
                                     </div>
                                 </td>
@@ -278,7 +275,7 @@
                                 <td style="text-align: center;">
                                     <div style="display: flex; justify-content: center; gap: 8px;">
                                         <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('BS. Vũ Thị Thu', 'Bác sĩ', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
-                                        <a href="#" class="action-btn delete" title="Xóa tài khoản" onclick="openDeleteModal('BS. Vũ Thị Thu', this); return false;"><i class="fa-regular fa-trash-can"></i></a>
+                                        <a href="#" class="action-btn delete" title="Khóa tài khoản" onclick="openLockModal('BS. Vũ Thị Thu', this); return false;"><i class="fa-solid fa-lock"></i></a>
                                     </div>
                                 </td>
                             </tr>
@@ -287,7 +284,7 @@
                             <tr>
                                 <td>
                                     <div class="user-identity">
-                                        <div class="user-name-avatar" style="background-color: #e0f2fe; color: #0284c7;">N</div>
+
                                         <span class="user-name">Bùi Văn Nam</span>
                                     </div>
                                 </td>
@@ -304,7 +301,7 @@
                                 <td style="text-align: center;">
                                     <div style="display: flex; justify-content: center; gap: 8px;">
                                         <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('Bùi Văn Nam', 'Bệnh nhân', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
-                                        <a href="#" class="action-btn delete" title="Xóa tài khoản" onclick="openDeleteModal('Bùi Văn Nam', this); return false;"><i class="fa-regular fa-trash-can"></i></a>
+                                        <a href="#" class="action-btn delete" title="Khóa tài khoản" onclick="openLockModal('Bùi Văn Nam', this); return false;"><i class="fa-solid fa-lock"></i></a>
                                     </div>
                                 </td>
                             </tr>
@@ -313,7 +310,7 @@
                             <tr>
                                 <td>
                                     <div class="user-identity">
-                                        <div class="user-name-avatar" style="background-color: #ffedd5; color: #d97706;">H</div>
+
                                         <span class="user-name">Đinh Thị Hương</span>
                                     </div>
                                 </td>
@@ -330,7 +327,7 @@
                                 <td style="text-align: center;">
                                     <div style="display: flex; justify-content: center; gap: 8px;">
                                         <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('Đinh Thị Hương', 'Lễ tân', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
-                                        <a href="#" class="action-btn delete" title="Xóa tài khoản" onclick="openDeleteModal('Đinh Thị Hương', this); return false;"><i class="fa-regular fa-trash-can"></i></a>
+                                        <a href="#" class="action-btn delete" title="Khóa tài khoản" onclick="openLockModal('Đinh Thị Hương', this); return false;"><i class="fa-solid fa-lock"></i></a>
                                     </div>
                                 </td>
                             </tr>
@@ -369,7 +366,6 @@
                             <option value="Bác sĩ">Bác sĩ</option>
                             <option value="Lễ tân">Lễ tân</option>
                             <option value="Quản lý">Quản lý</option>
-                            <option value="Quản trị">Quản trị</option>
                         </select>
                     </div>
                 </form>
@@ -381,23 +377,44 @@
         </div>
     </div>
 
-    <!-- MODAL 2: XÁC NHẬN XÓA TÀI KHOẢN -->
-    <div id="deleteModal" class="modal-overlay">
+    <!-- MODAL 2: XÁC NHẬN KHÓA TÀI KHOẢN -->
+    <div id="lockModal" class="modal-overlay">
         <div class="modal-box">
             <div class="modal-header">
-                <h3 class="modal-title" style="color: #ef4444;">Xóa tài khoản</h3>
-                <button class="modal-close-btn" onclick="closeModal('deleteModal')"><i class="fa-solid fa-xmark"></i></button>
+                <h3 class="modal-title" style="color: #f59e0b;">Khóa tài khoản</h3>
+                <button class="modal-close-btn" onclick="closeModal('lockModal')"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body">
-                <p>Bạn có chắc chắn muốn xóa tài khoản của <strong id="deleteUserName">...</strong> không?</p>
-                <p style="margin-top: 10px; color: #ef4444; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+                <p>Bạn có chắc chắn muốn khóa tài khoản của <strong id="lockUserName">...</strong> không?</p>
+                <p style="margin-top: 10px; color: #f59e0b; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
                     <i class="fa-solid fa-triangle-exclamation"></i>
-                    <span>Hành động này sẽ xóa vĩnh viễn dữ liệu tài khoản và không thể hoàn tác!</span>
+                    <span>Người dùng sẽ không thể đăng nhập vào hệ thống cho đến khi được mở khóa.</span>
                 </p>
             </div>
             <div class="modal-footer">
-                <button class="modal-btn cancel" onclick="closeModal('deleteModal')">Hủy</button>
-                <button class="modal-btn danger" onclick="handleDeleteConfirm()">Xóa tài khoản</button>
+                <button class="modal-btn cancel" onclick="closeModal('lockModal')">Hủy</button>
+                <button class="modal-btn danger" style="background-color: #f59e0b; border-color: #f59e0b;" onclick="handleLockConfirm()">Khóa tài khoản</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: XÁC NHẬN MỞ KHÓA TÀI KHOẢN -->
+    <div id="unlockModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title" style="color: #10b981;">Mở khóa tài khoản</h3>
+                <button class="modal-close-btn" onclick="closeModal('unlockModal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn mở khóa tài khoản của <strong id="unlockUserName">...</strong> không?</p>
+                <p style="margin-top: 10px; color: #10b981; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-circle-check"></i>
+                    <span>Người dùng sẽ có thể đăng nhập và sử dụng hệ thống bình thường.</span>
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn cancel" onclick="closeModal('unlockModal')">Hủy</button>
+                <button class="modal-btn" style="background-color: #10b981; color: white; border: none; cursor: pointer; padding: 0.5rem 1rem; border-radius: 4px;" onclick="handleUnlockConfirm()">Mở khóa</button>
             </div>
         </div>
     </div>
@@ -414,11 +431,18 @@
             document.getElementById('editRoleModal').classList.add('active');
         }
 
-        // Open Modal Delete
-        function openDeleteModal(userName, element) {
-            document.getElementById('deleteUserName').innerText = userName;
+        // Open Modal Lock
+        function openLockModal(userName, element) {
+            document.getElementById('lockUserName').innerText = userName;
             currentTargetRow = element.closest('tr');
-            document.getElementById('deleteModal').classList.add('active');
+            document.getElementById('lockModal').classList.add('active');
+        }
+
+        // Open Modal Unlock
+        function openUnlockModal(userName, element) {
+            document.getElementById('unlockUserName').innerText = userName;
+            currentTargetRow = element.closest('tr');
+            document.getElementById('unlockModal').classList.add('active');
         }
 
         // Close Modals
@@ -447,21 +471,54 @@
                     badgeCell.classList.add('receptionist');
                 } else if (newRole === 'Quản lý') {
                     badgeCell.classList.add('manager');
-                } else if (newRole === 'Quản trị') {
-                    badgeCell.classList.add('admin');
                 }
             }
             closeModal('editRoleModal');
             alert('Đã cập nhật vai trò tài khoản thành công!');
         }
 
-        // Handle Confirm Delete
-        function handleDeleteConfirm() {
+        // Handle Confirm Lock
+        function handleLockConfirm() {
             if (currentTargetRow) {
-                currentTargetRow.remove();
-                alert('Đã xóa tài khoản thành công!');
+                const statusCell = currentTargetRow.querySelector('.status-indicator');
+                if (statusCell) {
+                    statusCell.innerHTML = '<span class="status-dot inactive"></span><span style="color: var(--text-muted);">Tạm khóa</span>';
+                }
+
+                // Switch Lock button to Unlock button
+                const actionContainer = currentTargetRow.querySelector('td:last-child > div');
+                const lockBtn = actionContainer.querySelector('a[onclick^="openLockModal"]');
+                if (lockBtn) {
+                    const userName = document.getElementById('lockUserName').innerText;
+                    const unlockBtnHtml = `<a href="#" class="action-btn unlock" style="color: #10b981; background-color: #d1fae5;" title="Mở khóa tài khoản" onclick="openUnlockModal('${userName}', this); return false;"><i class="fa-solid fa-unlock"></i></a>`;
+                    lockBtn.outerHTML = unlockBtnHtml;
+                }
+
+                alert('Đã khóa tài khoản thành công!');
             }
-            closeModal('deleteModal');
+            closeModal('lockModal');
+        }
+
+        // Handle Confirm Unlock
+        function handleUnlockConfirm() {
+            if (currentTargetRow) {
+                const statusCell = currentTargetRow.querySelector('.status-indicator');
+                if (statusCell) {
+                    statusCell.innerHTML = '<span class="status-dot active"></span><span>Hoạt động</span>';
+                }
+
+                // Switch Unlock button to Lock button
+                const actionContainer = currentTargetRow.querySelector('td:last-child > div');
+                const unlockBtn = actionContainer.querySelector('a[onclick^="openUnlockModal"]');
+                if (unlockBtn) {
+                    const userName = document.getElementById('unlockUserName').innerText;
+                    const lockBtnHtml = `<a href="#" class="action-btn delete" title="Khóa tài khoản" onclick="openLockModal('${userName}', this); return false;"><i class="fa-solid fa-lock"></i></a>`;
+                    unlockBtn.outerHTML = lockBtnHtml;
+                }
+
+                alert('Đã mở khóa tài khoản thành công!');
+            }
+            closeModal('unlockModal');
         }
 
         // Click outside backdrop to close
