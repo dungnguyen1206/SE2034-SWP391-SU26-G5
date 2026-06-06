@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<aside th:fragment="patientSidebar(activeMenu)" class="patient-sidebar">
+
+    <div class="patient-sidebar-header">
+        <div class="patient-brand">
+            <div class="patient-brand-icon">
+                <i class="bi bi-hospital"></i>
+            </div>
+            <div class="patient-brand-text">
+                <h1>HAMS</h1>
+                <p>Cổng bệnh nhân</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="patient-sidebar-section">Chức năng</div>
+
+    <nav class="patient-nav">
+        <ul class="patient-nav-list">
+            <li>
+                <a th:href="@{/patient/dashboard}" class="patient-nav-link"
+                   th:classappend="${activeMenu == 'dashboard'} ? ' active'">
+                    <i class="bi bi-grid"></i> Tổng quan
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/patient/appointments/book}" class="patient-nav-link"
+                   th:classappend="${activeMenu == 'book'} ? ' active'">
+                    <i class="bi bi-calendar-plus"></i> Đặt lịch khám
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/patient/appointments}" class="patient-nav-link"
+                   th:classappend="${activeMenu == 'appointments'} ? ' active'">
+                    <i class="bi bi-calendar-check"></i> Lịch hẹn của tôi
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/patient/records}" class="patient-nav-link"
+                   th:classappend="${activeMenu == 'records'} ? ' active'">
+                    <i class="bi bi-file-earmark-medical"></i> Hồ sơ bệnh án
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="patient-sidebar-section">Tra cứu</div>
+
+    <nav class="patient-nav">
+        <ul class="patient-nav-list">
+            <li>
+                <a th:href="@{/patient/departments}" class="patient-nav-link"
+                   th:classappend="${activeMenu == 'departments'} ? ' active'">
+                    <i class="bi bi-hospital"></i> Chuyên khoa
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/patient/doctors}" class="patient-nav-link"
+                   th:classappend="${activeMenu == 'doctors'} ? ' active'">
+                    <i class="bi bi-person-badge"></i> Bác sĩ
+                </a>
+            </li>
+            <li>
+                <!-- Trước: /patient/service (thiếu s), icon sai bi-person-circle -->
+                <a th:href="@{/patient/services}" class="patient-nav-link"
+                   th:classappend="${activeMenu == 'services'} ? ' active'">
+                    <i class="bi bi-clipboard2-pulse"></i> Dịch vụ khám
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/patient/profile}" class="patient-nav-link"
+                   th:classappend="${activeMenu == 'profile'} ? ' active'">
+                    <i class="bi bi-person-circle"></i> Hồ sơ cá nhân
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="patient-sidebar-footer">
+        <!-- Lấy chữ cái đầu từ tên hiển thị trong session -->
+        <div class="patient-user-avatar">
+            <!-- Cũ: hardcode "P" -->
+            <!-- <div class="patient-user-avatar">P</div> -->
+            <span sec:authentication="principal.username"
+                  th:text="${#strings.substring(#authentication.principal.username, 0, 1).toUpperCase()}">P</span>
+        </div>
+        <div class="patient-user-info">
+            <!-- Cũ: dùng ${profile.fullName} và ${profile.username} từ model -->
+            <!-- <strong th:text="${profile != null} ? ${profile.fullName} : 'Bệnh nhân'">Bệnh nhân</strong> -->
+            <!-- <span th:text="${profile != null} ? ${profile.username} : 'patient'">patient</span> -->
+            <strong th:text="${profile != null} ? ${profile.fullName} : 'Bệnh nhân'"
+                    sec:authentication="principal.username">Bệnh nhân</strong>
+            <span sec:authentication="principal.username">email</span>
+        </div>
+        <div class="patient-logout-link">
+            <form th:action="@{/logout}" method="post" style="margin:0">
+                <button type="submit"
+                        style="background:none;border:none;cursor:pointer;padding:0;color:#bfdbfe;font-size:18px;padding:8px;border-radius:8px;display:inline-flex;text-decoration:none;transition:background 0.2s ease,color 0.2s ease;">
+                    <i class="bi bi-box-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+</aside>
+
+</body>
+</html>

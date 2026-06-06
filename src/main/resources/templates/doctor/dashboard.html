@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Doctor Dashboard</title>
+
+    <link rel="stylesheet" href="../../static/css/doctor/dashboard-doctor.css" th:href="@{/css/doctor/dashboard-doctor.css}">
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+<div class="layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div>
+            <div class="brand">
+                <h2>Hospital HAMS</h2>
+                <p>Bác Sĩ</p>
+            </div>
+
+            <nav class="menu">
+                <a class="active" th:href="@{/doctor/dashboard}">
+                    <i class="fa-solid fa-table-cells-large"></i>
+                    Dashboard
+                </a>
+
+                <a th:href="@{/doctor/schedule}">
+                    <i class="fa-regular fa-calendar-days"></i>
+                    Lịch làm việc
+                </a>
+
+                <a th:href="@{/doctor/appointment-list}">
+                    <i class="fa-regular fa-calendar-check"></i>
+                    Danh sách bệnh nhân
+                </a>
+
+                <a th:href="@{/doctor/notification}">
+                    <i class="fa-regular fa-bell"></i>
+                    Thông báo
+                </a>
+            </nav>
+        </div>
+
+        <div class="doctor-box">
+            <div class="doctor-info-box">
+                <div class="doctor-avatar">
+                    <i class="fa-regular fa-user"></i>
+                </div>
+                <div>
+                    <h4 th:text="${doctorName}">Bác sĩ Minh</h4>
+                    <p th:text="${doctorDept}">Chuyên Môn Nội</p>
+                </div>
+            </div>
+            <form th:action="@{/logout}" method="post" class="logout-form">
+                <button type="submit" class="logout-btn">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+
+        <section class="welcome">
+            <h1>Chào bác sĩ, <span th:text="${doctorName}"></span>!</h1>
+            <p>Chúc bạn một ngày làm việc hiệu quả</p>
+        </section>
+
+        <!-- Cards -->
+        <section class="stats">
+            <div class="stat-card">
+                <div>
+                    <p>BỆNH NHÂN HÔM NAY</p>
+                    <h2 th:text="${todayPatients}">02</h2>
+                </div>
+                <div class="icon blue">
+                    <i class="fa-solid fa-users"></i>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div>
+                    <p>HỒ SƠ CHỜ DUYỆT</p>
+                    <h2 th:text="${pendingRecords}">02</h2>
+                </div>
+                <div class="icon orange">
+                    <i class="fa-regular fa-file-lines"></i>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div>
+                    <p>SỐ HỒ SƠ ĐÃ HOÀN THÀNH</p>
+                    <h2 th:text="${completedRecords}">0</h2>
+                </div>
+                <div class="icon green">
+                    <i class="fa-regular fa-circle-check"></i>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div>
+                    <p>ĐƠN THUỐC HÔM NAY</p>
+                    <h2 th:text="${todayPrescriptions}">5</h2>
+                </div>
+                <div class="icon purple">
+                    <i class="fa-solid fa-capsules"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- Appointment -->
+        <section class="section">
+            <h2 class="section-title blue-line">Lịch hẹn trong ngày</h2>
+
+            <div class="table-box">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>BỆNH NHÂN</th>
+                        <th>DỊCH VỤ</th>
+                        <th>TRẠNG THÁI</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="a : ${appointments}">
+                        <td>
+                            <div class="patient">
+                                <span th:text="${a.initial}">TB</span>
+                                <b th:text="${a.patientName}">Trần Thị Bích</b>
+                            </div>
+                        </td>
+                        <td th:text="${a.service}">Tái khám định kỳ</td>
+                        <td>
+                            <span class="badge" th:text="${a.status}">CHƯA XÁC NHẬN</span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <div class="patient">
+                                <span>TB</span>
+                                <b>Trần Thị Bích</b>
+                            </div>
+                        </td>
+                        <td>Tái khám định kỳ</td>
+                        <td><span class="badge">CHƯA XÁC NHẬN</span></td>
+                    </tr>
+
+                    <tr>
+                        <td>
+                            <div class="patient">
+                                <span>LT</span>
+                                <b>Lê Minh Tâm</b>
+                            </div>
+                        </td>
+                        <td>Tư vấn xét nghiệm</td>
+                        <td><span class="badge">CHƯA XÁC NHẬN</span></td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <a href="#" class="view-all">
+                    Xem tất cả <i class="fa-solid fa-chevron-right"></i>
+                </a>
+            </div>
+        </section>
+
+        <!-- Recent Patients -->
+        <section class="section">
+            <h2 class="section-title green-line">Danh sách bệnh nhân gần đây</h2>
+
+            <div class="patient-list">
+                <div class="patient-card">
+                    <div class="circle">N</div>
+                    <div>
+                        <h3>Nguyễn Văn An</h3>
+                        <p>ID: BN-103</p>
+                        <small>Lần khám cuối: 12/10/2023</small>
+                    </div>
+                </div>
+
+                <div class="patient-card">
+                    <div class="circle">P</div>
+                    <div>
+                        <h3>Phạm Minh Hoàng</h3>
+                        <p>ID: BN-205</p>
+                        <small>Lần khám cuối: 08/10/2023</small>
+                    </div>
+                </div>
+
+                <div class="patient-card">
+                    <div class="circle">H</div>
+                    <div>
+                        <h3>Hoàng Diệu Linh</h3>
+                        <p>ID: BN-312</p>
+                        <small>Lần khám cuối: 05/10/2023</small>
+                    </div>
+                </div>
+
+                <div class="patient-card">
+                    <div class="circle">Đ</div>
+                    <div>
+                        <h3>Đặng Thu Thảo</h3>
+                        <p>ID: BN-118</p>
+                        <small>Lần khám cuối: 02/10/2023</small>
+                    </div>
+                </div>
+            </div>
+
+            <a href="#" class="view-all">
+                Xem tất cả <i class="fa-solid fa-chevron-right"></i>
+            </a>
+        </section>
+
+    </main>
+</div>
+
+</body>
+</html>

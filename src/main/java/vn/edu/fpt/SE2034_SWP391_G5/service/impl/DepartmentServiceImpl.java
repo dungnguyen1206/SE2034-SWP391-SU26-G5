@@ -1,5 +1,10 @@
 package vn.edu.fpt.SE2034_SWP391_G5.service.impl;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.Department;
+import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
+import vn.edu.fpt.SE2034_SWP391_G5.repository.DepartmentRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,10 +16,12 @@ import vn.edu.fpt.SE2034_SWP391_G5.service.DepartmentService;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 public class DepartmentServiceImpl implements DepartmentService {
 
     private final DepartmentRepository departmentRepository;
+    public DepartmentServiceImpl(DepartmentRepository departmentRepository) {
+        this.departmentRepository = departmentRepository;
+    }
 
     @Override
     public List<Department> getAllActiveDepartments() {

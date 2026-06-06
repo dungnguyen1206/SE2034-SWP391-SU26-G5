@@ -5,12 +5,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class CodeGenerator {
 
-    private static final AtomicInteger counter = new AtomicInteger(0);
-
+    // Dùng timestamp (nanoseconds) để tránh trùng mã khi server restart
+    // Trước đây: private static final AtomicInteger counter = new AtomicInteger(0);
+    //            return String.format("APT-%s%04d", year, counter.incrementAndGet() % 10000);
     public static String generateAppointmentCode() {
         String year = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy"));
-        int seq = counter.incrementAndGet() % 10000;
-        return String.format("APT-%s%04d", year, seq);
+        // Lấy 6 chữ số cuối của epoch millis để đảm bảo unique
+        long seq = System.currentTimeMillis() % 1_000_000L;
+        return String.format("APT-%s%06d", year, seq);
     }
 }
-

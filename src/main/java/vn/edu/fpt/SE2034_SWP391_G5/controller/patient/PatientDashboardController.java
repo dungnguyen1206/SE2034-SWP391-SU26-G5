@@ -1,4 +1,54 @@
 package vn.edu.fpt.SE2034_SWP391_G5.controller.patient;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.PatientResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
+import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
+import vn.edu.fpt.SE2034_SWP391_G5.service.PatientService;
+
+import java.util.List;
+
+@Controller
+@RequestMapping("/patient")
+@RequiredArgsConstructor
 public class PatientDashboardController {
+
+    private final PatientService patientService;
+    private final AppointmentService appointmentService;
+
+    // TODO: thay bằng @AuthenticationPrincipal khi auth sẵn sàng
+    // private static final Long DEMO_PATIENT_ID = 14L;
+
+    @GetMapping("/dashboard")
+    // public String dashboard(Model model) {
+    //     PatientResponse profile = patientService.getProfile(DEMO_PATIENT_ID);
+    //     List<AppointmentResponse> appointments = appointmentService.getAppointmentsByPatient(DEMO_PATIENT_ID);
+    public String dashboard(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        Long patientId = userDetails.getUser().getId();
+        PatientResponse profile = patientService.getProfile(patientId);
+        List<AppointmentResponse> appointments = appointmentService.getAppointmentsByPatient(patientId);
+
+        long totalAppointments = appointments.size();
+        // Trước đây tách pendingCount (WAITING) và confirmedCount (CONFIRMED) riêng
+        // → hiện "Chờ xác nhận" trên dashboard không hợp lý vì patient đặt vào slot có sẵn
+        // Fix: gộp WAITING + CONFIRMED thành 1 nhóm "Đã đặt lịch"
+        long bookedCount    = appointments.stream()
+                .filter(a -> "WAITING".equals(a.getStatus()) || "CONFIRMED".equals(a.getStatus())).count();
+        long completedCount = appointments.stream().filter(a -> "COMPLETED".equals(a.getStatus())).count();
+        List<AppointmentResponse> recentAppointments = appointments.stream().limit(5).toList();
+
+        model.addAttribute("profile", profile);
+        model.addAttribute("totalAppointments", totalAppointments);
+        model.addAttribute("bookedCount", bookedCount);
+        model.addAttribute("completedCount", completedCount);
+        model.addAttribute("recentAppointments", recentAppointments);
+
+        return "patient/dashboard";
+    }
 }
