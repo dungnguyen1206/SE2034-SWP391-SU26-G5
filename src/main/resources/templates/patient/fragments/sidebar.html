@@ -45,6 +45,32 @@
                     <i class="bi bi-file-earmark-medical"></i> Hồ sơ bệnh án
                 </a>
             </li>
+        </ul>
+    </nav>
+
+    <div class="patient-sidebar-section">Tra cứu</div>
+
+    <nav class="patient-nav">
+        <ul class="patient-nav-list">
+            <li>
+                <a th:href="@{/patient/departments}" class="patient-nav-link"
+                   th:classappend="${activeMenu == 'departments'} ? ' active'">
+                    <i class="bi bi-hospital"></i> Chuyên khoa
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/patient/doctors}" class="patient-nav-link"
+                   th:classappend="${activeMenu == 'doctors'} ? ' active'">
+                    <i class="bi bi-person-badge"></i> Bác sĩ
+                </a>
+            </li>
+            <li>
+                <!-- Trước: /patient/service (thiếu s), icon sai bi-person-circle -->
+                <a th:href="@{/patient/services}" class="patient-nav-link"
+                   th:classappend="${activeMenu == 'services'} ? ' active'">
+                    <i class="bi bi-clipboard2-pulse"></i> Dịch vụ khám
+                </a>
+            </li>
             <li>
                 <a th:href="@{/patient/profile}" class="patient-nav-link"
                    th:classappend="${activeMenu == 'profile'} ? ' active'">

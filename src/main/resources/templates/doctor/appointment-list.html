@@ -17,7 +17,7 @@
         <div>
             <div class="brand">
                 <h2>Hospital HAMS</h2>
-                <p>Dr. Professional</p>
+                <p>Bác Sĩ</p>
             </div>
 
             <nav class="menu">
@@ -44,13 +44,20 @@
         </div>
 
         <div class="doctor-box">
-            <div class="doctor-avatar">
-                <i class="fa-regular fa-user"></i>
+            <div class="doctor-info-box">
+                <div class="doctor-avatar">
+                    <i class="fa-regular fa-user"></i>
+                </div>
+                <div>
+                    <h4 th:text="${doctorName}">Bác sĩ Minh</h4>
+                    <p th:text="${doctorDept}">Chuyên Môn Nội</p>
+                </div>
             </div>
-            <div>
-                <h4 th:text="${doctorName}">Bác sĩ Minh</h4>
-                <p th:text="${doctorDept}">Chuyên Môn Nội</p>
-            </div>
+            <form th:action="@{/logout}" method="post" class="logout-form">
+                <button type="submit" class="logout-btn">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </form>
         </div>
     </aside>
 
@@ -115,13 +122,22 @@
                     </td>
 
                     <td>
-                        <select class="status-select"
-                                th:data-id="${a.id}"
-                                th:classappend="${a.status == 'WAITING' ? 'waiting' : (a.status == 'IN_PROGRESS' ? 'examining' : 'done')}">
-                            <option value="WAITING" th:selected="${a.status == 'WAITING'}">ĐANG ĐỢI</option>
-                            <option value="IN_PROGRESS" th:selected="${a.status == 'IN_PROGRESS'}">ĐANG KHÁM</option>
-                            <option value="COMPLETED" th:selected="${a.status == 'COMPLETED'}">HOÀN THÀNH</option>
-                        </select>
+                        <form th:action="@{/doctor/appointments/{id}/status(id=${a.id})}" method="POST"
+                              style="display: flex; gap: 8px; align-items: center; justify-content: center;">
+                            <input type="hidden" name="currentStatus" th:value="${currentStatus}" />
+                            <input type="hidden" name="page" th:value="${currentPage}" />
+                            <select name="status" class="status-select"
+                                    th:classappend="${a.status == 'WAITING' ? 'waiting' : (a.status == 'IN_PROGRESS' ? 'examining' : 'done')}"
+                                    style="margin-bottom: 0;">
+                                <option value="WAITING" th:selected="${a.status == 'WAITING'}">ĐANG ĐỢI</option>
+                                <option value="IN_PROGRESS" th:selected="${a.status == 'IN_PROGRESS'}">ĐANG KHÁM</option>
+                                <option value="COMPLETED" th:selected="${a.status == 'COMPLETED'}">HOÀN THÀNH</option>
+                            </select>
+                            <button type="submit" class="btn-save-status"
+                                    style="padding: 6px 12px; background-color: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500; transition: background-color 0.2s;">
+                                Lưu
+                            </button>
+                        </form>
                     </td>
 
                     <td>
@@ -156,39 +172,5 @@
     </main>
 
 </div>
-
-<script>
-document.querySelectorAll('.status-select').forEach(select => {
-    select.addEventListener('change', function() {
-        const appointmentId = this.getAttribute('data-id');
-        const newStatus = this.value;
-
-        // Update select color classes dynamically
-        this.classList.remove('waiting', 'examining', 'done');
-        if (newStatus === 'WAITING') {
-            this.classList.add('waiting');
-        } else if (newStatus === 'IN_PROGRESS') {
-            this.classList.add('examining');
-        } else if (newStatus === 'COMPLETED') {
-            this.classList.add('done');
-        }
-
-        // Make AJAX call to update status
-        fetch(`/doctor/appointments/${appointmentId}/status?status=${newStatus}`, {
-            method: 'POST'
-        }).then(response => {
-            if (response.ok) {
-                // Reload page to update counts in tabs
-                window.location.reload();
-            } else {
-                alert('Có lỗi xảy ra khi cập nhật trạng thái');
-            }
-        }).catch(err => {
-            console.error(err);
-            alert('Có lỗi xảy ra khi kết nối máy chủ');
-        });
-    });
-});
-</script>
 </body>
 </html>

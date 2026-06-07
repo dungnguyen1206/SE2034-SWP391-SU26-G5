@@ -10,68 +10,70 @@
     <link rel="stylesheet" href="../../static/css/auth/auth.css" th:href="@{/css/auth/auth.css}">
 </head>
 <body>
+    <!-- Guest Home Button -->
+    <a href="/" class="btn-guest-home">
+        <i class="fa-solid fa-house"></i> Về trang chủ
+    </a>
+
     <div class="auth-container">
-        <!-- Left Side: Register Card with Dark Slate-Blue Background Pane -->
+        <!-- Left Side: Register Card -->
         <div class="auth-left">
             <div class="auth-card">
                 <h2 class="auth-card-title">Đăng ký</h2>
                 
-                <!-- Alert Messages -->
-                <div th:if="${error != null}" class="auth-alert error" style="display: flex; background-color: #fce4e4; border: 1px solid #fcc2c2; color: #cc0000; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 0.9rem; align-items: center; gap: 8px;">
-                    <i class="fa-solid fa-circle-exclamation"></i> <span th:text="${error}">Lỗi đăng ký</span>
+                <!-- General Alert Message for All Errors -->
+                <div th:if="${error != null}" class="auth-alert error">
+                    <i class="fa-solid fa-circle-exclamation"></i> 
+                    <span th:text="${error}">Lỗi đăng ký</span>
                 </div>
 
                 <form th:action="@{/register}" th:object="${registerRequest}" method="POST">
+                    <!-- Username Input -->
+                    <div class="input-group">
+                        <label class="input-label" for="username">Tên đăng nhập</label>
+                        <input type="text" id="username" th:field="*{username}" class="auth-input" placeholder="Tên đăng nhập" autofocus>
+                    </div>
+
                     <!-- Names Group: Họ, Tên đệm, Tên -->
                     <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                        <!-- LastName Input -->
                         <div class="input-group" style="flex: 1; margin-bottom: 0;">
                             <label class="input-label" for="lastName">Họ</label>
-                            <input type="text" id="lastName" th:field="*{lastName}" class="auth-input" placeholder="Họ" required autofocus>
-                            <span style="color: #e74c3c; font-size: 0.8rem; margin-top: 5px; display: block;" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></span>
+                            <input type="text" id="lastName" th:field="*{lastName}" class="auth-input" placeholder="Họ">
                         </div>
                         
-                        <!-- MiddleName Input -->
                         <div class="input-group" style="flex: 1; margin-bottom: 0;">
                             <label class="input-label" for="middleName">Tên đệm</label>
                             <input type="text" id="middleName" th:field="*{middleName}" class="auth-input" placeholder="Tên đệm">
-                            <span style="color: #e74c3c; font-size: 0.8rem; margin-top: 5px; display: block;" th:if="${#fields.hasErrors('middleName')}" th:errors="*{middleName}"></span>
                         </div>
 
-                        <!-- FirstName Input -->
                         <div class="input-group" style="flex: 1; margin-bottom: 0;">
                             <label class="input-label" for="firstName">Tên</label>
-                            <input type="text" id="firstName" th:field="*{firstName}" class="auth-input" placeholder="Tên" required>
-                            <span style="color: #e74c3c; font-size: 0.8rem; margin-top: 5px; display: block;" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></span>
+                            <input type="text" id="firstName" th:field="*{firstName}" class="auth-input" placeholder="Tên">
                         </div>
                     </div>
                     
-                    <!-- Email (Gmail) Input -->
+                    <!-- Email Input -->
                     <div class="input-group">
                         <label class="input-label" for="email">Gmail</label>
-                        <input type="email" id="email" th:field="*{email}" class="auth-input" placeholder="nguyenvana@gmail.com" required>
-                        <span style="color: #e74c3c; font-size: 0.8rem; margin-top: 5px; display: block;" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                        <input type="email" id="email" th:field="*{email}" class="auth-input" placeholder="nguyenvana@gmail.com">
                     </div>
                     
                     <!-- Phone Input -->
                     <div class="input-group">
                         <label class="input-label" for="phone">Số điện thoại</label>
                         <input type="tel" id="phone" th:field="*{phone}" class="auth-input" placeholder="Nhập số điện thoại" required>
-                        <span style="color: #e74c3c; font-size: 0.8rem; margin-top: 5px; display: block;" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></span>
                     </div>
                     
                     <!-- Password Input -->
                     <div class="input-group">
                         <label class="input-label" for="password">Mật khẩu</label>
-                        <input type="password" id="password" th:field="*{password}" class="auth-input" placeholder="Tạo mật khẩu" required>
-                        <span style="color: #e74c3c; font-size: 0.8rem; margin-top: 5px; display: block;" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+                        <input type="password" id="password" th:field="*{password}" class="auth-input" placeholder="Tạo mật khẩu">
                     </div>
                     
                     <!-- Confirm Password Input -->
                     <div class="input-group">
                         <label class="input-label" for="confirmPassword">Xác nhận mật khẩu</label>
-                        <input type="password" id="confirmPassword" th:field="*{confirmPassword}" class="auth-input" placeholder="Nhập lại mật khẩu" required>
-                        <span style="color: #e74c3c; font-size: 0.8rem; margin-top: 5px; display: block;" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"></span>
+                        <input type="password" id="confirmPassword" th:field="*{confirmPassword}" class="auth-input" placeholder="Nhập lại mật khẩu">
                     </div>
                     
                     <!-- Form Actions: Register Button -->
@@ -88,7 +90,7 @@
             </div>
         </div>
         
-        <!-- Right Side: Brand Logo and Illustration on Light Gray -->
+        <!-- Right Side: Brand Logo and Illustration -->
         <div class="auth-right">
             <div class="auth-logo-top">
                 <span class="logo-circle"></span>

@@ -388,7 +388,7 @@ button, input, select {
     width: 100%;
     padding: 10px 14px 10px 40px;
     border: 1px solid #e2e8f0;
-    border-radius: 8px;
+    border-radius: 0;
     font-size: 0.88rem;
     background-color: #f8fafc;
     transition: all 0.2s;
@@ -477,10 +477,10 @@ button, input, select {
 }
 
 .admin-table th {
-    background-color: #fafbfc;
+    background-color: #94a3b8;
     padding: 16px 20px;
-    font-weight: 600;
-    color: #475569;
+    font-weight: 700;
+    color: #ffffff;
     border-bottom: 1px solid var(--border-color);
     text-transform: uppercase;
     font-size: 0.75rem;
@@ -530,35 +530,28 @@ button, input, select {
 /* Role Badges */
 .role-badge {
     display: inline-block;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     font-weight: 600;
-    text-align: center;
+    text-align: left;
 }
 
 .role-badge.patient {
-    background-color: var(--badge-patient-bg);
     color: var(--badge-patient-text);
 }
 
 .role-badge.doctor {
-    background-color: var(--badge-doctor-bg);
     color: var(--badge-doctor-text);
 }
 
 .role-badge.receptionist {
-    background-color: var(--badge-receptionist-bg);
     color: var(--badge-receptionist-text);
 }
 
 .role-badge.manager {
-    background-color: var(--badge-manager-bg);
     color: var(--badge-manager-text);
 }
 
 .role-badge.admin {
-    background-color: var(--badge-admin-bg);
     color: var(--badge-admin-text);
 }
 

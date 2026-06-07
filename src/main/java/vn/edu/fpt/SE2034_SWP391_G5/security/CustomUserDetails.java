@@ -37,8 +37,9 @@ public class CustomUserDetails implements UserDetails {
     }
 
     @Override
+    // Return username for Spring Security authentication
     public String getUsername() {
-        return user.getEmail(); // Đăng nhập sử dụng Email (Gmail)
+        return user.getUsername(); // Đăng nhập sử dụng Username
     }
 
     @Override

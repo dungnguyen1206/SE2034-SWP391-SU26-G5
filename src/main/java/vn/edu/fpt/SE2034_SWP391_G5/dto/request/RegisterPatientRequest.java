@@ -3,17 +3,21 @@ package vn.edu.fpt.SE2034_SWP391_G5.dto.request;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class RegisterPatientRequest {
 
+    // Username is required and must be between 4 and 50 characters
+    @NotBlank(message = "Tên đăng nhập không được để trống")
+    @Size(min = 4, max = 50, message = "Tên đăng nhập phải từ 4 đến 50 ký tự")
+    private String username;
+
+    // First name is required
     @NotBlank(message = "Tên không được để trống")
     private String firstName;
 

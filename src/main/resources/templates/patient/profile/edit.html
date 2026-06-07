@@ -10,15 +10,22 @@
 <body>
 <div class="patient-layout">
     <div th:replace="~{patient/fragments/sidebar :: patientSidebar('profile')}"></div>
+
+    <!-- PATIENT PROFILE EDIT - Page content -->
     <main class="patient-main">
 
+        <!-- PATIENT PROFILE EDIT - Flash error -->
         <div th:if="${errorMessage}" class="alert alert-error">
-            <i class="bi bi-exclamation-circle-fill"></i><span th:text="${errorMessage}"></span>
+            <i class="bi bi-exclamation-circle-fill"></i>
+            <span th:text="${errorMessage}"></span>
         </div>
 
+        <!-- PATIENT PROFILE EDIT - Header -->
         <div class="patient-page-header">
             <div style="display:flex;align-items:center;gap:12px;">
-                <a th:href="@{/patient/profile}" class="patient-back-link"><i class="bi bi-arrow-left"></i></a>
+                <a th:href="@{/patient/profile}" class="patient-back-link">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
                 <div>
                     <h2>Chỉnh sửa hồ sơ</h2>
                     <p>Cập nhật thông tin cá nhân của bạn</p>
@@ -26,84 +33,24 @@
             </div>
         </div>
 
-        <form th:action="@{/patient/profile/edit}" method="post" th:object="${form}">
+        <!-- PATIENT PROFILE EDIT - Self-update form, current user is resolved in controller -->
+        <form th:action="@{/patient/profile/edit}" method="post" th:object="${updateUserForm}">
             <div style="display:flex;flex-direction:column;gap:16px;">
+                <div th:replace="~{fragments/user-update-form :: metaFields}"></div>
 
-                <div class="patient-card">
+                <!-- PATIENT PROFILE EDIT - Common fields from users table -->
+                <section class="patient-card">
                     <div class="patient-card-header">
                         <i class="bi bi-person"></i>
                         <h3>Thông tin cá nhân</h3>
                     </div>
                     <div class="profile-form-grid">
-                        <div class="profile-form-field">
-                            <label>Họ <span style="color:#dc2626;">*</span></label>
-                            <input type="text" th:field="*{lastName}" placeholder="Nhập họ">
-                            <span th:if="${#fields.hasErrors('lastName')}" style="color:#dc2626;font-size:12px;" th:errors="*{lastName}"></span>
-                        </div>
-                        <div class="profile-form-field">
-                            <label>Tên đệm</label>
-                            <input type="text" th:field="*{middleName}" placeholder="Nhập tên đệm">
-                        </div>
-                        <div class="profile-form-field">
-                            <label>Tên <span style="color:#dc2626;">*</span></label>
-                            <input type="text" th:field="*{firstName}" placeholder="Nhập tên">
-                            <span th:if="${#fields.hasErrors('firstName')}" style="color:#dc2626;font-size:12px;" th:errors="*{firstName}"></span>
-                        </div>
-                        <div class="profile-form-field">
-                            <label>Số điện thoại</label>
-                            <input type="tel" th:field="*{phone}" placeholder="VD: 0901234567">
-                            <span th:if="${#fields.hasErrors('phone')}" style="color:#dc2626;font-size:12px;" th:errors="*{phone}"></span>
-                        </div>
-                        <div class="profile-form-field">
-                            <label>Giới tính</label>
-                            <select th:field="*{gender}">
-                                <option value="">-- Chọn giới tính --</option>
-                                <option value="MALE">Nam</option>
-                                <option value="FEMALE">Nữ</option>
-                                <option value="OTHER">Khác</option>
-                            </select>
-                        </div>
-                        <div class="profile-form-field">
-                            <label>Ngày sinh</label>
-                            <input type="date" th:field="*{dateOfBirth}">
-                        </div>
-                        <div class="profile-form-field">
-                            <label>Nhóm máu</label>
-                            <select th:field="*{bloodType}">
-                                <option value="">-- Chọn nhóm máu --</option>
-                                <option value="A+">A+</option>
-                                <option value="A-">A-</option>
-                                <option value="B+">B+</option>
-                                <option value="B-">B-</option>
-                                <option value="AB+">AB+</option>
-                                <option value="AB-">AB-</option>
-                                <option value="O+">O+</option>
-                                <option value="O-">O-</option>
-                            </select>
-                        </div>
+                        <div th:replace="~{fragments/user-update-form :: commonFields('PATIENT')}"></div>
+                        <div th:replace="~{fragments/user-update-form :: patientFields}"></div>
                     </div>
-                </div>
+                </section>
 
-                <div class="patient-card">
-                    <div class="patient-card-header">
-                        <i class="bi bi-geo-alt"></i>
-                        <h3>Địa chỉ</h3>
-                    </div>
-                    <div class="profile-form-grid">
-                        <div class="profile-form-field profile-form-full">
-                            <label>Địa chỉ chi tiết</label>
-                            <input type="text" th:field="*{addressLine}" placeholder="Số nhà, tên đường, phường/xã, quận/huyện">
-                        </div>
-                        <div class="profile-form-field">
-                            <label>Tỉnh / Thành phố</label>
-                            <select th:field="*{provinceId}">
-                                <option value="">-- Chọn tỉnh/thành phố --</option>
-                                <option th:each="prov : ${provinces}" th:value="${prov.id}" th:text="${prov.name}"></option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
+                <!-- PATIENT PROFILE EDIT - Actions -->
                 <div class="profile-form-actions">
                     <button type="submit" class="btn-primary">
                         <i class="bi bi-check-lg"></i> Lưu thay đổi
@@ -112,7 +59,6 @@
                         <i class="bi bi-x"></i> Hủy
                     </a>
                 </div>
-
             </div>
         </form>
 

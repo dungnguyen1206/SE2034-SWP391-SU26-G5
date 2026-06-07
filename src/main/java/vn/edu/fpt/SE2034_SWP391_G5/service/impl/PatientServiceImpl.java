@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.UpdateProfileRequest;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.request.UpdateUserRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.MedicalRecordResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.PatientResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalRecord;
@@ -65,9 +66,10 @@ public class PatientServiceImpl implements PatientService {
                 .build();
     }
 
+
     @Override
     @Transactional
-    public void updateProfile(Long patientId, UpdateProfileRequest request) {
+    public void updateProfile(Long patientId, UpdateUserRequest request) {
         User user = userRepository.findById(patientId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bệnh nhân"));
 
@@ -172,5 +174,6 @@ public class PatientServiceImpl implements PatientService {
     public List<User> findUsersByRoleName(String roleName) {
         return userRepository.findByRoleName(roleName);
     }
+
 
 }

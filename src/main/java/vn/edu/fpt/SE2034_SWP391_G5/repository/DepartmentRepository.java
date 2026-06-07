@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface DepartmentRepository extends JpaRepository<Department, Integer> {
     List<Department> findByStatus(String status);
+
 }
