@@ -52,7 +52,7 @@
                     <p th:text="${staff.getStaffCode()}">Mã nhân viên: STF-1</p>
                     <div class="staff-detail-badges">
                         <span class="staff-type-badge doctor" th:text="${staff.getRoleLabel()}">Loại nhân viên</span>
-                        <span class="staff-status active" th:text="${staff.getWorkingStatus() == 'ACTIVE'} ?'Đang hoạt động' : 'Ngưng hoạt động'">Trạng thái làm việc</span>
+                        <span class="staff-status active" th:text="${staff.getAccountStatus() == 'ACTIVE'} ?'Đang hoạt động' : 'Ngưng hoạt động'">Trạng thái làm việc</span>
                     </div>
                 </div>
 
@@ -69,10 +69,10 @@
                         <span>Vai trò</span>
                         <strong th:text="${staff.getRoleLabel()}">N/A</strong>
                     </div>
-                    <div>
-                        <span>Trạng thái tài khoản</span>
-                        <strong th:text="${staff.getWorkingStatus() == 'ACTIVE'} ?'Đang hoạt động' : 'Ngưng hoạt động'">N/A</strong>
-                    </div>
+<!--                    <div>-->
+<!--                        <span>Trạng thái tài khoản</span>-->
+<!--                        <strong th:text="${staff.getAccountStatus() == 'ACTIVE'} ?'Đang hoạt động' : 'Ngưng hoạt động'">N/A</strong>-->
+<!--                    </div>-->
                 </div>
             </section>
 

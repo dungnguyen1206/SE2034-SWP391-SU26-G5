@@ -228,7 +228,7 @@ public class StaffServiceImpl implements StaffService {
             staff.setDepartment(null);
             staff.setDegree(null);
             staff.setLicenseNumber(null);
-            staff.setExperienceYears(null);
+            staff.setExperienceYears(0);
             staff.setDoctorStatus(null);
         }
         userRepository.save(staff);
