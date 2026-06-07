@@ -47,12 +47,9 @@
 }
 
 .appt-action-cancel {
-    color: #b91c1c;
-    font-size: 15px;
-    background: none;
-    border: none;
+    color: black;
+    background: #b91c1c;
     cursor: pointer;
-    padding: 0;
 }
 
 /* ---- Appointment detail ---- */
@@ -109,10 +106,7 @@
 .appt-code-badge {
     display: inline-flex;
     align-items: center;
-    background: #eff6ff;
     color: #1d4ed8;
-    border: 1px solid #bfdbfe;
-    border-radius: 8px;
     padding: 6px 12px;
     font-size: 15px;
     font-weight: 700;

@@ -17,7 +17,7 @@
         <div>
             <div class="brand">
                 <h2>Hospital HAMS</h2>
-                <p>Dr. Professional</p>
+                <p>Bác Sĩ</p>
             </div>
 
             <nav class="menu">
@@ -44,13 +44,20 @@
         </div>
 
         <div class="doctor-box">
-            <div class="doctor-avatar">
-                <i class="fa-regular fa-user"></i>
+            <div class="doctor-info-box">
+                <div class="doctor-avatar">
+                    <i class="fa-regular fa-user"></i>
+                </div>
+                <div>
+                    <h4 th:text="${doctorName}">Bác sĩ Minh</h4>
+                    <p th:text="${doctorDept}">Chuyên Môn Nội</p>
+                </div>
             </div>
-            <div>
-                <h4>Bác sĩ Minh</h4>
-                <p>Chuyên Môn Nội</p>
-            </div>
+            <form th:action="@{/logout}" method="post" class="logout-form">
+                <button type="submit" class="logout-btn">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </form>
         </div>
     </aside>
 

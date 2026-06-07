@@ -2,6 +2,7 @@ package vn.edu.fpt.SE2034_SWP391_G5.controller.doctor;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorScheduleWeekResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRepository;
+import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.ScheduleService;
 
 import java.time.DayOfWeek;
@@ -25,11 +27,10 @@ public class DoctorScheduleController {
     private final ScheduleService scheduleService;
     private final UserRepository userRepository;
 
-    private static final Long DEMO_DOCTOR_ID = 5L;
-
     @GetMapping("/schedule")
     public String schedule(
             @RequestParam(value = "date", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
 
         LocalDate targetDate = (date != null) ? date : LocalDate.now();
@@ -38,8 +39,10 @@ public class DoctorScheduleController {
         LocalDate monday = targetDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate sunday = monday.plusDays(6);
 
+        Long doctorId = userDetails.getUser().getId();
+
         // Sidebar Doctor Info
-        User doctor = userRepository.findById(DEMO_DOCTOR_ID).orElse(null);
+        User doctor = userRepository.findById(doctorId).orElse(null);
         if (doctor != null) {
             String doctorName = (doctor.getLastName() != null ? doctor.getLastName() + " " : "")
                     + (doctor.getMiddleName() != null ? doctor.getMiddleName() + " " : "")
@@ -52,7 +55,7 @@ public class DoctorScheduleController {
         }
 
         // Fetch Weekly Schedule
-        List<DoctorScheduleWeekResponse> weekSchedule = scheduleService.getWeeklySchedule(DEMO_DOCTOR_ID, targetDate);
+        List<DoctorScheduleWeekResponse> weekSchedule = scheduleService.getWeeklySchedule(doctorId, targetDate);
 
         // Navigation dates
         LocalDate prevWeekMonday = monday.minusWeeks(1);
