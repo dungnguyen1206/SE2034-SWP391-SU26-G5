@@ -2,14 +2,13 @@ package vn.edu.fpt.SE2034_SWP391_G5.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateAppointmentRequest;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentPrintResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentStatusCountResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ScheduleSlotResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.*;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.*;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
@@ -24,10 +23,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.util.CodeGenerator;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -143,6 +139,141 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         return response;
     }
+
+    @Override
+    public List<AppointmentDateGroupResponse> groupAppointmentsByDate(List<AppointmentResponse> appointments) {
+        Map<LocalDate, List<AppointmentResponse>> groupedMap = new LinkedHashMap<>();
+
+        for (AppointmentResponse appointment : appointments) {
+            LocalDate bookingDate = appointment.getBookingDate();
+
+            if (bookingDate == null) {
+                continue;
+            }
+
+            if (!groupedMap.containsKey(bookingDate)) {
+                groupedMap.put(bookingDate, new ArrayList<>());
+            }
+
+            groupedMap.get(bookingDate).add(appointment);
+        }
+
+        List<AppointmentDateGroupResponse> result = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+
+        for (Map.Entry<LocalDate, List<AppointmentResponse>> entry : groupedMap.entrySet()) {
+            LocalDate bookingDate = entry.getKey();
+            List<AppointmentResponse> appointmentList = entry.getValue();
+
+            result.add(new AppointmentDateGroupResponse(
+                    bookingDate,
+                    today.equals(bookingDate),
+                    appointmentList.size(),
+                    appointmentList
+            ));
+        }
+
+        return result;
+    }
+
+    @Override
+    public Page<AppointmentResponse> getPagedAppointmentsForReceptionist(
+            String search,
+            String status,
+            LocalDate fromDate,
+            LocalDate toDate,
+            int page,
+            int size
+    ) {
+        List<AppointmentResponse> allAppointments =
+                getAppointmentListForReceptionist();
+
+        List<AppointmentResponse> filteredAppointments =
+                filterAppointmentsBySearchStatusAndDate(
+                        allAppointments,
+                        search,
+                        status,
+                        fromDate,
+                        toDate
+                );
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), filteredAppointments.size());
+
+        List<AppointmentResponse> pageContent;
+
+        if (start >= filteredAppointments.size()) {
+            pageContent = new ArrayList<>();
+        } else {
+            pageContent = filteredAppointments.subList(start, end);
+        }
+
+        return new PageImpl<>(
+                pageContent,
+                pageable,
+                filteredAppointments.size()
+        );
+    }
+
+    private List<AppointmentResponse> filterAppointmentsBySearchStatusAndDate(List<AppointmentResponse> appointments, String search, String status, LocalDate fromDate, LocalDate toDate) {
+        List<AppointmentResponse> result = new ArrayList<>();
+
+        String keyword = "";
+        if (search != null) {
+            keyword = search.trim().toLowerCase();
+        }
+
+        String selectedStatus = "";
+        if (status != null) {
+            selectedStatus = status.trim();
+        }
+
+        for (AppointmentResponse appointment : appointments) {
+            boolean matchesSearch = true;
+            boolean matchesStatus = true;
+            boolean matchesDate = true;
+
+            if (!keyword.isEmpty()) {
+                matchesSearch =
+                        containsIgnoreCase(appointment.getAppointmentCode(), keyword)
+                                || containsIgnoreCase(appointment.getPatientFullName(), keyword)
+                                || containsIgnoreCase(appointment.getPatientPhone(), keyword)
+                                || containsIgnoreCase(appointment.getDoctorFullName(), keyword)
+                                || containsIgnoreCase(appointment.getDepartmentName(), keyword)
+                                || containsIgnoreCase(appointment.getRoomNumber(), keyword);
+            }
+
+            if (!selectedStatus.isEmpty()) {
+                matchesStatus = selectedStatus.equals(appointment.getStatus());
+            }
+
+            if (fromDate != null) {
+                if (appointment.getBookingDate() == null) {
+                    matchesDate = false;
+                } else {
+                    matchesDate = !appointment.getBookingDate().isBefore(fromDate);
+                }
+            }
+
+            if (toDate != null) {
+                if (appointment.getBookingDate() == null) {
+                    matchesDate = false;
+                } else {
+                    matchesDate = matchesDate
+                            && !appointment.getBookingDate().isAfter(toDate);
+                }
+            }
+
+            if (matchesSearch && matchesStatus && matchesDate) {
+                result.add(appointment);
+            }
+        }
+
+        return result;
+    }
+
 
     private boolean containsIgnoreCase(String value, String keyword) {
         return value != null && value.toLowerCase().contains(keyword);

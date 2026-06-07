@@ -31,9 +31,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "order by sl.startTime asc")
     List<Appointment> findAppointmentsByBookingDate(@Param("today") LocalDate today);
 
-
-
-
     @Query("SELECT a FROM Appointment a " +
             "LEFT JOIN FETCH a.patient " +
             "LEFT JOIN FETCH a.doctor " +
