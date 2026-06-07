@@ -1,8 +1,7 @@
 package vn.edu.fpt.SE2034_SWP391_G5.service;
 
-import org.springframework.data.repository.query.Param;
 import org.springframework.validation.BindingResult;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateStaffRequest;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.request.UpdateUserRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorStaffDetailResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ReceptionistStaffDetailResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.StaffResponse;
@@ -25,5 +24,9 @@ public interface StaffService {
 
     Long countDoctorsAppointmentByAppointmentStatus(String appointmentStatus, Long doctorId);
 
-    User createStaff(CreateStaffRequest createStaff, BindingResult bindingResult);
+    UpdateUserRequest getReceptionistToUpdate(Long id);
+    UpdateUserRequest getDoctorToUpdate(Long id);
+    UpdateUserRequest getPatientToUpdate(Long id);
+
+     void  updateStaffProfile(Long id, UpdateUserRequest updateUserRequest);
 }

@@ -31,7 +31,8 @@
                 </div>
 
                 <div class="staff-detail-actions">
-                    <a href="#" class="staff-detail-button primary">
+                    <a th:href="@{/manager/staff/{staffId}/edit(staffId=${staff.getId()}, staffRole=${staff.getRoleName()})}"
+                       class="staff-detail-button primary">
                         <i class="bi bi-pencil"></i>
                         Chỉnh sửa hồ sơ
                     </a>

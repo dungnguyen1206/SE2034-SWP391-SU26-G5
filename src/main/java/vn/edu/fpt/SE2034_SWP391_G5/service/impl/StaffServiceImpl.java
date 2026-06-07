@@ -5,18 +5,15 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BindingResult;
-import vn.edu.fpt.SE2034_SWP391_G5.config.PasswordEncoderConfig;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateStaffRequest;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.request.UpdateUserRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorStaffDetailResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ReceptionistStaffDetailResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.StaffResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Department;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.Role;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.UserRole;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.UserRoleId;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.UserAddress;
+import vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.DepartmentRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.RoleRepository;
@@ -26,9 +23,8 @@ import vn.edu.fpt.SE2034_SWP391_G5.service.StaffService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 
 @Service
 public class StaffServiceImpl implements StaffService {
@@ -68,6 +64,7 @@ public class StaffServiceImpl implements StaffService {
         return receptionist;
     }
 
+    @Override
     public DoctorStaffDetailResponse findDoctorStaffDetailById(Long id) {
         return toDoctorStaffDetailResponse(findDoctorById(id));
     }
@@ -106,7 +103,7 @@ public class StaffServiceImpl implements StaffService {
         receptionistStaffDetailResponse.setFullName(receptionist.getFirstName() + " " + receptionist.getMiddleName() + " " + receptionist.getLastName());
         receptionistStaffDetailResponse.setRoleName("RECEPTIONIST");
         receptionistStaffDetailResponse.setRoleLabel("Lễ tân");
-        receptionistStaffDetailResponse.setWorkingStatus("Đang hoạt động");
+        receptionistStaffDetailResponse.setWorkingStatus("Đang làm việc");
         receptionistStaffDetailResponse.setAvatar(receptionist.getAvatar());
         receptionistStaffDetailResponse.setGender(receptionist.getGender());
         receptionistStaffDetailResponse.setUpdatedAt(receptionist.getUpdatedAt());
@@ -114,6 +111,7 @@ public class StaffServiceImpl implements StaffService {
         return receptionistStaffDetailResponse;
     }
 
+    @Override
     public ReceptionistStaffDetailResponse findReceptionistStaffDetailById(Long id) {
         return toReceptionistStaffDetailResponse(findReceptionistById(id));
     }
@@ -124,115 +122,126 @@ public class StaffServiceImpl implements StaffService {
     }
 
     @Override
-    @Transactional
-    public User createStaff(CreateStaffRequest createStaff, BindingResult bindingResult) {
-        String staffType = createStaff.getStaffType();
-
-        boolean isDoctor = "doctor".equalsIgnoreCase(staffType);
-        boolean isReceptionist = "receptionist".equalsIgnoreCase(staffType);
-
-        if (!isDoctor && !isReceptionist) {
-            bindingResult.rejectValue("staffType", "staffType.invalid", "Loại nhân viên không hợp lệ");
-            return null;
-        }
-
-        if (userRepository.existsByEmail(createStaff.getEmail())) {
-            bindingResult.rejectValue("email", "email.exists",
-                    "Email đã tồn tại");
-            return null;
-        }
-        if (userRepository.existsByPhone(createStaff.getPhone())) {
-            bindingResult.rejectValue("phone", "phone.exists", "Số điện thoại đã tồn tại");
-            return null;
-        }
-        if (isDoctor) {
-            if (createStaff.getDepartmentId() == null) {
-                bindingResult.rejectValue("departmentId", "department.required", "Khoa không được bỏ trống");
-            }
-            if (!StringUtils.hasText(createStaff.getDegree())) {
-                bindingResult.rejectValue("degree", "degree.required", "Bằng cấp không được bỏ trống");
-            }
-            if (!StringUtils.hasText(createStaff.getLicenseNumber())) {
-                bindingResult.rejectValue("licenseNumber", "licenseNumber.required", "Số giấy phép hành nghề không được bỏ trống");
-            } else if (userRepository.existsByLicenseNumber(createStaff.getLicenseNumber())) {
-                bindingResult.rejectValue("licenseNumber", "licenseNumber.exists", "Số giấy phép hành nghề đã tồn tại");
-            }
-            if (createStaff.getExperienceYears() == null) {
-                bindingResult.rejectValue("experienceYears", "experienceYears.required", "Số năm kinh nghiệm không được bỏ trống");
-            }
-            if (!StringUtils.hasText(createStaff.getDoctorStatus())) {
-                bindingResult.rejectValue("doctorStatus", "doctorStatus.required", "Trạng thái bác sĩ không được bỏ trống");
-            }
-            if (bindingResult.hasErrors()) {
-                return null;
-            }
-        }
-
-        //check staff age must suitable with national law
-        LocalDate dob = createStaff.getDateOfBirth();
-        LocalDate today = LocalDate.now();
-        LocalDate maxDOB = today.minusYears(18);
-        LocalDate minDOB = today.minusYears(65);
-        if (dob.isBefore(minDOB) || dob.isAfter(maxDOB)) {
-            bindingResult.rejectValue("dateOfBirth", "invalid.age", "Tuổi phải từ 18 đến 65 tuổi");
-            return null;
-        }
-
-        if (!createStaff.getPassword().equals(createStaff.getConfirmPassword())) {
-            bindingResult.rejectValue("confirmPassword", "confirmPassword.conflix", "Mật khẩu không trùng khớp");
-            return null;
-        }
-
-        User savedUser = userRepository.save(toUser(createStaff));
-        String roleName = isDoctor ? "DOCTOR" : "RECEPTIONIST";
-        Role role = roleRepository.findByName(roleName)
-                .orElseThrow(() -> new ResourceNotFoundException("role not found: " + roleName));
-
-        UserRole userRole = new UserRole();
-        userRole.setId(new UserRoleId(savedUser.getId(), role.getId()));
-        userRole.setUser(savedUser);
-        userRole.setRole(role);
-        userRole.setAssignedAt(LocalDateTime.now());
-        userRoleRepository.save(userRole);
-
-        return savedUser;
-
+    public UpdateUserRequest getReceptionistToUpdate(Long id) {
+        return toUpdateUserRequest(findReceptionistById(id), "RECEPTIONIST");
     }
 
-    private User toUser(CreateStaffRequest createUser) {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User currentUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Current user not found"));
-        boolean isDoctor = "doctor".equalsIgnoreCase(createUser.getStaffType());
-        User user = new User();
-        user.setUsername(createUser.getEmail());
-        user.setFirstName(createUser.getFirstName());
-        user.setMiddleName(createUser.getMiddleName());
-        user.setLastName(createUser.getLastName());
-        user.setEmail(createUser.getEmail());
-        user.setPhone(createUser.getPhone());
-        user.setBio(createUser.getBio());
-        user.setPasswordHash(passwordEncoder.encode(createUser.getPassword()));
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
-        user.setCreatedBy(currentUser);
-        user.setStatus(createUser.getAccountStatus() != null ? createUser.getAccountStatus() : "ACTIVE");
-        user.setEmailVerified(false);
-        user.setExperienceYears(0);
+    @Override
+    public UpdateUserRequest getDoctorToUpdate(Long id) {
+        return toUpdateUserRequest(findDoctorById(id), "DOCTOR");
+    }
 
-        // update Cloudinary here when the configuration process in done
-        user.setAvatar(createUser.getAvatar());
+    @Override
+    public UpdateUserRequest getPatientToUpdate(Long id) {
+        User patient = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("patient not found"));
+        return toUpdateUserRequest(patient, "PATIENT");
+    }
 
-        user.setGender(createUser.getGender());
-        user.setDateOfBirth(createUser.getDateOfBirth());
-        if (isDoctor) {
-            Department department = departmentRepository.getReferenceById(createUser.getDepartmentId());
-            user.setDepartment(department);
-            user.setDegree(createUser.getDegree());
-            user.setExperienceYears(createUser.getExperienceYears());
-            user.setLicenseNumber(createUser.getLicenseNumber());
-            user.setDoctorStatus(createUser.getDoctorStatus());
+    private UpdateUserRequest toUpdateUserRequest(User user, String staffRole) {
+        UpdateUserRequest updateUserRequest = new UpdateUserRequest();
+        updateUserRequest.setId(user.getId());
+        updateUserRequest.setProfileType(staffRole);
+        updateUserRequest.setFirstName(user.getFirstName());
+        updateUserRequest.setLastName(user.getLastName());
+        updateUserRequest.setMiddleName(user.getMiddleName());
+        updateUserRequest.setEmail(user.getEmail());
+        updateUserRequest.setPhone(user.getPhone());
+        updateUserRequest.setBio(user.getBio());
+        updateUserRequest.setCreatedAt(user.getCreatedAt());
+        updateUserRequest.setCreatedBy(user.getCreatedBy());
+        updateUserRequest.setAccountStatus(user.getStatus());
+        updateUserRequest.setGender(user.getGender());
+        updateUserRequest.setStaffRole(staffRole);
+        updateUserRequest.setUpdatedAt(user.getUpdatedAt());
+        updateUserRequest.setDateOfBirth(user.getDateOfBirth());
+        updateUserRequest.setAvatar(user.getAvatar());
+        updateUserRequest.setBloodType(user.getBloodType());
+
+        if (user.getAddresses() != null) {
+            UserAddress defaultAddress = user.getAddresses().stream()
+                    .filter(address -> Boolean.TRUE.equals(address.getIsDefault()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (defaultAddress != null) {
+                updateUserRequest.setAddressLine(defaultAddress.getAddressLine());
+                updateUserRequest.setDefaultAddress(defaultAddress.getIsDefault());
+                updateUserRequest.setProvinceId(defaultAddress.getProvince() != null
+                        ? defaultAddress.getProvince().getId()
+                        : null);
+            }
         }
-        return user;
+
+        if ("DOCTOR".equalsIgnoreCase(staffRole)) {
+            updateUserRequest.setDoctorStatus(user.getDoctorStatus());
+            updateUserRequest.setDepartmentId(user.getDepartment() != null ? user.getDepartment().getId() : null);
+            updateUserRequest.setDegree(user.getDegree());
+            updateUserRequest.setExperienceYears(user.getExperienceYears());
+            updateUserRequest.setLicenseNumber(user.getLicenseNumber());
+        }
+
+        return updateUserRequest;
+    }
+
+    @Override
+    @Transactional
+    public void updateStaffProfile(Long id, UpdateUserRequest request) {
+
+        User staff = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("user not found"));
+        if (!request.getProfileType().equalsIgnoreCase("DOCTOR")
+                && !request.getProfileType().equalsIgnoreCase("RECEPTIONIST")) {
+            throw new BadRequestException("Chỉ được truy cập hồ sơ của lễ tân và bác sĩ");
+        }
+        // 2. Set common fields
+        staff.setFirstName(request.getFirstName());
+        staff.setMiddleName(request.getMiddleName());
+        staff.setLastName(request.getLastName());
+        //validate phone
+        if (!staff.getPhone().equals(request.getPhone()) && userRepository.existsByPhone(request.getPhone())) {
+            throw new BadRequestException("Số điện thoại đã được đăng kí trước đó");
+        }
+        staff.setPhone(request.getPhone());
+        staff.setGender(request.getGender());
+
+        if (!vertifyDOB(request.getDateOfBirth())) {
+            throw new BadRequestException("Ngày sinh phải hợp lệ theo quy định của pháp luật về độ tuổi lao động");
+        }
+        staff.setDateOfBirth(request.getDateOfBirth());
+
+        staff.setAvatar(request.getAvatar());
+        staff.setBio(request.getBio());
+        staff.setStatus(request.getAccountStatus());
+        staff.setUpdatedAt(LocalDateTime.now());
+
+        if (request.getStaffRole().equalsIgnoreCase("DOCTOR")) {
+            Department department = departmentRepository.findById(request.getDepartmentId()).orElseThrow(() -> new ResourceNotFoundException("Phòng ban không hợp lệ"));
+            staff.setDepartment(department);
+            staff.setDegree(request.getDegree());
+            staff.setExperienceYears(request.getExperienceYears());
+            if (!staff.getLicenseNumber().equalsIgnoreCase(request.getLicenseNumber()) && userRepository.existsByLicenseNumber(request.getLicenseNumber())) {
+                throw new BadRequestException("Mã giấy phép đã tồn tại");
+            }
+            staff.setDoctorStatus(request.getDoctorStatus());
+        } else {
+            staff.setDepartment(null);
+            staff.setDegree(null);
+            staff.setLicenseNumber(null);
+            staff.setExperienceYears(null);
+            staff.setDoctorStatus(null);
+        }
+        userRepository.save(staff);
+    }
+
+    private boolean vertifyDOB(LocalDate dob) {
+        if (dob == null) {
+            return false;
+        }
+
+        LocalDate today = LocalDate.now();
+        LocalDate minRange = today.minusYears(60);
+        LocalDate maxRange = today.minusYears(18);
+        return dob.isAfter(minRange) && dob.isBefore(maxRange);
     }
 }

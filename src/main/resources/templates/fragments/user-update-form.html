@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- USER UPDATE FORM - Hidden metadata used to keep form context after validation errors -->
+<th:block th:fragment="metaFields">
+    <input type="hidden" th:field="*{profileType}">
+    <input type="hidden" th:field="*{staffRole}">
+</th:block>
+
+<!-- USER UPDATE FORM - Common user fields shared by patient, doctor, and receptionist -->
+<th:block th:fragment="commonFields(formMode)">
+    <label th:class="${formMode == 'PATIENT'} ? 'profile-form-field' : 'staff-form-field'">
+        <span>Email <strong>*</strong></span>
+        <input type="email" th:field="*{email}" placeholder="VD: user@hms.vn" readonly>
+        <div class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+    </label>
+
+    <label th:class="${formMode == 'PATIENT'} ? 'profile-form-field' : 'staff-form-field'">
+        <span>Họ <strong>*</strong></span>
+        <input type="text" th:field="*{firstName}" placeholder="VD: Nguyễn">
+        <div class="field-error" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
+    </label>
+
+    <label th:class="${formMode == 'PATIENT'} ? 'profile-form-field' : 'staff-form-field'">
+        <span>Tên đệm</span>
+        <input type="text" th:field="*{middleName}" placeholder="VD: Văn">
+        <div class="field-error" th:if="${#fields.hasErrors('middleName')}" th:errors="*{middleName}"></div>
+    </label>
+
+    <label th:class="${formMode == 'PATIENT'} ? 'profile-form-field' : 'staff-form-field'">
+        <span>Tên <strong>*</strong></span>
+        <input type="text" th:field="*{lastName}" placeholder="VD: An">
+        <div class="field-error" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
+    </label>
+
+    <label th:class="${formMode == 'PATIENT'} ? 'profile-form-field' : 'staff-form-field'">
+        <span>Số điện thoại <strong>*</strong></span>
+        <input type="tel" th:field="*{phone}" placeholder="VD: 0901234567">
+        <div class="field-error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
+    </label>
+
+    <label th:class="${formMode == 'PATIENT'} ? 'profile-form-field' : 'staff-form-field'">
+        <span>Ngày sinh</span>
+        <input type="date" th:field="*{dateOfBirth}">
+        <div class="field-error" th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}"></div>
+    </label>
+
+    <label th:class="${formMode == 'PATIENT'} ? 'profile-form-field' : 'staff-form-field'">
+        <span>Giới tính <strong>*</strong></span>
+        <select th:field="*{gender}">
+            <option value="">Chọn giới tính...</option>
+            <option value="MALE">Nam</option>
+            <option value="FEMALE">Nữ</option>
+            <option value="OTHER">Khác</option>
+        </select>
+        <div class="field-error" th:if="${#fields.hasErrors('gender')}" th:errors="*{gender}"></div>
+    </label>
+</th:block>
+
+<!-- USER UPDATE FORM - Patient-only medical and address fields -->
+<th:block th:fragment="patientFields">
+    <label class="profile-form-field">
+        <span>Nhóm máu</span>
+        <select th:field="*{bloodType}">
+            <option value="">Chọn nhóm máu...</option>
+            <option value="A+">A+</option>
+            <option value="A-">A-</option>
+            <option value="B+">B+</option>
+            <option value="B-">B-</option>
+            <option value="AB+">AB+</option>
+            <option value="AB-">AB-</option>
+            <option value="O+">O+</option>
+            <option value="O-">O-</option>
+        </select>
+    </label>
+
+    <label class="profile-form-field profile-form-full">
+        <span>Địa chỉ chi tiết</span>
+        <input type="text" th:field="*{addressLine}" placeholder="Số nhà, tên đường, phường/xã, quận/huyện">
+        <div class="field-error" th:if="${#fields.hasErrors('addressLine')}" th:errors="*{addressLine}"></div>
+    </label>
+
+    <label class="profile-form-field">
+        <span>Tỉnh / Thành phố</span>
+        <select th:field="*{provinceId}">
+            <option value="">Chọn tỉnh/thành phố...</option>
+            <option th:each="prov : ${provinces}" th:value="${prov.id}" th:text="${prov.name}"></option>
+        </select>
+    </label>
+</th:block>
+
+<!-- USER UPDATE FORM - Doctor-only professional profile fields -->
+<th:block th:fragment="doctorFields">
+    <label class="staff-form-field">
+        <span>Khoa <strong>*</strong></span>
+        <select th:field="*{departmentId}">
+            <option value="">Chọn khoa...</option>
+            <option th:each="department : ${departmentList}"
+                    th:value="${department.id}"
+                    th:text="${department.name}">
+            </option>
+        </select>
+        <div class="field-error" th:if="${#fields.hasErrors('departmentId')}" th:errors="*{departmentId}"></div>
+    </label>
+
+    <label class="staff-form-field">
+        <span>Bằng cấp <strong>*</strong></span>
+        <input type="text" th:field="*{degree}" placeholder="VD: Bác sĩ chuyên khoa I">
+        <div class="field-error" th:if="${#fields.hasErrors('degree')}" th:errors="*{degree}"></div>
+    </label>
+
+    <label class="staff-form-field">
+        <span>Số giấy phép hành nghề</span>
+        <input type="text" th:field="*{licenseNumber}" placeholder="VD: VN-MED-2021-0042">
+        <div class="field-error" th:if="${#fields.hasErrors('licenseNumber')}" th:errors="*{licenseNumber}"></div>
+    </label>
+
+    <label class="staff-form-field">
+        <span>Số năm kinh nghiệm <strong>*</strong></span>
+        <input type="number" min="0" th:field="*{experienceYears}" placeholder="VD: 8">
+        <div class="field-error" th:if="${#fields.hasErrors('experienceYears')}" th:errors="*{experienceYears}"></div>
+    </label>
+
+    <label class="staff-form-field">
+        <span>Trạng thái bác sĩ <strong>*</strong></span>
+        <select th:field="*{doctorStatus}">
+            <option value="ACTIVE">Đang hoạt động</option>
+            <option value="INACTIVE">Ngưng hoạt động</option>
+        </select>
+    </label>
+
+    <label class="staff-form-field staff-form-full">
+        <span>Tiểu sử chuyên môn</span>
+        <textarea th:field="*{bio}" placeholder="Mô tả ngắn về kinh nghiệm, chuyên môn của bác sĩ..."></textarea>
+    </label>
+</th:block>
+
+<!-- USER UPDATE FORM - Receptionist-only note fields -->
+<th:block th:fragment="receptionistFields">
+    <label class="staff-form-field staff-form-full">
+        <span>Ghi chú</span>
+        <textarea th:field="*{bio}" placeholder="Ghi chú nội bộ nếu có..."></textarea>
+    </label>
+</th:block>
+
+</body>
+</html>
