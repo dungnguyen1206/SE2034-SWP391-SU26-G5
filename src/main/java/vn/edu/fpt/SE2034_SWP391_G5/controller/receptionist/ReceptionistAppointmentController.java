@@ -1,6 +1,8 @@
 package vn.edu.fpt.SE2034_SWP391_G5.controller.receptionist;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,13 +28,36 @@ public class ReceptionistAppointmentController {
     private final ReceptionistService receptionistService;
 
     @GetMapping("/receptionist/appointment")
-    public String showAppointmentList(@RequestParam(required = false) String search, @RequestParam(required = false) String status, Model model) {
-        List<AppointmentResponse> appointments = getFilteredAppointments(search, status);
+    public String showAppointmentList(
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate toDate,
+            @RequestParam(defaultValue = "0") int page,
+            Model model
+    ) {
+        LocalDate today = LocalDate.now();
+        if(fromDate == null){
+            fromDate = today.minusDays(7);
+        }
+        if(toDate == null){
+            toDate = today;
+        }
+        if(page < 0){
+            page = 0;
+        }
+        int size = 20;
+
+        Page<AppointmentResponse> appointmentPage = appointmentService.getPagedAppointmentsForReceptionist(search, status, fromDate, toDate, page, size);
+        List<AppointmentResponse> appointments = appointmentPage.getContent();
+
         model.addAttribute("appointments", appointments);
+        model.addAttribute("appointmentPage", appointmentPage);
+        model.addAttribute("appointmentGroups", appointmentService.groupAppointmentsByDate(appointments));
 
         addAppointmentCounts(model, appointments);
         addReceptionistInfo(model);
-        addPageInfo(model, search, status);
+        addPageInfo(model, search, status, fromDate, toDate);
         
         return "receptionist/appointment/list";
     }
@@ -55,9 +80,11 @@ public class ReceptionistAppointmentController {
         model.addAttribute("receptionist", receptionistService.getReceptionistByUsername("recept.linh@hams.vn"));
     }
 
-    private void addPageInfo(Model model, String search, String status){
+    private void addPageInfo(Model model, String search, String status, LocalDate fromDate, LocalDate toDate) {
         model.addAttribute("search", search);
         model.addAttribute("selectedStatus", status);
+        model.addAttribute("fromDate", fromDate);
+        model.addAttribute("toDate", toDate);
         model.addAttribute("currentDateTime", getCurrentDateTime());
     }
 

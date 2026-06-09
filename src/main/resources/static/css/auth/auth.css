@@ -1,10 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-    --primary-blue: #1e56a0;      /* Royal blue matching admin */
-    --primary-hover: #163f7a;     /* Darker hover blue matching admin */
-    --dark-sidebar: #192231;      /* Dark slate blue matching admin */
-    --sidebar-active-bg: #223c61; /* Sidebar active bg matching admin */
+    --primary-blue: #0f766e;      /* Deep Teal for unique healthcare branding */
+    --primary-hover: #115e59;     /* Darker Teal for hover state */
+    --dark-sidebar: #064e3b;      /* Dark Emerald */
+    --sidebar-active-bg: #047857; /* Emerald active */
 
     --light-bg: #f5f7fb;          /* Light content background matching admin */
     --white: #ffffff;
@@ -39,7 +39,7 @@ body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI",
     Roboto, Helvetica, Arial, sans-serif;
     color: var(--text-main);
-    background: linear-gradient(135deg, #0a1931 0%, #15253b 100%);
+    background: linear-gradient(135deg, #e0f2fe 0%, #ccfbf1 100%); /* Soft medical blue to mint */
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
@@ -150,7 +150,7 @@ select {
     width: 100%;
     padding: 11px 14px;
     border: 1px solid #cbd5e1;
-    border-radius: 6px;
+    border-radius: 0;
     font-size: 0.95rem;
     color: var(--text-main);
     background-color: #ffffff;
@@ -161,7 +161,7 @@ select {
     outline: none;
     border-color: var(--primary-blue);
     background-color: var(--white);
-    box-shadow: 0 0 0 3px rgba(30, 86, 160, 0.15);
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
 }
 
 .auth-input::placeholder {
@@ -248,7 +248,7 @@ select {
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(30, 86, 160, 0.4) 0%, rgba(25, 34, 49, 0.8) 100%);
+    background: linear-gradient(135deg, rgba(15, 118, 110, 0.3) 0%, rgba(6, 78, 59, 0.7) 100%);
     z-index: 2;
 }
 
@@ -330,4 +330,28 @@ select {
         flex: 1;
         border-radius: 0;
     }
+}
+
+/* Guest Home Button */
+.btn-guest-home {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    color: var(--primary-blue);
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 100;
+    background-color: #e0f2fe;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-guest-home:hover {
+    background-color: var(--primary-blue);
+    color: white;
 }

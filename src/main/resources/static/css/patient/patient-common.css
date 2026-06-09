@@ -53,10 +53,10 @@ body { margin: 0; font-family: Arial, sans-serif; background: #f4f6f9; color: #0
 /* STATUS BADGES */
 .status-badge { display: inline-flex; align-items: center; padding: 5px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
 .status-pending    { background: #fef3c7; color: #92400e; }
-.status-confirmed  { background: #dbeafe; color: #1d4ed8; }
+.status-confirmed  { color: #1d4ed8; }
 .status-checked-in { background: #cffafe; color: #0e7490; }
 .status-completed  { background: #dcfce7; color: #166534; }
-.status-cancelled  { background: #fee2e2; color: #b91c1c; }
+.status-cancelled  { color: #b91c1c; }
 .status-rejected   { background: #fce7f3; color: #9d174d; }
 .status-no-show    { background: #f1f5f9; color: #64748b; }
 
