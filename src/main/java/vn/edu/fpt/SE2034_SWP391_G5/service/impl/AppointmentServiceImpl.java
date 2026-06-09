@@ -397,6 +397,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .patientId(patient != null ? patient.getId() : null)
                 .patientFullName(patientFullName)
                 .patientPhone(patient != null ? patient.getPhone() : null)
+                .patientAddress(buildPatientAddress(patient))
                 .patientAge(patientAge)
                 .patientGender(patientGender)
                 .patientInitials(patientInitials)

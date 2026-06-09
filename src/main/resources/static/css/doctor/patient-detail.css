@@ -1,0 +1,159 @@
+.patient-detail-main {
+    padding: 40px;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 25px;
+    text-decoration: none;
+    color: #2563eb;
+    font-weight: 700;
+}
+
+.profile-card {
+    width: 650px;
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+}
+
+.profile-card h1 {
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.profile-card > p {
+    color: #64748b;
+    margin-bottom: 30px;
+}
+
+.tabs {
+    background: #e5e7eb;
+    border-radius: 15px;
+    padding: 5px;
+    display: flex;
+    margin-bottom: 35px;
+}
+
+.tabs button {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 10px;
+    font-weight: 700;
+    border-radius: 12px;
+    cursor: pointer;
+}
+
+.tabs button.active {
+    background: white;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.big-avatar {
+    width: 120px;
+    height: 120px;
+    background: #2f80ff;
+    color: white;
+    border-radius: 50%;
+    font-size: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.profile-header h2 {
+    font-size: 32px;
+    margin-bottom: 14px;
+}
+
+.badges {
+    display: flex;
+    gap: 12px;
+}
+
+.code {
+    background: #e5e7eb;
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-weight: 700;
+}
+
+.status {
+    background: #06b6d4;
+    color: white;
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-weight: 700;
+}
+
+.profile-card hr {
+    border: none;
+    border-top: 1px solid #e5e7eb;
+    margin-bottom: 28px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 26px 40px;
+}
+
+.info-item {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.info-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+}
+
+.info-item p {
+    color: #64748b;
+    margin-bottom: 6px;
+}
+
+.info-item h3 {
+    font-size: 18px;
+}
+
+.blue {
+    background: #eff6ff;
+    color: #1764ff;
+}
+
+.green {
+    background: #ecfdf5;
+    color: #16a34a;
+}
+
+.orange {
+    background: #fff7ed;
+    color: #f97316;
+}
+
+.purple {
+    background: #faf5ff;
+    color: #9333ea;
+}
+
+.pink {
+    background: #fdf2f8;
+    color: #ec4899;
+}

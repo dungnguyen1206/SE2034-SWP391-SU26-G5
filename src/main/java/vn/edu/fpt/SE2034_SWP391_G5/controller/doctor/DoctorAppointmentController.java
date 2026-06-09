@@ -5,14 +5,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
 
@@ -22,7 +19,6 @@ import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
 public class DoctorAppointmentController {
 
     private final AppointmentService appointmentService;
-    private final UserRepository userRepository;
 
     @GetMapping("/appointment-list")
     public String appointmentList(
@@ -32,19 +28,6 @@ public class DoctorAppointmentController {
             Model model) {
 
         Long doctorId = userDetails.getUser().getId();
-
-        // Doctor Info sidebar
-        User doctor = userRepository.findById(doctorId).orElse(null);
-        if (doctor != null) {
-            String doctorName = (doctor.getLastName() != null ? doctor.getLastName() + " " : "")
-                    + (doctor.getMiddleName() != null ? doctor.getMiddleName() + " " : "")
-                    + (doctor.getFirstName() != null ? doctor.getFirstName() : "");
-            model.addAttribute("doctorName", doctorName.trim());
-            model.addAttribute("doctorDept", doctor.getDepartment() != null ? doctor.getDepartment().getName() : "");
-        } else {
-            model.addAttribute("doctorName", "Bác sĩ");
-            model.addAttribute("doctorDept", "");
-        }
 
         // Current date in Vietnamese
         String currentDate = java.time.format.DateTimeFormatter

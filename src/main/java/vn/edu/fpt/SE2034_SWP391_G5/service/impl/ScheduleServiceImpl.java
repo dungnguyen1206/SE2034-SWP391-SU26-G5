@@ -2,6 +2,7 @@ package vn.edu.fpt.SE2034_SWP391_G5.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorScheduleReportResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorScheduleWeekResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.DoctorSchedule;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.DoctorScheduleRepository;
@@ -107,6 +108,70 @@ public class ScheduleServiceImpl implements ScheduleService {
                 doctorOnDutyResponses.add(response);
             });
             return doctorOnDutyResponses;
+    }
+
+    @Override
+    public DoctorScheduleReportResponse getWeeklyScheduleReport(Long doctorId, LocalDate targetDate) {
+        LocalDate localTargetDate = (targetDate != null) ? targetDate : LocalDate.now();
+
+        // Get Monday of target week
+        LocalDate monday = localTargetDate.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+
+        // Fetch Weekly Schedule
+        List<DoctorScheduleWeekResponse> weekSchedule = getWeeklySchedule(doctorId, localTargetDate);
+
+        // Navigation dates
+        LocalDate prevWeekMonday = monday.minusWeeks(1);
+        LocalDate nextWeekMonday = monday.plusWeeks(1);
+
+        // Calculate summary metrics
+        double totalHours = 0;
+        int shiftCount = 0;
+        for (DoctorScheduleWeekResponse day : weekSchedule) {
+            if (day.getShifts() != null) {
+                for (DoctorScheduleWeekResponse.ShiftDetail shift : day.getShifts()) {
+                    shiftCount++;
+                    if ("MORNING".equalsIgnoreCase(shift.getShift())) {
+                        totalHours += 4.5;
+                    } else if ("AFTERNOON".equalsIgnoreCase(shift.getShift())) {
+                        totalHours += 5.0;
+                    } else if ("FULL_DAY".equalsIgnoreCase(shift.getShift())) {
+                        totalHours += 12.0;
+                    }
+                }
+            }
+        }
+
+        // Formatting double hours
+        String totalHoursStr;
+        if (totalHours == (long) totalHours) {
+            totalHoursStr = String.format("%d", (long) totalHours);
+        } else {
+            totalHoursStr = String.format("%.1f", totalHours).replace(',', '.');
+        }
+
+        String shiftCountStr = String.format("%d", shiftCount);
+
+        // Performance evaluation
+        String performance = "N/A";
+        if (totalHours >= 20) {
+            performance = "Xuất sắc";
+        } else if (totalHours >= 15) {
+            performance = "Tốt";
+        } else if (totalHours >= 8) {
+            performance = "Trung bình";
+        } else if (totalHours > 0) {
+            performance = "Cần cố gắng";
+        }
+
+        return DoctorScheduleReportResponse.builder()
+                .weekSchedule(weekSchedule)
+                .totalHoursStr(totalHoursStr)
+                .shiftCountStr(shiftCountStr)
+                .performance(performance)
+                .prevWeekDate(prevWeekMonday.toString())
+                .nextWeekDate(nextWeekMonday.toString())
+                .build();
     }
 
 }
