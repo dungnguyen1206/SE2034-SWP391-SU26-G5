@@ -175,3 +175,160 @@
     background: #020617;
     color: white;
 }
+
+/* Modal Overlay styling */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal-card {
+    position: relative;
+    transform: scale(0.9);
+    transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .modal-card {
+    transform: scale(1);
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 25px;
+    background: none;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+    color: #64748b;
+    transition: color 0.2s;
+}
+
+.modal-close-btn:hover {
+    color: #000;
+}
+
+.modal-subtitle {
+    margin-bottom: 25px !important;
+}
+
+/* Status styles inside modal */
+.status.waiting {
+    background: #fef3c7 !important;
+    color: #b45309 !important;
+}
+
+.status.examining {
+    background: #dbeafe !important;
+    color: #1d4ed8 !important;
+}
+
+.status.done {
+    background: #dcfce7 !important;
+    color: #15803d !important;
+}
+
+/* Modal specific overrides for premium & balanced proportions */
+.modal-card {
+    width: 580px !important; /* Reduced from 650px */
+    padding: 24px !important; /* Reduced from 30px */
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.modal-card h1 {
+    font-size: 24px !important; /* Reduced from 32px */
+    margin-bottom: 6px !important;
+}
+
+.modal-card > p.modal-subtitle {
+    font-size: 13px !important;
+    color: #64748b !important;
+    margin-bottom: 20px !important;
+}
+
+.modal-card .tabs {
+    margin-bottom: 24px !important;
+    border-radius: 10px !important;
+    padding: 3px !important;
+}
+
+.modal-card .tabs button {
+    padding: 8px !important;
+    font-size: 13px !important;
+    border-radius: 8px !important;
+}
+
+.modal-card .profile-header {
+    gap: 20px !important;
+    margin-bottom: 20px !important;
+}
+
+.modal-card .big-avatar {
+    width: 80px !important; /* Reduced from 120px */
+    height: 80px !important; /* Reduced from 120px */
+    font-size: 28px !important; /* Reduced from 40px */
+}
+
+.modal-card .profile-header h2 {
+    font-size: 22px !important; /* Reduced from 32px */
+    margin-bottom: 8px !important;
+}
+
+.modal-card .code, 
+.modal-card .status {
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+    border-radius: 6px !important;
+}
+
+.modal-card hr {
+    margin-bottom: 20px !important;
+}
+
+.modal-card .info-grid {
+    gap: 16px 20px !important;
+}
+
+.modal-card .info-item {
+    gap: 12px !important;
+}
+
+.modal-card .info-icon {
+    width: 40px !important; /* Reduced from 50px */
+    height: 40px !important; /* Reduced from 50px */
+    font-size: 18px !important; /* Reduced from 22px */
+    border-radius: 10px !important;
+}
+
+.modal-card .info-item p {
+    font-size: 12px !important;
+    margin-bottom: 2px !important;
+}
+
+.modal-card .info-item h3 {
+    font-size: 15px !important; /* Reduced from 18px */
+    font-weight: 600 !important;
+}
+
+/* Make Address span full width (2 columns) */
+.modal-card .address-item {
+    grid-column: span 2 !important;
+}
