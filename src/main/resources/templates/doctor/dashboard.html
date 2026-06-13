@@ -2,7 +2,7 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Doctor Dashboard</title>
+    <title>Trang tổng quan Bác sĩ</title>
 
     <link rel="stylesheet" href="../../static/css/doctor/dashboard-doctor.css" th:href="@{/css/doctor/dashboard-doctor.css}">
     <link rel="stylesheet"
@@ -23,7 +23,7 @@
             <nav class="menu">
                 <a class="active" th:href="@{/doctor/dashboard}">
                     <i class="fa-solid fa-table-cells-large"></i>
-                    Dashboard
+                    Trang tổng quan
                 </a>
 
                 <a th:href="@{/doctor/schedule}">
@@ -136,7 +136,7 @@
                         </td>
                         <td th:text="${a.service}">Tái khám định kỳ</td>
                         <td>
-                            <span class="badge" th:text="${a.status}">CHƯA XÁC NHẬN</span>
+                            <span class="badge" th:text="${a.statusLabel}">CHƯA XÁC NHẬN</span>
                         </td>
                     </tr>
 

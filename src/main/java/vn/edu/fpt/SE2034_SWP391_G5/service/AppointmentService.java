@@ -52,11 +52,11 @@ public interface AppointmentService {
     void cancelAppointment(Long appointmentId, Long patientId);
 
     //LinhNH 01/06/2026
-    // Lấy danh sách lịch hẹn của bác sĩ có phân trang và bộ lọc trạng thái
-    Page<AppointmentResponse> getAppointmentsForDoctor(Long doctorId, String status, Pageable pageable);
+    // Lấy danh sách lịch hẹn của bác sĩ có phân trang và bộ lọc trạng thái theo ngày
+    Page<AppointmentResponse> getAppointmentsForDoctor(Long doctorId, LocalDate bookingDate, String status, Pageable pageable);
 
-    // Đếm số lượng lịch hẹn của bác sĩ theo trạng thái
-    long countAppointmentsForDoctor(Long doctorId, String status);
+    // Đếm số lượng lịch hẹn của bác sĩ theo trạng thái theo ngày
+    long countAppointmentsForDoctor(Long doctorId, LocalDate bookingDate, String status);
 
     // Cập nhật trạng thái lịch hẹn
     void updateAppointmentStatus(Long appointmentId, String newStatus);

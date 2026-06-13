@@ -12,6 +12,10 @@
     <link rel="stylesheet" href="../../static/css/doctor/patient-detail.css"
         th:href="@{/css/doctor/patient-detail.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Flatpickr CSS & JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/vn.js"></script>
 </head>
 
 <body>
@@ -28,7 +32,7 @@
                 <nav class="menu">
                     <a th:href="@{/doctor/dashboard}">
                         <i class="fa-solid fa-table-cells-large"></i>
-                        Dashboard
+                        Trang tổng quan
                     </a>
 
                     <a th:href="@{/doctor/schedule}">
@@ -73,24 +77,30 @@
                     <h1>Danh sách bệnh nhân</h1>
                     <p th:text="${currentDate}"></p>
                 </div>
-
+                <div class="date-filter-box">
+                    <form id="dateFilterForm" method="GET" th:action="@{/doctor/appointment-list}">
+                        <input type="hidden" name="status" th:value="${currentStatus}" />
+                        <label for="dateFilter" class="date-filter-label">Chọn ngày khám:</label>
+                        <input type="text" id="dateFilter" name="date" th:value="${selectedDate}" class="date-picker-input" />
+                    </form>
+                </div>
             </div>
 
             <div class="filter-tabs">
                 <button th:classappend="${currentStatus == 'ALL'} ? 'active' : ''"
-                    th:onclick="|location.href='@{/doctor/appointment-list(status='ALL')}'|">
+                    th:onclick="|location.href='@{/doctor/appointment-list(status='ALL', date=${selectedDate})}'|">
                     Tất cả (<span th:text="${countAll}">7</span>)
                 </button>
                 <button th:classappend="${currentStatus == 'IN_PROGRESS'} ? 'active' : ''"
-                    th:onclick="|location.href='@{/doctor/appointment-list(status='IN_PROGRESS')}'|">
+                    th:onclick="|location.href='@{/doctor/appointment-list(status='IN_PROGRESS', date=${selectedDate})}'|">
                     Đang khám (<span th:text="${countExamining}">1</span>)
                 </button>
                 <button th:classappend="${currentStatus == 'WAITING'} ? 'active' : ''"
-                    th:onclick="|location.href='@{/doctor/appointment-list(status='WAITING')}'|">
+                    th:onclick="|location.href='@{/doctor/appointment-list(status='WAITING', date=${selectedDate})}'|">
                     Đang đợi (<span th:text="${countWaiting}">5</span>)
                 </button>
                 <button th:classappend="${currentStatus == 'COMPLETED'} ? 'active' : ''"
-                    th:onclick="|location.href='@{/doctor/appointment-list(status='COMPLETED')}'|">
+                    th:onclick="|location.href='@{/doctor/appointment-list(status='COMPLETED', date=${selectedDate})}'|">
                     Hoàn thành (<span th:text="${countCompleted}">1</span>)
                 </button>
             </div>
@@ -134,6 +144,7 @@
                                     style="display: flex; gap: 8px; align-items: center; justify-content: center;">
                                     <input type="hidden" name="currentStatus" th:value="${currentStatus}" />
                                     <input type="hidden" name="page" th:value="${currentPage}" />
+                                    <input type="hidden" name="date" th:value="${selectedDate}" />
                                     <select name="status" class="status-select"
                                         th:classappend="${a.status == 'WAITING' ? 'waiting' : (a.status == 'IN_PROGRESS' ? 'examining' : 'done')}"
                                         style="margin-bottom: 0;">
@@ -151,17 +162,8 @@
                             </td>
 
                             <td>
-                                <a href="javascript:void(0);" 
-                                   class="detail-link btn-view-detail"
-                                   th:data-initials="${a.patientInitials}"
-                                   th:data-fullname="${a.patientFullName}"
-                                   th:data-id="${'BN-' + a.patientId}"
-                                   th:data-status="${a.status}"
-                                   th:data-age="${a.patientAge != null ? a.patientAge + ' tuổi' : 'Chưa rõ tuổi'}"
-                                   th:data-phone="${a.patientPhone}"
-                                   th:data-address="${a.patientAddress != null && !a.patientAddress.isEmpty() ? a.patientAddress : 'Chưa cập nhật'}"
-                                   th:data-time="${a.slotStartTime != null ? #temporals.format(a.slotStartTime, 'HH:mm') : ''}"
-                                   th:data-service="${a.serviceName}">
+                                <a th:href="@{/doctor/appointments/{id}/detail(id=${a.id})}" 
+                                   class="detail-link btn-view-detail">
                                     <i class="fa-solid fa-pen"></i>
                                     Xem chi tiết
                                 </a>
@@ -177,13 +179,13 @@
 
                     <div class="pagination" th:if="${totalPages > 1}">
                         <button
-                            th:onclick="|location.href='@{/doctor/appointment-list(status=${currentStatus}, page=${currentPage - 1})}'|"
+                            th:onclick="|location.href='@{/doctor/appointment-list(status=${currentStatus}, page=${currentPage - 1}, date=${selectedDate})}'|"
                             th:disabled="${currentPage == 0}">‹ Trước</button>
                         <button th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                             th:classappend="${currentPage == i} ? 'active' : ''" th:text="${i + 1}"
-                            th:onclick="|location.href='@{/doctor/appointment-list(status=${currentStatus}, page=${i})}'|">1</button>
+                            th:onclick="|location.href='@{/doctor/appointment-list(status=${currentStatus}, page=${i}, date=${selectedDate})}'|">1</button>
                         <button
-                            th:onclick="|location.href='@{/doctor/appointment-list(status=${currentStatus}, page=${currentPage + 1})}'|"
+                            th:onclick="|location.href='@{/doctor/appointment-list(status=${currentStatus}, page=${currentPage + 1}, date=${selectedDate})}'|"
                             th:disabled="${currentPage == totalPages - 1}">Sau ›</button>
                     </div>
                 </div>
@@ -196,165 +198,20 @@
 
     </div>
 
-    <!-- Modal Chi Tiết Bệnh Nhân -->
-    <div id="patientDetailModal" class="modal-overlay">
-        <div class="modal-card profile-card">
-            <button class="modal-close-btn" onclick="closeModal()">&times;</button>
-            
-            <h1 style="font-size: 32px; margin-bottom: 8px;">Hồ sơ bệnh nhân</h1>
-            <p class="modal-subtitle">Xem và quản lý thông tin chi tiết của bệnh nhân</p>
-
-            <div class="tabs">
-                <button class="active">Thông tin cá nhân</button>
-                <button>Hồ sơ bệnh án</button>
-                <button>Hóa đơn</button>
-            </div>
-
-            <div class="profile-header">
-                <div class="big-avatar" id="modalInitials">LT</div>
-
-                <div>
-                    <h2 id="modalFullName" style="font-size: 32px; margin-bottom: 14px;">Lê Thị Mai Anh</h2>
-                    <div class="badges">
-                        <span class="code" id="modalCode">BN-30241</span>
-                        <span class="status" id="modalStatus">ĐANG KHÁM</span>
-                    </div>
-                </div>
-            </div>
-
-            <hr>
-
-            <div class="info-grid">
-
-                <div class="info-item">
-                    <div class="info-icon blue">
-                        <i class="fa-regular fa-user"></i>
-                    </div>
-                    <div>
-                        <p>Tuổi</p>
-                        <h3 id="modalAge">45 tuổi</h3>
-                    </div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-icon green">
-                        <i class="fa-solid fa-phone"></i>
-                    </div>
-                    <div>
-                        <p>Số điện thoại</p>
-                        <h3 id="modalPhone">0901234567</h3>
-                    </div>
-                </div>
-
-                <div class="info-item address-item">
-                    <div class="info-icon orange">
-                        <i class="fa-solid fa-location-dot"></i>
-                    </div>
-                    <div>
-                        <p>Địa chỉ</p>
-                        <h3 id="modalAddress">123 Nguyễn Huệ, Quận 1, TP.HCM</h3>
-                    </div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-icon purple">
-                        <i class="fa-regular fa-calendar"></i>
-                    </div>
-                    <div>
-                        <p>Giờ hẹn</p>
-                        <h3 id="modalTime">09:00</h3>
-                    </div>
-                </div>
-
-                <div class="info-item">
-                    <div class="info-icon pink">
-                        <i class="fa-regular fa-file-lines"></i>
-                    </div>
-                    <div>
-                        <p>Loại khám</p>
-                        <h3 id="modalService">Tái khám định kỳ</h3>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
+    <!-- Script for Flatpickr -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            const modal = document.getElementById("patientDetailModal");
-            const detailLinks = document.querySelectorAll(".btn-view-detail");
-
-            const statusLabels = {
-                'WAITING': 'ĐANG ĐỢI',
-                'IN_PROGRESS': 'ĐANG KHÁM',
-                'COMPLETED': 'HOÀN THÀNH',
-                'CONFIRMED': 'ĐÃ XÁC NHẬN',
-                'CANCELLED': 'ĐÃ HỦY',
-                'NO_SHOW': 'VẮNG MẶT'
-            };
-
-            const statusClasses = {
-                'WAITING': 'waiting',
-                'IN_PROGRESS': 'examining',
-                'COMPLETED': 'done',
-                'CONFIRMED': 'confirmed',
-                'CANCELLED': 'cancelled',
-                'NO_SHOW': 'no-show'
-            };
-
-            detailLinks.forEach(link => {
-                link.addEventListener("click", function (e) {
-                    e.preventDefault();
-
-                    // Get values from dataset
-                    const initials = this.dataset.initials || '';
-                    const fullname = this.dataset.fullname || '';
-                    const code = this.dataset.id || '';
-                    const status = this.dataset.status || '';
-                    const age = this.dataset.age || '';
-                    const phone = this.dataset.phone || '';
-                    const address = this.dataset.address || '';
-                    const time = this.dataset.time || '';
-                    const service = this.dataset.service || '';
-
-                    // Populate modal
-                    document.getElementById("modalInitials").textContent = initials;
-                    document.getElementById("modalFullName").textContent = fullname;
-                    document.getElementById("modalCode").textContent = code;
-
-                    const statusEl = document.getElementById("modalStatus");
-                    statusEl.textContent = statusLabels[status] || status;
-                    
-                    // Reset status class
-                    statusEl.className = 'status';
-                    if (statusClasses[status]) {
-                        statusEl.classList.add(statusClasses[status]);
-                    }
-
-                    document.getElementById("modalAge").textContent = age;
-                    document.getElementById("modalPhone").textContent = phone;
-                    document.getElementById("modalAddress").textContent = address;
-                    document.getElementById("modalTime").textContent = time;
-                    document.getElementById("modalService").textContent = service;
-
-                    // Show modal
-                    modal.classList.add("active");
-                });
-            });
-
-            // Close modal when clicking close button
-            window.closeModal = function () {
-                modal.classList.remove("active");
-            };
-
-            // Close modal when clicking outside the modal card
-            modal.addEventListener("click", function (e) {
-                if (e.target === modal) {
-                    closeModal();
+            flatpickr("#dateFilter", {
+                dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "d/m/Y",
+                locale: "vn",
+                onChange: function(selectedDates, dateStr, instance) {
+                    document.getElementById('dateFilterForm').submit();
                 }
             });
         });
     </script>
+
 </body>
 </html>

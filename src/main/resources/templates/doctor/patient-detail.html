@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hồ sơ bệnh nhân - Hospital HAMS</title>
+
+    <link rel="stylesheet" href="../../static/css/doctor/dashboard-doctor.css"
+        th:href="@{/css/doctor/dashboard-doctor.css}">
+    <link rel="stylesheet" href="../../static/css/doctor/patient-detail.css"
+        th:href="@{/css/doctor/patient-detail.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+
+<body>
+
+    <div class="layout">
+
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div>
+                <div class="brand">
+                    <h2>Hospital HAMS</h2>
+                    <p>Bác Sĩ</p>
+                </div>
+
+                <nav class="menu">
+                    <a th:href="@{/doctor/dashboard}">
+                        <i class="fa-solid fa-table-cells-large"></i>
+                        Trang tổng quan
+                    </a>
+
+                    <a th:href="@{/doctor/schedule}">
+                        <i class="fa-regular fa-calendar-days"></i>
+                        Lịch làm việc
+                    </a>
+
+                    <a class="active" th:href="@{/doctor/appointment-list}">
+                        <i class="fa-regular fa-calendar-check"></i>
+                        Danh sách bệnh nhân
+                    </a>
+
+                    <a th:href="@{/doctor/notification}">
+                        <i class="fa-regular fa-bell"></i>
+                        Thông báo
+                    </a>
+                </nav>
+            </div>
+
+            <div class="doctor-box">
+                <div class="doctor-info-box">
+                    <div class="doctor-avatar">
+                        <i class="fa-regular fa-user"></i>
+                    </div>
+                    <div>
+                        <h4 th:text="${doctorName}"></h4>
+                        <p th:text="${doctorDept}"></p>
+                    </div>
+                </div>
+                <form th:action="@{/logout}" method="post" class="logout-form">
+                    <button type="submit" class="logout-btn">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </form>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main patient-detail-main">
+
+            <!-- Header with Back Button -->
+            <div class="detail-header-row">
+                <a th:href="@{/doctor/appointment-list}" class="btn-back" title="Quay lại danh sách">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </a>
+                <div class="detail-title-area">
+                    <h1>Hồ sơ bệnh nhân</h1>
+                    <p>Xem và quản lý thông tin chi tiết của bệnh nhân</p>
+                </div>
+            </div>
+
+            <!-- Patient Summary Card -->
+            <div class="patient-summary-card">
+                <div class="summary-avatar" th:text="${appointment.patientInitials}">LT</div>
+                <div class="summary-info">
+                    <div class="summary-name-row">
+                        <h2 th:text="${appointment.patientFullName}">Lê Thị Mai Anh</h2>
+                        <div class="summary-badges">
+                            <span class="code-badge" th:text="${'BN-' + appointment.patientId}">BN-30241</span>
+                            <span class="status-badge" 
+                                  th:classappend="${appointment.status == 'WAITING' ? 'waiting' : (appointment.status == 'IN_PROGRESS' ? 'examining' : 'done')}"
+                                  th:text="${appointment.status == 'WAITING' ? 'ĐANG ĐỢI' : (appointment.status == 'IN_PROGRESS' ? 'ĐANG KHÁM' : (appointment.status == 'COMPLETED' ? 'HOÀN THÀNH' : appointment.status))}">ĐANG KHÁM</span>
+                        </div>
+                    </div>
+                    <p class="summary-meta" th:text="${(appointment.patientAge != null ? appointment.patientAge + ' tuổi' : 'Chưa rõ tuổi') + ' • ' + appointment.serviceName}">45 tuổi • Tái khám định kỳ</p>
+                </div>
+            </div>
+
+            <!-- Tabs Section -->
+            <div class="detail-tabs">
+                <button class="active">Thông tin cá nhân</button>
+                <button>Hồ sơ bệnh án</button>
+                <button>Hóa đơn</button>
+            </div>
+
+            <!-- Tab Content Pane Container -->
+            <div class="tab-content">
+                
+                <!-- Tab Pane 1: Thông tin cá nhân -->
+                <div class="tab-pane active">
+                    <div class="detail-content-card">
+                        <h3 class="card-title">Thông tin cá nhân</h3>
+                        <hr class="card-divider">
+                        
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-icon blue">
+                                    <i class="fa-regular fa-user"></i>
+                                </div>
+                                <div>
+                                    <p>Tuổi</p>
+                                    <h3 th:text="${appointment.patientAge != null ? appointment.patientAge + ' tuổi' : 'Chưa rõ tuổi'}">45 tuổi</h3>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <div class="info-icon green">
+                                    <i class="fa-solid fa-phone"></i>
+                                </div>
+                                <div>
+                                    <p>Số điện thoại</p>
+                                    <h3 th:text="${appointment.patientPhone != null && !appointment.patientPhone.isEmpty() ? appointment.patientPhone : 'Chưa cập nhật'}">0901234567</h3>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <div class="info-icon orange">
+                                    <i class="fa-solid fa-location-dot"></i>
+                                </div>
+                                <div>
+                                    <p>Địa chỉ</p>
+                                    <h3 th:text="${appointment.patientAddress != null && !appointment.patientAddress.isEmpty() ? appointment.patientAddress : 'Chưa cập nhật'}">123 Nguyễn Huệ, Quận 1, TP.HCM</h3>
+                                </div>
+                            </div>
+                            
+                            <!-- Placeholder cell for matching the grid spacing in screenshot -->
+                            <div class="info-item empty-placeholder"></div>
+                            
+                            <div class="info-item">
+                                <div class="info-icon purple">
+                                    <i class="fa-regular fa-calendar"></i>
+                                </div>
+                                <div>
+                                    <p>Giờ hẹn</p>
+                                    <h3 th:text="${appointment.slotStartTime != null ? #temporals.format(appointment.slotStartTime, 'HH:mm') : ''}">09:00</h3>
+                                </div>
+                            </div>
+                            
+                            <div class="info-item">
+                                <div class="info-icon pink">
+                                    <i class="fa-regular fa-file-lines"></i>
+                                </div>
+                                <div>
+                                    <p>Loại khám</p>
+                                    <h3 th:text="${appointment.serviceName}">Tái khám định kỳ</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Pane 2: Hồ sơ bệnh án -->
+                <div class="tab-pane">
+                    <div class="detail-content-card">
+                        <h3 class="card-title">Hồ sơ bệnh án</h3>
+                        <hr class="card-divider">
+                        <div class="empty-tab-state">
+                            <i class="fa-solid fa-file-medical"></i>
+                            <p>Không tìm thấy hồ sơ bệnh án nào được ghi nhận cho lịch hẹn này.</p>
+                            <a th:if="${!appointment.hasMedicalRecord}" th:href="@{/doctor/medical-records/create(appointmentId=${appointment.id})}" class="btn-create-record">
+                                <i class="fa-solid fa-plus"></i> Tạo hồ sơ bệnh án
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab Pane 3: Hóa đơn -->
+                <div class="tab-pane">
+                    <div class="detail-content-card">
+                        <h3 class="card-title">Hóa đơn</h3>
+                        <hr class="card-divider">
+                        <div class="empty-tab-state">
+                            <i class="fa-solid fa-file-invoice-dollar"></i>
+                            <p>Không tìm thấy hóa đơn thanh toán nào cho lịch hẹn này.</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- Script for interactive client-side tab switching -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const tabButtons = document.querySelectorAll(".detail-tabs button");
+            const tabPanes = document.querySelectorAll(".tab-pane");
+
+            tabButtons.forEach((btn, index) => {
+                btn.addEventListener("click", function () {
+                    // Reset active states
+                    tabButtons.forEach(b => b.classList.remove("active"));
+                    tabPanes.forEach(p => p.classList.remove("active"));
+
+                    // Set active current tab
+                    btn.classList.add("active");
+                    tabPanes[index].classList.add("active");
+                });
+            });
+        });
+    </script>
+
+</body>
+
+</html>

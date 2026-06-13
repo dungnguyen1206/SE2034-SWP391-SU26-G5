@@ -113,5 +113,11 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     long countByDoctorIdAndStatus(Long doctorId, String status);
 
     long countByDoctorIdAndStatusIn(Long doctorId, List<String> statuses);
+
+    Page<Appointment> findByDoctorIdAndBookingDateAndStatusIn(Long doctorId, LocalDate bookingDate, List<String> statuses, Pageable pageable);
+
+    long countByDoctorIdAndBookingDateAndStatus(Long doctorId, LocalDate bookingDate, String status);
+
+    long countByDoctorIdAndBookingDateAndStatusIn(Long doctorId, LocalDate bookingDate, List<String> statuses);
 }
 

@@ -2,12 +2,16 @@
     padding: 40px 30px;
 }
 
+.schedule-main > * {
+    max-width: 1200px;
+}
+
 .schedule-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 32px;
-    max-width: 1050px;
+    max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -46,7 +50,7 @@
     overflow: hidden;
     margin-top: 30px;
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-    max-width: 1050px;
+    max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -187,7 +191,7 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 28px;
     margin-top: 38px;
-    max-width: 1050px;
+    max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -196,21 +200,21 @@
     background: white;
     border: 1px solid #ddd;
     border-radius: 14px;
-    padding: 30px;
+    padding: 20px;
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 16px;
 }
 
 .summary-icon {
-    width: 56px;
-    height: 56px;
+    width: 48px;
+    height: 48px;
     border-radius: 12px;
     background: #f1f5f9;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 24px;
+    font-size: 20px;
 }
 
 .blue-icon {
@@ -226,10 +230,15 @@
 }
 
 .summary-card p {
-    color: #475569;
-    margin-bottom: 10px;
+    color: #64748b;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
 }
 
 .summary-card h2 {
-    font-size: 28px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1e293b;
 }

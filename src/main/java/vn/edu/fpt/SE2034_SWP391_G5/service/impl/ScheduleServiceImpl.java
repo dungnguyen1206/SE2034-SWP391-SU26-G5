@@ -49,20 +49,20 @@ public class ScheduleServiceImpl implements ScheduleService {
             List<DoctorScheduleWeekResponse.ShiftDetail> shiftDetails = daySchedules.stream().map(ds -> {
                 String shiftType = ds.getShift(); // e.g. "MORNING"
                 String shiftClass = "morning";
-                String badgeText = "Morning";
-                String title = "Morning Shift";
+                String badgeText = "Sáng";
+                String title = "Ca Sáng";
                 String timeRange = "07:30 - 12:00";
 
                 if ("AFTERNOON".equalsIgnoreCase(shiftType)) {
                     shiftClass = "afternoon";
-                    badgeText = "Afternoon";
-                    title = "Afternoon Shift";
+                    badgeText = "Chiều";
+                    title = "Ca Chiều";
                     timeRange = "13:00 - 18:00";
                 } else if ("FULL_DAY".equalsIgnoreCase(shiftType)) {
                     shiftClass = "full";
-                    badgeText = "Full";
-                    title = "Full Day";
-                    timeRange = "Toàn ngày";
+                    badgeText = "Cả ngày";
+                    title = "Cả ngày";
+                    timeRange = "07:30 - 18:00";
                 }
 
                 String roomName = ds.getRoom() != null ? ds.getRoom().getName() : "";

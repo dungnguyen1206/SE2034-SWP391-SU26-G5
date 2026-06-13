@@ -659,7 +659,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public Page<AppointmentResponse> getAppointmentsForDoctor(Long doctorId, String status, Pageable pageable) {
+    public Page<AppointmentResponse> getAppointmentsForDoctor(Long doctorId, LocalDate bookingDate, String status, Pageable pageable) {
         List<String> statuses;
 
         if (status == null || status.trim().isEmpty() || "ALL".equalsIgnoreCase(status)) {
@@ -668,20 +668,21 @@ public class AppointmentServiceImpl implements AppointmentService {
             statuses = List.of(status.toUpperCase());
         }
 
-        return appointmentRepository.findByDoctorIdAndStatusIn(doctorId, statuses, pageable)
+        return appointmentRepository.findByDoctorIdAndBookingDateAndStatusIn(doctorId, bookingDate, statuses, pageable)
                 .map(this::toResponse);
     }
 
     @Override
-    public long countAppointmentsForDoctor(Long doctorId, String status) {
+    public long countAppointmentsForDoctor(Long doctorId, LocalDate bookingDate, String status) {
         if (status == null || status.trim().isEmpty() || "ALL".equalsIgnoreCase(status)) {
-            return appointmentRepository.countByDoctorIdAndStatusIn(
+            return appointmentRepository.countByDoctorIdAndBookingDateAndStatusIn(
                     doctorId,
+                    bookingDate,
                     List.of("WAITING", "IN_PROGRESS", "COMPLETED")
             );
         }
 
-        return appointmentRepository.countByDoctorIdAndStatus(doctorId, status.toUpperCase());
+        return appointmentRepository.countByDoctorIdAndBookingDateAndStatus(doctorId, bookingDate, status.toUpperCase());
     }
 
     @Override
