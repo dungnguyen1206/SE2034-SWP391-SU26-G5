@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Danh sách tài khoản nhân viên</title>
@@ -7,6 +8,7 @@
     <link rel="stylesheet" th:href="@{/css/manager/manager-staff.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
+
 <body>
     <div class="manager-layout">
 
@@ -19,10 +21,10 @@
                     <h2>Tài khoản nhân viên</h2>
                     <p>Quản lý tài khoản bác sĩ, lễ tân trong hệ thống</p>
                 </div>
-<!--                <a th:href="@{/manager/staff/create(type='doctor')}" class="staff-create-button">-->
-<!--                    <i class="bi bi-plus-lg"></i>-->
-<!--                    Tạo tài khoản nhân viên-->
-<!--                </a>-->
+                <!--                <a th:href="@{/manager/staff/create(type='doctor')}" class="staff-create-button">-->
+                <!--                    <i class="bi bi-plus-lg"></i>-->
+                <!--                    Tạo tài khoản nhân viên-->
+                <!--                </a>-->
             </header>
 
             <section class="staff-stats">
@@ -45,80 +47,84 @@
 
             <section class="staff-filter-card">
 
-                        <!--                Searching-->
+                <!--                Searching-->
                 <div class="staff-filter-row">
-                    <form method="get" th:action="@{/manager/staff/list}"  class="staff-search-box" >
-                        <input type="hidden" name="selectedRole" th:value="${selectedRole}" >
-                            <i class="bi bi-funnel"></i>
-                        <input type="text" name="filterKey" th:value="${filterKey}" placeholder="Tìm theo tên, email, số điện thoại...">
+                    <form method="get" th:action="@{/manager/staff/list}" class="staff-search-box">
+                        <input type="hidden" name="selectedRole" th:value="${selectedRole}">
+                        <i class="bi bi-funnel"></i>
+                        <input type="text" name="filterKey" th:value="${filterKey}"
+                            placeholder="Tìm theo tên, email, số điện thoại...">
                     </form>
 
-                    <div class="staff-filter-actions" >
+                    <div class="staff-filter-actions">
 
-                        <a class="staff-filter-button"
-                           th:href="@{/manager/staff/list(filterKey=${filterKey})}"
-                           th:classappend="${selectedRole == null} ? ' active'">
+                        <a class="staff-filter-button" th:href="@{/manager/staff/list(filterKey=${filterKey})}"
+                            th:classappend="${selectedRole == null} ? ' active'">
                             Tất cả
                         </a>
 
                         <a class="staff-filter-button"
-                           th:href="@{/manager/staff/list(role='DOCTOR', filterKey=${filterKey})}"
-                           th:classappend="${selectedRole == 'DOCTOR'} ? ' active'">
+                            th:href="@{/manager/staff/list(role='DOCTOR', filterKey=${filterKey})}"
+                            th:classappend="${selectedRole == 'DOCTOR'} ? ' active'">
                             Bác sĩ
                         </a>
 
 
                         <a class="staff-filter-button"
-                           th:href="@{/manager/staff/list(role='RECEPTIONIST',filterKey=${filterKey})}"
-                           th:classappend="${selectedRole == 'RECEPTIONIST'} ? ' active'">
+                            th:href="@{/manager/staff/list(role='RECEPTIONIST',filterKey=${filterKey})}"
+                            th:classappend="${selectedRole == 'RECEPTIONIST'} ? ' active'">
                             Lễ tân
                         </a>
-<!--                        <button class="staff-filter-button" type="button">Đang hoạt động</button>-->
+                        <!--                        <button class="staff-filter-button" type="button">Đang hoạt động</button>-->
                     </div>
                 </div>
 
-                <p class="staff-filter-note" th:text="'Tìm thấy ' + ${numberOfResult} + ' tài khoản'" >Tìm thấy 8 tài khoản</p>
+                <p class="staff-filter-note" th:text="'Tìm thấy ' + ${numberOfResult} + ' tài khoản'">Tìm thấy 8 tài
+                    khoản</p>
             </section>
 
             <section class="staff-table-card">
                 <table class="staff-table">
                     <thead>
-                    <tr>
-                        <th>Họ và tên</th>
-                        <th>Email</th>
-                        <th>Số điện thoại</th>
-                        <th>Loại nhân viên</th>
-                        <th>Trạng thái</th>
-                        <th>Người tạo</th>
-                        <th>Ngày tạo</th>
-                        <th>Thao tác</th>
-                    </tr>
+                        <tr>
+                            <th>Họ và tên</th>
+                            <th>Email</th>
+                            <th>Số điện thoại</th>
+                            <th>Loại nhân viên</th>
+                            <th>Trạng thái</th>
+                            <th>Người tạo</th>
+                            <th>Ngày tạo</th>
+                            <th>Thao tác</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="staff : ${staffResponses}">
-                        <td>
-                            <div class="staff-profile">
-                                <div class="staff-avatar">T</div>
-                                <strong th:text="${staff.getName()}">BS. Trần Minh Tuấn</strong>
-                            </div>
-                        </td>
-                        <td th:text="${staff.getEmail()}">tuan.tran@hms.vn</td>
-                        <td th:text="${staff.getPhone()}">0987 654 321</td>
-                        <td><span class="staff-type-badge" th:classappend="${staff.getRole() == 'DOCTOR'} ? ' doctor' : ' receptionist'"
-                               th:text="${staff.getRole()=='DOCTOR'} ? 'Bác sĩ' : 'Lễ tân' ">Bác sĩ</span></td>
-                        <td><span class="staff-status active"><span></span>Đang hoạt động</span></td>
-                        <td th:text="${staff.getCreatedBy()}">Hoàng Thị Mai</td>
-                        <td th:text="${staff.getCreatedDate()}">15/03/2021</td>
-                        <td>
-                            <div class="staff-actions">
-                                <a th:href="@{/manager/staff/{staffId}(staffId=${staff.getId()}, staffRole=${staff.getRole()})}" class="staff-action-view"><i class="bi bi-eye"></i></a>
-                                <a th:href="@{/manager/staff/{staffId}/edit(staffId=${staff.getId()}, staffRole=${staff.getRole()})}" class="staff-action-edit"><i class="bi bi-pencil"></i></a>
-<!--                                <a href="#" class="staff-action-lock"><i class="bi bi-trash"></i></a>-->
-<!--                                <a href="#" class="staff-action-key"><i class="bi bi-key"></i></a>-->
+                        <tr th:each="staff : ${staffResponses}">
+                            <td>
+                                <div class="staff-profile">
+                                    <div class="staff-avatar">T</div>
+                                    <strong th:text="${staff.getName()}">BS. Trần Minh Tuấn</strong>
+                                </div>
+                            </td>
+                            <td th:text="${staff.getEmail()}">tuan.tran@hms.vn</td>
+                            <td th:text="${staff.getPhone()}">0987 654 321</td>
+                            <td><span class="staff-type-badge"
+                                    th:classappend="${staff.getRole() == 'DOCTOR'} ? ' doctor' : ' receptionist'"
+                                    th:text="${staff.getRole()=='DOCTOR'} ? 'Bác sĩ' : 'Lễ tân' ">Bác sĩ</span></td>
+                            <td><span class="staff-status active"><span></span>Đang hoạt động</span></td>
+                            <td th:text="${staff.getCreatedBy()}">Hoàng Thị Mai</td>
+                            <td th:text="${staff.getCreatedDate()}">15/03/2021</td>
+                            <td>
+                                <div class="staff-actions">
+                                    <a th:href="@{/manager/staff/{staffId}(staffId=${staff.getId()}, staffRole=${staff.getRole()})}"
+                                        class="staff-action-view"><i class="bi bi-eye"></i></a>
+                                    <a th:href="@{/manager/staff/{staffId}/edit(staffId=${staff.getId()}, staffRole=${staff.getRole()})}"
+                                        class="staff-action-edit"><i class="bi bi-pencil"></i></a>
+                                    <!--                                <a href="#" class="staff-action-lock"><i class="bi bi-trash"></i></a>-->
+                                    <!--                                <a href="#" class="staff-action-key"><i class="bi bi-key"></i></a>-->
 
-                            </div>
-                        </td>
-                    </tr>
+                                </div>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
 
@@ -126,4 +132,5 @@
         </main>
     </div>
 </body>
+
 </html>
