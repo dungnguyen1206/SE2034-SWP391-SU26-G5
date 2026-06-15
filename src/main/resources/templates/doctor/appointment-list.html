@@ -81,7 +81,8 @@
                     <form id="dateFilterForm" method="GET" th:action="@{/doctor/appointment-list}">
                         <input type="hidden" name="status" th:value="${currentStatus}" />
                         <label for="dateFilter" class="date-filter-label">Chọn ngày khám:</label>
-                        <input type="text" id="dateFilter" name="date" th:value="${selectedDate}" class="date-picker-input" />
+                        <input type="text" id="dateFilter" name="date" th:value="${selectedDate}"
+                            class="date-picker-input" />
                     </form>
                 </div>
             </div>
@@ -162,8 +163,8 @@
                             </td>
 
                             <td>
-                                <a th:href="@{/doctor/appointments/{id}/detail(id=${a.id})}" 
-                                   class="detail-link btn-view-detail">
+                                <a th:href="@{/doctor/appointments/{id}/detail(id=${a.id})}"
+                                    class="detail-link btn-view-detail">
                                     <i class="fa-solid fa-pen"></i>
                                     Xem chi tiết
                                 </a>
@@ -206,7 +207,7 @@
                 altInput: true,
                 altFormat: "d/m/Y",
                 locale: "vn",
-                onChange: function(selectedDates, dateStr, instance) {
+                onChange: function (selectedDates, dateStr, instance) {
                     document.getElementById('dateFilterForm').submit();
                 }
             });
@@ -214,4 +215,5 @@
     </script>
 
 </body>
+
 </html>

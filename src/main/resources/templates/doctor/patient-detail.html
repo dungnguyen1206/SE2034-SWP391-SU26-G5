@@ -87,12 +87,15 @@
                         <h2 th:text="${appointment.patientFullName}">Lê Thị Mai Anh</h2>
                         <div class="summary-badges">
                             <span class="code-badge" th:text="${'BN-' + appointment.patientId}">BN-30241</span>
-                            <span class="status-badge" 
-                                  th:classappend="${appointment.status == 'WAITING' ? 'waiting' : (appointment.status == 'IN_PROGRESS' ? 'examining' : 'done')}"
-                                  th:text="${appointment.status == 'WAITING' ? 'ĐANG ĐỢI' : (appointment.status == 'IN_PROGRESS' ? 'ĐANG KHÁM' : (appointment.status == 'COMPLETED' ? 'HOÀN THÀNH' : appointment.status))}">ĐANG KHÁM</span>
+                            <span class="status-badge"
+                                th:classappend="${appointment.status == 'WAITING' ? 'waiting' : (appointment.status == 'IN_PROGRESS' ? 'examining' : 'done')}"
+                                th:text="${appointment.status == 'WAITING' ? 'ĐANG ĐỢI' : (appointment.status == 'IN_PROGRESS' ? 'ĐANG KHÁM' : (appointment.status == 'COMPLETED' ? 'HOÀN THÀNH' : appointment.status))}">ĐANG
+                                KHÁM</span>
                         </div>
                     </div>
-                    <p class="summary-meta" th:text="${(appointment.patientAge != null ? appointment.patientAge + ' tuổi' : 'Chưa rõ tuổi') + ' • ' + appointment.serviceName}">45 tuổi • Tái khám định kỳ</p>
+                    <p class="summary-meta"
+                        th:text="${(appointment.patientAge != null ? appointment.patientAge + ' tuổi' : 'Chưa rõ tuổi') + ' • ' + appointment.serviceName}">
+                        45 tuổi • Tái khám định kỳ</p>
                 </div>
             </div>
 
@@ -105,13 +108,13 @@
 
             <!-- Tab Content Pane Container -->
             <div class="tab-content">
-                
+
                 <!-- Tab Pane 1: Thông tin cá nhân -->
                 <div class="tab-pane active">
                     <div class="detail-content-card">
                         <h3 class="card-title">Thông tin cá nhân</h3>
                         <hr class="card-divider">
-                        
+
                         <div class="info-grid">
                             <div class="info-item">
                                 <div class="info-icon blue">
@@ -119,43 +122,51 @@
                                 </div>
                                 <div>
                                     <p>Tuổi</p>
-                                    <h3 th:text="${appointment.patientAge != null ? appointment.patientAge + ' tuổi' : 'Chưa rõ tuổi'}">45 tuổi</h3>
+                                    <h3
+                                        th:text="${appointment.patientAge != null ? appointment.patientAge + ' tuổi' : 'Chưa rõ tuổi'}">
+                                        45 tuổi</h3>
                                 </div>
                             </div>
-                            
+
                             <div class="info-item">
                                 <div class="info-icon green">
                                     <i class="fa-solid fa-phone"></i>
                                 </div>
                                 <div>
                                     <p>Số điện thoại</p>
-                                    <h3 th:text="${appointment.patientPhone != null && !appointment.patientPhone.isEmpty() ? appointment.patientPhone : 'Chưa cập nhật'}">0901234567</h3>
+                                    <h3
+                                        th:text="${appointment.patientPhone != null && !appointment.patientPhone.isEmpty() ? appointment.patientPhone : 'Chưa cập nhật'}">
+                                        0901234567</h3>
                                 </div>
                             </div>
-                            
+
                             <div class="info-item">
                                 <div class="info-icon orange">
                                     <i class="fa-solid fa-location-dot"></i>
                                 </div>
                                 <div>
                                     <p>Địa chỉ</p>
-                                    <h3 th:text="${appointment.patientAddress != null && !appointment.patientAddress.isEmpty() ? appointment.patientAddress : 'Chưa cập nhật'}">123 Nguyễn Huệ, Quận 1, TP.HCM</h3>
+                                    <h3
+                                        th:text="${appointment.patientAddress != null && !appointment.patientAddress.isEmpty() ? appointment.patientAddress : 'Chưa cập nhật'}">
+                                        123 Nguyễn Huệ, Quận 1, TP.HCM</h3>
                                 </div>
                             </div>
-                            
+
                             <!-- Placeholder cell for matching the grid spacing in screenshot -->
                             <div class="info-item empty-placeholder"></div>
-                            
+
                             <div class="info-item">
                                 <div class="info-icon purple">
                                     <i class="fa-regular fa-calendar"></i>
                                 </div>
                                 <div>
                                     <p>Giờ hẹn</p>
-                                    <h3 th:text="${appointment.slotStartTime != null ? #temporals.format(appointment.slotStartTime, 'HH:mm') : ''}">09:00</h3>
+                                    <h3
+                                        th:text="${appointment.slotStartTime != null ? #temporals.format(appointment.slotStartTime, 'HH:mm') : ''}">
+                                        09:00</h3>
                                 </div>
                             </div>
-                            
+
                             <div class="info-item">
                                 <div class="info-icon pink">
                                     <i class="fa-regular fa-file-lines"></i>
@@ -177,9 +188,6 @@
                         <div class="empty-tab-state">
                             <i class="fa-solid fa-file-medical"></i>
                             <p>Không tìm thấy hồ sơ bệnh án nào được ghi nhận cho lịch hẹn này.</p>
-                            <a th:if="${!appointment.hasMedicalRecord}" th:href="@{/doctor/medical-records/create(appointmentId=${appointment.id})}" class="btn-create-record">
-                                <i class="fa-solid fa-plus"></i> Tạo hồ sơ bệnh án
-                            </a>
                         </div>
                     </div>
                 </div>

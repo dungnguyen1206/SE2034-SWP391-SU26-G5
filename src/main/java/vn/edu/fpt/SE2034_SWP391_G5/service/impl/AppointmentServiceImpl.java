@@ -698,4 +698,13 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         appointmentRepository.save(appointment);
     }
+
+    @Override
+    public List<AppointmentResponse> getRecentCompletedAppointmentsForDoctor(Long doctorId, int limit) {
+        Pageable pageable = PageRequest.of(0, limit);
+        return appointmentRepository.findRecentCompletedAppointments(doctorId, "COMPLETED", pageable)
+                .stream()
+                .map(this::toResponse)
+                .toList();
+    }
 }

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Tổng quan quản lý bệnh viện</title>
@@ -7,15 +8,16 @@
     <link rel="stylesheet" th:href="@{/css/manager/manager-common.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
+
 <body>
-     <div class="manager-layout">
+    <div class="manager-layout">
 
-         <div th:replace="~{manager/fragments/sidebar :: managerSidebar('dashboard')}"></div>
+        <div th:replace="~{manager/fragments/sidebar :: managerSidebar('dashboard')}"></div>
 
-    <!--MAIN CONTENT -->
+        <!--MAIN CONTENT -->
 
 
-         <main class="manager-main">
+        <main class="manager-main">
             <header class="dashboard-header">
                 <div class="dashboard-header-title">
                     <h2>Tổng quan quản lý bệnh viện</h2>
@@ -26,9 +28,9 @@
                 <span class="dashboard-status-badge">Hệ thống hoạt động bình thường</span>
 
             </header>
-             <div class="manager-dashboard">
-                 
-                 <!--Block 1-->
+            <div class="manager-dashboard">
+
+                <!--Block 1-->
 
                 <div class="dashboard-stats">
 
@@ -47,7 +49,8 @@
                     <div class="dashboard-stat-card">
                         <div class="dashboard-stat-label">Bác sĩ đang hoạt động</div>
                         <div class="dashboard-stat-value" th:text="${doctorActive}">18</div>
-                        <div class="dashboard-stat-note" th:text="${doctorInactive + ' Bác sĩ đang nghỉ'}">2 Bác sĩ đang nghỉ</div>
+                        <div class="dashboard-stat-note" th:text="${doctorInactive + ' Bác sĩ đang nghỉ'}">2 Bác sĩ đang
+                            nghỉ</div>
                     </div>
 
                     <div class="dashboard-stat-card">
@@ -58,29 +61,35 @@
 
                 </div>
 
-                 <!--Block 2-->
-                 <div class="dashboard-status-card">
-                     <div class="status-card-title">
-                         Thống kê trạng thái lịch hẹn hôm nay
-                     </div>
-                     <div class="status-card-list">
-                         <div class="status-card-badge status-confirmed" th:text="${confirmedAppointment} + ' Đã xác nhận'">87 Đã xác nhận</div>
-                         <div class="status-card-badge status-waiting" th:text="${waitingAppointment} + ' Chờ khám'">34 Chờ khám</div>
-                         <div class="status-card-badge status-examining" th:text="${examiningAppointment == null}? '0 Đang khám' : ${examiningAppointment} + ' Đang khám'">22 Đang khám</div>
-                         <div class="status-card-badge status-completed" th:text="${completedAppointment} + ' Đã hoàn thành'">156 Đã hoàn thành</div>
-                         <div class="status-card-badge status-cancelled" th:text="${cancelledAppointment} + ' Đã hủy'">12 Đã hủy</div>
-                     </div>
-                 </div>
+                <!--Block 2-->
+                <div class="dashboard-status-card">
+                    <div class="status-card-title">
+                        Thống kê trạng thái lịch hẹn hôm nay
+                    </div>
+                    <div class="status-card-list">
+                        <div class="status-card-badge status-confirmed"
+                            th:text="${confirmedAppointment} + ' Đã xác nhận'">87 Đã xác nhận</div>
+                        <div class="status-card-badge status-waiting" th:text="${waitingAppointment} + ' Chờ khám'">34
+                            Chờ khám</div>
+                        <div class="status-card-badge status-examining"
+                            th:text="${examiningAppointment == null}? '0 Đang khám' : ${examiningAppointment} + ' Đang khám'">
+                            22 Đang khám</div>
+                        <div class="status-card-badge status-completed"
+                            th:text="${completedAppointment} + ' Đã hoàn thành'">156 Đã hoàn thành</div>
+                        <div class="status-card-badge status-cancelled" th:text="${cancelledAppointment} + ' Đã hủy'">12
+                            Đã hủy</div>
+                    </div>
+                </div>
 
-                 <!--Block 3-->
-                 <div class="dashboard-grid">
-                     <div class="dashboard-panel">
-                            <div class="dashboard-panel-header">
-                                Lịch hẹn hôm nay
-                            </div>
-                            <div class="dashboard-panel-body">
-                                <table class="dashboard-table">
-                                    <thead>
+                <!--Block 3-->
+                <div class="dashboard-grid">
+                    <div class="dashboard-panel">
+                        <div class="dashboard-panel-header">
+                            Lịch hẹn hôm nay
+                        </div>
+                        <div class="dashboard-panel-body">
+                            <table class="dashboard-table">
+                                <thead>
                                     <tr>
                                         <th>Bệnh nhân</th>
                                         <th>Bác sĩ</th>
@@ -88,55 +97,58 @@
                                         <th>Thời gian</th>
                                         <th>Trạng thái</th>
                                     </tr>
-                                    </thead>
-                                    <tbody>
+                                </thead>
+                                <tbody>
 
                                     <tr th:each="appointment : ${todayAppointmentsList}">
                                         <td th:text="${appointment.getPatientFullName()}">Nguyễn Việt Dũng</td>
                                         <td th:text="${appointment.getDoctorFullName()}">BS. Nguyễn Văn A</td>
                                         <td th:text="${appointment.getServiceName()}">Khám mắt</td>
-                                        <td th:text="${appointment.getSlotStartTime()}+'-'+ ${appointment.getSlotEndTime()}">09:00 - 10:00</td>
+                                        <td
+                                            th:text="${appointment.getSlotStartTime()}+'-'+ ${appointment.getSlotEndTime()}">
+                                            09:00 - 10:00</td>
                                         <td th:text="${appointment.getStatus()}">Đã xác nhận</td>
                                     </tr>
-                                    </tbody>
-                                </table>
+                                </tbody>
+                            </table>
 
-                            </div>
-                     </div>
-                     <div class="dashboard-panel">
-                            <div class="dashboard-panel-header">
-                                Bác sĩ trực hôm nay
-                            </div>
-                         <div class="dashboard-panel-body">
-                             <table class="dashboard-table">
-                                 <thead>
-                                 <tr>
-                                     <th>Bác sĩ</th>
-                                     <th>Khoa</th>
-                                     <th>Ca trực</th>
-                                     <th>Trạng thái</th>
-                                 </tr>
-                                 </thead>
-                                 <tbody>
-                                 <tr th:each="doctor : ${doctorOnDutyResponses}">
-                                     <td th:text="${doctor.getDoctorName()}">BS. Trần Minh Tuấn</td>
-                                     <td th:text="${doctor.getDepartmentName()}">Tim mạch</td>
-                                     <td th:text="${doctor.getShift()}">Ca sáng</td>
-                                     <td th:text="${doctor.getStatus()}">Đang trực</td>
+                        </div>
+                    </div>
+                    <div class="dashboard-panel">
+                        <div class="dashboard-panel-header">
+                            Bác sĩ trực hôm nay
+                        </div>
+                        <div class="dashboard-panel-body">
+                            <table class="dashboard-table">
+                                <thead>
+                                    <tr>
+                                        <th>Bác sĩ</th>
+                                        <th>Khoa</th>
+                                        <th>Ca trực</th>
+                                        <th>Trạng thái</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="doctor : ${doctorOnDutyResponses}">
+                                        <td th:text="${doctor.getDoctorName()}">BS. Trần Minh Tuấn</td>
+                                        <td th:text="${doctor.getDepartmentName()}">Tim mạch</td>
+                                        <td th:text="${doctor.getShift()}">Ca sáng</td>
+                                        <td th:text="${doctor.getStatus()}">Đang trực</td>
 
-                                 </tr>
-                                 </tbody>
-                             </table>
-                         </div>
-                     </div>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
-                 </div>
-             </div>
-         </main>
+                </div>
+            </div>
+        </main>
 
 
-     </div>
+    </div>
 
 
 </body>
+
 </html>

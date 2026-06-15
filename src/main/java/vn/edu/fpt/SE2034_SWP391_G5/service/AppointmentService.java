@@ -60,4 +60,7 @@ public interface AppointmentService {
 
     // Cập nhật trạng thái lịch hẹn
     void updateAppointmentStatus(Long appointmentId, String newStatus);
+
+    // Lấy danh sách bệnh nhân đã khám xong gần đây nhất
+    List<AppointmentResponse> getRecentCompletedAppointmentsForDoctor(Long doctorId, int limit);
 }

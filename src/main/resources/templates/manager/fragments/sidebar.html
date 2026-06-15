@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
 
     <meta charset="UTF-8">
@@ -7,48 +8,57 @@
 </head>
 
 <body>
-<!--Common SideBar-->
-<aside th:fragment="managerSidebar(activeMenu)" class="manager-sidebar" >
-    <header class="manager-header">
-        <div class="manager-header-title">
-            <div class="manager-brand-icon"> <i class="bi bi-hospital"></i> </div>
-            <div class="manager-brand-text"><h1>HMS</h1>
-                <p>HAMEMS System</p>
+    <!--Common SideBar-->
+    <aside th:fragment="managerSidebar(activeMenu)" class="manager-sidebar">
+        <header class="manager-header">
+            <div class="manager-header-title">
+                <div class="manager-brand-icon"> <i class="bi bi-hospital"></i> </div>
+                <div class="manager-brand-text">
+                    <h1>HMS</h1>
+                    <p>HAMEMS System</p>
+                </div>
             </div>
-        </div>
-    </header>
-    <nav class="sidebar-section-title">Quản lý bệnh viện</nav>
-    <nav class="manager-nav">
-        <ul class="manager-nav-list">
-            <li><a th:href="@{/manager/dashboard}" class="manager-nav-link" th:classappend="${activeMenu == 'dashboard'} ? 'active'"><i class="bi bi-grid"></i>Tổng quan</a></li>
-            <li><a th:href="@{/manager/staff/list}" class="manager-nav-link" th:classappend="${activeMenu == 'staff'} ? 'active'"><i class="bi bi-people"></i>Tài khoản nhân viên</a></li>
-<!--            <li><a th:href="@{manager/doctors}" class="manager-nav-link" th:classappend="${activeMenu == 'doctor'} ? 'active'"><i class="bi bi-person-badge"></i>Danh sách bác sĩ</a></li>-->
-<!--            <li><a href="#" class="manager-nav-link"><i class="bi bi-headset"></i>Danh sách lễ tân</a></li>-->
-            <li><a href="#" class="manager-nav-link"><i class="bi bi-clipboard2-pulse"></i>Danh sách dịch vụ</a></li>
-            <li><a href="#" class="manager-nav-link"><i class="bi bi-calendar-week"></i>Quản lý lịch làm việc</a></li>
-            <li><a href="#" class="manager-nav-link"><i class="bi bi-newspaper"></i>Danh sách bài viết</a></li>
-            <li><a href="#" class="manager-nav-link"><i class="bi bi-megaphone"></i>Danh sách tin tức</a></li>
-            <li><a href="#" class="manager-nav-link"><i class="bi bi-calendar-check"></i>Danh sách lịch hẹn</a></li>
-            <li><a href="#" class="manager-nav-link"><i class="bi bi-file-earmark-medical"></i>Hồ sơ bệnh án</a></li>
-            <li><a href="#" class="manager-nav-link"><i class="bi bi-receipt"></i>Tổng quan hóa đơn</a></li>
-        </ul>
-    </nav>
-    <div class="manager-sidebar-footer">
-        <div class="manager-user-avatar">
-            HM
-        </div>
+        </header>
+        <nav class="sidebar-section-title">Quản lý bệnh viện</nav>
+        <nav class="manager-nav">
+            <ul class="manager-nav-list">
+                <li><a th:href="@{/manager/dashboard}" class="manager-nav-link"
+                        th:classappend="${activeMenu == 'dashboard'} ? 'active'"><i class="bi bi-grid"></i>Tổng quan</a>
+                </li>
+                <li><a th:href="@{/manager/staff/list}" class="manager-nav-link"
+                        th:classappend="${activeMenu == 'staff'} ? 'active'"><i class="bi bi-people"></i>Tài khoản nhân
+                        viên</a></li>
+                <!--            <li><a th:href="@{manager/doctors}" class="manager-nav-link" th:classappend="${activeMenu == 'doctor'} ? 'active'"><i class="bi bi-person-badge"></i>Danh sách bác sĩ</a></li>-->
+                <!--            <li><a href="#" class="manager-nav-link"><i class="bi bi-headset"></i>Danh sách lễ tân</a></li>-->
+                <li><a href="#" class="manager-nav-link"><i class="bi bi-clipboard2-pulse"></i>Danh sách dịch vụ</a>
+                </li>
+                <li><a href="#" class="manager-nav-link"><i class="bi bi-calendar-week"></i>Quản lý lịch làm việc</a>
+                </li>
+                <li><a href="#" class="manager-nav-link"><i class="bi bi-newspaper"></i>Danh sách bài viết</a></li>
+                <li><a href="#" class="manager-nav-link"><i class="bi bi-megaphone"></i>Danh sách tin tức</a></li>
+                <li><a href="#" class="manager-nav-link"><i class="bi bi-calendar-check"></i>Danh sách lịch hẹn</a></li>
+                <li><a href="#" class="manager-nav-link"><i class="bi bi-file-earmark-medical"></i>Hồ sơ bệnh án</a>
+                </li>
+                <li><a href="#" class="manager-nav-link"><i class="bi bi-receipt"></i>Tổng quan hóa đơn</a></li>
+            </ul>
+        </nav>
+        <div class="manager-sidebar-footer">
+            <div class="manager-user-avatar">
+                HM
+            </div>
 
-        <div class="manager-user-info">
-            <strong> Quản lý bệnh viện</strong>
-            <span>manager@hms.vn</span>
-        </div>
+            <div class="manager-user-info">
+                <strong> Quản lý bệnh viện</strong>
+                <span>manager@hms.vn</span>
+            </div>
 
-        <div class="manager-logout-link">
-            <a href="#"><i class="bi bi-box-arrow-right"></i></a>
-        </div>
+            <div class="manager-logout-link">
+                <a href="#"><i class="bi bi-box-arrow-right"></i></a>
+            </div>
 
-    </div>
-</aside>
+        </div>
+    </aside>
 
 </body>
+
 </html>
