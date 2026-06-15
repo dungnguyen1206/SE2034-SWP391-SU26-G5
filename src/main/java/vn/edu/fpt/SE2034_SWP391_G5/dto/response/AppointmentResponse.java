@@ -29,8 +29,6 @@ public class AppointmentResponse {
 
     // Patient info
     private Long patientId;
-
-    //LinhNH 01/06/2026
     private Integer patientAge;
     private String patientGender;
     private String patientInitials;
