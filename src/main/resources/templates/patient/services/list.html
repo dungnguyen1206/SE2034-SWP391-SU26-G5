@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Dịch vụ khám</title>
@@ -7,111 +8,106 @@
     <link rel="stylesheet" th:href="@{/css/patient/patient-appointment.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
+
 <body>
-<div class="patient-layout">
-    <div th:replace="~{patient/fragments/sidebar :: patientSidebar('services')}"></div>
-    <main class="patient-main">
+    <div class="patient-layout">
+        <div th:replace="~{patient/fragments/sidebar :: patientSidebar('services')}"></div>
+        <main class="patient-main">
 
-        <!-- Header -->
-        <div class="patient-page-header">
-            <div>
-                <h2>Dịch vụ khám</h2>
-                <p>Danh sách các dịch vụ khám chữa bệnh theo chuyên khoa</p>
-            </div>
-            <a th:href="@{/patient/appointments/book}" class="btn-primary">
-                <i class="bi bi-calendar-plus"></i> Đặt lịch khám
-            </a>
-        </div>
-
-        <!-- Filter theo khoa -->
-        <div class="appt-filter-bar" style="flex-wrap:wrap;gap:8px;">
-            <a th:href="@{/patient/services}" class="appt-filter-btn"
-               th:classappend="${selectedDepartmentId == null} ? ' active'">Tất cả</a>
-            <a th:each="dept : ${departments}"
-               th:href="@{/patient/services(departmentId=${dept.id})}"
-               class="appt-filter-btn"
-               th:classappend="${selectedDepartmentId != null and selectedDepartmentId == dept.id} ? ' active'"
-               th:text="${dept.name}">Khoa</a>
-        </div>
-
-        <!-- Empty state -->
-        <div th:if="${#lists.isEmpty(services)}" class="patient-card" style="margin-top:8px;">
-            <div class="empty-state">
-                <i class="bi bi-clipboard2-x" style="font-size:40px;"></i>
-                <p>Không có dịch vụ nào trong khoa này</p>
-                <a th:href="@{/patient/services}" class="btn-secondary" style="margin-top:8px;">
-                    Xem tất cả dịch vụ
+            <!-- Header -->
+            <div class="patient-page-header">
+                <div>
+                    <h2>Dịch vụ khám</h2>
+                    <p>Danh sách các dịch vụ khám chữa bệnh theo chuyên khoa</p>
+                </div>
+                <a th:href="@{/patient/appointments/book}" class="btn-primary">
+                    <i class="bi bi-calendar-plus"></i> Đặt lịch khám
                 </a>
             </div>
-        </div>
 
-        <!-- Danh sách dịch vụ -->
-        <div th:unless="${#lists.isEmpty(services)}"
-             style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:8px;">
+            <!-- Filter theo khoa -->
+            <div class="appt-filter-bar" style="flex-wrap:wrap;gap:8px;">
+                <a th:href="@{/patient/services}" class="appt-filter-btn"
+                    th:classappend="${selectedDepartmentId == null} ? ' active'">Tất cả</a>
+                <a th:each="dept : ${departments}" th:href="@{/patient/services(departmentId=${dept.id})}"
+                    class="appt-filter-btn"
+                    th:classappend="${selectedDepartmentId != null and selectedDepartmentId == dept.id} ? ' active'"
+                    th:text="${dept.name}">Khoa</a>
+            </div>
 
-            <div th:each="svc : ${services}" class="patient-card"
-                 style="padding:0;overflow:hidden;display:flex;flex-direction:column;">
-
-                <!-- Ảnh dịch vụ hoặc placeholder -->
-                <div th:if="${svc.imageUrl != null}"
-                     style="height:140px;overflow:hidden;">
-                    <img th:src="${svc.imageUrl}" alt="service"
-                         style="width:100%;height:100%;object-fit:cover;">
-                </div>
-                <div th:if="${svc.imageUrl == null}"
-                     style="height:140px;background:linear-gradient(135deg,#eff6ff,#dbeafe);
-                            display:flex;align-items:center;justify-content:center;">
-                    <i class="bi bi-clipboard2-pulse" style="font-size:48px;color:#3b82f6;opacity:0.5;"></i>
-                </div>
-
-                <!-- Nội dung -->
-                <div style="padding:16px;flex:1;display:flex;flex-direction:column;gap:8px;">
-
-                    <!-- Tên dịch vụ -->
-                    <div style="font-size:15px;font-weight:700;color:#0f172a;" th:text="${svc.name}"></div>
-
-                    <!-- Khoa -->
-                    <div th:if="${svc.department != null}"
-                         style="font-size:12px;color:#1d4ed8;font-weight:600;">
-                        <i class="bi bi-hospital" style="margin-right:4px;"></i>
-                        <span th:text="${svc.department.name}"></span>
-                    </div>
-
-                    <!-- Mô tả -->
-                    <div th:if="${svc.description != null}"
-                         style="font-size:13px;color:#64748b;line-height:1.5;
-                                display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;"
-                         th:text="${svc.description}"></div>
-
-                    <!-- Giá + thời gian -->
-                    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
-                        <div th:if="${svc.referencePrice != null}"
-                             style="font-size:14px;font-weight:700;color:#0f4c81;">
-                            <i class="bi bi-cash-coin" style="margin-right:4px;"></i>
-                            <span th:text="${#numbers.formatDecimal(svc.referencePrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
-                        </div>
-                        <div th:if="${svc.estimatedDuration != null}"
-                             style="font-size:12px;color:#94a3b8;">
-                            <i class="bi bi-clock" style="margin-right:4px;"></i>
-                            <span th:text="${svc.estimatedDuration} + ' phút'"></span>
-                        </div>
-                    </div>
-
-                    <!-- Nút đặt lịch -->
-                    <a th:if="${svc.department != null}"
-                       th:href="@{/patient/appointments/book/step2(departmentId=${svc.department.id})}"
-                       class="btn-primary"
-                       style="justify-content:center;font-size:13px;margin-top:auto;">
-                        <i class="bi bi-calendar-plus"></i> Đặt lịch dịch vụ này
+            <!-- Empty state -->
+            <div th:if="${#lists.isEmpty(services)}" class="patient-card" style="margin-top:8px;">
+                <div class="empty-state">
+                    <i class="bi bi-clipboard2-x" style="font-size:40px;"></i>
+                    <p>Không có dịch vụ nào trong khoa này</p>
+                    <a th:href="@{/patient/services}" class="btn-secondary" style="margin-top:8px;">
+                        Xem tất cả dịch vụ
                     </a>
                 </div>
             </div>
-        </div>
 
-        <div style="margin-top:12px;font-size:13px;color:#94a3b8;" th:unless="${#lists.isEmpty(services)}"
-             th:text="${#lists.size(services)} + ' dịch vụ'"></div>
+            <!-- Danh sách dịch vụ -->
+            <div th:unless="${#lists.isEmpty(services)}"
+                style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:8px;">
 
-    </main>
-</div>
+                <div th:each="svc : ${services}" class="patient-card"
+                    style="padding:0;overflow:hidden;display:flex;flex-direction:column;">
+
+                    <!-- Ảnh dịch vụ hoặc placeholder -->
+                    <div th:if="${svc.imageUrl != null}" style="height:140px;overflow:hidden;">
+                        <img th:src="${svc.imageUrl}" alt="service" style="width:100%;height:100%;object-fit:cover;">
+                    </div>
+                    <div th:if="${svc.imageUrl == null}" style="height:140px;background:linear-gradient(135deg,#eff6ff,#dbeafe);
+                            display:flex;align-items:center;justify-content:center;">
+                        <i class="bi bi-clipboard2-pulse" style="font-size:48px;color:#3b82f6;opacity:0.5;"></i>
+                    </div>
+
+                    <!-- Nội dung -->
+                    <div style="padding:16px;flex:1;display:flex;flex-direction:column;gap:8px;">
+
+                        <!-- Tên dịch vụ -->
+                        <div style="font-size:15px;font-weight:700;color:#0f172a;" th:text="${svc.name}"></div>
+
+                        <!-- Khoa -->
+                        <div th:if="${svc.department != null}" style="font-size:12px;color:#1d4ed8;font-weight:600;">
+                            <i class="bi bi-hospital" style="margin-right:4px;"></i>
+                            <span th:text="${svc.department.name}"></span>
+                        </div>
+
+                        <!-- Mô tả -->
+                        <div th:if="${svc.description != null}" style="font-size:13px;color:#64748b;line-height:1.5;
+                                display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;"
+                            th:text="${svc.description}"></div>
+
+                        <!-- Giá + thời gian -->
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+                            <div th:if="${svc.referencePrice != null}"
+                                style="font-size:14px;font-weight:700;color:#0f4c81;">
+                                <i class="bi bi-cash-coin" style="margin-right:4px;"></i>
+                                <span
+                                    th:text="${#numbers.formatDecimal(svc.referencePrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
+                            </div>
+                            <div th:if="${svc.estimatedDuration != null}" style="font-size:12px;color:#94a3b8;">
+                                <i class="bi bi-clock" style="margin-right:4px;"></i>
+                                <span th:text="${svc.estimatedDuration} + ' phút'"></span>
+                            </div>
+                        </div>
+
+                        <!-- Nút đặt lịch -->
+                        <a th:if="${svc.department != null}"
+                            th:href="@{/patient/appointments/book/step2(departmentId=${svc.department.id})}"
+                            class="btn-primary" style="justify-content:center;font-size:13px;margin-top:auto;">
+                            <i class="bi bi-calendar-plus"></i> Đặt lịch dịch vụ này
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top:12px;font-size:13px;color:#94a3b8;" th:unless="${#lists.isEmpty(services)}"
+                th:text="${#lists.size(services)} + ' dịch vụ'"></div>
+
+        </main>
+    </div>
 </body>
+
 </html>

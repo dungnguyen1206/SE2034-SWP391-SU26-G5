@@ -59,10 +59,7 @@ public class AppointmentPrintResponse {
         if (slotStartTime == null || slotEndTime == null) {
             return "";
         }
-
-        return slotStartTime.toString().substring(0, 5)
-                + " - "
-                + slotEndTime.toString().substring(0, 5);
+        return slotStartTime.toString().substring(0, 5) + " - " + slotEndTime.toString().substring(0, 5);
     }
 
     public String getStatusLabel() {

@@ -17,12 +17,12 @@
             <header class="staff-header">
                 <div class="staff-header-title">
                     <h2>Tài khoản nhân viên</h2>
-                    <p>Tạo và quản lý tài khoản bác sĩ, lễ tân trong hệ thống</p>
+                    <p>Quản lý tài khoản bác sĩ, lễ tân trong hệ thống</p>
                 </div>
-                <a th:href="@{/manager/staff/create(type='doctor')}" class="staff-create-button">
-                    <i class="bi bi-plus-lg"></i>
-                    Tạo tài khoản nhân viên
-                </a>
+<!--                <a th:href="@{/manager/staff/create(type='doctor')}" class="staff-create-button">-->
+<!--                    <i class="bi bi-plus-lg"></i>-->
+<!--                    Tạo tài khoản nhân viên-->
+<!--                </a>-->
             </header>
 
             <section class="staff-stats">
@@ -84,6 +84,7 @@
                 <table class="staff-table">
                     <thead>
                     <tr>
+                        <th>STT</th>
                         <th>Họ và tên</th>
                         <th>Email</th>
                         <th>Số điện thoại</th>
@@ -95,7 +96,8 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="staff : ${staffResponses}">
+                    <tr th:each="staff, index : ${staffResponses}">
+                        <td th:text="${index.count}"></td>
                         <td>
                             <div class="staff-profile">
                                 <div class="staff-avatar">T</div>
@@ -106,14 +108,24 @@
                         <td th:text="${staff.getPhone()}">0987 654 321</td>
                         <td><span class="staff-type-badge" th:classappend="${staff.getRole() == 'DOCTOR'} ? ' doctor' : ' receptionist'"
                                th:text="${staff.getRole()=='DOCTOR'} ? 'Bác sĩ' : 'Lễ tân' ">Bác sĩ</span></td>
-                        <td><span class="staff-status active"><span></span>Đang hoạt động</span></td>
+                        <td>
+                            <div class="staff-status-text"
+                                 th:classappend="${staff.getStatus().equals('ACTIVE')} ? ' active' : ' inactive'">
+                             <span class="staff-status-dot"
+                                   th:classappend="${staff.getStatus().equals('ACTIVE')} ? ' active' : ' inactive'"></span>
+                                <strong th:text="${staff.getStatus().equals('ACTIVE')} ? 'Đang hoạt động' : 'Ngưng hoạt động'">
+                                    Đang hoạt động
+                                </strong>
+                            </div>
+
+                        </td>
                         <td th:text="${staff.getCreatedBy()}">Hoàng Thị Mai</td>
                         <td th:text="${staff.getCreatedDate()}">15/03/2021</td>
                         <td>
                             <div class="staff-actions">
                                 <a th:href="@{/manager/staff/{staffId}(staffId=${staff.getId()}, staffRole=${staff.getRole()})}" class="staff-action-view"><i class="bi bi-eye"></i></a>
-                                <a href="#" class="staff-action-edit"><i class="bi bi-pencil"></i></a>
-                                <a href="#" class="staff-action-lock"><i class="bi bi-trash"></i></a>
+                                <a th:href="@{/manager/staff/{staffId}/edit(staffId=${staff.getId()}, staffRole=${staff.getRole()})}" class="staff-action-edit"><i class="bi bi-pencil"></i></a>
+<!--                                <a href="#" class="staff-action-lock"><i class="bi bi-trash"></i></a>-->
 <!--                                <a href="#" class="staff-action-key"><i class="bi bi-key"></i></a>-->
 
                             </div>

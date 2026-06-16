@@ -26,6 +26,12 @@
                         <a th:href="@{/receptionist/appointment}" class="btn-back">
                             Quay lại danh sách
                         </a>
+
+                        <a th:if="${appointment.status == 'CONFIRMED'}"
+                           th:href="@{/receptionist/appointment/{id}/check-in-ticket(id=${appointment.id})}"
+                           class="btn-checkin-detail">
+                            Check-in
+                        </a>
                     </div>
 
                     <div class="detail-ticket">

@@ -18,26 +18,24 @@ public class AppointmentResponse {
     private LocalTime slotStartTime;
     private LocalTime slotEndTime;
     private String roomNumber;
+    private String patientFullName;
     private String patientPhone;
     private String patientAddress;
+    private String doctorFullName;
+    private String departmentName;
     private LocalDate bookingDate;
     private String status;
     private LocalDateTime checkInTime;
 
     // Patient info
     private Long patientId;
-    private String patientFullName;
-
-    //LinhNH 01/06/2026
     private Integer patientAge;
     private String patientGender;
     private String patientInitials;
 
     // Doctor info
     private Long doctorId;
-    private String doctorFullName;
     private String doctorDegree;
-    private String departmentName;
 
     // Service info
     private Long serviceId;
@@ -45,7 +43,6 @@ public class AppointmentResponse {
 
     // Schedule info
     private String shift;
-
 
     // Other
     private String note;
@@ -78,7 +75,7 @@ public class AppointmentResponse {
         return switch (status) {
             case "CONFIRMED" -> "Đã xác nhận";
             case "WAITING" -> "Chờ khám";
-            case "EXAMINING" -> "Đang khám";
+            case "EXAMINING", "IN_PROGRESS" -> "Đang khám";
             case "COMPLETED" -> "Đã khám xong";
             case "CANCELLED" -> "Đã hủy";
             case "NO_SHOW" -> "Vắng mặt";
@@ -94,7 +91,7 @@ public class AppointmentResponse {
         return switch (status) {
             case "CONFIRMED" -> "status-confirmed";
             case "WAITING" -> "status-waiting";
-            case "EXAMINING" -> "status-examining";
+            case "EXAMINING", "IN_PROGRESS" -> "status-examining";
             case "COMPLETED" -> "status-completed";
             case "CANCELLED" -> "status-cancelled";
             case "NO_SHOW" -> "status-no-show";

@@ -28,9 +28,9 @@
 .dashboard-status-badge {
     display: inline-flex;
     align-items: center;
-    background: #dcfce7;
+    /*background: #dcfce7;*/
     color: #166534;
-    border: 1px solid #86efac;
+    /*border: 1px solid #86efac;*/
     padding: 8px 14px;
     border-radius: 999px;
     font-size: 14px;
@@ -99,23 +99,27 @@ Block 1
     font-weight: 600;
 }
 .status-waiting {
-    background: #fef3c7;
+    background: aliceblue;
     color: #92400e;
 }
 .status-confirmed {
-    background: #dbeafe;
+
     color: #1d4ed8;
+    background: aliceblue;
 }
 .status-examining {
-    background: #cffafe;
+    background: aliceblue;
+
     color: #0e7490;
 }
 .status-completed {
-    background: #dcfce7;
+    background: aliceblue;
+
     color: #166534;
 }
 .status-cancelled {
-    background: #fee2e2;
+    background: aliceblue;
+
     color: #b91c1c;
 }
 

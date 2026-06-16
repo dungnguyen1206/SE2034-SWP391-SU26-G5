@@ -248,12 +248,11 @@
 }
 
 .staff-type-badge.doctor {
-    background: #dcfce7;
     color: #008236;
 }
 
 .staff-type-badge.receptionist {
-    background: #fef3c7;
+
     color: #b45309;
 }
 
@@ -289,7 +288,8 @@
 .staff-actions {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 15px;
+    margin-left: 10px;
 }
 
 .staff-actions a {
@@ -365,6 +365,96 @@
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
 }
 
+.staff-status-text {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 28px;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.staff-status-text strong {
+    font-weight: 600;
+}
+
+.staff-status-text.active strong {
+    color: #008236;
+}
+
+.staff-status-text.inactive strong {
+    color: #64748b;
+}
+
+.staff-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.staff-status-dot.active {
+    background: #00b85f;
+}
+
+.staff-status-dot.inactive {
+    background: #94a3b8;
+}
+
+/*
+Staff form error
+
+*/
+
+.staff-form-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: -6px 0 18px;
+    padding: 12px 14px;
+    border: 1px solid #fecaca;
+    border-radius: 9px;
+    background: #fff5f5;
+    color: #b91c1c;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.staff-form-alert i {
+    margin-top: 2px;
+    color: #dc2626;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+/*
+
+Staff form success
+
+*/
+.staff-form-success {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin: -6px 0 18px;
+    padding: 12px 14px;
+    border: 1px solid #bbf7d0;
+    border-radius: 9px;
+    background: #f0fdf4;
+    color: #166534;
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+.staff-form-success i {
+    margin-top: 2px;
+    color: #16a34a;
+    font-size: 15px;
+    flex-shrink: 0;
+}
+
+
 /*
     Staff Form - Staff Type
 */
@@ -393,8 +483,8 @@
 .staff-type-option {
     width: 180px;
     min-height: 86px;
-    border: 2px solid #dde3ea;
-    border-radius: 12px;
+    /*border: 2px solid #dde3ea;*/
+    /*border-radius: 12px;*/
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -411,14 +501,14 @@
 }
 
 .staff-type-option.doctor.selected {
-    border-color: #00c46a;
-    background: #ecfdf5;
+    /*border-color: #00c46a;*/
+    /*background: #ecfdf5;*/
     color: #008236;
 }
 
 .staff-type-option.receptionist.selected {
-    border-color: #f2b705;
-    background: #fffbeb;
+    /*border-color: #f2b705;*/
+    /*background: #fffbeb;*/
     color: #b45309;
 }
 
@@ -437,8 +527,8 @@
 
 .staff-role-note strong {
     padding: 4px 9px;
-    border-radius: 999px;
-    background: #dcfce7;
+    /*border-radius: 999px;*/
+    /*background: #dcfce7;*/
     color: #008236;
     font-size: 12px;
 }
@@ -492,7 +582,7 @@
 */
 .staff-form-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 16px;
 }
 
@@ -561,12 +651,11 @@
 }
 
 .staff-section-badge.doctor {
-    background: #dcfce7;
+    /*background: #dcfce7;*/
     color: #008236;
 }
 
 .staff-section-badge.receptionist {
-    background: #fef3c7;
     color: #b45309;
 }
 
@@ -585,8 +674,8 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    border: 1px solid #dde3ea;
-    border-radius: 9px;
+    /*border: 1px solid #dde3ea;*/
+    /*border-radius: 9px;*/
     padding: 0 12px;
     color: #334155;
     font-size: 14px;
@@ -599,8 +688,8 @@
 }
 
 .staff-radio-card.selected {
-    border-color: #78adff;
-    background: #eff6ff;
+    /*border-color: #78adff;*/
+    /*background: #eff6ff;*/
     color: #145cff;
 }
 
@@ -714,12 +803,12 @@
 }
 
 .staff-help-badge.doctor {
-    background: #dcfce7;
+    /*background: #dcfce7;*/
     color: #008236;
 }
 
 .staff-help-badge.receptionist {
-    background: #fef3c7;
+    /*background: #fef3c7;*/
     color: #b45309;
 }
 
@@ -781,10 +870,12 @@
 */
 .staff-detail-summary {
     display: grid;
-    grid-template-columns: auto minmax(220px, 1fr) minmax(360px, 2fr);
+    grid-template-columns: auto minmax(220px,1fr);
     gap: 22px;
     align-items: center;
     margin-bottom: 20px;
+    width: 100%;
+
 }
 
 .staff-detail-avatar {
@@ -845,16 +936,20 @@
 */
 .staff-detail-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 360px;
+    grid-template-columns: auto minmax(0, 2fr);
     gap: 20px;
     align-items: start;
+    width: 100%;
 }
 
-.staff-detail-main,
-.staff-detail-side {
-    display: flex;
-    flex-direction: column;
+.staff-detail-side{
+    display: grid;
+}
+.staff-detail-main{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 20px;
+
 }
 
 .staff-detail-info-list {
@@ -865,9 +960,9 @@
 .staff-detail-info-list div {
     display: flex;
     justify-content: space-between;
-    gap: 16px;
     padding: 12px 0;
     border-bottom: 1px solid #eef2f7;
+    width: 100%;
 }
 
 .staff-detail-info-list div:last-child {

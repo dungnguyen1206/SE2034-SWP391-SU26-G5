@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DoctorOnDutyResponse {
+    private Long doctorId;
     private String doctorName;
     private String departmentName;
     private String status;

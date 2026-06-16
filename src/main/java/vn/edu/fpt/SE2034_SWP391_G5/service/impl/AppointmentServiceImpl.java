@@ -2,14 +2,13 @@ package vn.edu.fpt.SE2034_SWP391_G5.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateAppointmentRequest;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentPrintResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentStatusCountResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ScheduleSlotResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.*;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.*;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
@@ -23,11 +22,9 @@ import vn.edu.fpt.SE2034_SWP391_G5.util.CodeGenerator;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.Period;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -93,27 +90,24 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public AppointmentPrintResponse getCheckInTicket(Long appointmentId) {
-        Appointment appointment = appointmentRepository.findCheckInTicketById(appointmentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin lịch hẹn"));
-
+        Appointment appointment = appointmentRepository.findCheckInTicketById(appointmentId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin lịch hẹn"));
         AppointmentPrintResponse ticket = toPrintResponse(appointment);
-
-        if (ticket.getCheckInTime() != null) {
-            Long queueNumber = appointmentRepository.countQueueNumberForTicket(
-                    ticket.getId(),
-                    ticket.getBookingDate(),
-                    ticket.getCheckInTime()
-            );
+        if (appointment.getCheckInTime() != null) {
+            TimeSlot effectiveSlot = getEffectiveSlotForTicket(appointment);
+            if (effectiveSlot != null) {
+                ticket.setSlotStartTime(effectiveSlot.getStartTime());
+                ticket.setSlotEndTime(effectiveSlot.getEndTime());
+            }
+            Long queueNumber = calculateQueueNumber(appointment);
             ticket.setQueueNumber(queueNumber);
         }
-
         return ticket;
     }
 
     @Override
-    @Transactional
+    @Transactional(noRollbackFor = BadRequestException.class)
     public void confirmCheckInAppointment(Long appointmentId) {
-        Appointment appointment = appointmentRepository.findById(appointmentId)
+        Appointment appointment = appointmentRepository.findCheckInTicketById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lịch hẹn"));
 
         if (!"CONFIRMED".equals(appointment.getStatus())) {
@@ -124,7 +118,30 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new BadRequestException("Chỉ được check-in lịch hẹn trong ngày khám");
         }
 
+        TimeSlot slot = appointment.getSlot();
+
+        if (slot == null) {
+            throw new BadRequestException("Lịch hẹn chưa có slot khám");
+        }
+
         LocalDateTime now = LocalDateTime.now();
+        LocalTime currentTime = now.toLocalTime();
+        LocalTime slotEndTime = slot.getEndTime();
+        LocalTime lateLimitTime = slotEndTime.plusMinutes(15);
+
+        if (currentTime.isAfter(lateLimitTime)) {
+            markAppointmentNoShow(appointment, now);
+            throw new BadRequestException("Bệnh nhân đã trễ quá 15 phút. Vui lòng đặt lịch lại.");
+        }
+
+        if (currentTime.isAfter(slotEndTime)) {
+            List<TimeSlot> slots = getSlotsInSameRoomAndDate(appointment);
+            TimeSlot nextSlot = findNextSlot(slots, slot);
+            if (nextSlot == null) {
+                markAppointmentNoShow(appointment, now);
+                throw new BadRequestException("Bệnh nhân đã trễ slot khám và không còn slot tiếp theo. Vui lòng đặt lịch lại.");
+            }
+        }
 
         appointment.setStatus("WAITING");
         appointment.setCheckInTime(now);
@@ -143,6 +160,295 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         return response;
     }
+
+    @Override
+    public List<AppointmentDateGroupResponse> groupAppointmentsByDate(List<AppointmentResponse> appointments) {
+        Map<LocalDate, List<AppointmentResponse>> groupedMap = new LinkedHashMap<>();
+
+        for (AppointmentResponse appointment : appointments) {
+            LocalDate bookingDate = appointment.getBookingDate();
+            if (bookingDate == null) {
+                continue;
+            }
+            if (!groupedMap.containsKey(bookingDate)) {
+                groupedMap.put(bookingDate, new ArrayList<>());
+            }
+            groupedMap.get(bookingDate).add(appointment);
+        }
+
+        List<AppointmentDateGroupResponse> result = new ArrayList<>();
+        LocalDate today = LocalDate.now();
+
+        for (Map.Entry<LocalDate, List<AppointmentResponse>> entry : groupedMap.entrySet()) {
+            LocalDate bookingDate = entry.getKey();
+            List<AppointmentResponse> appointmentList = entry.getValue();
+
+            result.add(new AppointmentDateGroupResponse(
+                    bookingDate,
+                    today.equals(bookingDate),
+                    appointmentList.size(),
+                    appointmentList
+            ));
+        }
+
+        return result;
+    }
+
+    @Override
+    public Page<AppointmentResponse> getPagedAppointmentsForReceptionist(
+            String search,
+            String status,
+            LocalDate fromDate,
+            LocalDate toDate,
+            int page,
+            int size
+    ) {
+        List<AppointmentResponse> allAppointments = getAppointmentListForReceptionist();
+
+        List<AppointmentResponse> filteredAppointments =
+                filterAppointmentsBySearchStatusAndDate(
+                        allAppointments,
+                        search,
+                        status,
+                        fromDate,
+                        toDate
+                );
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), filteredAppointments.size());
+
+        List<AppointmentResponse> pageContent;
+
+        if (start >= filteredAppointments.size()) {
+            pageContent = new ArrayList<>();
+        } else {
+            pageContent = filteredAppointments.subList(start, end);
+        }
+
+        return new PageImpl<>(pageContent, pageable, filteredAppointments.size());
+    }
+
+    private List<AppointmentResponse> filterAppointmentsBySearchStatusAndDate(List<AppointmentResponse> appointments, String search, String status, LocalDate fromDate, LocalDate toDate) {
+        List<AppointmentResponse> result = new ArrayList<>();
+
+        String keyword = "";
+        if (search != null) {
+            keyword = search.trim().toLowerCase();
+        }
+
+        String selectedStatus = "";
+        if (status != null) {
+            selectedStatus = status.trim();
+        }
+
+        for (AppointmentResponse appointment : appointments) {
+            boolean matchesSearch = true;
+            boolean matchesStatus = true;
+            boolean matchesDate = true;
+
+            if (!keyword.isEmpty()) {
+                matchesSearch =
+                        containsIgnoreCase(appointment.getAppointmentCode(), keyword)
+                                || containsIgnoreCase(appointment.getPatientFullName(), keyword)
+                                || containsIgnoreCase(appointment.getPatientPhone(), keyword)
+                                || containsIgnoreCase(appointment.getDoctorFullName(), keyword)
+                                || containsIgnoreCase(appointment.getDepartmentName(), keyword)
+                                || containsIgnoreCase(appointment.getRoomNumber(), keyword);
+            }
+
+            if (!selectedStatus.isEmpty()) {
+                matchesStatus = selectedStatus.equals(appointment.getStatus());
+            }
+
+            if (fromDate != null) {
+                if (appointment.getBookingDate() == null) {
+                    matchesDate = false;
+                } else {
+                    matchesDate = !appointment.getBookingDate().isBefore(fromDate);
+                }
+            }
+
+            if (toDate != null) {
+                if (appointment.getBookingDate() == null) {
+                    matchesDate = false;
+                } else {
+                    matchesDate = matchesDate
+                            && !appointment.getBookingDate().isAfter(toDate);
+                }
+            }
+
+            if (matchesSearch && matchesStatus && matchesDate) {
+                result.add(appointment);
+            }
+        }
+
+        return result;
+    }
+
+    private void markAppointmentNoShow(Appointment appointment, LocalDateTime now) {
+        appointment.setStatus("NO_SHOW");
+        appointment.setUpdatedAt(now);
+        appointmentRepository.save(appointment);
+    }
+
+    private Long calculateQueueNumber(Appointment appointment) {
+        TimeSlot originalSlot = appointment.getSlot();
+
+        if (originalSlot == null || originalSlot.getSchedule() == null) {
+            return 0L;
+        }
+
+        List<TimeSlot> slots = getSlotsInSameRoomAndDate(appointment);
+        TimeSlot effectiveSlot = getEffectiveSlot(appointment, slots, appointment.getCheckInTime());
+
+        if (effectiveSlot == null) {
+            return 0L;
+        }
+
+        Long baseNumber = calculateBaseNumberBeforeSlot(slots, effectiveSlot);
+        Long orderInSlot = calculateOrderInEffectiveSlot(appointment, slots, effectiveSlot);
+
+        return baseNumber + orderInSlot;
+    }
+
+    private Long calculateBaseNumberBeforeSlot(List<TimeSlot> slots, TimeSlot effectiveSlot) {
+        long baseNumber = 0L;
+
+        for (TimeSlot slot : slots) {
+            if (slot.getId().equals(effectiveSlot.getId())) {
+                break;
+            }
+
+            if (slot.getMaxCapacity() != null) {
+                baseNumber += slot.getMaxCapacity();
+            }
+        }
+
+        return baseNumber;
+    }
+
+    private Long calculateOrderInEffectiveSlot(Appointment targetAppointment, List<TimeSlot> slots, TimeSlot effectiveSlot) {
+        Integer roomId = getRoomId(targetAppointment);
+
+        if(roomId == null){
+            return 0L;
+        }
+
+        List<Appointment> checkedInAppointments =
+                appointmentRepository.findCheckedInAppointmentsByBookingDateAndScheduleId(
+                        targetAppointment.getBookingDate(),
+                        roomId
+                );
+
+        long order = 0L;
+
+        for (Appointment appointment : checkedInAppointments) {
+            if (appointment.getCheckInTime() == null) {
+                continue;
+            }
+
+            TimeSlot appointmentEffectiveSlot = getEffectiveSlot(appointment, slots, appointment.getCheckInTime());
+
+            if (appointmentEffectiveSlot == null) {
+                continue;
+            }
+
+            if (!appointmentEffectiveSlot.getId().equals(effectiveSlot.getId())) {
+                continue;
+            }
+
+            boolean checkedInBefore = appointment.getCheckInTime().isBefore(targetAppointment.getCheckInTime());
+
+            boolean checkedInSameTimeButIdSmaller =
+                    appointment.getCheckInTime().isEqual(targetAppointment.getCheckInTime())
+                            && appointment.getId() <= targetAppointment.getId();
+
+            if (checkedInBefore || checkedInSameTimeButIdSmaller) {
+                order++;
+            }
+        }
+
+        return order;
+    }
+
+    private TimeSlot getEffectiveSlotForTicket(Appointment appointment) {
+        TimeSlot originalSlot = appointment.getSlot();
+
+        if (originalSlot == null) {
+            return null;
+        }
+        List<TimeSlot> slots = getSlotsInSameRoomAndDate(appointment);
+
+        return getEffectiveSlot(appointment, slots, appointment.getCheckInTime());
+    }
+
+    private TimeSlot getEffectiveSlot(Appointment appointment, List<TimeSlot> slots, LocalDateTime checkInTime) {
+        TimeSlot originalSlot = appointment.getSlot();
+
+        if (originalSlot == null || checkInTime == null) {
+            return originalSlot;
+        }
+
+        LocalTime checkInLocalTime = checkInTime.toLocalTime();
+
+        if (!checkInLocalTime.isAfter(originalSlot.getEndTime())) {
+            return originalSlot;
+        }
+
+        LocalTime lateLimitTime = originalSlot.getEndTime().plusMinutes(15);
+
+        if (!checkInLocalTime.isAfter(lateLimitTime)) {
+            TimeSlot nextSlot = findNextSlot(slots, originalSlot);
+
+            if (nextSlot != null) {
+                return nextSlot;
+            }
+        }
+
+        return originalSlot;
+    }
+
+    private Integer getRoomId(Appointment appointment){
+        if(appointment == null
+                || appointment.getSlot() == null
+                || appointment.getSlot().getSchedule() == null
+                || appointment.getSlot().getSchedule().getRoom() == null
+        ){
+            return null;
+        }
+        return appointment.getSlot().getSchedule().getRoom().getId();
+    }
+
+    private List<TimeSlot> getSlotsInSameRoomAndDate(Appointment appointment) {
+        Integer roomId = getRoomId(appointment);
+        if (roomId == null || appointment.getBookingDate() == null) {
+            return new ArrayList<>();
+        }
+        return timeSlotRepository.findByRoomIdAndWorkDateOrderByStartTimeAsc(roomId, appointment.getBookingDate());
+    }
+
+    private TimeSlot findNextSlot(List<TimeSlot> slots, TimeSlot currentSlot) {
+        if (slots == null || slots.isEmpty() || currentSlot == null) {
+            return null;
+        }
+
+        for (int i = 0; i < slots.size(); i++) {
+            TimeSlot slot = slots.get(i);
+
+            if (slot.getId().equals(currentSlot.getId())) {
+                if (i + 1 < slots.size()) {
+                    return slots.get(i + 1);
+                }
+
+                return null;
+            }
+        }
+
+        return null;
+    }
+
 
     private boolean containsIgnoreCase(String value, String keyword) {
         return value != null && value.toLowerCase().contains(keyword);
@@ -188,6 +494,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                     a.getDoctor().getMiddleName(),
                     a.getDoctor().getFirstName()
             ));
+            response.setId(a.getId());
             response.setServiceName(a.getService().getName());
             response.setSlotStartTime(a.getSlot().getStartTime());
             response.setSlotEndTime(a.getSlot().getEndTime());
@@ -397,6 +704,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .patientId(patient != null ? patient.getId() : null)
                 .patientFullName(patientFullName)
                 .patientPhone(patient != null ? patient.getPhone() : null)
+                .patientAddress(buildPatientAddress(patient))
                 .patientAge(patientAge)
                 .patientGender(patientGender)
                 .patientInitials(patientInitials)
@@ -527,7 +835,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public Page<AppointmentResponse> getAppointmentsForDoctor(Long doctorId, String status, Pageable pageable) {
+    public Page<AppointmentResponse> getAppointmentsForDoctor(Long doctorId, LocalDate bookingDate, String status, Pageable pageable) {
         List<String> statuses;
 
         if (status == null || status.trim().isEmpty() || "ALL".equalsIgnoreCase(status)) {
@@ -536,20 +844,21 @@ public class AppointmentServiceImpl implements AppointmentService {
             statuses = List.of(status.toUpperCase());
         }
 
-        return appointmentRepository.findByDoctorIdAndStatusIn(doctorId, statuses, pageable)
+        return appointmentRepository.findByDoctorIdAndBookingDateAndStatusIn(doctorId, bookingDate, statuses, pageable)
                 .map(this::toResponse);
     }
 
     @Override
-    public long countAppointmentsForDoctor(Long doctorId, String status) {
+    public long countAppointmentsForDoctor(Long doctorId, LocalDate bookingDate, String status) {
         if (status == null || status.trim().isEmpty() || "ALL".equalsIgnoreCase(status)) {
-            return appointmentRepository.countByDoctorIdAndStatusIn(
+            return appointmentRepository.countByDoctorIdAndBookingDateAndStatusIn(
                     doctorId,
+                    bookingDate,
                     List.of("WAITING", "IN_PROGRESS", "COMPLETED")
             );
         }
 
-        return appointmentRepository.countByDoctorIdAndStatus(doctorId, status.toUpperCase());
+        return appointmentRepository.countByDoctorIdAndBookingDateAndStatus(doctorId, bookingDate, status.toUpperCase());
     }
 
     @Override
@@ -564,5 +873,14 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setUpdatedAt(LocalDateTime.now());
 
         appointmentRepository.save(appointment);
+    }
+
+    @Override
+    public List<AppointmentResponse> getRecentCompletedAppointmentsForDoctor(Long doctorId, int limit) {
+        Pageable pageable = PageRequest.of(0, limit);
+        return appointmentRepository.findRecentCompletedAppointments(doctorId, "COMPLETED", pageable)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 }
