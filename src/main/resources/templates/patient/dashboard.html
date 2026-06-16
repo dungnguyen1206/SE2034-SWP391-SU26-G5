@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Tổng quan - Bệnh nhân</title>
@@ -7,117 +8,120 @@
     <link rel="stylesheet" th:href="@{/css/patient/patient-dashboard.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
+
 <body>
-<div class="patient-layout">
-    <div th:replace="~{patient/fragments/sidebar :: patientSidebar('dashboard')}"></div>
-    <main class="patient-main">
+    <div class="patient-layout">
+        <div th:replace="~{patient/fragments/sidebar :: patientSidebar('dashboard')}"></div>
+        <main class="patient-main">
 
-        <div th:if="${successMessage}" class="alert alert-success">
-            <i class="bi bi-check-circle-fill"></i>
-            <span th:text="${successMessage}"></span>
-        </div>
-        <div th:if="${errorMessage}" class="alert alert-error">
-            <i class="bi bi-exclamation-circle-fill"></i>
-            <span th:text="${errorMessage}"></span>
-        </div>
-
-        <!-- Welcome banner -->
-        <div class="patient-welcome-banner">
-            <div>
-                <h3 th:text="'Xin chào, ' + ${profile.fullName} + '!'">Xin chào!</h3>
-                <p>Chào mừng bạn quay lại hệ thống quản lý y tế HAMS</p>
+            <div th:if="${successMessage}" class="alert alert-success">
+                <i class="bi bi-check-circle-fill"></i>
+                <span th:text="${successMessage}"></span>
             </div>
-            <a th:href="@{/patient/appointments/book}" class="btn-primary"
-               style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);">
-                <i class="bi bi-calendar-plus"></i> Đặt lịch khám
-            </a>
-        </div>
-
-        <!-- Stats -->
-        <div class="dashboard-stats">
-            <div class="dashboard-stat-card">
-                <div class="dashboard-stat-icon icon-blue"><i class="bi bi-calendar-check"></i></div>
-                <div class="dashboard-stat-value" th:text="${totalAppointments}">0</div>
-                <div class="dashboard-stat-label">Tổng lịch hẹn</div>
-            </div>
-            <!-- Trước đây có 2 card riêng: "Chờ xác nhận" (WAITING) + "Đã xác nhận" (CONFIRMED) -->
-            <!-- Fix: gộp lại thành 1 card "Đã đặt lịch" vì patient đặt vào slot có sẵn, không cần chờ xác nhận -->
-            <div class="dashboard-stat-card">
-                <div class="dashboard-stat-icon icon-cyan"><i class="bi bi-calendar2-check"></i></div>
-                <div class="dashboard-stat-value" th:text="${bookedCount}">0</div>
-                <div class="dashboard-stat-label">Đã đặt lịch</div>
-            </div>
-            <div class="dashboard-stat-card">
-                <div class="dashboard-stat-icon icon-green"><i class="bi bi-patch-check"></i></div>
-                <div class="dashboard-stat-value" th:text="${completedCount}">0</div>
-                <div class="dashboard-stat-label">Đã hoàn thành</div>
-            </div>
-        </div>
-
-        <!-- Recent appointments -->
-        <div class="dashboard-panel">
-            <div class="dashboard-panel-header">
-                <h3><i class="bi bi-clock-history" style="color:#0f4c81;margin-right:8px;"></i>Lịch hẹn gần đây</h3>
-                <a th:href="@{/patient/appointments}">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+            <div th:if="${errorMessage}" class="alert alert-error">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span th:text="${errorMessage}"></span>
             </div>
 
-            <div th:if="${#lists.isEmpty(recentAppointments)}" class="empty-state">
-                <i class="bi bi-calendar-x"></i>
-                <p>Bạn chưa có lịch hẹn nào</p>
-                <a th:href="@{/patient/appointments/book}" class="btn-primary">
-                    <i class="bi bi-calendar-plus"></i> Đặt lịch ngay
+            <!-- Welcome banner -->
+            <div class="patient-welcome-banner">
+                <div>
+                    <h3 th:text="'Xin chào, ' + ${profile.fullName} + '!'">Xin chào!</h3>
+                    <p>Chào mừng bạn quay lại hệ thống quản lý y tế HAMS</p>
+                </div>
+                <a th:href="@{/patient/appointments/book}" class="btn-primary"
+                    style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);">
+                    <i class="bi bi-calendar-plus"></i> Đặt lịch khám
                 </a>
             </div>
 
-            <table th:unless="${#lists.isEmpty(recentAppointments)}" class="patient-table">
-                <thead>
-                    <tr>
-                        <th>Mã lịch hẹn</th>
-                        <th>Bác sĩ</th>
-                        <th>Dịch vụ</th>
-                        <th>Ngày khám</th>
-                        <th>Ca khám</th>
-                        <th>Trạng thái</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="appt : ${recentAppointments}">
-                        <td><span class="appt-code-badge" th:text="${appt.appointmentCode}">APT-001</span></td>
-                        <td>
-                            <div style="font-weight:600;color:#0f172a;" th:text="${appt.doctorFullName}"></div>
-                            <div style="font-size:12px;color:#64748b;" th:text="${appt.departmentName}"></div>
-                        </td>
-                        <td th:text="${appt.serviceName}"></td>
-                        <td th:text="${#temporals.format(appt.bookingDate, 'dd/MM/yyyy')}"></td>
-                        <td>
-                            <span th:if="${appt.shift == 'MORNING'}" style="color:#b45309;font-weight:600;"><i class="bi bi-sunrise"></i> Ca sáng</span>
-                            <span th:if="${appt.shift == 'AFTERNOON'}" style="color:#0e7490;font-weight:600;"><i class="bi bi-sunset"></i> Ca chiều</span>
-                        </td>
-                        <td>
-                            <span class="status-badge"
-                                  th:classappend="${appt.status == 'WAITING'} ? 'status-pending' :
+            <!-- Stats -->
+            <div class="dashboard-stats">
+                <div class="dashboard-stat-card">
+                    <div class="dashboard-stat-icon icon-blue"><i class="bi bi-calendar-check"></i></div>
+                    <div class="dashboard-stat-value" th:text="${totalAppointments}">0</div>
+                    <div class="dashboard-stat-label">Tổng lịch hẹn</div>
+                </div>
+                <!-- Trước đây có 2 card riêng: "Chờ xác nhận" (WAITING) + "Đã xác nhận" (CONFIRMED) -->
+                <!-- Fix: gộp lại thành 1 card "Đã đặt lịch" vì patient đặt vào slot có sẵn, không cần chờ xác nhận -->
+                <div class="dashboard-stat-card">
+                    <div class="dashboard-stat-icon icon-cyan"><i class="bi bi-calendar2-check"></i></div>
+                    <div class="dashboard-stat-value" th:text="${bookedCount}">0</div>
+                    <div class="dashboard-stat-label">Đã đặt lịch</div>
+                </div>
+                <div class="dashboard-stat-card">
+                    <div class="dashboard-stat-icon icon-green"><i class="bi bi-patch-check"></i></div>
+                    <div class="dashboard-stat-value" th:text="${completedCount}">0</div>
+                    <div class="dashboard-stat-label">Đã hoàn thành</div>
+                </div>
+            </div>
+
+            <!-- Recent appointments -->
+            <div class="dashboard-panel">
+                <div class="dashboard-panel-header">
+                    <h3><i class="bi bi-clock-history" style="color:#0f4c81;margin-right:8px;"></i>Lịch hẹn gần đây</h3>
+                    <a th:href="@{/patient/appointments}">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+                </div>
+
+                <div th:if="${#lists.isEmpty(recentAppointments)}" class="empty-state">
+                    <i class="bi bi-calendar-x"></i>
+                    <p>Bạn chưa có lịch hẹn nào</p>
+                    <a th:href="@{/patient/appointments/book}" class="btn-primary">
+                        <i class="bi bi-calendar-plus"></i> Đặt lịch ngay
+                    </a>
+                </div>
+
+                <table th:unless="${#lists.isEmpty(recentAppointments)}" class="patient-table">
+                    <thead>
+                        <tr>
+                            <th>Mã lịch hẹn</th>
+                            <th>Bác sĩ</th>
+                            <th>Dịch vụ</th>
+                            <th>Ngày khám</th>
+                            <th>Ca khám</th>
+                            <th>Trạng thái</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="appt : ${recentAppointments}">
+                            <td><span class="appt-code-badge" th:text="${appt.appointmentCode}">APT-001</span></td>
+                            <td>
+                                <div style="font-weight:600;color:#0f172a;" th:text="${appt.doctorFullName}"></div>
+                                <div style="font-size:12px;color:#64748b;" th:text="${appt.departmentName}"></div>
+                            </td>
+                            <td th:text="${appt.serviceName}"></td>
+                            <td th:text="${#temporals.format(appt.bookingDate, 'dd/MM/yyyy')}"></td>
+                            <td>
+                                <span th:if="${appt.shift == 'MORNING'}" style="color:#b45309;font-weight:600;"><i
+                                        class="bi bi-sunrise"></i> Ca sáng</span>
+                                <span th:if="${appt.shift == 'AFTERNOON'}" style="color:#0e7490;font-weight:600;"><i
+                                        class="bi bi-sunset"></i> Ca chiều</span>
+                            </td>
+                            <td>
+                                <span class="status-badge"
+                                    th:classappend="${appt.status == 'WAITING'} ? 'status-pending' :
                                                   (${appt.status == 'CONFIRMED'} ? 'status-confirmed' :
                                                   (${appt.status == 'COMPLETED'} ? 'status-completed' :
-                                                  (${appt.status == 'CANCELLED'} ? 'status-cancelled' : 'status-pending')))"
-                                  th:text="${appt.status == 'WAITING'} ? 'Đã đặt lịch' :
+                                                  (${appt.status == 'CANCELLED'} ? 'status-cancelled' : 'status-pending')))" th:text="${appt.status == 'WAITING'} ? 'Đã đặt lịch' :
                                            (${appt.status == 'CONFIRMED'} ? 'Đã đặt lịch' :
                                            (${appt.status == 'COMPLETED'} ? 'Hoàn thành' :
                                            (${appt.status == 'CANCELLED'} ? 'Đã hủy' : ${appt.status})))">
-                            </span>
-                        </td>
-                        <td>
-                            <a th:href="@{/patient/appointments/{id}(id=${appt.id})}"
-                               style="color:#0f4c81;font-size:15px;text-decoration:none;">
-                                <i class="bi bi-eye"></i>
-                            </a>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+                                </span>
+                            </td>
+                            <td>
+                                <a th:href="@{/patient/appointments/{id}(id=${appt.id})}"
+                                    style="color:#0f4c81;font-size:15px;text-decoration:none;">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
-    </main>
-</div>
+        </main>
+    </div>
 </body>
+
 </html>

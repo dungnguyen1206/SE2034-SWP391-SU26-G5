@@ -1,176 +1,219 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Danh sách bệnh nhân</title>
 
-    <link rel="stylesheet" href="../../static/css/doctor/dashboard-doctor.css" th:href="@{/css/doctor/dashboard-doctor.css}">
-    <link rel="stylesheet" href="../../static/css/doctor/schedule-doctor.css" th:href="@{/css/doctor/appointment-list.css}">
-    <link rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../../static/css/doctor/dashboard-doctor.css"
+        th:href="@{/css/doctor/dashboard-doctor.css}">
+    <link rel="stylesheet" href="../../static/css/doctor/schedule-doctor.css"
+        th:href="@{/css/doctor/appointment-list.css}">
+    <link rel="stylesheet" href="../../static/css/doctor/patient-detail.css"
+        th:href="@{/css/doctor/patient-detail.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Flatpickr CSS & JS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/vn.js"></script>
 </head>
+
 <body>
 
-<div class="layout">
+    <div class="layout">
 
-    <aside class="sidebar">
-        <div>
-            <div class="brand">
-                <h2>Hospital HAMS</h2>
-                <p>Bác Sĩ</p>
-            </div>
-
-            <nav class="menu">
-                <a th:href="@{/doctor/dashboard}">
-                    <i class="fa-solid fa-table-cells-large"></i>
-                    Dashboard
-                </a>
-
-                <a th:href="@{/doctor/schedule}">
-                    <i class="fa-regular fa-calendar-days"></i>
-                    Lịch làm việc
-                </a>
-
-                <a class="active" th:href="@{/doctor/appointment-list}">
-                    <i class="fa-regular fa-calendar-check"></i>
-                    Danh sách bệnh nhân
-                </a>
-
-                <a th:href="@{/doctor/notification}">
-                    <i class="fa-regular fa-bell"></i>
-                    Thông báo
-                </a>
-            </nav>
-        </div>
-
-        <div class="doctor-box">
-            <div class="doctor-info-box">
-                <div class="doctor-avatar">
-                    <i class="fa-regular fa-user"></i>
-                </div>
-                <div>
-                    <h4 th:text="${doctorName}">Bác sĩ Minh</h4>
-                    <p th:text="${doctorDept}">Chuyên Môn Nội</p>
-                </div>
-            </div>
-            <form th:action="@{/logout}" method="post" class="logout-form">
-                <button type="submit" class="logout-btn">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                </button>
-            </form>
-        </div>
-    </aside>
-
-    <main class="main patient-main">
-
-        <div class="page-header">
+        <aside class="sidebar">
             <div>
-                <h1>Danh sách bệnh nhân</h1>
-                <p th:text="${currentDate}">Thứ Sáu, ngày 24 tháng 05, 2024</p>
+                <div class="brand">
+                    <h2>Hospital HAMS</h2>
+                    <p>Bác Sĩ</p>
+                </div>
+
+                <nav class="menu">
+                    <a th:href="@{/doctor/dashboard}">
+                        <i class="fa-solid fa-table-cells-large"></i>
+                        Trang tổng quan
+                    </a>
+
+                    <a th:href="@{/doctor/schedule}">
+                        <i class="fa-regular fa-calendar-days"></i>
+                        Lịch làm việc
+                    </a>
+
+                    <a class="active" th:href="@{/doctor/appointment-list}">
+                        <i class="fa-regular fa-calendar-check"></i>
+                        Danh sách bệnh nhân
+                    </a>
+
+                    <a th:href="@{/doctor/notification}">
+                        <i class="fa-regular fa-bell"></i>
+                        Thông báo
+                    </a>
+                </nav>
             </div>
 
-        </div>
+            <div class="doctor-box">
+                <div class="doctor-info-box">
+                    <div class="doctor-avatar">
+                        <i class="fa-regular fa-user"></i>
+                    </div>
+                    <div>
+                        <h4 th:text="${doctorName}"></h4>
+                        <p th:text="${doctorDept}"></p>
+                    </div>
+                </div>
+                <form th:action="@{/logout}" method="post" class="logout-form">
+                    <button type="submit" class="logout-btn">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </form>
+            </div>
+        </aside>
 
-        <div class="filter-tabs">
-            <button th:classappend="${currentStatus == 'ALL'} ? 'active' : ''"
-                    th:onclick="|location.href='@{/doctor/appointment-list(status='ALL')}'|">
-                Tất cả (<span th:text="${countAll}">7</span>)
-            </button>
-            <button th:classappend="${currentStatus == 'IN_PROGRESS'} ? 'active' : ''"
-                    th:onclick="|location.href='@{/doctor/appointment-list(status='IN_PROGRESS')}'|">
-                Đang khám (<span th:text="${countExamining}">1</span>)
-            </button>
-            <button th:classappend="${currentStatus == 'WAITING'} ? 'active' : ''"
-                    th:onclick="|location.href='@{/doctor/appointment-list(status='WAITING')}'|">
-                Đang đợi (<span th:text="${countWaiting}">5</span>)
-            </button>
-            <button th:classappend="${currentStatus == 'COMPLETED'} ? 'active' : ''"
-                    th:onclick="|location.href='@{/doctor/appointment-list(status='COMPLETED')}'|">
-                Hoàn thành (<span th:text="${countCompleted}">1</span>)
-            </button>
-        </div>
+        <main class="main patient-main">
 
-        <div class="patient-table">
-            <table>
-                <thead>
-                <tr>
-                    <th>BỆNH NHÂN</th>
-                    <th>NGÀY HẸN</th>
-                    <th>TRẠNG THÁI</th>
-                    <th>THAO TÁC</th>
-                </tr>
-                </thead>
-
-                <tbody>
-                <tr th:each="a : ${appointments.content}">
-                    <td>
-                        <div class="patient-info">
-                            <div class="avatar" th:text="${a.patientInitials}">LT</div>
-                            <div>
-                                <h4 th:text="${a.patientFullName}">Lê Thị Mai Anh</h4>
-                                <p>
-                                    ID: <span th:text="${'BN-' + a.patientId}">BN-30241</span>
-                                    • <span th:text="${a.patientAge != null ? a.patientAge + ' tuổi' : 'Chưa rõ tuổi'}">45 tuổi</span>
-                                </p>
-                            </div>
-                        </div>
-                    </td>
-
-                    <td>
-                        <strong th:text="${#temporals.format(a.bookingDate, 'dd/MM/yyyy')}">24/05/2024</strong>
-                        <p class="time" th:text="${a.slotStartTime != null ? #temporals.format(a.slotStartTime, 'HH:mm') : ''}">09:00</p>
-                    </td>
-
-                    <td>
-                        <form th:action="@{/doctor/appointments/{id}/status(id=${a.id})}" method="POST"
-                              style="display: flex; gap: 8px; align-items: center; justify-content: center;">
-                            <input type="hidden" name="currentStatus" th:value="${currentStatus}" />
-                            <input type="hidden" name="page" th:value="${currentPage}" />
-                            <select name="status" class="status-select"
-                                    th:classappend="${a.status == 'WAITING' ? 'waiting' : (a.status == 'IN_PROGRESS' ? 'examining' : 'done')}"
-                                    style="margin-bottom: 0;">
-                                <option value="WAITING" th:selected="${a.status == 'WAITING'}">ĐANG ĐỢI</option>
-                                <option value="IN_PROGRESS" th:selected="${a.status == 'IN_PROGRESS'}">ĐANG KHÁM</option>
-                                <option value="COMPLETED" th:selected="${a.status == 'COMPLETED'}">HOÀN THÀNH</option>
-                            </select>
-                            <button type="submit" class="btn-save-status"
-                                    style="padding: 6px 12px; background-color: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500; transition: background-color 0.2s;">
-                                Lưu
-                            </button>
-                        </form>
-                    </td>
-
-                    <td>
-                        <a th:href="@{/doctor/appointment-detail(id=${a.id})}" class="detail-link">
-                            <i class="fa-solid fa-pen"></i>
-                            Xem chi tiết
-                        </a>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-
-            <div class="table-footer" th:if="${totalElements > 0}">
-                <p th:text="'Hiển thị ' + ${startRow} + '-' + ${endRow} + ' trong tổng số ' + ${totalElements} + ' bệnh nhân'">Hiển thị 1-5 trong tổng số 7 bệnh nhân</p>
-
-                <div class="pagination" th:if="${totalPages > 1}">
-                    <button th:onclick="|location.href='@{/doctor/appointment-list(status=${currentStatus}, page=${currentPage - 1})}'|"
-                            th:disabled="${currentPage == 0}">‹ Trước</button>
-                    <button th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                            th:classappend="${currentPage == i} ? 'active' : ''"
-                            th:text="${i + 1}"
-                            th:onclick="|location.href='@{/doctor/appointment-list(status=${currentStatus}, page=${i})}'|">1</button>
-                    <button th:onclick="|location.href='@{/doctor/appointment-list(status=${currentStatus}, page=${currentPage + 1})}'|"
-                            th:disabled="${currentPage == totalPages - 1}">Sau ›</button>
+            <div class="page-header">
+                <div>
+                    <h1>Danh sách bệnh nhân</h1>
+                    <p th:text="${currentDate}"></p>
+                </div>
+                <div class="date-filter-box">
+                    <form id="dateFilterForm" method="GET" th:action="@{/doctor/appointment-list}">
+                        <input type="hidden" name="status" th:value="${currentStatus}" />
+                        <label for="dateFilter" class="date-filter-label">Chọn ngày khám:</label>
+                        <input type="text" id="dateFilter" name="date" th:value="${selectedDate}"
+                            class="date-picker-input" />
+                    </form>
                 </div>
             </div>
-            <div class="table-footer" th:if="${totalElements == 0}" style="justify-content: center;">
-                <p>Không tìm thấy bệnh nhân nào</p>
+
+            <div class="filter-tabs">
+                <button th:classappend="${currentStatus == 'ALL'} ? 'active' : ''"
+                    th:onclick="|location.href='@{/doctor/appointment-list(status='ALL', date=${selectedDate})}'|">
+                    Tất cả (<span th:text="${countAll}">7</span>)
+                </button>
+                <button th:classappend="${currentStatus == 'IN_PROGRESS'} ? 'active' : ''"
+                    th:onclick="|location.href='@{/doctor/appointment-list(status='IN_PROGRESS', date=${selectedDate})}'|">
+                    Đang khám (<span th:text="${countExamining}">1</span>)
+                </button>
+                <button th:classappend="${currentStatus == 'WAITING'} ? 'active' : ''"
+                    th:onclick="|location.href='@{/doctor/appointment-list(status='WAITING', date=${selectedDate})}'|">
+                    Đang đợi (<span th:text="${countWaiting}">5</span>)
+                </button>
+                <button th:classappend="${currentStatus == 'COMPLETED'} ? 'active' : ''"
+                    th:onclick="|location.href='@{/doctor/appointment-list(status='COMPLETED', date=${selectedDate})}'|">
+                    Hoàn thành (<span th:text="${countCompleted}">1</span>)
+                </button>
             </div>
-        </div>
 
-    </main>
+            <div class="patient-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>BỆNH NHÂN</th>
+                            <th>NGÀY HẸN</th>
+                            <th>TRẠNG THÁI</th>
+                            <th>THAO TÁC</th>
+                        </tr>
+                    </thead>
 
-</div>
+                    <tbody>
+                        <tr th:each="a : ${appointments.content}">
+                            <td>
+                                <div class="patient-info">
+                                    <div class="avatar" th:text="${a.patientInitials}">LT</div>
+                                    <div>
+                                        <h4 th:text="${a.patientFullName}"></h4>
+                                        <p>
+                                            ID: <span th:text="${'BN-' + a.patientId}"></span>
+                                            • <span
+                                                th:text="${a.patientAge != null ? a.patientAge + ' tuổi' : 'Chưa rõ tuổi'}"></span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <strong th:text="${#temporals.format(a.bookingDate, 'dd/MM/yyyy')}"></strong>
+                                <p class="time"
+                                    th:text="${a.slotStartTime != null ? #temporals.format(a.slotStartTime, 'HH:mm') : ''}">
+                                </p>
+                            </td>
+
+                            <td>
+                                <form th:action="@{/doctor/appointments/{id}/status(id=${a.id})}" method="POST"
+                                    style="display: flex; gap: 8px; align-items: center; justify-content: center;">
+                                    <input type="hidden" name="currentStatus" th:value="${currentStatus}" />
+                                    <input type="hidden" name="page" th:value="${currentPage}" />
+                                    <input type="hidden" name="date" th:value="${selectedDate}" />
+                                    <select name="status" class="status-select"
+                                        th:classappend="${a.status == 'WAITING' ? 'waiting' : (a.status == 'IN_PROGRESS' ? 'examining' : 'done')}"
+                                        style="margin-bottom: 0;">
+                                        <option value="WAITING" th:selected="${a.status == 'WAITING'}">ĐANG ĐỢI</option>
+                                        <option value="IN_PROGRESS" th:selected="${a.status == 'IN_PROGRESS'}">ĐANG KHÁM
+                                        </option>
+                                        <option value="COMPLETED" th:selected="${a.status == 'COMPLETED'}">HOÀN THÀNH
+                                        </option>
+                                    </select>
+                                    <button type="submit" class="btn-save-status"
+                                        style="padding: 6px 12px; background-color: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500; transition: background-color 0.2s;">
+                                        Lưu
+                                    </button>
+                                </form>
+                            </td>
+
+                            <td>
+                                <a th:href="@{/doctor/appointments/{id}/detail(id=${a.id})}"
+                                    class="detail-link btn-view-detail">
+                                    <i class="fa-solid fa-pen"></i>
+                                    Xem chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="table-footer" th:if="${totalElements > 0}">
+                    <p
+                        th:text="'Hiển thị ' + ${startRow} + '-' + ${endRow} + ' trong tổng số ' + ${totalElements} + ' bệnh nhân'">
+                    </p>
+
+                    <div class="pagination" th:if="${totalPages > 1}">
+                        <button
+                            th:onclick="|location.href='@{/doctor/appointment-list(status=${currentStatus}, page=${currentPage - 1}, date=${selectedDate})}'|"
+                            th:disabled="${currentPage == 0}">‹ Trước</button>
+                        <button th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                            th:classappend="${currentPage == i} ? 'active' : ''" th:text="${i + 1}"
+                            th:onclick="|location.href='@{/doctor/appointment-list(status=${currentStatus}, page=${i}, date=${selectedDate})}'|">1</button>
+                        <button
+                            th:onclick="|location.href='@{/doctor/appointment-list(status=${currentStatus}, page=${currentPage + 1}, date=${selectedDate})}'|"
+                            th:disabled="${currentPage == totalPages - 1}">Sau ›</button>
+                    </div>
+                </div>
+                <div class="table-footer" th:if="${totalElements == 0}" style="justify-content: center;">
+                    <p>Không tìm thấy bệnh nhân nào</p>
+                </div>
+            </div>
+
+        </main>
+
+    </div>
+
+    <!-- Script for Flatpickr -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            flatpickr("#dateFilter", {
+                dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "d/m/Y",
+                locale: "vn",
+                onChange: function (selectedDates, dateStr, instance) {
+                    document.getElementById('dateFilterForm').submit();
+                }
+            });
+        });
+    </script>
+
 </body>
+
 </html>

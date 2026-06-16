@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Chi tiết nhân viên</title>
@@ -7,6 +8,7 @@
     <link rel="stylesheet" th:href="@{/css/manager/manager-staff.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
+
 <body>
     <div class="manager-layout">
 
@@ -32,7 +34,7 @@
 
                 <div class="staff-detail-actions">
                     <a th:href="@{/manager/staff/{staffId}/edit(staffId=${staff.getId()}, staffRole=${staff.getRoleName()})}"
-                       class="staff-detail-button primary">
+                        class="staff-detail-button primary">
                         <i class="bi bi-pencil"></i>
                         Chỉnh sửa hồ sơ
                     </a>
@@ -52,7 +54,9 @@
                     <p th:text="${staff.getStaffCode()}">Mã nhân viên: STF-1</p>
                     <div class="staff-detail-badges">
                         <span class="staff-type-badge doctor" th:text="${staff.getRoleLabel()}">Loại nhân viên</span>
-                        <span class="staff-status active" th:text="${staff.getAccountStatus() == 'ACTIVE'} ?'Đang hoạt động' : 'Ngưng hoạt động'">Trạng thái làm việc</span>
+                        <span class="staff-status active"
+                            th:text="${staff.getAccountStatus() == 'ACTIVE'} ?'Đang hoạt động' : 'Ngưng hoạt động'">Trạng
+                            thái làm việc</span>
                     </div>
                 </div>
 
@@ -69,10 +73,10 @@
                         <span>Vai trò</span>
                         <strong th:text="${staff.getRoleLabel()}">N/A</strong>
                     </div>
-<!--                    <div>-->
-<!--                        <span>Trạng thái tài khoản</span>-->
-<!--                        <strong th:text="${staff.getAccountStatus() == 'ACTIVE'} ?'Đang hoạt động' : 'Ngưng hoạt động'">N/A</strong>-->
-<!--                    </div>-->
+                    <!--                    <div>-->
+                    <!--                        <span>Trạng thái tài khoản</span>-->
+                    <!--                        <strong th:text="${staff.getAccountStatus() == 'ACTIVE'} ?'Đang hoạt động' : 'Ngưng hoạt động'">N/A</strong>-->
+                    <!--                    </div>-->
                 </div>
             </section>
 
@@ -88,14 +92,19 @@
                         </div>
 
                         <div class="staff-detail-info-list">
-                            <div><span>Mã nhân viên</span><strong th:text="'STF-' + ${staff.getId()}">STF-1</strong></div>
+                            <div><span>Mã nhân viên</span><strong th:text="'STF-' + ${staff.getId()}">STF-1</strong>
+                            </div>
                             <div><span>Họ và tên</span><strong th:text="${staff.getFullName()}">N/A</strong></div>
                             <div><span>Email công việc</span><strong th:text="${staff.getEmail()}">N/A</strong></div>
-                            <div><span>Số điện thoại</span><strong  th:text="${staff.getPhone()}">N/A</strong></div>
+                            <div><span>Số điện thoại</span><strong th:text="${staff.getPhone()}">N/A</strong></div>
                             <div><span>Vai trò</span><strong th:text="${staff.getRoleLabel()}">N/A</strong></div>
-                            <div><span>Trạng thái tài khoản</span><strong th:text="${staff.getAccountStatus() == 'ACTIVE'} ? 'Đang hoạt động' : 'Ngưng hoạt động '">N/A</strong></div>
+                            <div><span>Trạng thái tài khoản</span><strong
+                                    th:text="${staff.getAccountStatus() == 'ACTIVE'} ? 'Đang hoạt động' : 'Ngưng hoạt động '">N/A</strong>
+                            </div>
                             <div><span>Ngày tạo</span><strong th:text="${staff.getCreatedAt()}">N/A</strong></div>
-                            <div><span>Ngày cập nhật</span><strong th:text="${staff.getUpdatedAt() == null} ? 'N/A' : ${staff.getUpdatedAt()}">N/A</strong></div>
+                            <div><span>Ngày cập nhật</span><strong
+                                    th:text="${staff.getUpdatedAt() == null} ? 'N/A' : ${staff.getUpdatedAt()}">N/A</strong>
+                            </div>
                         </div>
                     </section>
 
@@ -109,10 +118,14 @@
 
                         <div class="staff-detail-info-list">
                             <div><span>Khoa</span><strong th:text="${doctor.getDepartmentName()}">N/A</strong></div>
-                            <div><span>Số giấy phép hành nghề</span><strong th:text="${doctor.getLicenseNumber()}">N/A</strong></div>
+                            <div><span>Số giấy phép hành nghề</span><strong
+                                    th:text="${doctor.getLicenseNumber()}">N/A</strong></div>
                             <div><span>Bằng cấp</span><strong th:text="${doctor.getDegree()}">N/A</strong></div>
-                            <div><span>Số năm kinh nghiệm</span><strong th:text="${doctor.getExperienceYears()}">N/A</strong></div>
-                            <div><span>Trạng thái làm việc</span><strong th:text="${staff.getWorkingStatus() == 'ACTIVE'} ? 'Đang hoạt động' : 'Ngưng hoạt động'">N/A</strong></div>
+                            <div><span>Số năm kinh nghiệm</span><strong
+                                    th:text="${doctor.getExperienceYears()}">N/A</strong></div>
+                            <div><span>Trạng thái làm việc</span><strong
+                                    th:text="${staff.getWorkingStatus() == 'ACTIVE'} ? 'Đang hoạt động' : 'Ngưng hoạt động'">N/A</strong>
+                            </div>
                         </div>
 
                         <div class="staff-detail-bio">
@@ -122,7 +135,8 @@
                     </section>
 
                     <!--RECEPTIONIST INFORMATION-->
-                    <section class="staff-form-card staff-receptionist-card" th:if="${staff.getRoleName() == 'RECEPTIONIST'}">
+                    <section class="staff-form-card staff-receptionist-card"
+                        th:if="${staff.getRoleName() == 'RECEPTIONIST'}">
                         <div class="staff-form-card-header">
                             <i class="bi bi-person"></i>
                             <h3>Thông tin lễ tân</h3>
@@ -130,9 +144,14 @@
                         </div>
 
                         <div class="staff-detail-info-list">
-                            <div><span>Mã nhân viên</span><strong th:text="'STF-' + ${receptionist.getId()}">STF-1</strong></div>
-                            <div><span>Ngày bắt đầu</span><strong th:text="${staff.getCreatedAt() != null} ? ${staff.getCreatedAt()} : 'N/A'">N/A</strong></div>
-                            <div><span>Trạng thái làm việc</span><strong th:text="${staff.getAccountStatus() == 'ACTIVE'} ? 'Đang hoạt động' : 'Ngưng hoạt động'">N/A</strong></div>
+                            <div><span>Mã nhân viên</span><strong
+                                    th:text="'STF-' + ${receptionist.getId()}">STF-1</strong></div>
+                            <div><span>Ngày bắt đầu</span><strong
+                                    th:text="${staff.getCreatedAt() != null} ? ${staff.getCreatedAt()} : 'N/A'">N/A</strong>
+                            </div>
+                            <div><span>Trạng thái làm việc</span><strong
+                                    th:text="${staff.getAccountStatus() == 'ACTIVE'} ? 'Đang hoạt động' : 'Ngưng hoạt động'">N/A</strong>
+                            </div>
                         </div>
 
                         <div class="staff-detail-bio">
@@ -190,4 +209,5 @@
         </main>
     </div>
 </body>
+
 </html>

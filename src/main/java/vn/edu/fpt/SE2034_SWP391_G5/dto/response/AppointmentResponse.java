@@ -29,8 +29,6 @@ public class AppointmentResponse {
 
     // Patient info
     private Long patientId;
-
-    //LinhNH 01/06/2026
     private Integer patientAge;
     private String patientGender;
     private String patientInitials;
@@ -77,7 +75,7 @@ public class AppointmentResponse {
         return switch (status) {
             case "CONFIRMED" -> "Đã xác nhận";
             case "WAITING" -> "Chờ khám";
-            case "EXAMINING" -> "Đang khám";
+            case "EXAMINING", "IN_PROGRESS" -> "Đang khám";
             case "COMPLETED" -> "Đã khám xong";
             case "CANCELLED" -> "Đã hủy";
             case "NO_SHOW" -> "Vắng mặt";
@@ -93,7 +91,7 @@ public class AppointmentResponse {
         return switch (status) {
             case "CONFIRMED" -> "status-confirmed";
             case "WAITING" -> "status-waiting";
-            case "EXAMINING" -> "status-examining";
+            case "EXAMINING", "IN_PROGRESS" -> "status-examining";
             case "COMPLETED" -> "status-completed";
             case "CANCELLED" -> "status-cancelled";
             case "NO_SHOW" -> "status-no-show";
