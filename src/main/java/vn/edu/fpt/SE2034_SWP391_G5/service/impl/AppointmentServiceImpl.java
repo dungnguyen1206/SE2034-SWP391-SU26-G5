@@ -188,6 +188,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                     a.getDoctor().getMiddleName(),
                     a.getDoctor().getFirstName()
             ));
+            response.setId(a.getId());
             response.setServiceName(a.getService().getName());
             response.setSlotStartTime(a.getSlot().getStartTime());
             response.setSlotEndTime(a.getSlot().getEndTime());

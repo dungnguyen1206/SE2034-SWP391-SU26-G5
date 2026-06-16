@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.DoctorSchedule;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.Room;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -30,4 +32,32 @@ public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, 
 
     List<DoctorSchedule> findByDoctorIdAndWorkDateBetweenAndStatusOrderByWorkDateAscShiftAsc(
             Long doctorId, LocalDate startDate, LocalDate endDate, String status);
+
+
+    @Query("SELECT u from User u left join u.department d where d.id=:departmentId")
+     List<User> findDoctorByDepartmentId(@Param("departmentId") Integer departmentId);
+
+    @Query("select r from Room r left  join r.department d where d.id=:departmentId")
+     List<Room> findRoomsByDepartmentId(@Param("departmentId") Integer departmentId);
+
+    @Query("SELECT COUNT(sd) > 0 FROM DoctorSchedule sd " +
+            "WHERE sd.doctor = :doctor " +
+            "AND sd.workDate = :workDate " +
+            "AND sd.shift IN :shifts")
+    boolean existsByDoctorAndWorkDateAndShiftIn(
+            @Param("doctor") User doctor,
+            @Param("workDate") LocalDate workDate,
+            @Param("shifts") List<String> shifts
+    );
+
+
+    @Query("Select count(ds) >0   from DoctorSchedule ds " +
+            " where ds.room=:room" +
+            " and ds.workDate=:workDate" +
+            " and ds.shift in :shifts")
+    boolean existsByRoomAndWorkDateAndShift(
+      @Param("room") Room room,
+      @Param("workDate") LocalDate workDate,
+      @Param("shifts")  List<String> shifts
+    );
 }

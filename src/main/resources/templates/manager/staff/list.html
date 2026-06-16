@@ -84,6 +84,7 @@
                 <table class="staff-table">
                     <thead>
                     <tr>
+                        <th>STT</th>
                         <th>Họ và tên</th>
                         <th>Email</th>
                         <th>Số điện thoại</th>
@@ -95,7 +96,8 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="staff : ${staffResponses}">
+                    <tr th:each="staff, index : ${staffResponses}">
+                        <td th:text="${index.count}"></td>
                         <td>
                             <div class="staff-profile">
                                 <div class="staff-avatar">T</div>
@@ -106,7 +108,17 @@
                         <td th:text="${staff.getPhone()}">0987 654 321</td>
                         <td><span class="staff-type-badge" th:classappend="${staff.getRole() == 'DOCTOR'} ? ' doctor' : ' receptionist'"
                                th:text="${staff.getRole()=='DOCTOR'} ? 'Bác sĩ' : 'Lễ tân' ">Bác sĩ</span></td>
-                        <td><span class="staff-status active"><span></span>Đang hoạt động</span></td>
+                        <td>
+                            <div class="staff-status-text"
+                                 th:classappend="${staff.getStatus().equals('ACTIVE')} ? ' active' : ' inactive'">
+                             <span class="staff-status-dot"
+                                   th:classappend="${staff.getStatus().equals('ACTIVE')} ? ' active' : ' inactive'"></span>
+                                <strong th:text="${staff.getStatus().equals('ACTIVE')} ? 'Đang hoạt động' : 'Ngưng hoạt động'">
+                                    Đang hoạt động
+                                </strong>
+                            </div>
+
+                        </td>
                         <td th:text="${staff.getCreatedBy()}">Hoàng Thị Mai</td>
                         <td th:text="${staff.getCreatedDate()}">15/03/2021</td>
                         <td>

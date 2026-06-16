@@ -1,10 +1,245 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <body>
+
+<!--SCHEDULE MANAGEMENT - CREATE SHIFT PANEL FRAGMENT-->
+<th:block th:fragment="createShiftPanel">
+    <label class="schedule-panel-overlay" for="createShiftToggle"></label>
+
+    <aside class="schedule-panel">
+        <!--CREATE SHIFT - HEADER-->
+        <header class="schedule-panel-header">
+            <div>
+                <h3>Tạo ca làm việc</h3>
+                <p th:text="'Tuần ' + ${presentWeek.getId()} + ' - ' +${presentWeek.getStartDate()} +'-'+${presentWeek.getEndDate()}">Tuần 24 — 09/06–15/06/2025</p>
+            </div>
+            <label class="schedule-panel-close" for="createShiftToggle" aria-label="Đóng">
+                <i class="bi bi-x-lg"></i>
+            </label>
+        </header>
+
+        <form th:action="@{/manager/schedules/create(weekScheduleId = ${presentWeek.getId()})}" method="post"  th:object="${scheduleRequest}" id="createDoctorScheduleForm">
+        <!--CREATE SHIFT - FORM BODY-->
+        <div class="schedule-panel-body">
+            <label class="schedule-field">
+                <span>Khoa <strong>*</strong></span>
+                <select id="departmentSelect"  th:field="*{departmentId}" required>
+                    <option value="0">Chọn khoa...</option>
+                    <option th:each="department : ${departments}"
+                            th:value="${department.getId()}
+"                                   th:text="${department.getName()}"  >Tim mạch</option>
+                </select>
+            </label>
+
+            <label class="schedule-field">
+                <span>Tìm bác sĩ <strong>*</strong></span>
+                <input type="text" placeholder="Nhập tên của bác sĩ" id="doctorInput" autocomplete="off" disabled required>
+                <input type="hidden" id="doctorId" th:field="*{doctorId}">
+                <ul id="doctorSuggestions">
+                    <li value=""></li>
+                </ul>
+            </label>
+
+            <label class="schedule-field">
+                <span>Ngày <strong>*</strong></span>
+                <select th:field="*{workDate}"  disabled id="workDate" required>
+                    <option value="">Chọn ngày...</option>
+                    <option th:each="workdate, index : ${workdates}"
+                            th:value="${workdate}"
+                            th:text="${index.count == 7 ? 'Chủ nhật' : 'Thứ ' + (index.count + 1)} + ' - ' + ${#temporals.format(workdate, 'dd/MM/yyyy')}">
+                    </option>
+                </select>
+            </label>
+
+            <label class="schedule-field">
+                <span>Loại ca <strong>*</strong></span>
+                <select  th:field="*{scheduleShift}" disabled id="scheduleShift" required>
+                    <option value="">Chọn ca</option>
+                    <option value="MORNING">Ca sáng</option>
+                    <option value="AFTERNOON">Ca chiều</option>
+                    <option value="FULL_DAY">Cả ngày</option>
+                </select>
+            </label>
+
+            <label class="schedule-field">
+                <span>Phòng</span>
+                <select id="roomSelect"  th:field="*{roomId}" disabled  required>
+                    <option value="">--Chọn Phòng--</option>
+
+                </select>
+            </label>
+
+            <label class="schedule-field">
+                <span>Số lượt khám tối đa</span>
+                <select th:field="*{maxCapacity}" disabled id="maxCapacity" required>
+                    <option value="">Chọn số lượng khám tối đa</option>
+                    <option value="8">8</option>
+                    <option value="10">10</option>
+                </select>
+            </label>
+
+            <label class="schedule-field">
+                <span>Ghi chú</span>
+                <textarea th:field="*{note}" placeholder="Ghi chú nội bộ cho ca làm việc..."></textarea>
+            </label>
+
+            <!--CREATE SHIFT - CONFLICT MESSAGE-->
+            <div class="schedule-conflict"
+                 id="conflictBox"
+                 th:style="${errorMessage != null} ? 'display:block' : 'display:none'">
+                <i class="bi bi-exclamation-circle"></i>
+                <span id="errorMessage" th:text="${errorMessage}"></span>
+            </div>
+        </div>
+
+        <!--CREATE SHIFT - ACTIONS-->
+        <footer class="schedule-panel-footer">
+            <label class="schedule-secondary-button" for="createShiftToggle" id="cancelBtn">Hủy</label>
+            <button class="schedule-save-button" type="submit">Lưu ca</button>
+        </footer>
+        </form>
+    </aside>
+
+    <script th:inline="javascript">
+        const doctors =  /*[[${doctors}]]*/[];
+        const rooms =  /*[[${rooms}]]*/[];
+        let departmentId=0;
+
+        // Process room dropList
+        document.getElementById('departmentSelect').addEventListener('change', (e) =>{
+
+            //Get departmentId from the event
+             departmentId = Number (e.target.value);
+            const roomSelect = document.getElementById('roomSelect');
+            const doctorSelect = document.getElementById('doctorInput');
+            roomSelect.innerHTML = '<option value="">--Chọn Phòng--</option>';
+            doctorSelect.value = "";
+            document.getElementById('doctorId').value = "";
+            document.getElementById('doctorSuggestions').innerHTML = '<li value=""></li>';
+            if (departmentId === 0 || departmentId === null) {return}
+
+            document.getElementById('doctorInput').disabled = false;
+            //filter room base on departmentId
+            const getRoomByDepartmentId = rooms.filter(r => r.departmentId === departmentId);
+
+            getRoomByDepartmentId.forEach(room => {
+                    const option = document.createElement("option");
+                    option.value = room.id;
+                    option.text = room.name;
+                    roomSelect.appendChild(option);
+            })
+
+        })
+        //Process doctor input
+        document.getElementById('doctorInput').addEventListener('input', (e) =>{
+            const keyword = e.target.value;
+            const doctorSuggestion = document.getElementById('doctorSuggestions');
+            doctorSuggestion.innerHTML='';
+            if(departmentId === 0 || departmentId === null) {return}
+
+            const filterdDoctors = doctors.filter(d => d.departmentId === departmentId && d.fullName.toLowerCase().includes(keyword.toLowerCase()));
+            document.getElementById('doctorId').value='';
+            filterdDoctors.forEach(doctor => {
+                const li = document.createElement("li");
+                li.textContent = `STF-${doctor.id} ${doctor.fullName}`;
+                li.style.cursor = "pointer";
+                li.onclick = () =>{
+                    document.getElementById('doctorInput').value = `STF-${doctor.id} ${doctor.fullName}` ;
+                    document.getElementById('doctorId').value =doctor.id;
+                    doctorSuggestion.innerHTML = '';
+                    document.getElementById('workDate').disabled = false;
+                }
+                doctorSuggestion.appendChild(li);
+            })
+
+
+
+        })
+
+        const  hasError = /*[[${errorMessage !=null }]]*/ false;
+        if(hasError){
+            const toggleCheckbox = document.getElementById('createShiftToggle');
+            if(toggleCheckbox){
+                toggleCheckbox.checked = true;
+            }
+        }
+
+        // Progressive Disclosure
+
+        document.getElementById('workDate').addEventListener('change', (e) => {
+            document.getElementById('scheduleShift').disabled = false;
+        })
+
+        document.getElementById('scheduleShift').addEventListener('change', (e) => {
+            document.getElementById('roomSelect').disabled = false;
+
+        })
+       document.getElementById('roomSelect').addEventListener('change', (e) => {
+           document.getElementById('maxCapacity').disabled = false;
+       })
+
+        //Validation
+        document.getElementById('createDoctorScheduleForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const doctorId = document.getElementById('doctorId').value;
+            const workDate = document.getElementById('workDate').value;
+            const scheduleShift = document.getElementById('scheduleShift').value;
+            const roomSelect = document.getElementById('roomSelect').value;
+            const maxCapacity = document.getElementById('maxCapacity').value;
+            if(!doctorId){
+                document.getElementById('conflictBox').style.display = 'block';
+                document.getElementById('errorMessage').innerHTML = "Bác sĩ chưa được chọn";
+               return;
+            }
+            else if(!workDate){
+                document.getElementById('conflictBox').style.display = 'block';
+                document.getElementById('errorMessage').innerHTML = "Vui lòng chọn ngày";
+                return;
+            }
+            else if(!scheduleShift || scheduleShift.value === 0){
+                document.getElementById('conflictBox').style.display = 'block';
+                document.getElementById('errorMessage').innerHTML = "Vui lòng chọn ca làm";
+                return;
+            }
+            else if(!roomSelect || roomSelect.value === 0){
+                document.getElementById('conflictBox').style.display = 'block';
+                document.getElementById('errorMessage').innerHTML = "Vui lòng chọn phòng";
+                return;
+            }
+            else if(!maxCapacity || maxCapacity.value===0){
+                document.getElementById('conflictBox').style.display = 'block';
+                document.getElementById('errorMessage').innerHTML = "Vui lòng chọn số lượt khám tối đa";
+                return;
+            }
+
+
+
+            e.target.submit();
+        })
+
+         //handle cancel button
+        function resetForm(){
+            const createForm = document.getElementById('createDoctorScheduleForm');
+            departmentId = 0;
+            const doctorInput = document.getElementById('doctorInput').disabled = true;
+            const workDate = document.getElementById('workDate').disabled= true;
+            const scheduleShift = document.getElementById('scheduleShift').disabled= true;
+            const maxCapacity = document.getElementById('maxCapacity').disabled= true;
+            const roomSelect = document.getElementById('roomSelect').disabled= true;
+             document.getElementById('doctorSuggestions').innerHTML = '';
+             document.getElementById('conflictBox').style.display = 'none';
+            createForm.reset();
+        }
+
+        document.getElementById('cancelBtn').addEventListener('click', () =>{
+            resetForm();
+        })
+
+
+    </script>
+
+</th:block>
+
 
 </body>
 </html>

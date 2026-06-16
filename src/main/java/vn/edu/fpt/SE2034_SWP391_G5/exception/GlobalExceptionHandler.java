@@ -1,11 +1,15 @@
 package vn.edu.fpt.SE2034_SWP391_G5.exception;
 
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import vn.edu.fpt.SE2034_SWP391_G5.exception.Schedule.ScheduleConflictException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -42,5 +46,25 @@ public class GlobalExceptionHandler {
         model.addAttribute("errorCode", 500);
         return "error/500";
     }
+
+
+    /*
+    *
+    * Function helps handle schedule conflict
+    *
+    */
+
+    @ExceptionHandler(ScheduleConflictException.class)
+    public String handleScheduleConflict(Exception ex, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        String referer = request.getHeader("Referer");
+        return  "redirect:" + (referer != null ? referer : "/manager/schedules/list");
+    }
+
+
+
+
+
+
 }
 

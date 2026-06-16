@@ -10,11 +10,6 @@
 
 <!-- USER UPDATE FORM - Common user fields shared by patient, doctor, and receptionist -->
 <th:block th:fragment="commonFields(formMode)">
-    <label th:class="${formMode == 'PATIENT'} ? 'profile-form-field' : 'staff-form-field'">
-        <span>Email <strong>*</strong></span>
-        <input type="email" th:field="*{email}" placeholder="VD: user@hms.vn" readonly>
-        <div class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
-    </label>
 
     <label th:class="${formMode == 'PATIENT'} ? 'profile-form-field' : 'staff-form-field'">
         <span>Họ <strong>*</strong></span>
@@ -34,6 +29,11 @@
         <div class="field-error" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
     </label>
 
+    <label th:class="${formMode == 'PATIENT'} ? 'profile-form-field' : 'staff-form-field'">
+        <span>Email <strong>*</strong></span>
+        <input type="email" th:field="*{email}" placeholder="VD: user@hms.vn" readonly>
+        <div class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+    </label>
     <label th:class="${formMode == 'PATIENT'} ? 'profile-form-field' : 'staff-form-field'">
         <span>Số điện thoại <strong>*</strong></span>
         <input type="tel" th:field="*{phone}" placeholder="VD: 0901234567">
