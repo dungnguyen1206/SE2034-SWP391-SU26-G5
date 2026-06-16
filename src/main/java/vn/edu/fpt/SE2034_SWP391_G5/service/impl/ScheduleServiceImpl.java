@@ -99,11 +99,19 @@ public class ScheduleServiceImpl implements ScheduleService {
             List<DoctorOnDutyResponse> doctorOnDutyResponses = new ArrayList<>();
             doctorSchedules.forEach(doctorSchedule -> {
                 DoctorOnDutyResponse response = new DoctorOnDutyResponse();
-                response.setDoctorName(doctorSchedule.getDoctor().getFirstName()+" "+ doctorSchedule.getDoctor().getMiddleName()+" "+doctorSchedule.getDoctor().getLastName());
-                response.setDepartmentName(doctorSchedule.getDoctor().getDepartment().getName());
+                // Null-safe: tránh NPE khi middleName null
+                String firstName = doctorSchedule.getDoctor().getFirstName() != null ? doctorSchedule.getDoctor().getFirstName() : "";
+                String middleName = doctorSchedule.getDoctor().getMiddleName() != null ? " " + doctorSchedule.getDoctor().getMiddleName() : "";
+                String lastName = doctorSchedule.getDoctor().getLastName() != null ? " " + doctorSchedule.getDoctor().getLastName() : "";
+                response.setDoctorName(firstName + middleName + lastName);
+                // Null-safe: department có thể null
+                response.setDepartmentName(doctorSchedule.getDoctor().getDepartment() != null
+                        ? doctorSchedule.getDoctor().getDepartment().getName() : "");
                 response.setShift(String.valueOf(doctorSchedule.getShift()));
                 response.setStatus(doctorSchedule.getDoctor().getStatus());
-                response.setRoomNumber(doctorSchedule.getRoom().getRoomNumber());
+                // Null-safe: room có thể null (LEFT JOIN)
+                response.setRoomNumber(doctorSchedule.getRoom() != null
+                        ? doctorSchedule.getRoom().getRoomNumber() : "");
                 doctorOnDutyResponses.add(response);
             });
             return doctorOnDutyResponses;

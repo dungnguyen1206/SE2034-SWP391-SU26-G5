@@ -12,8 +12,14 @@ import java.util.List;
 @Repository
 public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, Long> {
 
-    @Query("SELECT ds from DoctorSchedule ds Join fetch ds.doctor d join fetch d.department dpt join fetch dpt.rooms r where ds.workDate= :date")
-    public List<DoctorSchedule> findByDate(@Param("date") LocalDate date);
+    // Trước: join fetch dpt.rooms r → join Collection gây lỗi, và rooms của department khác với room của schedule
+    // Fix: chỉ join doctor, department và room của schedule (LEFT JOIN để tránh mất dữ liệu khi room null)
+    @Query("SELECT DISTINCT ds FROM DoctorSchedule ds " +
+           "JOIN FETCH ds.doctor d " +
+           "JOIN FETCH d.department dpt " +
+           "LEFT JOIN FETCH ds.room r " +
+           "WHERE ds.workDate = :date")
+    List<DoctorSchedule> findByDate(@Param("date") LocalDate date);
 
 
 

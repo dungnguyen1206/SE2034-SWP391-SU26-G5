@@ -39,7 +39,16 @@ public class SecurityConfig {
         http
             .authenticationProvider(authenticationProvider())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/register", "/verify-otp", "/login", "/forgot-password", "/reset-password", "/css/**", "/js/**", "/images/**").permitAll()
+                // Trang công khai - không cần đăng nhập
+                // Trước: chỉ có "/", "/register", "/verify-otp", "/login", "/forgot-password", "/reset-password"
+                // Thêm: "/home", "/home/**" để guest xem được trang chủ
+                .requestMatchers(
+                    "/", "/home", "/home/**",
+                    "/register", "/verify-otp",
+                    "/login",
+                    "/forgot-password", "/reset-password",
+                    "/css/**", "/js/**", "/images/**"
+                ).permitAll()
                 .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/manager/**").hasAuthority("ROLE_MANAGER")
                 .requestMatchers("/doctor/**").hasAuthority("ROLE_DOCTOR")
