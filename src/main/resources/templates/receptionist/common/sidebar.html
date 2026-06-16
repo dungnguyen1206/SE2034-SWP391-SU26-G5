@@ -1,64 +1,63 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-    <body>
 
-        <aside class="sidebar" th:fragment="sidebar(activeMenu)">
+<body>
 
-            <div class="brand">
-                <div class="brand-icon">+</div>
+    <aside class="sidebar" th:fragment="sidebar(activeMenu)">
 
-                <div>
-                    <h2>Bệnh Viện</h2>
-                    <p>HAMS HOSPITAL</p>
-                </div>
+        <div class="brand">
+            <div class="brand-icon">
+                <i class="bi bi-hospital"></i>
             </div>
 
-            <!-- Receptionist info -->
-            <div class="receptionist-card">
-                <div class="receptionist-avatar" th:text="${receptionist.avatarText}"></div>
-
-                <div class="receptionist-info">
-                    <h3 th:text="${receptionist.fullName}"></h3>
-                    <p>Nhân Viên Tiếp Tân</p>
-                </div>
+            <div>
+                <h2>Bệnh Viện</h2>
+                <p>HAMS HOSPITAL</p>
             </div>
+        </div>
 
-            <!-- Menu -->
-            <div class="menu-title">CHỨC NĂNG</div>
+        <!-- Receptionist info -->
+        <div class="receptionist-card">
+            <div class="receptionist-avatar" th:text="${receptionist.avatarText}"></div>
 
-            <nav class="menu">
+            <div class="receptionist-info">
+                <h3 th:text="${receptionist.fullName}"></h3>
+                <p>Nhân Viên Tiếp Tân</p>
+            </div>
+        </div>
 
-                <a th:href="@{/receptionist/dashboard}"
-                   class="menu-item"
-                   th:classappend="${activeMenu == 'dashboard'} ? ' active'">
-                    <span class="menu-icon">🏠</span>
-                    <span>Trang Chủ</span>
-                </a>
+        <!-- Menu -->
+        <div class="menu-title">CHỨC NĂNG</div>
 
-                <a th:href="@{/receptionist/appointment}"
-                   class="menu-item"
-                   th:classappend="${activeMenu == 'appointment'} ? ' active'">
-                    <span class="menu-icon">📅</span>
-                    <span>Lịch Hẹn</span>
-                </a>
+        <nav class="menu">
 
-                <a th:href="@{/receptionist/queue}"
-                   class="menu-item"
-                   th:classappend="${activeMenu == 'queue'} ? ' active'">
-                    <span class="menu-icon">👥</span>
-                    <span>Hàng Đợi Khám</span>
-                </a>
+            <a th:href="@{/receptionist/dashboard}" class="menu-item"
+                th:classappend="${activeMenu == 'dashboard'} ? ' active'">
+                <span class="menu-icon">🏠</span>
+                <span>Trang Chủ</span>
+            </a>
 
-                <a th:href="@{/receptionist/invoice}"
-                   class="menu-item"
-                   th:classappend="${activeMenu == 'invoice'} ? ' active'">
-                    <span class="menu-icon">🧾</span>
-                    <span>Hóa Đơn</span>
-                </a>
+            <a th:href="@{/receptionist/appointment}" class="menu-item"
+                th:classappend="${activeMenu == 'appointment'} ? ' active'">
+                <span class="menu-icon">📅</span>
+                <span>Lịch Hẹn</span>
+            </a>
 
-            </nav>
+            <a th:href="@{/receptionist/queue}" class="menu-item" th:classappend="${activeMenu == 'queue'} ? ' active'">
+                <span class="menu-icon">👥</span>
+                <span>Hàng Đợi Khám</span>
+            </a>
 
-        </aside>
+            <a th:href="@{/receptionist/invoice}" class="menu-item"
+                th:classappend="${activeMenu == 'invoice'} ? ' active'">
+                <span class="menu-icon">🧾</span>
+                <span>Hóa Đơn</span>
+            </a>
 
-    </body>
+        </nav>
+
+    </aside>
+
+</body>
+
 </html>

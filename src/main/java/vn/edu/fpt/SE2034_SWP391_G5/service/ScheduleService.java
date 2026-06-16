@@ -6,11 +6,12 @@ import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorOnDutyResponse;
 
 import java.time.LocalDate;
 import java.util.List;
-
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorScheduleResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorScheduleWeekResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Room;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorScheduleReportResponse;
+
 
 public interface ScheduleService {
     List<DoctorOnDutyResponse> findDoctorScheduleByDate(LocalDate date);
@@ -19,4 +20,5 @@ public interface ScheduleService {
     List<Room> getAllRoomsByDepartmentId(Integer departmentId);
     List<User> getAllDoctorByDepartmentId(Integer departmentId);
 
+    DoctorScheduleReportResponse getWeeklyScheduleReport(Long doctorId, LocalDate targetDate);
 }

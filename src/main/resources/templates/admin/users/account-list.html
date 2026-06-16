@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
     <!-- Local preview fallback + Thymeleaf reference -->
     <link rel="stylesheet" href="../../../static/css/admin/admin.css" th:href="@{/css/admin/admin.css}">
 </head>
+
 <body>
     <div class="admin-layout">
         <!-- 1. LEFT SIDEBAR -->
@@ -23,12 +25,12 @@
                     <span class="sidebar-header-subtitle">Quản trị viên</span>
                 </div>
             </div>
-            
+
             <!-- Sidebar Navigation Menu -->
             <nav class="sidebar-menu">
                 <div class="sidebar-menu-section">
                     <span class="sidebar-section-title">Quản trị</span>
-                    
+
                     <!-- active user list menu item -->
                     <a href="#" class="sidebar-item active">
                         <div class="sidebar-item-left">
@@ -39,7 +41,7 @@
                     </a>
                 </div>
             </nav>
-            
+
             <!-- Sidebar Bottom Profile info -->
             <div class="sidebar-profile">
                 <div class="profile-info">
@@ -57,7 +59,7 @@
                 </form>
             </div>
         </aside>
-        
+
         <!-- 2. MAIN CONTAINER -->
         <main class="admin-main">
             <!-- Top Header -->
@@ -68,7 +70,7 @@
                     <span class="breadcrumb-separator"><i class="fa-solid fa-angle-right"></i></span>
                     <span class="breadcrumb-active">Quản lý tài khoản</span>
                 </div>
-                
+
                 <!-- Right Header Info (Search and Bell notifications removed as requested) -->
                 <div class="header-right">
                     <div class="header-user">
@@ -77,14 +79,14 @@
                     </div>
                 </div>
             </header>
-            
+
             <!-- Main Content panel -->
             <div class="admin-content">
                 <!-- Page Title -->
                 <div class="page-title-section">
                     <h1 class="page-title">Quản lý tài khoản</h1>
                 </div>
-                
+
                 <!-- Filter Bar actions -->
                 <div class="filter-bar">
                     <div class="filter-left">
@@ -96,7 +98,7 @@
                             <i class="fa-solid fa-filter"></i>
                         </button>
                     </div>
-                    
+
                     <!-- Filter Pills -->
                     <div class="filter-pills">
                         <button class="filter-pill active">Tất cả</button>
@@ -106,9 +108,9 @@
                         <button class="filter-pill">Quản lý</button>
                     </div>
                 </div>
-                
+
                 <!-- Display results count -->
-                
+
                 <!-- Accounts Table -->
                 <div class="table-container">
                     <table class="admin-table">
@@ -144,12 +146,16 @@
                                 <td>2026-05-18</td>
                                 <td style="text-align: center;">
                                     <div style="display: flex; justify-content: center; gap: 8px;">
-                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('Nguyễn Thị Lan', 'Bệnh nhân', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
-                                        <a href="#" class="action-btn delete" title="Khóa tài khoản" onclick="openLockModal('Nguyễn Thị Lan', this); return false;"><i class="fa-solid fa-lock"></i></a>
+                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò"
+                                            onclick="openEditRoleModal('Nguyễn Thị Lan', 'Bệnh nhân', this); return false;"><i
+                                                class="fa-solid fa-user-shield"></i></a>
+                                        <a href="#" class="action-btn delete" title="Khóa tài khoản"
+                                            onclick="openLockModal('Nguyễn Thị Lan', this); return false;"><i
+                                                class="fa-solid fa-lock"></i></a>
                                     </div>
                                 </td>
                             </tr>
-                            
+
                             <!-- Row 2 -->
                             <tr>
                                 <td>
@@ -170,12 +176,16 @@
                                 <td>2026-05-15</td>
                                 <td style="text-align: center;">
                                     <div style="display: flex; justify-content: center; gap: 8px;">
-                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('BS. Trần Minh Tuấn', 'Bác sĩ', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
-                                        <a href="#" class="action-btn delete" title="Khóa tài khoản" onclick="openLockModal('BS. Trần Minh Tuấn', this); return false;"><i class="fa-solid fa-lock"></i></a>
+                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò"
+                                            onclick="openEditRoleModal('BS. Trần Minh Tuấn', 'Bác sĩ', this); return false;"><i
+                                                class="fa-solid fa-user-shield"></i></a>
+                                        <a href="#" class="action-btn delete" title="Khóa tài khoản"
+                                            onclick="openLockModal('BS. Trần Minh Tuấn', this); return false;"><i
+                                                class="fa-solid fa-lock"></i></a>
                                     </div>
                                 </td>
                             </tr>
-                            
+
                             <!-- Row 3 -->
                             <tr>
                                 <td>
@@ -196,12 +206,16 @@
                                 <td>2026-05-12</td>
                                 <td style="text-align: center;">
                                     <div style="display: flex; justify-content: center; gap: 8px;">
-                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('Lê Thị Hoa', 'Lễ tân', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
-                                        <a href="#" class="action-btn delete" title="Khóa tài khoản" onclick="openLockModal('Lê Thị Hoa', this); return false;"><i class="fa-solid fa-lock"></i></a>
+                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò"
+                                            onclick="openEditRoleModal('Lê Thị Hoa', 'Lễ tân', this); return false;"><i
+                                                class="fa-solid fa-user-shield"></i></a>
+                                        <a href="#" class="action-btn delete" title="Khóa tài khoản"
+                                            onclick="openLockModal('Lê Thị Hoa', this); return false;"><i
+                                                class="fa-solid fa-lock"></i></a>
                                     </div>
                                 </td>
                             </tr>
-                            
+
                             <!-- Row 4 -->
                             <tr>
                                 <td>
@@ -222,12 +236,17 @@
                                 <td>2026-05-10</td>
                                 <td style="text-align: center;">
                                     <div style="display: flex; justify-content: center; gap: 8px;">
-                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('Phạm Văn Đức', 'Bệnh nhân', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
-                                        <a href="#" class="action-btn unlock" style="color: #10b981; background-color: #d1fae5;" title="Mở khóa tài khoản" onclick="openUnlockModal('Phạm Văn Đức', this); return false;"><i class="fa-solid fa-unlock"></i></a>
+                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò"
+                                            onclick="openEditRoleModal('Phạm Văn Đức', 'Bệnh nhân', this); return false;"><i
+                                                class="fa-solid fa-user-shield"></i></a>
+                                        <a href="#" class="action-btn unlock"
+                                            style="color: #10b981; background-color: #d1fae5;" title="Mở khóa tài khoản"
+                                            onclick="openUnlockModal('Phạm Văn Đức', this); return false;"><i
+                                                class="fa-solid fa-unlock"></i></a>
                                     </div>
                                 </td>
                             </tr>
-                            
+
                             <!-- Row 5 -->
                             <tr>
                                 <td>
@@ -248,12 +267,16 @@
                                 <td>2026-05-08</td>
                                 <td style="text-align: center;">
                                     <div style="display: flex; justify-content: center; gap: 8px;">
-                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('Hoàng Thị Mai', 'Quản lý', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
-                                        <a href="#" class="action-btn delete" title="Khóa tài khoản" onclick="openLockModal('Hoàng Thị Mai', this); return false;"><i class="fa-solid fa-lock"></i></a>
+                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò"
+                                            onclick="openEditRoleModal('Hoàng Thị Mai', 'Quản lý', this); return false;"><i
+                                                class="fa-solid fa-user-shield"></i></a>
+                                        <a href="#" class="action-btn delete" title="Khóa tài khoản"
+                                            onclick="openLockModal('Hoàng Thị Mai', this); return false;"><i
+                                                class="fa-solid fa-lock"></i></a>
                                     </div>
                                 </td>
                             </tr>
-                            
+
                             <!-- Row 6 -->
                             <tr>
                                 <td>
@@ -274,12 +297,16 @@
                                 <td>2026-05-05</td>
                                 <td style="text-align: center;">
                                     <div style="display: flex; justify-content: center; gap: 8px;">
-                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('BS. Vũ Thị Thu', 'Bác sĩ', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
-                                        <a href="#" class="action-btn delete" title="Khóa tài khoản" onclick="openLockModal('BS. Vũ Thị Thu', this); return false;"><i class="fa-solid fa-lock"></i></a>
+                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò"
+                                            onclick="openEditRoleModal('BS. Vũ Thị Thu', 'Bác sĩ', this); return false;"><i
+                                                class="fa-solid fa-user-shield"></i></a>
+                                        <a href="#" class="action-btn delete" title="Khóa tài khoản"
+                                            onclick="openLockModal('BS. Vũ Thị Thu', this); return false;"><i
+                                                class="fa-solid fa-lock"></i></a>
                                     </div>
                                 </td>
                             </tr>
-                            
+
                             <!-- Row 7 -->
                             <tr>
                                 <td>
@@ -300,12 +327,16 @@
                                 <td>2026-05-02</td>
                                 <td style="text-align: center;">
                                     <div style="display: flex; justify-content: center; gap: 8px;">
-                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('Bùi Văn Nam', 'Bệnh nhân', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
-                                        <a href="#" class="action-btn delete" title="Khóa tài khoản" onclick="openLockModal('Bùi Văn Nam', this); return false;"><i class="fa-solid fa-lock"></i></a>
+                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò"
+                                            onclick="openEditRoleModal('Bùi Văn Nam', 'Bệnh nhân', this); return false;"><i
+                                                class="fa-solid fa-user-shield"></i></a>
+                                        <a href="#" class="action-btn delete" title="Khóa tài khoản"
+                                            onclick="openLockModal('Bùi Văn Nam', this); return false;"><i
+                                                class="fa-solid fa-lock"></i></a>
                                     </div>
                                 </td>
                             </tr>
-                            
+
                             <!-- Row 8 -->
                             <tr>
                                 <td>
@@ -326,15 +357,19 @@
                                 <td>2026-04-28</td>
                                 <td style="text-align: center;">
                                     <div style="display: flex; justify-content: center; gap: 8px;">
-                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" onclick="openEditRoleModal('Đinh Thị Hương', 'Lễ tân', this); return false;"><i class="fa-solid fa-user-shield"></i></a>
-                                        <a href="#" class="action-btn delete" title="Khóa tài khoản" onclick="openLockModal('Đinh Thị Hương', this); return false;"><i class="fa-solid fa-lock"></i></a>
+                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò"
+                                            onclick="openEditRoleModal('Đinh Thị Hương', 'Lễ tân', this); return false;"><i
+                                                class="fa-solid fa-user-shield"></i></a>
+                                        <a href="#" class="action-btn delete" title="Khóa tài khoản"
+                                            onclick="openLockModal('Đinh Thị Hương', this); return false;"><i
+                                                class="fa-solid fa-lock"></i></a>
                                     </div>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                
+
                 <!-- Pagination -->
                 <div class="pagination-container">
                     <span>Trang 1 / 2 &bull; Tổng số 12 tài khoản</span>
@@ -354,13 +389,16 @@
         <div class="modal-box">
             <div class="modal-header">
                 <h3 class="modal-title">Thay đổi vai trò</h3>
-                <button class="modal-close-btn" onclick="closeModal('editRoleModal')"><i class="fa-solid fa-xmark"></i></button>
+                <button class="modal-close-btn" onclick="closeModal('editRoleModal')"><i
+                        class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body">
                 <p>Thay đổi vai trò hệ thống cho tài khoản <strong id="editRoleUserName">...</strong>:</p>
                 <form id="editRoleForm" onsubmit="handleEditRoleSubmit(event)">
                     <div class="modal-form-group">
-                        <label for="roleSelect" style="font-size: 0.8rem; font-weight: 600; color: #475569; text-transform: uppercase;">Vai trò mới</label>
+                        <label for="roleSelect"
+                            style="font-size: 0.8rem; font-weight: 600; color: #475569; text-transform: uppercase;">Vai
+                            trò mới</label>
                         <select id="roleSelect" class="modal-select">
                             <option value="Bệnh nhân">Bệnh nhân</option>
                             <option value="Bác sĩ">Bác sĩ</option>
@@ -382,18 +420,21 @@
         <div class="modal-box">
             <div class="modal-header">
                 <h3 class="modal-title" style="color: #f59e0b;">Khóa tài khoản</h3>
-                <button class="modal-close-btn" onclick="closeModal('lockModal')"><i class="fa-solid fa-xmark"></i></button>
+                <button class="modal-close-btn" onclick="closeModal('lockModal')"><i
+                        class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body">
                 <p>Bạn có chắc chắn muốn khóa tài khoản của <strong id="lockUserName">...</strong> không?</p>
-                <p style="margin-top: 10px; color: #f59e0b; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+                <p
+                    style="margin-top: 10px; color: #f59e0b; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
                     <i class="fa-solid fa-triangle-exclamation"></i>
                     <span>Người dùng sẽ không thể đăng nhập vào hệ thống cho đến khi được mở khóa.</span>
                 </p>
             </div>
             <div class="modal-footer">
                 <button class="modal-btn cancel" onclick="closeModal('lockModal')">Hủy</button>
-                <button class="modal-btn danger" style="background-color: #f59e0b; border-color: #f59e0b;" onclick="handleLockConfirm()">Khóa tài khoản</button>
+                <button class="modal-btn danger" style="background-color: #f59e0b; border-color: #f59e0b;"
+                    onclick="handleLockConfirm()">Khóa tài khoản</button>
             </div>
         </div>
     </div>
@@ -403,18 +444,22 @@
         <div class="modal-box">
             <div class="modal-header">
                 <h3 class="modal-title" style="color: #10b981;">Mở khóa tài khoản</h3>
-                <button class="modal-close-btn" onclick="closeModal('unlockModal')"><i class="fa-solid fa-xmark"></i></button>
+                <button class="modal-close-btn" onclick="closeModal('unlockModal')"><i
+                        class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="modal-body">
                 <p>Bạn có chắc chắn muốn mở khóa tài khoản của <strong id="unlockUserName">...</strong> không?</p>
-                <p style="margin-top: 10px; color: #10b981; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
+                <p
+                    style="margin-top: 10px; color: #10b981; font-size: 0.85rem; display: flex; align-items: center; gap: 6px;">
                     <i class="fa-solid fa-circle-check"></i>
                     <span>Người dùng sẽ có thể đăng nhập và sử dụng hệ thống bình thường.</span>
                 </p>
             </div>
             <div class="modal-footer">
                 <button class="modal-btn cancel" onclick="closeModal('unlockModal')">Hủy</button>
-                <button class="modal-btn" style="background-color: #10b981; color: white; border: none; cursor: pointer; padding: 0.5rem 1rem; border-radius: 4px;" onclick="handleUnlockConfirm()">Mở khóa</button>
+                <button class="modal-btn"
+                    style="background-color: #10b981; color: white; border: none; cursor: pointer; padding: 0.5rem 1rem; border-radius: 4px;"
+                    onclick="handleUnlockConfirm()">Mở khóa</button>
             </div>
         </div>
     </div>
@@ -457,10 +502,10 @@
             const newRole = document.getElementById('roleSelect').value;
             if (currentTargetRow) {
                 const badgeCell = currentTargetRow.querySelector('.role-badge');
-                
+
                 // Clear old role classes
                 badgeCell.className = 'role-badge';
-                
+
                 // Update text and apply new class
                 badgeCell.innerText = newRole;
                 if (newRole === 'Bệnh nhân') {
@@ -522,7 +567,7 @@
         }
 
         // Click outside backdrop to close
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             if (event.target.classList.contains('modal-overlay')) {
                 event.target.classList.remove('active');
                 currentTargetRow = null;
@@ -530,5 +575,5 @@
         }
     </script>
 </body>
-</html>
 
+</html>

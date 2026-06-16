@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Chỉnh sửa hồ sơ</title>
@@ -7,62 +8,64 @@
     <link rel="stylesheet" th:href="@{/css/patient/patient-profile.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
+
 <body>
-<div class="patient-layout">
-    <div th:replace="~{patient/fragments/sidebar :: patientSidebar('profile')}"></div>
+    <div class="patient-layout">
+        <div th:replace="~{patient/fragments/sidebar :: patientSidebar('profile')}"></div>
 
-    <!-- PATIENT PROFILE EDIT - Page content -->
-    <main class="patient-main">
+        <!-- PATIENT PROFILE EDIT - Page content -->
+        <main class="patient-main">
 
-        <!-- PATIENT PROFILE EDIT - Flash error -->
-        <div th:if="${errorMessage}" class="alert alert-error">
-            <i class="bi bi-exclamation-circle-fill"></i>
-            <span th:text="${errorMessage}"></span>
-        </div>
-
-        <!-- PATIENT PROFILE EDIT - Header -->
-        <div class="patient-page-header">
-            <div style="display:flex;align-items:center;gap:12px;">
-                <a th:href="@{/patient/profile}" class="patient-back-link">
-                    <i class="bi bi-arrow-left"></i>
-                </a>
-                <div>
-                    <h2>Chỉnh sửa hồ sơ</h2>
-                    <p>Cập nhật thông tin cá nhân của bạn</p>
-                </div>
+            <!-- PATIENT PROFILE EDIT - Flash error -->
+            <div th:if="${errorMessage}" class="alert alert-error">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span th:text="${errorMessage}"></span>
             </div>
-        </div>
 
-        <!-- PATIENT PROFILE EDIT - Self-update form, current user is resolved in controller -->
-        <form th:action="@{/patient/profile/edit}" method="post" th:object="${updateUserForm}">
-            <div style="display:flex;flex-direction:column;gap:16px;">
-                <div th:replace="~{fragments/user-update-form :: metaFields}"></div>
-
-                <!-- PATIENT PROFILE EDIT - Common fields from users table -->
-                <section class="patient-card">
-                    <div class="patient-card-header">
-                        <i class="bi bi-person"></i>
-                        <h3>Thông tin cá nhân</h3>
-                    </div>
-                    <div class="profile-form-grid">
-                        <div th:replace="~{fragments/user-update-form :: commonFields('PATIENT')}"></div>
-                        <div th:replace="~{fragments/user-update-form :: patientFields}"></div>
-                    </div>
-                </section>
-
-                <!-- PATIENT PROFILE EDIT - Actions -->
-                <div class="profile-form-actions">
-                    <button type="submit" class="btn-primary">
-                        <i class="bi bi-check-lg"></i> Lưu thay đổi
-                    </button>
-                    <a th:href="@{/patient/profile}" class="btn-secondary">
-                        <i class="bi bi-x"></i> Hủy
+            <!-- PATIENT PROFILE EDIT - Header -->
+            <div class="patient-page-header">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <a th:href="@{/patient/profile}" class="patient-back-link">
+                        <i class="bi bi-arrow-left"></i>
                     </a>
+                    <div>
+                        <h2>Chỉnh sửa hồ sơ</h2>
+                        <p>Cập nhật thông tin cá nhân của bạn</p>
+                    </div>
                 </div>
             </div>
-        </form>
 
-    </main>
-</div>
+            <!-- PATIENT PROFILE EDIT - Self-update form, current user is resolved in controller -->
+            <form th:action="@{/patient/profile/edit}" method="post" th:object="${updateUserForm}">
+                <div style="display:flex;flex-direction:column;gap:16px;">
+                    <div th:replace="~{fragments/user-update-form :: metaFields}"></div>
+
+                    <!-- PATIENT PROFILE EDIT - Common fields from users table -->
+                    <section class="patient-card">
+                        <div class="patient-card-header">
+                            <i class="bi bi-person"></i>
+                            <h3>Thông tin cá nhân</h3>
+                        </div>
+                        <div class="profile-form-grid">
+                            <div th:replace="~{fragments/user-update-form :: commonFields('PATIENT')}"></div>
+                            <div th:replace="~{fragments/user-update-form :: patientFields}"></div>
+                        </div>
+                    </section>
+
+                    <!-- PATIENT PROFILE EDIT - Actions -->
+                    <div class="profile-form-actions">
+                        <button type="submit" class="btn-primary">
+                            <i class="bi bi-check-lg"></i> Lưu thay đổi
+                        </button>
+                        <a th:href="@{/patient/profile}" class="btn-secondary">
+                            <i class="bi bi-x"></i> Hủy
+                        </a>
+                    </div>
+                </div>
+            </form>
+
+        </main>
+    </div>
 </body>
+
 </html>

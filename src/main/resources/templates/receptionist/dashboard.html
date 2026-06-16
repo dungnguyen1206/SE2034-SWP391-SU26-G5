@@ -1,10 +1,201 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <meta charset="UTF-8">
+        <title>Trang Chủ Tiếp Tân</title>
 
-</body>
+        <link rel="stylesheet" th:href="@{/css/receptionist/common/sidebar.css}">
+        <link rel="stylesheet" th:href="@{/css/receptionist/common/header.css}">
+        <link rel="stylesheet" th:href="@{/css/receptionist/dashboard.css}">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    </head>
+
+    <body>
+        <div class="layout">
+
+            <div th:replace="~{receptionist/common/sidebar :: sidebar('dashboard')}"></div>
+
+            <main class="main">
+                <div th:replace="~{receptionist/common/header :: header('Trang Chủ')}"></div>
+
+                <section class="dashboard-page">
+
+                    <!-- Welcome banner -->
+                    <section class="welcome-card">
+                        <div class="welcome-content">
+                            <p th:text="'Hôm nay: ' + ${todayText}"></p>
+                            <h1 th:text="'Xin chào, ' + ${receptionist.fullName} + '!'"></h1>
+                            <span>Bạn đang đăng nhập với vai trò Nhân viên tiếp tân</span>
+                        </div>
+
+                        <div class="welcome-icon">
+                            <i class="bi bi-hospital"></i>
+                        </div>
+                    </section>
+
+                    <!-- Overview cards -->
+                    <section class="overview-grid">
+                        <div class="overview-card appointment-overview">
+                            <div class="overview-header">
+                                <div class="overview-icon">📅</div>
+                                <div>
+                                    <h2>Quản lý lịch hẹn</h2>
+                                    <p>Lịch hẹn trong ngày</p>
+                                </div>
+                            </div>
+
+                            <div class="overview-body">
+                                <div>
+                                    <span>Tổng lịch hôm nay</span>
+                                    <strong th:text="${stats.totalAppointmentsToday}"></strong>
+                                </div>
+
+                                <div>
+                                    <span>Đã check-in</span>
+                                    <strong class="number-checked" th:text="${stats.checkedInToday}"></strong>
+                                </div>
+                            </div>
+
+                            <a th:href="@{/receptionist/appointment}" class="overview-link">
+                                Xem chi tiết >
+                            </a>
+                        </div>
+
+                        <div class="overview-card queue-overview">
+                            <div class="overview-header">
+                                <div class="overview-icon">👥</div>
+                                <div>
+                                    <h2>Hàng đợi khám</h2>
+                                    <p>Tình trạng hàng đợi</p>
+                                </div>
+                            </div>
+
+                            <div class="overview-body">
+                                <div>
+                                    <span>Đang chờ</span>
+                                    <strong class="number-waiting" th:text="${stats.waitingQueue}"></strong>
+                                </div>
+
+                                <div>
+                                    <span>Đang khám</span>
+                                    <strong class="number-examining" th:text="${stats.examiningQueue}"></strong>
+                                </div>
+                            </div>
+
+                            <a th:href="@{/receptionist/queue}" class="overview-link">
+                                Xem chi tiết >
+                            </a>
+                        </div>
+
+                        <div class="overview-card invoice-overview">
+                            <div class="overview-header">
+                                <div class="overview-icon">🧾</div>
+                                <div>
+                                    <h2>Quản lý hóa đơn</h2>
+                                    <p>Tình trạng thanh toán</p>
+                                </div>
+                            </div>
+
+                            <div class="overview-body">
+                                <div>
+                                    <span>Đã thanh toán</span>
+                                    <strong class="number-paid" th:text="${stats.paidInvoices}"></strong>
+                                </div>
+
+                                <div>
+                                    <span>Chưa thanh toán</span>
+                                    <strong class="number-unpaid" th:text="${stats.unpaidInvoices}"></strong>
+                                </div>
+                            </div>
+
+                            <a th:href="@{/receptionist/invoice}" class="overview-link">
+                                Xem chi tiết >
+                            </a>
+                        </div>
+                    </section>
+
+                    <!-- Today appointments -->
+                    <section class="today-card">
+                        <div class="today-header">
+                            <div>
+                                <h2>Lịch hẹn hôm nay</h2>
+                            </div>
+
+                            <form class="dashboard-search" th:action="@{/receptionist/dashboard}" method="get">
+                                <div class="dashboard-search-box">
+                                    <span class="search-icon"> ⌕ </span>
+
+                                    <input type="text" name="search" placeholder="Tìm kiếm theo tên bệnh nhân, sdt..." th:value="${search}">
+                                </div>
+
+                                <button type="submit" class="btn-dashboard-search"> Tìm </button>
+
+                                <a th:href="@{/receptionist/dashboard}" class="btn-dashboard-reset"> Làm mới </a>
+                            </form>
+                        </div>
+
+                        <div class="table-wrapper">
+                            <table class="today-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mã lịch hẹn</th>
+                                        <th>Slot</th>
+                                        <th>Bệnh nhân</th>
+                                        <th>SĐT</th>
+                                        <th>Khoa</th>
+                                        <th>Bác sĩ</th>
+                                        <th>Phòng</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thao tác</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr th:each="appointment : ${todayAppointments}">
+                                        <td>
+                                            <a class="appointment-code"
+                                               th:href="@{/receptionist/appointment/{id}(id=${appointment.id})}"
+                                               th:text="${appointment.appointmentCode}">
+                                            </a>
+                                        </td>
+
+                                        <td th:text="${appointment.slotText}"></td>
+
+                                        <td th:text="${appointment.patientFullName}"></td>
+
+                                        <td th:text="${appointment.patientPhone != null ? appointment.patientPhone : '-'}"></td>
+
+                                        <td th:text="${appointment.departmentName != null ? appointment.departmentName : '-'}"></td>
+
+                                        <td th:text="${appointment.doctorFullName != null ? appointment.doctorFullName : '-'}"></td>
+
+                                        <td>
+                                            <span class="room-badge" th:text="${appointment.roomNumber != null ? appointment.roomNumber : '-'}"></span>
+                                        </td>
+
+                                        <td>
+                                            <span class="status-badge" th:classappend="${appointment.statusClass}" th:text="${appointment.statusLabel}"></span>
+                                        </td>
+
+                                        <td>
+                                            <a class="btn-detail"
+                                               th:href="@{/receptionist/appointment/{id}(id=${appointment.id})}">
+                                                Chi tiết
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                    <tr th:if="${todayAppointments == null || todayAppointments.isEmpty()}">
+                                        <td colspan="9" class="empty-row">
+                                            Hôm nay chưa có lịch hẹn nào
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                </section>
+            </main>
+        </div>
+    </body>
 </html>

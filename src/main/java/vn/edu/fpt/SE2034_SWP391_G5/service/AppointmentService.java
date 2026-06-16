@@ -2,27 +2,23 @@ package vn.edu.fpt.SE2034_SWP391_G5.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.repository.query.Param;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentDateGroupResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentStatusCountResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.Appointment;
-
+import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateAppointmentRequest;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentPrintResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ScheduleSlotResponse;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateAppointmentRequest;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentPrintResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ScheduleSlotResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.Appointment;
-
-
 public interface AppointmentService {
     long getAllAppointment();
+
     Map<String, Long> findTodayAppointmentsByStatus(LocalDate localDate);
+
     List<AppointmentResponse> findAppointmentsByBookingDate(LocalDate today);
 
+    //------------------------------ Hoàng Linh ---------------------------------------------------------------
     List<AppointmentResponse> getAppointmentListForReceptionist();
 
     long countByStatus(List<AppointmentResponse> appointments, String status);
@@ -34,6 +30,11 @@ public interface AppointmentService {
     void confirmCheckInAppointment(Long appointmentId);
 
     AppointmentResponse getAppointmentDetailForReceptionist(Long appointmentId);
+
+    List<AppointmentDateGroupResponse> groupAppointmentsByDate(List<AppointmentResponse> appointments);
+
+    Page<AppointmentResponse> getPagedAppointmentsForReceptionist(String search, String status, LocalDate fromDate, LocalDate toDate, int page, int size);
+    //------------------------------------------------------------------------------------------------------------
 
     // Lấy lịch + slot của bác sĩ để hiển thị trên form đặt lịch
     List<ScheduleSlotResponse> getAvailableSchedules(Long doctorId);
@@ -51,12 +52,15 @@ public interface AppointmentService {
     void cancelAppointment(Long appointmentId, Long patientId);
 
     //LinhNH 01/06/2026
-    // Lấy danh sách lịch hẹn của bác sĩ có phân trang và bộ lọc trạng thái
-    Page<AppointmentResponse> getAppointmentsForDoctor(Long doctorId, String status, Pageable pageable);
+    // Lấy danh sách lịch hẹn của bác sĩ có phân trang và bộ lọc trạng thái theo ngày
+    Page<AppointmentResponse> getAppointmentsForDoctor(Long doctorId, LocalDate bookingDate, String status, Pageable pageable);
 
-    // Đếm số lượng lịch hẹn của bác sĩ theo trạng thái
-    long countAppointmentsForDoctor(Long doctorId, String status);
+    // Đếm số lượng lịch hẹn của bác sĩ theo trạng thái theo ngày
+    long countAppointmentsForDoctor(Long doctorId, LocalDate bookingDate, String status);
 
     // Cập nhật trạng thái lịch hẹn
     void updateAppointmentStatus(Long appointmentId, String newStatus);
+
+    // Lấy danh sách bệnh nhân đã khám xong gần đây nhất
+    List<AppointmentResponse> getRecentCompletedAppointmentsForDoctor(Long doctorId, int limit);
 }

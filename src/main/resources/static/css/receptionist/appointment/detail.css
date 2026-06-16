@@ -7,6 +7,25 @@
     margin: 0 auto 18px;
     display: flex;
     justify-content: flex-end;
+    gap: 12px;
+}
+
+.btn-checkin-detail {
+    height: 42px;
+    padding: 0 18px;
+    border-radius: 12px;
+    background-color: #16a34a;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 800;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-checkin-detail:hover {
+    background-color: #15803d;
 }
 
 .btn-back {

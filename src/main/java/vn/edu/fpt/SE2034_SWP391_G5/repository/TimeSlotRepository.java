@@ -23,4 +23,15 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
     // Fetch slot cùng với schedule (để tránh LazyInitializationException khi đặt lịch)
     @Query("SELECT t FROM TimeSlot t JOIN FETCH t.schedule s WHERE t.id = :id")
     Optional<TimeSlot> findByIdWithSchedule(@Param("id") Long id);
+
+    @Query("SELECT ts FROM TimeSlot ts " +
+            "JOIN FETCH ts.schedule sch " +
+            "JOIN FETCH sch.room r " +
+            "WHERE sch.workDate = :workDate " +
+            "AND r.id = :roomId " +
+            "ORDER BY ts.startTime ASC")
+    List<TimeSlot> findByRoomIdAndWorkDateOrderByStartTimeAsc(
+            @Param("roomId") Integer roomId,
+            @Param("workDate") LocalDate workDate
+    );
 }

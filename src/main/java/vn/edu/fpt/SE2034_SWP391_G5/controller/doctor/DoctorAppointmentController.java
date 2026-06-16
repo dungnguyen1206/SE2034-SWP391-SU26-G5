@@ -5,14 +5,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRepository;
+import java.time.LocalDate;
 import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
 
@@ -22,34 +20,33 @@ import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
 public class DoctorAppointmentController {
 
     private final AppointmentService appointmentService;
-    private final UserRepository userRepository;
 
     @GetMapping("/appointment-list")
     public String appointmentList(
             @RequestParam(value = "status", defaultValue = "ALL") String status,
             @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "date", required = false) String dateStr,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
 
         Long doctorId = userDetails.getUser().getId();
-
-        // Doctor Info sidebar
-        User doctor = userRepository.findById(doctorId).orElse(null);
-        if (doctor != null) {
-            String doctorName = (doctor.getLastName() != null ? doctor.getLastName() + " " : "")
-                    + (doctor.getMiddleName() != null ? doctor.getMiddleName() + " " : "")
-                    + (doctor.getFirstName() != null ? doctor.getFirstName() : "");
-            model.addAttribute("doctorName", doctorName.trim());
-            model.addAttribute("doctorDept", doctor.getDepartment() != null ? doctor.getDepartment().getName() : "");
+        
+        LocalDate bookingDate;
+        if (dateStr == null || dateStr.trim().isEmpty()) {
+            bookingDate = LocalDate.now();
         } else {
-            model.addAttribute("doctorName", "Bác sĩ");
-            model.addAttribute("doctorDept", "");
+            try {
+                bookingDate = LocalDate.parse(dateStr);
+            } catch (Exception e) {
+                bookingDate = LocalDate.now();
+            }
         }
+        model.addAttribute("selectedDate", bookingDate.toString());
 
         // Current date in Vietnamese
         String currentDate = java.time.format.DateTimeFormatter
                 .ofPattern("EEEE, 'ngày' dd 'tháng' MM, yyyy", new java.util.Locale("vi", "VN"))
-                .format(java.time.LocalDate.now());
+                .format(bookingDate);
         // Capitalize first letter of the day (e.g. "Thứ hai" -> "Thứ Hai")
         if (currentDate.length() > 0) {
             currentDate = Character.toUpperCase(currentDate.charAt(0)) + currentDate.substring(1);
@@ -58,7 +55,7 @@ public class DoctorAppointmentController {
 
         // Pagination setup (5 items per page)
         Pageable pageable = PageRequest.of(page, 5, Sort.by("id").ascending());
-        Page<AppointmentResponse> appointmentsPage = appointmentService.getAppointmentsForDoctor(doctorId, status, pageable);
+        Page<AppointmentResponse> appointmentsPage = appointmentService.getAppointmentsForDoctor(doctorId, bookingDate, status, pageable);
 
         model.addAttribute("appointments", appointmentsPage);
         model.addAttribute("currentStatus", status);
@@ -74,10 +71,10 @@ public class DoctorAppointmentController {
         model.addAttribute("totalElements", totalElements);
 
         // Tab counts
-        model.addAttribute("countAll", appointmentService.countAppointmentsForDoctor(doctorId, "ALL"));
-        model.addAttribute("countWaiting", appointmentService.countAppointmentsForDoctor(doctorId, "WAITING"));
-        model.addAttribute("countExamining", appointmentService.countAppointmentsForDoctor(doctorId, "IN_PROGRESS"));
-        model.addAttribute("countCompleted", appointmentService.countAppointmentsForDoctor(doctorId, "COMPLETED"));
+        model.addAttribute("countAll", appointmentService.countAppointmentsForDoctor(doctorId, bookingDate, "ALL"));
+        model.addAttribute("countWaiting", appointmentService.countAppointmentsForDoctor(doctorId, bookingDate, "WAITING"));
+        model.addAttribute("countExamining", appointmentService.countAppointmentsForDoctor(doctorId, bookingDate, "IN_PROGRESS"));
+        model.addAttribute("countCompleted", appointmentService.countAppointmentsForDoctor(doctorId, bookingDate, "COMPLETED"));
 
         return "doctor/appointment-list";
     }
@@ -87,13 +84,37 @@ public class DoctorAppointmentController {
             @PathVariable Long id,
             @RequestParam String status,
             @RequestParam(value = "currentStatus", defaultValue = "ALL") String currentStatus,
-            @RequestParam(value = "page", defaultValue = "0") int page) {
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "date", required = false) String dateStr) {
         try {
             appointmentService.updateAppointmentStatus(id, status);
         } catch (Exception e) {
             // Log or handle error if needed
         }
-        return "redirect:/doctor/appointment-list?status=" + currentStatus + "&page=" + page;
+        
+        String redirectUrl = "redirect:/doctor/appointment-list?status=" + currentStatus + "&page=" + page;
+        if (dateStr != null && !dateStr.trim().isEmpty()) {
+            redirectUrl += "&date=" + dateStr;
+        }
+        return redirectUrl;
+    }
+
+    @GetMapping("/appointments/{id}/detail")
+    public String appointmentDetail(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model) {
+        Long doctorId = userDetails.getUser().getId();
+        AppointmentResponse appointment = appointmentService.getAppointmentDetailForReceptionist(id);
+        
+        // Security check: ensure this appointment belongs to the logged-in doctor
+        if (appointment == null || !doctorId.equals(appointment.getDoctorId())) {
+            throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền xem thông tin lịch hẹn này");
+        }
+        
+        model.addAttribute("appointment", appointment);
+        return "doctor/patient-detail";
     }
 }
+
 

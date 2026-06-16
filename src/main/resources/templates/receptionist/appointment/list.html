@@ -59,25 +59,60 @@
                     <form class="appointment-toolbar" th:action="@{/receptionist/appointment}" method="get">
                         <div class="search-box">
                             <span class="search-icon"> ⌕ </span>
-                            <input type="text" name="search" placeholder="Tìm kiếm bệnh nhân..." th:value="${search}">
+
+                            <input type="text"
+                                   name="search"
+                                   placeholder="Tìm kiếm bệnh nhân..."
+                                   th:value="${search}">
                         </div>
 
                         <select class="status-filter" name="status">
-                            <option value="" th:selected="${selectedStatus == null || selectedStatus == ''}"> Tất cả trạng
-                                thái
+                            <option value="" th:selected="${selectedStatus == null || selectedStatus == ''}">
+                                Tất cả trạng thái
                             </option>
-                            <option value="CONFIRMED" th:selected="${selectedStatus == 'CONFIRMED'}"> Đã xác nhận</option>
-                            <option value="WAITING" th:selected="${selectedStatus == 'WAITING'}"> Chờ khám</option>
-                            <option value="EXAMINING" th:selected="${selectedStatus == 'EXAMINING'}"> Đang khám</option>
-                            <option value="COMPLETED" th:selected="${selectedStatus == 'COMPLETED'}"> Đã khám xong
+
+                            <option value="CONFIRMED" th:selected="${selectedStatus == 'CONFIRMED'}">
+                                Đã xác nhận
                             </option>
-                            <option value="CANCELLED" th:selected="${selectedStatus == 'CANCELLED'}"> Đã hủy</option>
-                            <option value="NO_SHOW" th:selected="${selectedStatus == 'NO_SHOW'}"> Vắng mặt</option>
+
+                            <option value="WAITING" th:selected="${selectedStatus == 'WAITING'}">
+                                Chờ khám
+                            </option>
+
+                            <option value="EXAMINING" th:selected="${selectedStatus == 'EXAMINING'}">
+                                Đang khám
+                            </option>
+
+                            <option value="COMPLETED" th:selected="${selectedStatus == 'COMPLETED'}">
+                                Đã khám xong
+                            </option>
+
+                            <option value="CANCELLED" th:selected="${selectedStatus == 'CANCELLED'}">
+                                Đã hủy
+                            </option>
+
+                            <option value="NO_SHOW" th:selected="${selectedStatus == 'NO_SHOW'}">
+                                Vắng mặt
+                            </option>
                         </select>
 
-                        <button type="submit" class="btn-search"> Tìm Kiếm</button>
+                        <input type="date"
+                               name="fromDate"
+                               class="date-filter"
+                               th:value="${fromDate}">
 
-                        <a th:href="@{/receptionist/appointment}" class="btn-reset"> Làm Mới </a>
+                        <input type="date"
+                               name="toDate"
+                               class="date-filter"
+                               th:value="${toDate}">
+
+                        <button type="submit" class="btn-search">
+                            Tìm Kiếm
+                        </button>
+
+                        <a th:href="@{/receptionist/appointment}" class="btn-reset">
+                            Làm Mới
+                        </a>
                     </form>
 
                     <div class="table-wrapper">
@@ -90,15 +125,42 @@
                                     <th>Bệnh nhân</th>
                                     <th>SĐT</th>
                                     <th>Bác sĩ</th>
-                                    <th>Chuyên khoa</th>
+                                    <th>Khoa</th>
                                     <th>Ngày giờ</th>
                                     <th>Trạng thái</th>
                                     <th>Thao tác</th>
                                 </tr>
                             </thead>
 
-                            <tbody>
-                                <tr th:each="appointment : ${appointments}">
+                            <!-- Group theo ngày -->
+                            <tbody th:each="group : ${appointmentGroups}">
+
+                                <!-- Dòng ngày -->
+                                <tr class="date-group-row">
+                                    <td colspan="10">
+                                        <div class="date-group-header">
+                                            <div class="date-left">
+                                                <span class="date-icon">📅</span>
+
+                                                <strong th:text="${#temporals.format(group.bookingDate, 'dd/MM/yyyy')}">
+                                                    03/06/2026
+                                                </strong>
+
+                                                <span class="today-badge" th:if="${group.today}">
+                                                    Hôm nay
+                                                </span>
+                                            </div>
+
+                                            <div class="date-total"
+                                                 th:text="${group.totalAppointments + ' lịch hẹn'}">
+                                                0 lịch hẹn
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <!-- Danh sách lịch hẹn trong ngày -->
+                                <tr th:each="appointment : ${group.appointments}">
                                     <td>
                                         <a class="appointment-code"
                                            th:href="@{/receptionist/appointment/{id}(id=${appointment.id})}"
@@ -109,26 +171,30 @@
                                     <td th:text="${appointment.slotText}"></td>
 
                                     <td>
-                                        <span class="room-badge" th:text="${appointment.roomNumber}"></span>
+                                        <span class="room-badge"
+                                              th:text="${appointment.roomNumber != null ? appointment.roomNumber : '-'}">
+                                        </span>
                                     </td>
 
                                     <td th:text="${appointment.patientFullName}"></td>
 
-                                    <td th:text="${appointment.patientPhone}"></td>
+                                    <td th:text="${appointment.patientPhone != null ? appointment.patientPhone : '-'}"></td>
 
-                                    <td th:text="${appointment.doctorFullName}"></td>
+                                    <td th:text="${appointment.doctorFullName != null ? appointment.doctorFullName : '-'}"></td>
 
-                                    <td th:text="${appointment.departmentName}"></td>
+                                    <td th:text="${appointment.departmentName != null ? appointment.departmentName : '-'}"></td>
 
                                     <td>
-                                        <span th:text="${#temporals.format(appointment.bookingDate, 'dd/MM/yyyy')}"></span>
-                                        <span> · </span>
-                                        <span th:text="${#temporals.format(appointment.slotStartTime, 'HH:mm')}"></span>
+                                        <span th:if="${appointment.bookingDate != null}"
+                                              th:text="${#temporals.format(appointment.bookingDate, 'dd/MM/yyyy')}">
+                                        </span>
                                     </td>
 
                                     <td>
-                                        <span class="status-badge" th:classappend="${appointment.statusClass}"
-                                              th:text="${appointment.statusLabel}"></span>
+                                        <span class="status-badge"
+                                              th:classappend="${appointment.statusClass}"
+                                              th:text="${appointment.statusLabel}">
+                                        </span>
                                     </td>
 
                                     <td class="action-cell">
@@ -144,15 +210,74 @@
                                         </a>
                                     </td>
                                 </tr>
+                            </tbody>
 
-                                <tr th:if="${appointments == null || appointments.isEmpty()}">
-                                    <td colspan="10" class="empty-row"> Không có lịch hẹn nào</td>
+                            <!-- Không có dữ liệu -->
+                            <tbody th:if="${appointmentGroups == null || appointmentGroups.isEmpty()}">
+                                <tr>
+                                    <td colspan="10" class="empty-row">
+                                        Không có lịch hẹn nào
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
-                    <div class="pagination-footer"></div>
+                    <!-- Pagination -->
+                    <div class="pagination-footer"
+                         th:if="${appointmentPage != null && appointmentPage.totalPages > 0}">
+
+                        <div class="pagination-info">
+                            <span th:text="'Trang ' + ${appointmentPage.number + 1} + ' / ' + ${appointmentPage.totalPages}">
+                                Trang 1 / 1
+                            </span>
+
+                            <span th:text="'Tổng: ' + ${appointmentPage.totalElements} + ' lịch hẹn'">
+                                Tổng: 0 lịch hẹn
+                            </span>
+                        </div>
+
+                        <div class="pagination">
+
+                            <a class="page-btn"
+                               th:classappend="${appointmentPage.first} ? ' disabled'"
+                               th:href="@{/receptionist/appointment(
+                                    page=${appointmentPage.number - 1},
+                                    search=${search},
+                                    status=${selectedStatus},
+                                    fromDate=${fromDate},
+                                    toDate=${toDate}
+                               )}">
+                                Trước
+                            </a>
+
+                            <a class="page-number"
+                               th:each="pageNumber : ${#numbers.sequence(0, appointmentPage.totalPages - 1)}"
+                               th:classappend="${pageNumber == appointmentPage.number} ? ' active'"
+                               th:href="@{/receptionist/appointment(
+                                    page=${pageNumber},
+                                    search=${search},
+                                    status=${selectedStatus},
+                                    fromDate=${fromDate},
+                                    toDate=${toDate}
+                               )}"
+                               th:text="${pageNumber + 1}">
+                            </a>
+
+                            <a class="page-btn"
+                               th:classappend="${appointmentPage.last} ? ' disabled'"
+                               th:href="@{/receptionist/appointment(
+                                    page=${appointmentPage.number + 1},
+                                    search=${search},
+                                    status=${selectedStatus},
+                                    fromDate=${fromDate},
+                                    toDate=${toDate}
+                               )}">
+                                Sau
+                            </a>
+
+                        </div>
+                    </div>
                 </section>
             </main>
         </div>
