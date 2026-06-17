@@ -5,6 +5,14 @@ import org.springframework.stereotype.Repository;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.UserRole;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.UserRoleId;
 
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
 @Repository
 public interface UserRoleRepository extends JpaRepository<UserRole, UserRoleId> {
+    List<UserRole> findByUserId(Long userId);
+
+    @Transactional
+    void deleteByUserId(Long userId);
 }

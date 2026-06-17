@@ -248,7 +248,6 @@
 }
 
 .staff-type-badge.doctor {
-
     color: #008236;
 }
 
@@ -583,7 +582,7 @@ Staff form success
 */
 .staff-form-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 16px;
 }
 
@@ -871,10 +870,12 @@ Staff form success
 */
 .staff-detail-summary {
     display: grid;
-    grid-template-columns: auto minmax(220px, 1fr) minmax(360px, 2fr);
+    grid-template-columns: auto minmax(220px,1fr);
     gap: 22px;
     align-items: center;
     margin-bottom: 20px;
+    width: 100%;
+
 }
 
 .staff-detail-avatar {
@@ -935,16 +936,20 @@ Staff form success
 */
 .staff-detail-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 360px;
+    grid-template-columns: auto minmax(0, 2fr);
     gap: 20px;
     align-items: start;
+    width: 100%;
 }
 
-.staff-detail-main,
-.staff-detail-side {
-    display: flex;
-    flex-direction: column;
+.staff-detail-side{
+    display: grid;
+}
+.staff-detail-main{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 20px;
+
 }
 
 .staff-detail-info-list {
@@ -955,9 +960,9 @@ Staff form success
 .staff-detail-info-list div {
     display: flex;
     justify-content: space-between;
-    gap: 16px;
     padding: 12px 0;
     border-bottom: 1px solid #eef2f7;
+    width: 100%;
 }
 
 .staff-detail-info-list div:last-child {

@@ -12,9 +12,11 @@ import vn.edu.fpt.SE2034_SWP391_G5.service.*;
 import vn.edu.fpt.SE2034_SWP391_G5.service.impl.*;
 
 import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Controller
@@ -42,6 +44,9 @@ public class ManagerDashboardController {
         long doctorActive = doctorService.findByDoctorStatus("ACTIVE").size();
         long doctorInactive = doctorService.findByDoctorStatus("INACTIVE").size();
         BigDecimal totalAmount = invoiceService.getTotalAmount("PAID", LocalDate.now().getMonthValue(),LocalDate.now().getYear());
+        Locale vietnamLocale = new Locale("vi", "VN");
+        NumberFormat vnCurrencyFormat = NumberFormat.getCurrencyInstance(vietnamLocale);
+        String formattedAmount = vnCurrencyFormat.format(totalAmount);
         Map<String,Long> appointmentStatusCountResponseMap = appointmentService.findTodayAppointmentsByStatus(LocalDate.now());
         List<AppointmentResponse> todayAppointmentsList = appointmentService.findAppointmentsByBookingDate(LocalDate.now());
         List<DoctorOnDutyResponse> doctorOnDutyResponses = scheduleService.findDoctorScheduleByDate(LocalDate.now());
@@ -50,7 +55,7 @@ public class ManagerDashboardController {
         model.addAttribute("totalAppointment", totalAppointment);
         model.addAttribute("doctorActive", doctorActive);
         model.addAttribute("doctorInactive", doctorInactive);
-        model.addAttribute("totalAmount", totalAmount);
+        model.addAttribute("totalAmount", formattedAmount);
         model.addAttribute("waitingAppointment", appointmentStatusCountResponseMap.get("WAITING"));
         model.addAttribute("confirmedAppointment", appointmentStatusCountResponseMap.get("CONFIRMED"));
         model.addAttribute("examiningAppointment", appointmentStatusCountResponseMap.get("EXAMINING"));

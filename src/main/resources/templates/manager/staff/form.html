@@ -30,7 +30,7 @@
             <i class="bi bi-check-circle-fill"></i>
             <span th:text="${successMessage}"></span>
         </div>
-        
+
         <!-- STAFF UPDATE - Form error -->
         <div th:if="${errorMessage}" class="staff-form-alert">
             <i class="bi bi-exclamation-circle-fill"></i>
@@ -48,21 +48,21 @@
 
             <!-- STAFF UPDATE - Staff role display only, role is managed by Admin flow -->
             <section class="staff-form-card staff-type-section">
-                <div class="staff-form-section-title">Loại nhân viên</div>
+<!--                <div class="staff-form-section-title">Loại nhân viên</div>-->
 
-                <div class="staff-type-options">
-                    <div class="staff-type-option doctor"
-                         th:classappend="${updateUserForm.profileType == 'DOCTOR'} ? 'selected'">
-                        <i class="bi bi-shield-plus"></i>
-                        <strong>Bác sĩ</strong>
-                    </div>
+<!--                <div class="staff-type-options">-->
+<!--                    <div class="staff-type-option doctor"-->
+<!--                         th:classappend="${updateUserForm.profileType == 'DOCTOR'} ? 'selected'">-->
+<!--                        <i class="bi bi-shield-plus"></i>-->
+<!--                        <strong>Bác sĩ</strong>-->
+<!--                    </div>-->
 
-                    <div class="staff-type-option receptionist"
-                         th:classappend="${updateUserForm.profileType == 'RECEPTIONIST'} ? 'selected'">
-                        <i class="bi bi-person"></i>
-                        <strong>Lễ tân</strong>
-                    </div>
-                </div>
+<!--                    <div class="staff-type-option receptionist"-->
+<!--                         th:classappend="${updateUserForm.profileType == 'RECEPTIONIST'} ? 'selected'">-->
+<!--                        <i class="bi bi-person"></i>-->
+<!--                        <strong>Lễ tân</strong>-->
+<!--                    </div>-->
+<!--                </div>-->
 
                 <div class="staff-role-note">
                     <i class="bi bi-lock"></i>

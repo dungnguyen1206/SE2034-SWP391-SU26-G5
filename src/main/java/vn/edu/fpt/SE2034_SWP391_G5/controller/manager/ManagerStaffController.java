@@ -1,6 +1,7 @@
 package vn.edu.fpt.SE2034_SWP391_G5.controller.manager;
 
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -29,28 +30,16 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/manager/staff")
+@RequiredArgsConstructor
 public class ManagerStaffController {
 
     private final DoctorService doctorService;
     private final StaffService staffService;
     private final ReceptionistService receptionistService;
     private final DepartmentService departmentService;
-    private final RoleRepository roleRepository;
-    private final UserRoleRepository userRoleRepository;
 
-    public ManagerStaffController(DoctorService doctorService,
-                                  StaffService staffService,
-                                  ReceptionistService receptionistService,
-                                  DepartmentService departmentService,
-                                  RoleRepository roleRepository,
-                                  UserRoleRepository userRoleRepository) {
-        this.doctorService = doctorService;
-        this.staffService = staffService;
-        this.receptionistService = receptionistService;
-        this.departmentService = departmentService;
-        this.roleRepository = roleRepository;
-        this.userRoleRepository = userRoleRepository;
-    }
+
+
 
     @GetMapping("/list")
     public String staff(@RequestParam(required = false) String role,
