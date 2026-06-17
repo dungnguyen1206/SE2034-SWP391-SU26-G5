@@ -142,7 +142,7 @@
 
                             <td>
                                 <form th:action="@{/doctor/appointments/{id}/status(id=${a.id})}" method="POST"
-                                    style="display: flex; gap: 8px; align-items: center; justify-content: center;">
+                                    style="display: flex; gap: 8px; align-items: center; justify-content: flex-start;">
                                     <input type="hidden" name="currentStatus" th:value="${currentStatus}" />
                                     <input type="hidden" name="page" th:value="${currentPage}" />
                                     <input type="hidden" name="date" th:value="${selectedDate}" />

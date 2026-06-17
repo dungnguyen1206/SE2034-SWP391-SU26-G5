@@ -31,6 +31,8 @@ public class AppointmentResponse {
     private Long patientId;
     private Integer patientAge;
     private String patientGender;
+    private LocalDate patientDateOfBirth;
+    private String patientBloodType;
     private String patientInitials;
 
     // Doctor info

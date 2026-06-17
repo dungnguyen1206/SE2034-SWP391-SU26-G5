@@ -102,7 +102,6 @@
             <!-- Tabs Section -->
             <div class="detail-tabs">
                 <button class="active">Thông tin cá nhân</button>
-                <button>Hồ sơ bệnh án</button>
                 <button>Hóa đơn</button>
             </div>
 
@@ -112,19 +111,48 @@
                 <!-- Tab Pane 1: Thông tin cá nhân -->
                 <div class="tab-pane active">
                     <div class="detail-content-card">
-                        <h3 class="card-title">Thông tin cá nhân</h3>
+                        <div class="card-header-row">
+                            <h3 class="card-title" style="font-size: 16px; font-weight: 700; color: #0f172a;">Thông tin cá nhân</h3>
+                            <a th:href="@{/doctor/appointments/{id}/records/create(id=${appointment.id})}" class="btn-create-record">
+                                <i class="fa-solid fa-plus"></i> Tạo hồ sơ bệnh án
+                            </a>
+                        </div>
                         <hr class="card-divider">
 
                         <div class="info-grid">
                             <div class="info-item">
                                 <div class="info-icon blue">
-                                    <i class="fa-regular fa-user"></i>
+                                    <i class="fa-regular fa-calendar-days"></i>
                                 </div>
                                 <div>
-                                    <p>Tuổi</p>
+                                    <p>Ngày sinh</p>
                                     <h3
-                                        th:text="${appointment.patientAge != null ? appointment.patientAge + ' tuổi' : 'Chưa rõ tuổi'}">
-                                        45 tuổi</h3>
+                                        th:text="${appointment.patientDateOfBirth != null ? #temporals.format(appointment.patientDateOfBirth, 'dd/MM/yyyy') : 'Chưa cập nhật'}">
+                                        01/01/1985</h3>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-icon purple">
+                                    <i class="fa-solid fa-venus-mars"></i>
+                                </div>
+                                <div>
+                                    <p>Giới tính</p>
+                                    <h3
+                                        th:text="${appointment.patientGender == 'MALE'} ? 'Nam' : (${appointment.patientGender == 'FEMALE'} ? 'Nữ' : (${appointment.patientGender != null} ? ${appointment.patientGender} : 'Chưa cập nhật'))">
+                                        Nam</h3>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-icon red">
+                                    <i class="fa-solid fa-droplet"></i>
+                                </div>
+                                <div>
+                                    <p>Nhóm máu</p>
+                                    <h3
+                                        th:text="${appointment.patientBloodType != null ? appointment.patientBloodType : 'Chưa cập nhật'}">
+                                        O</h3>
                                 </div>
                             </div>
 
@@ -152,12 +180,9 @@
                                 </div>
                             </div>
 
-                            <!-- Placeholder cell for matching the grid spacing in screenshot -->
-                            <div class="info-item empty-placeholder"></div>
-
                             <div class="info-item">
                                 <div class="info-icon purple">
-                                    <i class="fa-regular fa-calendar"></i>
+                                    <i class="fa-regular fa-clock"></i>
                                 </div>
                                 <div>
                                     <p>Giờ hẹn</p>
@@ -176,21 +201,14 @@
                                     <h3 th:text="${appointment.serviceName}">Tái khám định kỳ</h3>
                                 </div>
                             </div>
+
+                            <!-- Placeholder cell for matching the grid spacing -->
+                            <div class="info-item empty-placeholder"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Tab Pane 2: Hồ sơ bệnh án -->
-                <div class="tab-pane">
-                    <div class="detail-content-card">
-                        <h3 class="card-title">Hồ sơ bệnh án</h3>
-                        <hr class="card-divider">
-                        <div class="empty-tab-state">
-                            <i class="fa-solid fa-file-medical"></i>
-                            <p>Không tìm thấy hồ sơ bệnh án nào được ghi nhận cho lịch hẹn này.</p>
-                        </div>
-                    </div>
-                </div>
+
 
                 <!-- Tab Pane 3: Hóa đơn -->
                 <div class="tab-pane">

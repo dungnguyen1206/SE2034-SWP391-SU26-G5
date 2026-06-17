@@ -160,6 +160,11 @@
     color: #ec4899;
 }
 
+.red {
+    background: #fef2f2;
+    color: #ef4444;
+}
+
 /* ==========================================================================
    NEW Styles for the dedicated, independent patient-detail page
    ========================================================================== */
@@ -341,11 +346,15 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.02), 0 1px 2px rgba(0,0,0,0.03);
 }
 
-.detail-content-card .card-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: #0f172a;
+.card-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 16px;
+}
+
+.card-header-row .card-title {
+    margin-bottom: 0 !important;
 }
 
 .detail-content-card .card-divider {

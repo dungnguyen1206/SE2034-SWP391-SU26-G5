@@ -682,6 +682,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         String patientGender = patient != null ? patient.getGender() : null;
+        LocalDate patientDateOfBirth = patient != null ? patient.getDateOfBirth() : null;
+        String patientBloodType = patient != null ? patient.getBloodType() : null;
 
         String patientInitials = "";
         if (!patientFullName.trim().isEmpty()) {
@@ -706,6 +708,8 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .patientAddress(buildPatientAddress(patient))
                 .patientAge(patientAge)
                 .patientGender(patientGender)
+                .patientDateOfBirth(patientDateOfBirth)
+                .patientBloodType(patientBloodType)
                 .patientInitials(patientInitials)
                 .doctorId(doctor != null ? doctor.getId() : null)
                 .doctorFullName(doctorFullName)
