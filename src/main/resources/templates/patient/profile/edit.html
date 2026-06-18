@@ -10,36 +10,40 @@
 </head>
 
 <body>
-    <div class="patient-layout">
-        <div th:replace="~{patient/fragments/sidebar :: patientSidebar('profile')}"></div>
+<div class="patient-layout">
+    <div th:replace="~{patient/fragments/sidebar :: patientSidebar('profile')}"></div>
 
-        <!-- PATIENT PROFILE EDIT - Page content -->
-        <main class="patient-main">
+    <!-- PATIENT PROFILE EDIT - Page content -->
+    <main class="patient-main">
 
-            <!-- PATIENT PROFILE EDIT - Flash error -->
-            <div th:if="${errorMessage}" class="alert alert-error">
-                <i class="bi bi-exclamation-circle-fill"></i>
-                <span th:text="${errorMessage}"></span>
-            </div>
+        <!-- PATIENT PROFILE EDIT - Flash error -->
+        <div th:if="${errorMessage}" class="alert alert-error">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            <span th:text="${errorMessage}"></span>
+        </div>
 
-            <!-- PATIENT PROFILE EDIT - Header -->
-            <div class="patient-page-header">
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <a th:href="@{/patient/profile}" class="patient-back-link">
-                        <i class="bi bi-arrow-left"></i>
-                    </a>
-                    <div>
-                        <h2>Chỉnh sửa hồ sơ</h2>
-                        <p>Cập nhật thông tin cá nhân của bạn</p>
-                    </div>
+        <!-- PATIENT PROFILE EDIT - Header -->
+        <div class="patient-page-header">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <a th:href="@{/patient/profile}" class="patient-back-link">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div>
+                    <h2>Chỉnh sửa hồ sơ</h2>
+                    <p>Cập nhật thông tin cá nhân của bạn</p>
                 </div>
             </div>
+        </div>
 
-            <!-- PATIENT PROFILE EDIT - Self-update form, current user is resolved in controller -->
-            <form th:action="@{/patient/profile/edit}" method="post" th:object="${updateUserForm}">
-                <div style="display:flex;flex-direction:column;gap:16px;">
-                    <div th:replace="~{fragments/user-update-form :: metaFields}"></div>
 
+        <!-- PATIENT PROFILE EDIT - Self-update form, current user is resolved in controller -->
+        <form th:action="@{/patient/profile/edit}" method="post" th:object="${updateUserForm}"  enctype="multipart/form-data">
+            <div style="display:flex;flex-direction:column;gap:16px;">
+
+                <div th:replace="~{fragments/user-update-form :: metaFields}">
+                </div>
+
+                <div style="display:flex;align-items:center;gap:12px;">
                     <!-- PATIENT PROFILE EDIT - Common fields from users table -->
                     <section class="patient-card">
                         <div class="patient-card-header">
@@ -52,20 +56,56 @@
                         </div>
                     </section>
 
-                    <!-- PATIENT PROFILE EDIT - Actions -->
-                    <div class="profile-form-actions">
-                        <button type="submit" class="btn-primary">
-                            <i class="bi bi-check-lg"></i> Lưu thay đổi
-                        </button>
-                        <a th:href="@{/patient/profile}" class="btn-secondary">
-                            <i class="bi bi-x"></i> Hủy
-                        </a>
-                    </div>
-                </div>
-            </form>
+                    <!-- Patient UPDATE - Avatar upload placeholder -->
+                    <section class="patient-avatar">
+                        <div class="patient-card-header">Ảnh đại diện</div>
+                        <div class="patient-photo-preview" id="patient-photo-preview">
+                            <img th:if="${updateUserForm.avatar != null and updateUserForm.avatar != ''}"
+                                 th:src="${updateUserForm.avatar}"
+                                 alt="Avatar"/>
 
-        </main>
-    </div>
+                            <i th:unless="${updateUserForm.avatar != null and updateUserForm.avatar != ''}"
+                               class="bi bi-person"></i>
+                        </div>
+                        <input id="PatientAvatarFile" class="patient-file-input" type="file" name="avatarFile"
+                               accept="image/*">
+                        <label for="PatientAvatarFile" class="patient-upload-button">Tải ảnh lên</label>
+
+                        <!-- PATIENT PROFILE EDIT - Actions -->
+                        <div class="profile-form-actions">
+                            <button type="submit" class="btn-primary">
+                                <i class="bi bi-check-lg"></i> Lưu thay đổi
+                            </button>
+                            <a th:href="@{/patient/profile}" class="btn-secondary">
+                                <i class="bi bi-x"></i> Hủy
+                            </a>
+                        </div>
+                    </section>
+
+                </div>
+
+            </div>
+        </form>
+
+    </main>
+</div>
+<script th:inline="javascript">
+    const patientImageBlock = document.getElementById("patient-photo-preview");
+    const patientAvatar = document.getElementById("PatientAvatarFile");
+
+    patientAvatar.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const url = URL.createObjectURL(file);
+            patientImageBlock.innerHTML = "";
+            const newAvatar = document.createElement("img");
+            newAvatar.src = url;
+            newAvatar.alt = "Avatar";
+            patientImageBlock.appendChild(newAvatar);
+        }
+
+    })
+</script>
 </body>
 
 </html>

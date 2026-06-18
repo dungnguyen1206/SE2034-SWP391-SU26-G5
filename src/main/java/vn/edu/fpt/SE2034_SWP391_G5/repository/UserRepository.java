@@ -35,6 +35,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
                         "   r.name," +
                         "   u.status," +
                         "  CONCAT(cb.firstName, ' ', COALESCE(cb.middleName, ''), ' ', cb.lastName)," +
+                        "   u.avatar," +
                         "   u.createdAt," +
                         "   u.updatedAt)" +
                         " FROM User u" +
@@ -86,6 +87,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
                         " r.name," +
                         " u.status," +
                         " concat(cb.firstName, ' '  , COALESCE(cb.middleName,' ') ,' ',cb.lastName)," +
+                        " u.avatar,      " +
                         " u.createdAt," +
                         " u.updatedAt)" +
                         " From User u " +

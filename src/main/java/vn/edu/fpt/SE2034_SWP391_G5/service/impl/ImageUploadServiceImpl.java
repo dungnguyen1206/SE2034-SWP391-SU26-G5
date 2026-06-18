@@ -21,9 +21,10 @@ public class ImageUploadServiceImpl implements ImageUploadService {
 
         try {
             Map<String, Object> result = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+            
             return result.get("secure_url").toString();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage());
         }
 
     }

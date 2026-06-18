@@ -48,21 +48,6 @@
 
             <!-- STAFF UPDATE - Staff role display only, role is managed by Admin flow -->
             <section class="staff-form-card staff-type-section">
-<!--                <div class="staff-form-section-title">Loại nhân viên</div>-->
-
-<!--                <div class="staff-type-options">-->
-<!--                    <div class="staff-type-option doctor"-->
-<!--                         th:classappend="${updateUserForm.profileType == 'DOCTOR'} ? 'selected'">-->
-<!--                        <i class="bi bi-shield-plus"></i>-->
-<!--                        <strong>Bác sĩ</strong>-->
-<!--                    </div>-->
-
-<!--                    <div class="staff-type-option receptionist"-->
-<!--                         th:classappend="${updateUserForm.profileType == 'RECEPTIONIST'} ? 'selected'">-->
-<!--                        <i class="bi bi-person"></i>-->
-<!--                        <strong>Lễ tân</strong>-->
-<!--                    </div>-->
-<!--                </div>-->
 
                 <div class="staff-role-note">
                     <i class="bi bi-lock"></i>
@@ -142,8 +127,13 @@
                     <!-- STAFF UPDATE - Avatar upload placeholder -->
                     <section class="staff-form-card">
                         <div class="staff-form-side-title">Ảnh đại diện</div>
-                        <div class="staff-photo-preview">
-                            <i class="bi bi-person"></i>
+                        <div class="staff-photo-preview" id="staff-photo-preview">
+                            <img th:if="${updateUserForm.avatar != null and updateUserForm.avatar != ''}"
+                                 th:src="${updateUserForm.avatar}"
+                                 alt="Avatar"/>
+
+                            <i th:unless="${updateUserForm.avatar != null and updateUserForm.avatar != ''}"
+                               class="bi bi-person"></i>
                         </div>
                         <input id="staffAvatarFile" class="staff-file-input" type="file" name="avatarFile" accept="image/*">
                         <label for="staffAvatarFile" class="staff-upload-button">Tải ảnh lên</label>
@@ -172,5 +162,25 @@
         </form>
     </main>
 </div>
+    <script th:inline="javascript">
+            const staffPhotoPreview = document.getElementById('staff-photo-preview');
+            const staffAvatar = document.getElementById("staffAvatarFile");
+
+            staffAvatar.addEventListener("change", (e) => {
+
+                const file = e.target.files[0];
+                if (file) {
+                    const url = URL.createObjectURL(file);
+                    staffPhotoPreview.innerHTML = "";
+
+                    const newImg = document.createElement("img");
+                    newImg.src = url;
+                    newImg.alt = "Avatar";
+                    staffPhotoPreview.appendChild(newImg);
+                }
+
+            })
+
+    </script>
 </body>
 </html>

@@ -6,14 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.RegisterPatientRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AuthService;
 
 @Controller
+@RequestMapping("")
 public class AuthController {
 
     @Autowired

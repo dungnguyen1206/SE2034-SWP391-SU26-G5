@@ -49,7 +49,12 @@
             <div class="doctor-box">
                 <div class="doctor-info-box">
                     <div class="doctor-avatar">
-                        <i class="fa-regular fa-user"></i>
+                        <img th:if="${doctorAvatar != null and doctorAvatar != ''}"
+                             th:src="${#strings.replace(doctorAvatar, '/upload/', '/upload/w_150,h_150,c_fill,g_face,q_auto,f_auto/')}"
+                             alt="Avatar"/>
+
+                        <i th:unless="${doctorAvatar != null and doctorAvatar != ''}"
+                           class="bi bi-person"></i>
                     </div>
                     <div>
                         <h4 th:text="${doctorName}"></h4>
