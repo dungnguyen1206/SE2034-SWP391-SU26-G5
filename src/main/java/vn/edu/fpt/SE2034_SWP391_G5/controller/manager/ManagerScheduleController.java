@@ -5,6 +5,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateDoctorScheduleRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorScheduleResponse;
@@ -64,11 +65,12 @@ public class ManagerScheduleController {
 
     @PostMapping("/create")
     public String createSchedule(@ModelAttribute CreateDoctorScheduleRequest createDoctorScheduleRequest,
-                                 @RequestParam("weekScheduleId") Long weekScheduleId ) {
+                                 @RequestParam("weekScheduleId") Long weekScheduleId, RedirectAttributes redirectAttributes ) {
         CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         User user = userDetails.getUser();
         DoctorScheduleResponse doctorScheduleResponse = scheduleService.createDoctorSchedule(createDoctorScheduleRequest,user.getId(), weekScheduleId);
-
+        redirectAttributes.addFlashAttribute("doctorScheduleResponse", doctorScheduleResponse);
+        redirectAttributes.addFlashAttribute("successMessage","Tạo ca làm việc thành công");
         return "redirect:/manager/schedules/list";
 
 

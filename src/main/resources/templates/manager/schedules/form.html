@@ -90,6 +90,13 @@
                 <i class="bi bi-exclamation-circle"></i>
                 <span id="errorMessage" th:text="${errorMessage}"></span>
             </div>
+
+            <div class="schedule-success"
+                 id="successBox"
+                 th:style="${doctorScheduleResponse != null} ? 'display:block' : 'display:none'">
+                <i class="bi bi-exclamation-circle"></i>
+                <span id="successMessage" th:text="${successMessage}"></span>
+            </div>
         </div>
 
         <!--CREATE SHIFT - ACTIONS-->
@@ -156,13 +163,16 @@
 
         })
 
+        //display notification
         const  hasError = /*[[${errorMessage !=null }]]*/ false;
-        if(hasError){
+        const success = /*[[${successMessage !=null}]]*/ false;
+        if(hasError || success){
             const toggleCheckbox = document.getElementById('createShiftToggle');
             if(toggleCheckbox){
                 toggleCheckbox.checked = true;
             }
         }
+
 
         // Progressive Disclosure
 
@@ -228,6 +238,7 @@
             const roomSelect = document.getElementById('roomSelect').disabled= true;
              document.getElementById('doctorSuggestions').innerHTML = '';
              document.getElementById('conflictBox').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
             createForm.reset();
         }
 

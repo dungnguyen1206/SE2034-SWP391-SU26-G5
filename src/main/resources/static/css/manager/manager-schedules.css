@@ -5,7 +5,7 @@
     --color-success-light: #F0FDF4;
     --color-warning: #D97706;
     --color-warning-light: #FFFBEB;
-    --color-danger: #DC2626;
+    --color-danger: #ff002f;
     --color-danger-light: #FEF2F2;
     --color-text-primary: #111827;
     --color-text-muted: #6B7280;
@@ -697,6 +697,21 @@
     border-radius: 10px;
     background: var(--color-danger-light);
     color: var(--color-danger);
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+.schedule-success{
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 4px;
+    padding: 12px;
+    border: 1px solid #c4f48e;
+    border-radius: 10px;
+    background: var(--color-success-light);
+    color: var(--color-success);
     font-size: 13px;
     font-weight: 700;
     line-height: 1.4;
