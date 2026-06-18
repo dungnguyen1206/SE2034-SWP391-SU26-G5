@@ -20,7 +20,7 @@ public class ImageUploadServiceImpl implements ImageUploadService {
     public String uploadImage(MultipartFile file) {
 
         try {
-            Map<String, Object> result = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+            Map<String, Object> result = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap());
             
             return result.get("secure_url").toString();
         } catch (IOException e) {
