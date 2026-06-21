@@ -6,10 +6,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.UpdateProfileRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.UpdateUserRequest;
@@ -17,6 +15,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.dto.response.PatientResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Province;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.ProvinceRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
+import vn.edu.fpt.SE2034_SWP391_G5.service.ImageUploadService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.PatientService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.StaffService;
 
@@ -30,6 +29,7 @@ public class PatientProfileController {
     private final PatientService patientService;
     private final StaffService staffService;
     private final ProvinceRepository provinceRepository;
+    private final ImageUploadService imageUploadService;
 
     @GetMapping
     public String viewProfile(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
@@ -52,7 +52,7 @@ public class PatientProfileController {
                                 BindingResult bindingResult,
                                 @AuthenticationPrincipal CustomUserDetails userDetails,
                                 RedirectAttributes redirectAttributes,
-                                Model model) {
+                                Model model,  @RequestParam("avatarFile") MultipartFile avatarFile) {
         Long patientId = userDetails.getUser().getId();
         updateUserForm.setProfileType("PATIENT");
         updateUserForm.setStaffRole("PATIENT");
@@ -63,6 +63,8 @@ public class PatientProfileController {
         }
 
         try {
+            String avatar = imageUploadService.uploadImage(avatarFile);
+            updateUserForm.setAvatar(avatar);
             patientService.updateProfile(patientId,updateUserForm);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật hồ sơ thành công");
             return "redirect:/patient/profile";

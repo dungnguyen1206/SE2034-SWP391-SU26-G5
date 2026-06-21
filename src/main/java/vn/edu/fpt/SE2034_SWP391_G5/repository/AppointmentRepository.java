@@ -217,5 +217,21 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     long countByDoctorIdAndStatus(Long doctorId, String status);
 
     long countByDoctorIdAndStatusIn(Long doctorId, List<String> statuses);
+
+    Page<Appointment> findByDoctorIdAndBookingDateAndStatusIn(Long doctorId, LocalDate bookingDate, List<String> statuses, Pageable pageable);
+
+    long countByDoctorIdAndBookingDateAndStatus(Long doctorId, LocalDate bookingDate, String status);
+
+    long countByDoctorIdAndBookingDateAndStatusIn(Long doctorId, LocalDate bookingDate, List<String> statuses);
+
+    @Query("SELECT a FROM Appointment a " +
+           "LEFT JOIN FETCH a.patient " +
+           "LEFT JOIN FETCH a.slot sl " +
+           "WHERE a.doctor.id = :doctorId AND a.status = :status " +
+           "ORDER BY a.bookingDate DESC, a.id DESC")
+    List<Appointment> findRecentCompletedAppointments(@Param("doctorId") Long doctorId,
+                                                      @Param("status") String status,
+                                                      Pageable pageable);
 }
 
+    

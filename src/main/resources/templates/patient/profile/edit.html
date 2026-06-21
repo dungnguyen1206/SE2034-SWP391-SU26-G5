@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <title>Chỉnh sửa hồ sơ</title>
@@ -7,6 +8,7 @@
     <link rel="stylesheet" th:href="@{/css/patient/patient-profile.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
+
 <body>
 <div class="patient-layout">
     <div th:replace="~{patient/fragments/sidebar :: patientSidebar('profile')}"></div>
@@ -33,36 +35,77 @@
             </div>
         </div>
 
+
         <!-- PATIENT PROFILE EDIT - Self-update form, current user is resolved in controller -->
-        <form th:action="@{/patient/profile/edit}" method="post" th:object="${updateUserForm}">
+        <form th:action="@{/patient/profile/edit}" method="post" th:object="${updateUserForm}"  enctype="multipart/form-data">
             <div style="display:flex;flex-direction:column;gap:16px;">
-                <div th:replace="~{fragments/user-update-form :: metaFields}"></div>
 
-                <!-- PATIENT PROFILE EDIT - Common fields from users table -->
-                <section class="patient-card">
-                    <div class="patient-card-header">
-                        <i class="bi bi-person"></i>
-                        <h3>Thông tin cá nhân</h3>
-                    </div>
-                    <div class="profile-form-grid">
-                        <div th:replace="~{fragments/user-update-form :: commonFields('PATIENT')}"></div>
-                        <div th:replace="~{fragments/user-update-form :: patientFields}"></div>
-                    </div>
-                </section>
-
-                <!-- PATIENT PROFILE EDIT - Actions -->
-                <div class="profile-form-actions">
-                    <button type="submit" class="btn-primary">
-                        <i class="bi bi-check-lg"></i> Lưu thay đổi
-                    </button>
-                    <a th:href="@{/patient/profile}" class="btn-secondary">
-                        <i class="bi bi-x"></i> Hủy
-                    </a>
+                <div th:replace="~{fragments/user-update-form :: metaFields}">
                 </div>
+
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <!-- PATIENT PROFILE EDIT - Common fields from users table -->
+                    <section class="patient-card">
+                        <div class="patient-card-header">
+                            <i class="bi bi-person"></i>
+                            <h3>Thông tin cá nhân</h3>
+                        </div>
+                        <div class="profile-form-grid">
+                            <div th:replace="~{fragments/user-update-form :: commonFields('PATIENT')}"></div>
+                            <div th:replace="~{fragments/user-update-form :: patientFields}"></div>
+                        </div>
+                    </section>
+
+                    <!-- Patient UPDATE - Avatar upload placeholder -->
+                    <section class="patient-avatar">
+                        <div class="patient-card-header">Ảnh đại diện</div>
+                        <div class="patient-photo-preview" id="patient-photo-preview">
+                            <img th:if="${updateUserForm.avatar != null and updateUserForm.avatar != ''}"
+                                 th:src="${updateUserForm.avatar}"
+                                 alt="Avatar"/>
+
+                            <i th:unless="${updateUserForm.avatar != null and updateUserForm.avatar != ''}"
+                               class="bi bi-person"></i>
+                        </div>
+                        <input id="PatientAvatarFile" class="patient-file-input" type="file" name="avatarFile"
+                               accept="image/*">
+                        <label for="PatientAvatarFile" class="patient-upload-button">Tải ảnh lên</label>
+
+                        <!-- PATIENT PROFILE EDIT - Actions -->
+                        <div class="profile-form-actions">
+                            <button type="submit" class="btn-primary">
+                                <i class="bi bi-check-lg"></i> Lưu thay đổi
+                            </button>
+                            <a th:href="@{/patient/profile}" class="btn-secondary">
+                                <i class="bi bi-x"></i> Hủy
+                            </a>
+                        </div>
+                    </section>
+
+                </div>
+
             </div>
         </form>
 
     </main>
 </div>
+<script th:inline="javascript">
+    const patientImageBlock = document.getElementById("patient-photo-preview");
+    const patientAvatar = document.getElementById("PatientAvatarFile");
+
+    patientAvatar.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const url = URL.createObjectURL(file);
+            patientImageBlock.innerHTML = "";
+            const newAvatar = document.createElement("img");
+            newAvatar.src = url;
+            newAvatar.alt = "Avatar";
+            patientImageBlock.appendChild(newAvatar);
+        }
+
+    })
+</script>
 </body>
+
 </html>

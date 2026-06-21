@@ -236,6 +236,13 @@
     font-size: 13px;
     font-weight: 700;
     flex-shrink: 0;
+    overflow: hidden;
+
+}
+.staff-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .staff-type-badge {
@@ -248,7 +255,6 @@
 }
 
 .staff-type-badge.doctor {
-
     color: #008236;
 }
 
@@ -583,7 +589,7 @@ Staff form success
 */
 .staff-form-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     gap: 16px;
 }
 
@@ -709,8 +715,8 @@ Staff form success
 }
 
 .staff-photo-preview {
-    width: 80px;
-    height: 80px;
+    width: 120px;
+    height: 120px   ;
     border-radius: 50%;
     margin: 4px auto 14px;
     display: flex;
@@ -720,9 +726,14 @@ Staff form success
     color: #ffffff;
     font-size: 24px;
     font-weight: 700;
+    overflow: hidden;
+}
+.staff-photo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.staff-upload-button,
 .staff-save-button,
 .staff-cancel-button {
     width: 100%;
@@ -733,7 +744,9 @@ Staff form success
 }
 
 .staff-upload-button {
-    border: 1px dashed #cbd5e1;
+    margin: 16px;
+    padding: 8px ;
+    border: 1px solid #c3c2c2;
     background: #ffffff;
     color: #64748b;
     display: flex;
@@ -871,15 +884,17 @@ Staff form success
 */
 .staff-detail-summary {
     display: grid;
-    grid-template-columns: auto minmax(220px, 1fr) minmax(360px, 2fr);
+    grid-template-columns: auto minmax(220px,1fr);
     gap: 22px;
     align-items: center;
     margin-bottom: 20px;
+    width: 100%;
+
 }
 
 .staff-detail-avatar {
-    width: 72px;
-    height: 72px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     background: #86a7ff;
     color: #ffffff;
@@ -888,6 +903,12 @@ Staff form success
     justify-content: center;
     font-size: 24px;
     font-weight: 700;
+    overflow: hidden;
+}
+.staff-detail-avatar img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .staff-detail-summary-main h3 {
@@ -935,16 +956,20 @@ Staff form success
 */
 .staff-detail-layout {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 360px;
+    grid-template-columns: auto minmax(0, 2fr);
     gap: 20px;
     align-items: start;
+    width: 100%;
 }
 
-.staff-detail-main,
-.staff-detail-side {
-    display: flex;
-    flex-direction: column;
+.staff-detail-side{
+    display: grid;
+}
+.staff-detail-main{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 20px;
+
 }
 
 .staff-detail-info-list {
@@ -955,9 +980,9 @@ Staff form success
 .staff-detail-info-list div {
     display: flex;
     justify-content: space-between;
-    gap: 16px;
     padding: 12px 0;
     border-bottom: 1px solid #eef2f7;
+    width: 100%;
 }
 
 .staff-detail-info-list div:last-child {

@@ -220,6 +220,8 @@ public class StaffServiceImpl implements StaffService {
             staff.setDepartment(department);
             staff.setDegree(request.getDegree());
             staff.setExperienceYears(request.getExperienceYears());
+            staff.setLicenseNumber(request.getLicenseNumber());
+            staff.setCreatedBy(request.getCreatedBy());
             if (!staff.getLicenseNumber().equalsIgnoreCase(request.getLicenseNumber()) && userRepository.existsByLicenseNumber(request.getLicenseNumber())) {
                 throw new BadRequestException("Mã giấy phép đã tồn tại");
             }

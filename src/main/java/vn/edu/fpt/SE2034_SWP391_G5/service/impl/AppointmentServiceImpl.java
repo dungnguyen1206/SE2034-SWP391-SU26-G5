@@ -547,6 +547,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                     a.getDoctor().getMiddleName(),
                     a.getDoctor().getFirstName()
             ));
+            response.setId(a.getId());
             response.setServiceName(a.getService().getName());
             response.setSlotStartTime(a.getSlot().getStartTime());
             response.setSlotEndTime(a.getSlot().getEndTime());
@@ -887,7 +888,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public Page<AppointmentResponse> getAppointmentsForDoctor(Long doctorId, String status, Pageable pageable) {
+    public Page<AppointmentResponse> getAppointmentsForDoctor(Long doctorId, LocalDate bookingDate, String status, Pageable pageable) {
         List<String> statuses;
 
         if (status == null || status.trim().isEmpty() || "ALL".equalsIgnoreCase(status)) {
@@ -896,20 +897,21 @@ public class AppointmentServiceImpl implements AppointmentService {
             statuses = List.of(status.toUpperCase());
         }
 
-        return appointmentRepository.findByDoctorIdAndStatusIn(doctorId, statuses, pageable)
+        return appointmentRepository.findByDoctorIdAndBookingDateAndStatusIn(doctorId, bookingDate, statuses, pageable)
                 .map(this::toResponse);
     }
 
     @Override
-    public long countAppointmentsForDoctor(Long doctorId, String status) {
+    public long countAppointmentsForDoctor(Long doctorId, LocalDate bookingDate, String status) {
         if (status == null || status.trim().isEmpty() || "ALL".equalsIgnoreCase(status)) {
-            return appointmentRepository.countByDoctorIdAndStatusIn(
+            return appointmentRepository.countByDoctorIdAndBookingDateAndStatusIn(
                     doctorId,
+                    bookingDate,
                     List.of("WAITING", "IN_PROGRESS", "COMPLETED")
             );
         }
 
-        return appointmentRepository.countByDoctorIdAndStatus(doctorId, status.toUpperCase());
+        return appointmentRepository.countByDoctorIdAndBookingDateAndStatus(doctorId, bookingDate, status.toUpperCase());
     }
 
     @Override
@@ -924,5 +926,14 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setUpdatedAt(LocalDateTime.now());
 
         appointmentRepository.save(appointment);
+    }
+
+    @Override
+    public List<AppointmentResponse> getRecentCompletedAppointmentsForDoctor(Long doctorId, int limit) {
+        Pageable pageable = PageRequest.of(0, limit);
+        return appointmentRepository.findRecentCompletedAppointments(doctorId, "COMPLETED", pageable)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 }
