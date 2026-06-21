@@ -18,10 +18,6 @@ public class AppointmentResponse {
     private LocalTime slotStartTime;
     private LocalTime slotEndTime;
     private String roomNumber;
-    private String patientFullName;
-    private String patientPhone;
-    private String patientAddress;
-    private String doctorFullName;
     private String departmentName;
     private LocalDate bookingDate;
     private String status;
@@ -29,12 +25,16 @@ public class AppointmentResponse {
 
     // Patient info
     private Long patientId;
+    private String patientFullName;
+    private String patientPhone;
+    private String patientAddress;
     private Integer patientAge;
     private String patientGender;
     private String patientInitials;
 
     // Doctor info
     private Long doctorId;
+    private String doctorFullName;
     private String doctorDegree;
 
     // Service info
@@ -53,17 +53,13 @@ public class AppointmentResponse {
         if (slotStartTime == null || slotEndTime == null) {
             return "";
         }
-
-        return slotStartTime.toString().substring(0, 5)
-                + " - "
-                + slotEndTime.toString().substring(0, 5);
+        return slotStartTime.toString().substring(0, 5) + " - " + slotEndTime.toString().substring(0, 5);
     }
 
     public String getRoomText() {
         if (roomNumber == null) {
             return "";
         }
-
         return roomNumber;
     }
 
@@ -71,7 +67,6 @@ public class AppointmentResponse {
         if (status == null) {
             return "";
         }
-
         return switch (status) {
             case "CONFIRMED" -> "Đã xác nhận";
             case "WAITING" -> "Chờ khám";
@@ -87,7 +82,6 @@ public class AppointmentResponse {
         if (status == null) {
             return "status-default";
         }
-
         return switch (status) {
             case "CONFIRMED" -> "status-confirmed";
             case "WAITING" -> "status-waiting";

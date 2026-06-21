@@ -7,6 +7,7 @@
         <link rel="stylesheet" th:href="@{/css/receptionist/common/sidebar.css}">
         <link rel="stylesheet" th:href="@{/css/receptionist/common/header.css}">
         <link rel="stylesheet" th:href="@{/css/receptionist/appointment/detail.css}">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     </head>
 
     <body>
@@ -51,7 +52,8 @@
 
                             <div>
                                 <span>Trạng thái</span>
-                                <strong class="status-badge" th:classappend="${appointment.statusClass}" th:text="${appointment.statusLabel}">
+                                <strong class="status-badge" th:classappend="${appointment.statusClass}"
+                                        th:text="${appointment.statusLabel}">
                                 </strong>
                             </div>
                         </div>
