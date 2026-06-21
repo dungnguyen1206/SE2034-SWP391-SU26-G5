@@ -16,16 +16,16 @@ public class ReceptionistPasswordResetSeeder {
             PasswordEncoder passwordEncoder
     ) {
         return args -> {
-            User receptionist = userRepository.findByEmail("recept.linh@hams.vn")
-                    .orElseThrow(() -> new RuntimeException("Receptionist not found"));
-
-            receptionist.setPasswordHash(passwordEncoder.encode("123456"));
-            receptionist.setStatus("ACTIVE");
-            receptionist.setEmailVerified(true);
-
-            userRepository.save(receptionist);
-
-            System.out.println("Receptionist password reset successfully");
+            userRepository.findByEmail("recept.linh@hams.vn").ifPresentOrElse(
+                receptionist -> {
+                    receptionist.setPasswordHash(passwordEncoder.encode("123456"));
+                    receptionist.setStatus("ACTIVE");
+                    receptionist.setEmailVerified(true);
+                    userRepository.save(receptionist);
+                    System.out.println("Receptionist password reset successfully");
+                },
+                () -> System.out.println("Receptionist recept.linh@hams.vn not found, skipping password reset")
+            );
         };
     }
 }
