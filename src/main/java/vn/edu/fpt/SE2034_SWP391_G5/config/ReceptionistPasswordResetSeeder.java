@@ -13,19 +13,17 @@ public class ReceptionistPasswordResetSeeder {
     @Bean
     CommandLineRunner resetReceptionistPassword(
             UserRepository userRepository,
-            PasswordEncoder passwordEncoder
-    ) {
+            PasswordEncoder passwordEncoder) {
         return args -> {
             userRepository.findByEmail("recept.linh@hams.vn").ifPresentOrElse(
-                receptionist -> {
-                    receptionist.setPasswordHash(passwordEncoder.encode("123456"));
-                    receptionist.setStatus("ACTIVE");
-                    receptionist.setEmailVerified(true);
-                    userRepository.save(receptionist);
-                    System.out.println("Receptionist password reset successfully");
-                },
-                () -> System.out.println("Receptionist recept.linh@hams.vn not found, skipping password reset")
-            );
+                    receptionist -> {
+                        receptionist.setPasswordHash(passwordEncoder.encode("123456"));
+                        receptionist.setStatus("ACTIVE");
+                        receptionist.setEmailVerified(true);
+                        userRepository.save(receptionist);
+                        System.out.println("Receptionist password reset successfully");
+                    },
+                    () -> System.out.println("Receptionist recept.linh@hams.vn not found, skipping password reset"));
         };
     }
 }

@@ -54,8 +54,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
 
     // Lấy danh sách lịch hẹn hôm nay trên Dashboard.
-// Có hỗ trợ tìm kiếm theo họ, tên đệm, tên hoặc số điện thoại bệnh nhân.
-// Chỉ query lịch hẹn của ngày hiện tại, không lấy toàn bộ danh sách.
+    // Có hỗ trợ tìm kiếm theo họ, tên đệm, tên hoặc số điện thoại bệnh nhân.
+    // Chỉ query lịch hẹn của ngày hiện tại, không lấy toàn bộ danh sách.
     @Query("SELECT a FROM Appointment a " +
             "JOIN FETCH a.patient p " +
             "JOIN FETCH a.doctor d " +
@@ -176,9 +176,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("roomId") Integer roomId
     );
 
-    @Query("SELECT a FROM Appointment a " +
+    @Query("SELECT DISTINCT a FROM Appointment a " +
             "LEFT JOIN FETCH a.patient p " +
-            "LEFT JOIN FETCH p.addresses " +
+            "LEFT JOIN FETCH p.addresses addr " +
+            "LEFT JOIN FETCH addr.province " +
             "LEFT JOIN FETCH a.doctor " +
             "LEFT JOIN FETCH a.service sv " +
             "LEFT JOIN FETCH sv.department " +
@@ -225,10 +226,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     long countByDoctorIdAndBookingDateAndStatusIn(Long doctorId, LocalDate bookingDate, List<String> statuses);
 
     @Query("SELECT a FROM Appointment a " +
-           "LEFT JOIN FETCH a.patient " +
-           "LEFT JOIN FETCH a.slot sl " +
-           "WHERE a.doctor.id = :doctorId AND a.status = :status " +
-           "ORDER BY a.bookingDate DESC, a.id DESC")
+            "LEFT JOIN FETCH a.patient " +
+            "LEFT JOIN FETCH a.slot sl " +
+            "WHERE a.doctor.id = :doctorId AND a.status = :status " +
+            "ORDER BY a.bookingDate DESC, a.id DESC")
     List<Appointment> findRecentCompletedAppointments(@Param("doctorId") Long doctorId,
                                                       @Param("status") String status,
                                                       Pageable pageable);

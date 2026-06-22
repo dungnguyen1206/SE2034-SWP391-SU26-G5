@@ -100,20 +100,12 @@
 
                                 <div class="info-row">
                                     <span>Ca khám:</span>
-                                    <strong th:text="${appointment.shift != null ? appointment.shift : '-'}"></strong>
+                                    <strong th:text="${appointment.shiftLabel != null ? appointment.shiftLabel : '-'}"></strong>
                                 </div>
 
                                 <div class="info-row">
                                     <span>Phòng khám:</span>
                                     <strong th:text="${appointment.roomNumber != null ? appointment.roomNumber : '-'}"></strong>
-                                </div>
-
-                                <div class="info-row">
-                                    <span>Thời gian tạo:</span>
-                                    <strong th:if="${appointment.createdAt != null}"
-                                            th:text="${#temporals.format(appointment.createdAt, 'dd/MM/yyyy HH:mm')}">
-                                    </strong>
-                                    <strong th:if="${appointment.createdAt == null}">-</strong>
                                 </div>
                             </div>
                         </div>

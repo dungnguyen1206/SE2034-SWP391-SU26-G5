@@ -92,4 +92,13 @@ public class AppointmentResponse {
             default -> "status-default";
         };
     }
+
+    public String getShiftLabel() {
+        if ("MORNING".equalsIgnoreCase(shift)) {
+            return "Ca sáng";
+        } else if ("AFTERNOON".equalsIgnoreCase(shift)) {
+            return "Ca chiều";
+        }
+        return shift;
+    }
 }
