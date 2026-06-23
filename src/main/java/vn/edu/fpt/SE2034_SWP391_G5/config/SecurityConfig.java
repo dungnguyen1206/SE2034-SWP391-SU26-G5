@@ -47,12 +47,15 @@ public class SecurityConfig {
                     "/register", "/verify-otp",
                     "/login",
                     "/forgot-password", "/reset-password",
-                    "/css/**", "/js/**", "/images/**"
+                    "/css/**", "/js/**", "/images/**",
+                    // Xem danh sách + chi tiết chuyên khoa — public
+                    "/patient/departments", "/patient/departments/**"
                 ).permitAll()
                 .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/manager/**").hasAuthority("ROLE_MANAGER")
                 .requestMatchers("/doctor/**").hasAuthority("ROLE_DOCTOR")
                 .requestMatchers("/receptionist/**").hasAuthority("ROLE_RECEPTIONIST")
+                // Đặt lịch và các tính năng cá nhân vẫn yêu cầu login
                 .requestMatchers("/patient/**").hasAuthority("ROLE_PATIENT")
                 .anyRequest().authenticated()
             )

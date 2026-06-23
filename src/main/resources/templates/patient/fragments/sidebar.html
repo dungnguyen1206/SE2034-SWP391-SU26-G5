@@ -81,20 +81,16 @@
         </nav>
 
         <div class="patient-sidebar-footer">
-            <!-- Lấy chữ cái đầu từ tên hiển thị trong session -->
             <div class="patient-user-avatar">
-                <!-- Cũ: hardcode "P" -->
-                <!-- <div class="patient-user-avatar">P</div> -->
-                <span sec:authentication="principal.username"
-                    th:text="${#strings.substring(#authentication.principal.username, 0, 1).toUpperCase()}">P</span>
+                <!-- Chỉ lấy chữ cái đầu khi đã đăng nhập, tránh lỗi AnonymousAuthenticationToken -->
+                <span sec:authorize="isAuthenticated()"
+                      th:text="${#strings.substring(#authentication.principal.username, 0, 1).toUpperCase()}">P</span>
+                <span sec:authorize="!isAuthenticated()">?</span>
             </div>
             <div class="patient-user-info">
-                <!-- Cũ: dùng ${profile.fullName} và ${profile.username} từ model -->
-                <!-- <strong th:text="${profile != null} ? ${profile.fullName} : 'Bệnh nhân'">Bệnh nhân</strong> -->
-                <!-- <span th:text="${profile != null} ? ${profile.username} : 'patient'">patient</span> -->
-                <strong th:text="${profile != null} ? ${profile.fullName} : 'Bệnh nhân'"
-                    sec:authentication="principal.username">Bệnh nhân</strong>
-                <span sec:authentication="principal.username">email</span>
+                <strong th:text="${profile != null} ? ${profile.fullName} : 'Bệnh nhân'">Bệnh nhân</strong>
+                <span sec:authorize="isAuthenticated()" sec:authentication="principal.username">username</span>
+                <span sec:authorize="!isAuthenticated()">Khách</span>
             </div>
             <div class="patient-logout-link">
                 <form th:action="@{/logout}" method="post" style="margin:0">
