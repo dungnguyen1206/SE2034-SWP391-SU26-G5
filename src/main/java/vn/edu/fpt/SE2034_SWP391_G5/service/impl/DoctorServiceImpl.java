@@ -52,10 +52,11 @@ public class DoctorServiceImpl implements DoctorService {
         return doctorResponses;
     }
 
-    private DoctorResponse toResponse(User u) {
+    @Override
+    public  DoctorResponse toResponse(User u) {
         return DoctorResponse.builder()
                 .id(u.getId())
-                .fullName(buildFullName(u.getLastName(), u.getMiddleName(), u.getFirstName()))
+                .fullName(buildFullName(u.getFirstName(), u.getMiddleName(), u.getLastName()))
                 .firstName(u.getFirstName())
                 .middleName(u.getMiddleName())
                 .lastName(u.getLastName())
@@ -70,7 +71,8 @@ public class DoctorServiceImpl implements DoctorService {
                 .build();
     }
 
-    private String buildFullName(String lastName, String middleName, String firstName) {
+    @Override
+    public String buildFullName(String lastName, String middleName, String firstName) {
         StringBuilder sb = new StringBuilder();
         if (lastName != null) sb.append(lastName).append(" ");
         if (middleName != null) sb.append(middleName).append(" ");

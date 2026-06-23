@@ -1,8 +1,11 @@
 package vn.edu.fpt.SE2034_SWP391_G5.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Repository;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.DoctorSchedule;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Room;
@@ -42,12 +45,10 @@ public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, 
 
     @Query("SELECT COUNT(sd) > 0 FROM DoctorSchedule sd " +
             "WHERE sd.doctor = :doctor " +
-            "AND sd.workDate = :workDate " +
-            "AND sd.shift IN :shifts")
-    boolean existsByDoctorAndWorkDateAndShiftIn(
+            "AND sd.workDate = :workDate ")
+    boolean existsByDoctorAndWorkDate(
             @Param("doctor") User doctor,
-            @Param("workDate") LocalDate workDate,
-            @Param("shifts") List<String> shifts
+            @Param("workDate") LocalDate workDate
     );
 
 
@@ -60,4 +61,37 @@ public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, 
       @Param("workDate") LocalDate workDate,
       @Param("shifts")  List<String> shifts
     );
+
+
+    @Query("Select distinct ds from DoctorSchedule ds " +
+            " left join fetch ds.doctor d " +
+            " left join ds.weekSchedule ws " +
+            " left join fetch ds.room r" +
+            " left join fetch ds.timeSlots ts" +
+            " where d.id IN :doctorId and ws.id=:weekScheduleId")
+    List<DoctorSchedule> getAllDoctorScheduleByWeekSchedule(@Param("doctorId") List<Long> doctorIds,
+                                                            @Param("weekScheduleId") Long weekScheduleId);
+
+
+    @Query("SELECT distinct u FROM User u " +
+            " LEFT JOIN u.department d " +
+            " LEFT JOIN u.userRoles ur" +
+            " WHERE ur.role.name=:role" +
+            " AND(:departmentId is null or d.id=:departmentId)" +
+            " AND(:doctorName is null or (" +
+            " lower(concat( u.firstName,' ',COALESCE(u.middleName,''),' ', u.lastName)) Like lower(concat('%',:doctorName,'%') ) ) )" +
+            " AND(:shift is null or exists (" +
+            "       SELECT 1 from DoctorSchedule ds" +
+            "       WHERE  ds.doctor.id=u.id " +
+            "       AND ds.weekSchedule.id=:weekScheduleId" +
+            "       AND (:shift = 'ALL' " +
+            "            OR ds.shift=:shift" +
+            "            OR (:shift IN ('MORNING','AFTERNOON')" +
+            "            AND ds.shift = 'FULL_DAY' ) )))")
+    Page<User> getDoctorScheduleByFilter(@Param("role") String role,
+                                                   @Param("departmentId") Integer departmentId,
+                                                   @Param("doctorName") String doctorName,
+                                                   @Param("shift") String shift,
+                                                   @Param("weekScheduleId")  Long weekScheduleId,
+                                                   Pageable pageable);
 }
