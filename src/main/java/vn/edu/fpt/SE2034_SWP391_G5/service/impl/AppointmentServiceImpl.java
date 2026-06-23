@@ -2,7 +2,6 @@ package vn.edu.fpt.SE2034_SWP391_G5.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -12,11 +11,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.dto.response.*;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.*;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.AppointmentRepository;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.DoctorScheduleRepository;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalServiceRepository;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.TimeSlotRepository;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRepository;
+import vn.edu.fpt.SE2034_SWP391_G5.repository.*;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
 import vn.edu.fpt.SE2034_SWP391_G5.util.CodeGenerator;
 
@@ -37,13 +32,70 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final MedicalServiceRepository medicalServiceRepository;
 
     @Override
-    public List<AppointmentResponse> getAppointmentListForReceptionist() {
-        return appointmentRepository.findAllForReceptionistList()
-                .stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<AppointmentResponse> getAppointmentListForReceptionist(LocalDate fromDate, LocalDate toDate, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Appointment> appointmentPage = appointmentRepository.findAppointmentListForReceptionistList(fromDate, toDate, pageable);
+        return appointmentPage.map(this::toAppointmentListResponse);
     }
 
+    private AppointmentResponse toAppointmentListResponse(Appointment appointment) {
+        return AppointmentResponse.builder()
+                .id(appointment.getId())
+                .appointmentCode(appointment.getAppointmentCode())
+                .slotStartTime(appointment.getSlot().getStartTime())
+                .slotEndTime(appointment.getSlot().getEndTime())
+                .roomNumber(appointment.getSlot().getSchedule().getRoom().getRoomNumber())
+                .patientFullName(getUserFullName(appointment.getPatient()))
+                .patientPhone(appointment.getPatient().getPhone())
+                .doctorFullName(getUserFullName(appointment.getDoctor()))
+                .departmentName(appointment.getService().getDepartment().getName())
+                .bookingDate(appointment.getBookingDate())
+                .status(appointment.getStatus())
+                .build();
+    }
+
+    private String getUserFullName(User user) {
+        if (user == null) {
+            return "";
+        }
+        String firstName = user.getFirstName() == null ? "" : user.getFirstName();
+        String middleName = user.getMiddleName() == null ? "" : user.getMiddleName();
+        String lastName = user.getLastName() == null ? "" : user.getLastName();
+        return (lastName + " " + middleName + " " + firstName).trim().replaceAll("\\s+", " ");
+    }
+
+    public Page<AppointmentResponse> searchAppointmentListForReceptionist(String search, String status, LocalDate fromDate, LocalDate toDate, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Appointment> appointmentPage = appointmentRepository.searchAppointmentListForReceptionist(search, status, fromDate, toDate, pageable);
+        return appointmentPage.map(this::toAppointmentListResponse);
+    }
+
+    @Override
+    public Map<String, Long> getAppointmentStatusCountsInDateRangeForReceptionist(LocalDate fromDate, LocalDate toDate) {
+        Map<String, Long> statusCounts = new HashMap<>();
+        statusCounts.put("CONFIRMED", appointmentRepository.countConfirmedAppointmentsInDateRange(fromDate, toDate));
+        statusCounts.put("WAITING", appointmentRepository.countWaitingAppointmentsInDateRange(fromDate, toDate));
+        statusCounts.put("EXAMINING", appointmentRepository.countExaminingAppointmentsInDateRange(fromDate, toDate));
+        statusCounts.put("COMPLETED", appointmentRepository.countCompletedAppointmentsInDateRange(fromDate, toDate));
+        statusCounts.put("CANCELLED", appointmentRepository.countCancelledAppointmentsInDateRange(fromDate, toDate));
+        statusCounts.put("NO_SHOW", appointmentRepository.countNoShowAppointmentsInDateRange(fromDate, toDate));
+        return statusCounts;
+    }
+
+    private Map<String, Long> createDefaultAppointmentStatusCounts() {
+        Map<String, Long> statusCounts = new HashMap<>();
+
+        statusCounts.put("CONFIRMED", 0L);
+        statusCounts.put("WAITING", 0L);
+        statusCounts.put("EXAMINING", 0L);
+        statusCounts.put("COMPLETED", 0L);
+        statusCounts.put("CANCELLED", 0L);
+        statusCounts.put("NO_SHOW", 0L);
+
+        return statusCounts;
+    }
+
+    // ---------------------------------------------------------------------------
     @Override
     public long countByStatus(List<AppointmentResponse> appointments, String status) {
         long count = 0;
@@ -203,31 +255,32 @@ public class AppointmentServiceImpl implements AppointmentService {
             int page,
             int size
     ) {
-        List<AppointmentResponse> allAppointments = getAppointmentListForReceptionist();
-
-        List<AppointmentResponse> filteredAppointments =
-                filterAppointmentsBySearchStatusAndDate(
-                        allAppointments,
-                        search,
-                        status,
-                        fromDate,
-                        toDate
-                );
-
-        Pageable pageable = PageRequest.of(page, size);
-
-        int start = (int) pageable.getOffset();
-        int end = Math.min(start + pageable.getPageSize(), filteredAppointments.size());
-
-        List<AppointmentResponse> pageContent;
-
-        if (start >= filteredAppointments.size()) {
-            pageContent = new ArrayList<>();
-        } else {
-            pageContent = filteredAppointments.subList(start, end);
-        }
-
-        return new PageImpl<>(pageContent, pageable, filteredAppointments.size());
+//        List<AppointmentResponse> allAppointments = getAppointmentListForReceptionist();
+//
+//        List<AppointmentResponse> filteredAppointments =
+//                filterAppointmentsBySearchStatusAndDate(
+//                        allAppointments,
+//                        search,
+//                        status,
+//                        fromDate,
+//                        toDate
+//                );
+//
+//        Pageable pageable = PageRequest.of(page, size);
+//
+//        int start = (int) pageable.getOffset();
+//        int end = Math.min(start + pageable.getPageSize(), filteredAppointments.size());
+//
+//        List<AppointmentResponse> pageContent;
+//
+//        if (start >= filteredAppointments.size()) {
+//            pageContent = new ArrayList<>();
+//        } else {
+//            pageContent = filteredAppointments.subList(start, end);
+//        }
+//
+        //  return new PageImpl<>(pageContent, pageable, filteredAppointments.size());
+        return null;
     }
 
     private List<AppointmentResponse> filterAppointmentsBySearchStatusAndDate(List<AppointmentResponse> appointments, String search, String status, LocalDate fromDate, LocalDate toDate) {
@@ -332,7 +385,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private Long calculateOrderInEffectiveSlot(Appointment targetAppointment, List<TimeSlot> slots, TimeSlot effectiveSlot) {
         Integer roomId = getRoomId(targetAppointment);
 
-        if(roomId == null){
+        if (roomId == null) {
             return 0L;
         }
 
@@ -410,12 +463,12 @@ public class AppointmentServiceImpl implements AppointmentService {
         return originalSlot;
     }
 
-    private Integer getRoomId(Appointment appointment){
-        if(appointment == null
+    private Integer getRoomId(Appointment appointment) {
+        if (appointment == null
                 || appointment.getSlot() == null
                 || appointment.getSlot().getSchedule() == null
                 || appointment.getSlot().getSchedule().getRoom() == null
-        ){
+        ) {
             return null;
         }
         return appointment.getSlot().getSchedule().getRoom().getId();
@@ -494,6 +547,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                     a.getDoctor().getMiddleName(),
                     a.getDoctor().getFirstName()
             ));
+            response.setId(a.getId());
             response.setServiceName(a.getService().getName());
             response.setSlotStartTime(a.getSlot().getStartTime());
             response.setSlotEndTime(a.getSlot().getEndTime());

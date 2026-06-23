@@ -58,4 +58,11 @@ public class DoctorSchedule {
 
     @OneToMany(mappedBy = "schedule")
     private Set<TimeSlot> timeSlots;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "week_schedule_id")
+    private WeekSchedule weekSchedule;
+
+    @Column(columnDefinition = "NVARCHAR(255)")
+    private String note;
 }

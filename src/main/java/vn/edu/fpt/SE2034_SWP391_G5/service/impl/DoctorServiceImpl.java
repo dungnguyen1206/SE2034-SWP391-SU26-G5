@@ -8,6 +8,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DoctorService;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -41,6 +42,14 @@ public class DoctorServiceImpl implements DoctorService {
         User doctor = userRepository.findById(doctorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bác sĩ với id: " + doctorId));
         return toResponse(doctor);
+    }
+
+    @Override
+    public List<DoctorResponse> getAllDoctors() {
+        List<User> users = userRepository.findByRoleName("DOCTOR");
+        List<DoctorResponse> doctorResponses = new ArrayList<>();
+        users.forEach(user -> doctorResponses.add(toResponse(user)));
+        return doctorResponses;
     }
 
     private DoctorResponse toResponse(User u) {

@@ -10,4 +10,6 @@ public interface DoctorService {
     List<User> findByRoleNameAndStatus(String roleName, String status);
     List<DoctorResponse> getDoctorsByDepartment(Integer departmentId);
     DoctorResponse getDoctorById(Long doctorId);
+
+    List<DoctorResponse> getAllDoctors();
 }

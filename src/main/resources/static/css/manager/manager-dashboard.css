@@ -99,22 +99,26 @@ Block 1
     font-weight: 600;
 }
 .status-waiting {
-
+    background: aliceblue;
     color: #92400e;
 }
 .status-confirmed {
 
     color: #1d4ed8;
+    background: aliceblue;
 }
 .status-examining {
+    background: aliceblue;
 
     color: #0e7490;
 }
 .status-completed {
+    background: aliceblue;
 
     color: #166534;
 }
 .status-cancelled {
+    background: aliceblue;
 
     color: #b91c1c;
 }

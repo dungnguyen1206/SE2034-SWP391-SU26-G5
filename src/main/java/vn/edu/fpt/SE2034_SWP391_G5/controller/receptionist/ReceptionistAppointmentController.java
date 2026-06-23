@@ -3,15 +3,16 @@ package vn.edu.fpt.SE2034_SWP391_G5.controller.receptionist;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentPrintResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ReceptionistResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
+import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.ReceptionistService;
 
@@ -19,6 +20,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -28,56 +30,101 @@ public class ReceptionistAppointmentController {
     private final ReceptionistService receptionistService;
 
     @GetMapping("/receptionist/appointment")
+    // Hiển thị toàn bộ danh sách lịch hẹn theo ngày
     public String showAppointmentList(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String status,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fromDate,
-            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate toDate,
+            @RequestParam(value = "fromDate", required = false) String fromDateStr,
+            @RequestParam(value = "toDate", required = false) String toDateStr,
             @RequestParam(defaultValue = "0") int page,
             Model model
     ) {
         LocalDate today = LocalDate.now();
-        if(fromDate == null){
-            fromDate = today.minusDays(7);
+        LocalDate fromDate = null;
+        LocalDate toDate = null;
+
+        if (fromDateStr != null && !fromDateStr.trim().isEmpty()) {
+            try {
+                fromDate = LocalDate.parse(fromDateStr.trim());
+            } catch (Exception e) {
+                // Fallback to null
+            }
         }
-        if(toDate == null){
+        if (toDateStr != null && !toDateStr.trim().isEmpty()) {
+            try {
+                toDate = LocalDate.parse(toDateStr.trim());
+            } catch (Exception e) {
+                // Fallback to null
+            }
+        }
+
+        if (fromDate == null) {
+            fromDate = today.minusDays(6);
+        }
+        if (toDate == null) {
             toDate = today;
         }
-        if(page < 0){
+        if (page < 0) {
             page = 0;
         }
+
         int size = 20;
 
-        Page<AppointmentResponse> appointmentPage = appointmentService.getPagedAppointmentsForReceptionist(search, status, fromDate, toDate, page, size);
+        Page<AppointmentResponse> appointmentPage;
+
+        if (hasSearchOrFilterCondition(search, status)) {
+            appointmentPage = appointmentService.searchAppointmentListForReceptionist(search, status, fromDate, toDate, page, size);
+        } else {
+            appointmentPage = appointmentService.getAppointmentListForReceptionist(fromDate, toDate, page, size);
+        }
+
         List<AppointmentResponse> appointments = appointmentPage.getContent();
 
         model.addAttribute("appointments", appointments);
         model.addAttribute("appointmentPage", appointmentPage);
         model.addAttribute("appointmentGroups", appointmentService.groupAppointmentsByDate(appointments));
+        model.addAttribute("fromDate", fromDate);
+        model.addAttribute("toDate", toDate);
+        model.addAttribute("search", search);
+        model.addAttribute("selectedStatus", status);
 
-        addAppointmentCounts(model, appointments);
-        addReceptionistInfo(model);
-        addPageInfo(model, search, status, fromDate, toDate);
-        
+        addReceptionistInfo(model, userDetails);
+        addAppointmentStatusCounts(model, fromDate, toDate);
+
         return "receptionist/appointment/list";
     }
 
-    private List<AppointmentResponse> getFilteredAppointments(String search, String status){
-        List<AppointmentResponse> allAppointments = appointmentService.getAppointmentListForReceptionist();
-        return appointmentService.filterAppointments(allAppointments, search, status);
+    private boolean hasSearchOrFilterCondition(String search, String status) {
+        return (search != null && !search.trim().isEmpty()) || (status != null && !status.trim().isEmpty());
     }
 
-    private void addAppointmentCounts(Model model, List<AppointmentResponse> appointments){
-        model.addAttribute("confirmedCount", appointmentService.countByStatus(appointments, "CONFIRMED"));
-        model.addAttribute("waitingCount", appointmentService.countByStatus(appointments, "WAITING"));
-        model.addAttribute("examiningCount", appointmentService.countByStatus(appointments, "EXAMINING"));
-        model.addAttribute("completedCount", appointmentService.countByStatus(appointments, "COMPLETED"));
-        model.addAttribute("cancelledCount", appointmentService.countByStatus(appointments, "CANCELLED"));
-        model.addAttribute("noShowCount", appointmentService.countByStatus(appointments, "NO_SHOW"));
+    private void addAppointmentStatusCounts(
+            Model model,
+            LocalDate fromDate,
+            LocalDate toDate
+    ) {
+        Map<String, Long> statusCounts = appointmentService.getAppointmentStatusCountsInDateRangeForReceptionist(fromDate, toDate);
+
+        model.addAttribute("confirmedCount", statusCounts.get("CONFIRMED"));
+        model.addAttribute("waitingCount", statusCounts.get("WAITING"));
+        model.addAttribute("examiningCount", statusCounts.get("EXAMINING"));
+        model.addAttribute("completedCount", statusCounts.get("COMPLETED"));
+        model.addAttribute("cancelledCount", statusCounts.get("CANCELLED"));
+        model.addAttribute("noShowCount", statusCounts.get("NO_SHOW"));
     }
 
-    private void addReceptionistInfo(Model model){
-        model.addAttribute("receptionist", receptionistService.getReceptionistByUsername("recept.linh@hams.vn"));
+    private void addReceptionistInfo(Model model, CustomUserDetails userDetails) {
+        User user = userDetails.getUser();
+        String fullName = (user.getLastName() + " " + (user.getMiddleName() != null ? user.getMiddleName() + " " : "") + user.getFirstName()).trim().replaceAll("\\s+", " ");
+        String avatarText = "";
+        if (user.getLastName() != null && !user.getLastName().isEmpty()) {
+            avatarText += user.getLastName().substring(0, 1).toUpperCase();
+        }
+        if (user.getFirstName() != null && !user.getFirstName().isEmpty()) {
+            avatarText += user.getFirstName().substring(0, 1).toUpperCase();
+        }
+        model.addAttribute("receptionist", new ReceptionistResponse(user.getId(), fullName, avatarText));
     }
 
     private void addPageInfo(Model model, String search, String status, LocalDate fromDate, LocalDate toDate) {
@@ -88,15 +135,19 @@ public class ReceptionistAppointmentController {
         model.addAttribute("currentDateTime", getCurrentDateTime());
     }
 
-    private String getCurrentDateTime(){
+    private String getCurrentDateTime() {
         return LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy · HH:mm"));
     }
 
     @GetMapping("/receptionist/appointment/{id}")
-    public String showAppointmentDetail(@PathVariable Long id, Model model){
+    public String showAppointmentDetail(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model
+    ) {
         AppointmentResponse appointment = appointmentService.getAppointmentDetailForReceptionist(id);
         model.addAttribute("appointment", appointment);
-        addReceptionistInfo(model);
+        addReceptionistInfo(model, userDetails);
         model.addAttribute("currentDateTime", getCurrentDateTime());
         return "receptionist/appointment/detail";
     }
