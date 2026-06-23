@@ -10,5 +10,4 @@ import lombok.NoArgsConstructor;
 public class AppointmentStatusCountResponse {
     private String status;
     private Long count;
-
 }

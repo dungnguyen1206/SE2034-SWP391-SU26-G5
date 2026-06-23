@@ -72,49 +72,9 @@
     background-color: #e2e8f0;
 }
 
-.datetime-box {
-    height: 38px;
-    padding: 0 14px;
-    border-radius: 12px;
-    background-color: #f8fafc;
-    color: #475569;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-    font-weight: 600;
-}
-
-.time-icon {
-    color: #64748b;
-    font-size: 16px;
-}
-
-.notification-box {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: #f8fafc;
-    border: 1px solid #e5e7eb;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* USER DROPDOWN */
+.header-user-dropdown {
     position: relative;
-}
-
-.notification-icon {
-    font-size: 18px;
-}
-
-.notification-dot {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 9px;
-    height: 9px;
-    background-color: #ef4444;
-    border-radius: 50%;
-    border: 2px solid #ffffff;
 }
 
 .header-user {
@@ -127,6 +87,21 @@
     display: flex;
     align-items: center;
     gap: 10px;
+    cursor: pointer;
+    list-style: none;
+}
+
+.header-user::-webkit-details-marker {
+    display: none;
+}
+
+.header-user::marker {
+    display: none;
+    content: "";
+}
+
+.header-user:hover {
+    background-color: #f8fafc;
 }
 
 .header-avatar {
@@ -161,6 +136,54 @@
     margin-left: auto;
     color: #64748b;
     font-size: 16px;
+    transition: transform 0.2s ease;
+}
+
+.header-user-dropdown[open] .header-arrow {
+    transform: rotate(180deg);
+}
+
+.header-dropdown-menu {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    min-width: 150px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.14);
+    padding: 8px;
+    display: none;
+    z-index: 1000;
+}
+
+.header-user-dropdown[open] .header-dropdown-menu {
+    display: block;
+}
+
+.dropdown-logout-form {
+    margin: 0;
+}
+
+.dropdown-item {
+    width: 100%;
+    display: block;
+    padding: 10px 12px;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.logout-item {
+    color: #dc2626;
+}
+
+.logout-item:hover {
+    background: #fee2e2;
 }
 
 @media (max-width: 1100px) {

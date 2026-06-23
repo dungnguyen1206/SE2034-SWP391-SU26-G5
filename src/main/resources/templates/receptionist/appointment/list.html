@@ -7,6 +7,7 @@
         <link rel="stylesheet" th:href="@{/css/receptionist/common/sidebar.css}">
         <link rel="stylesheet" th:href="@{/css/receptionist/common/header.css}">
         <link rel="stylesheet" th:href="@{/css/receptionist/appointment/list.css}">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     </head>
 
     <body>
@@ -60,59 +61,36 @@
                         <div class="search-box">
                             <span class="search-icon"> ⌕ </span>
 
-                            <input type="text"
-                                   name="search"
-                                   placeholder="Tìm kiếm bệnh nhân..."
-                                   th:value="${search}">
+                            <input type="text" name="search" placeholder="Tìm kiếm bệnh nhân..." th:value="${search}">
                         </div>
 
                         <select class="status-filter" name="status">
-                            <option value="" th:selected="${selectedStatus == null || selectedStatus == ''}">
-                                Tất cả trạng thái
+                            <option value="" th:selected="${selectedStatus == null || selectedStatus == ''}">Tất cả
+                                trạng thái
                             </option>
 
-                            <option value="CONFIRMED" th:selected="${selectedStatus == 'CONFIRMED'}">
-                                Đã xác nhận
+                            <option value="CONFIRMED" th:selected="${selectedStatus == 'CONFIRMED'}">Đã xác nhận
                             </option>
 
-                            <option value="WAITING" th:selected="${selectedStatus == 'WAITING'}">
-                                Chờ khám
+                            <option value="WAITING" th:selected="${selectedStatus == 'WAITING'}">Chờ khám</option>
+
+                            <option value="EXAMINING" th:selected="${selectedStatus == 'EXAMINING'}">Đang khám</option>
+
+                            <option value="COMPLETED" th:selected="${selectedStatus == 'COMPLETED'}">Đã khám xong
                             </option>
 
-                            <option value="EXAMINING" th:selected="${selectedStatus == 'EXAMINING'}">
-                                Đang khám
-                            </option>
+                            <option value="CANCELLED" th:selected="${selectedStatus == 'CANCELLED'}">Đã hủy</option>
 
-                            <option value="COMPLETED" th:selected="${selectedStatus == 'COMPLETED'}">
-                                Đã khám xong
-                            </option>
-
-                            <option value="CANCELLED" th:selected="${selectedStatus == 'CANCELLED'}">
-                                Đã hủy
-                            </option>
-
-                            <option value="NO_SHOW" th:selected="${selectedStatus == 'NO_SHOW'}">
-                                Vắng mặt
-                            </option>
+                            <option value="NO_SHOW" th:selected="${selectedStatus == 'NO_SHOW'}">Vắng mặt</option>
                         </select>
 
-                        <input type="date"
-                               name="fromDate"
-                               class="date-filter"
-                               th:value="${fromDate}">
+                        <input type="date" name="fromDate" class="date-filter" th:value="${fromDate}">
 
-                        <input type="date"
-                               name="toDate"
-                               class="date-filter"
-                               th:value="${toDate}">
+                        <input type="date" name="toDate" class="date-filter" th:value="${toDate}">
 
-                        <button type="submit" class="btn-search">
-                            Tìm Kiếm
-                        </button>
+                        <button type="submit" class="btn-search">Tìm Kiếm</button>
 
-                        <a th:href="@{/receptionist/appointment}" class="btn-reset">
-                            Làm Mới
-                        </a>
+                        <a th:href="@{/receptionist/appointment}" class="btn-reset">Làm Mới</a>
                     </form>
 
                     <div class="table-wrapper">

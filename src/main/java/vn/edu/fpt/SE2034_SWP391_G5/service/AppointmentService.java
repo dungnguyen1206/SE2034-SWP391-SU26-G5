@@ -2,11 +2,12 @@ package vn.edu.fpt.SE2034_SWP391_G5.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentDateGroupResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateAppointmentRequest;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentDateGroupResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentPrintResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ScheduleSlotResponse;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -19,11 +20,16 @@ public interface AppointmentService {
     List<AppointmentResponse> findAppointmentsByBookingDate(LocalDate today);
 
     //------------------------------ Hoàng Linh ---------------------------------------------------------------
-    List<AppointmentResponse> getAppointmentListForReceptionist();
+    // Lấy danh sách lịch hẹn để hiển thị lên màn hình Appointment List
+    Page<AppointmentResponse> getAppointmentListForReceptionist(LocalDate fromDate, LocalDate toDate, int page, int size);
+
+    Page<AppointmentResponse> searchAppointmentListForReceptionist(String search, String status, LocalDate fromDate, LocalDate toDate, int page, int size);
+
+    Map<String, Long> getAppointmentStatusCountsInDateRangeForReceptionist(LocalDate fromDate, LocalDate toDate);
 
     long countByStatus(List<AppointmentResponse> appointments, String status);
 
-    List<AppointmentResponse> filterAppointments(List<AppointmentResponse> appointments,String search, String status);
+    List<AppointmentResponse> filterAppointments(List<AppointmentResponse> appointments, String search, String status);
 
     AppointmentPrintResponse getCheckInTicket(Long appointmentId);
 
