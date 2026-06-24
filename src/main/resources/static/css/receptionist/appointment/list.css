@@ -134,6 +134,10 @@
     gap: 10px;
     padding: 0 14px;
 }
+.search-box i{
+    color: #94a3b8;
+    font-size: 15px; 
+}
 
 .search-icon {
     color: #94a3b8;

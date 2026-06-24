@@ -214,6 +214,7 @@ public class StaffServiceImpl implements StaffService {
         staff.setBio(request.getBio());
         staff.setStatus(request.getAccountStatus());
         staff.setUpdatedAt(LocalDateTime.now());
+        staff.setCreatedBy(request.getCreatedBy());
 
         if (request.getStaffRole().equalsIgnoreCase("DOCTOR")) {
             Department department = departmentRepository.findById(request.getDepartmentId()).orElseThrow(() -> new ResourceNotFoundException("Phòng ban không hợp lệ"));
@@ -221,7 +222,6 @@ public class StaffServiceImpl implements StaffService {
             staff.setDegree(request.getDegree());
             staff.setExperienceYears(request.getExperienceYears());
             staff.setLicenseNumber(request.getLicenseNumber());
-            staff.setCreatedBy(request.getCreatedBy());
             if (!staff.getLicenseNumber().equalsIgnoreCase(request.getLicenseNumber()) && userRepository.existsByLicenseNumber(request.getLicenseNumber())) {
                 throw new BadRequestException("Mã giấy phép đã tồn tại");
             }

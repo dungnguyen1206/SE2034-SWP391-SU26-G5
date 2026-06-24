@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DoctorScheduleResponse {
-    private Long id;
+    private Long doctorId;
     private String doctorName;
     private String shift;
     private String roomName;
@@ -18,4 +18,5 @@ public class DoctorScheduleResponse {
     private int maxSlots;
     private String status;
     private String note;
+    private int bookedCapacity;
 }
