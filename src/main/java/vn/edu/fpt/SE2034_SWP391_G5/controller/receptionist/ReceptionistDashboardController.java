@@ -20,15 +20,9 @@ public class ReceptionistDashboardController {
 
     @GetMapping("/receptionist/dashboard")
     public String showDashboard(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(required = false) String search, Model model) {
-        model.addAttribute("receptionist",
-                receptionistService.getReceptionistByUsername(userDetails.getUser().getEmail()));
-
-        model.addAttribute("stats",
-                receptionistService.getTodayDashboardStatistics());
-
-        model.addAttribute("todayAppointments",
-                receptionistService.getTodayAppointmentsForDashboard(search));
-
+        model.addAttribute("receptionist", receptionistService.getReceptionistByUsername(userDetails.getUser().getEmail()));
+        model.addAttribute("stats", receptionistService.getTodayDashboardStatistics());
+        model.addAttribute("todayAppointments", receptionistService.getTodayAppointmentsForDashboard(search));
         model.addAttribute("search", search);
         model.addAttribute("todayText", getTodayText());
 

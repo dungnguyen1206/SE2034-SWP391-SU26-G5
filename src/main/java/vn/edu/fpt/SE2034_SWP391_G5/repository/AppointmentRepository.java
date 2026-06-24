@@ -125,13 +125,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     )
     Page<Appointment> searchAppointmentListForReceptionist(@Param("search") String search, @Param("status") String status, @Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate, Pageable pageable);
 
-    // Đếm số lượng lịch hẹn theo từng trạng thái trong khoảng ngày
-    @Query("SELECT new vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentStatusCountResponse(a.status, COUNT(a)) " +
-            "FROM Appointment a " +
-            "WHERE a.bookingDate BETWEEN :fromDate AND :toDate " +
-            "GROUP BY a.status")
-    List<AppointmentStatusCountResponse> countAppointmentsByStatusInDateRangeForReceptionist(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
-
     @Query("SELECT COUNT(a) FROM Appointment a WHERE a.bookingDate BETWEEN :fromDate AND :toDate AND a.status = 'CONFIRMED'")
     long countConfirmedAppointmentsInDateRange(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
 

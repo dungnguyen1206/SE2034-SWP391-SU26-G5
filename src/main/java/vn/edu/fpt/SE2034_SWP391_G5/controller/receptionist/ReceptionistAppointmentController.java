@@ -2,7 +2,6 @@ package vn.edu.fpt.SE2034_SWP391_G5.controller.receptionist;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -99,13 +98,8 @@ public class ReceptionistAppointmentController {
         return (search != null && !search.trim().isEmpty()) || (status != null && !status.trim().isEmpty());
     }
 
-    private void addAppointmentStatusCounts(
-            Model model,
-            LocalDate fromDate,
-            LocalDate toDate
-    ) {
+    private void addAppointmentStatusCounts(Model model, LocalDate fromDate, LocalDate toDate) {
         Map<String, Long> statusCounts = appointmentService.getAppointmentStatusCountsInDateRangeForReceptionist(fromDate, toDate);
-
         model.addAttribute("confirmedCount", statusCounts.get("CONFIRMED"));
         model.addAttribute("waitingCount", statusCounts.get("WAITING"));
         model.addAttribute("examiningCount", statusCounts.get("EXAMINING"));
@@ -140,11 +134,7 @@ public class ReceptionistAppointmentController {
     }
 
     @GetMapping("/receptionist/appointment/{id}")
-    public String showAppointmentDetail(
-            @PathVariable Long id,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            Model model
-    ) {
+    public String showAppointmentDetail(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         AppointmentResponse appointment = appointmentService.getAppointmentDetailForReceptionist(id);
         model.addAttribute("appointment", appointment);
         addReceptionistInfo(model, userDetails);

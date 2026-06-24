@@ -5,38 +5,46 @@
 }
 
 body {
-    font-family: "Segoe UI", Arial, sans-serif;
-    background-color: #f1f5f9;
-    color: #111827;
+    font-family: 'Inter', "Segoe UI", Arial, sans-serif;
+    background-color: #f8fafc;
+    color: #1e293b;
 }
 
 .page {
     min-height: 100vh;
-    padding: 32px;
+    padding: 40px 16px;
 }
 
 .ticket-actions {
     max-width: 720px;
-    margin: 0 auto 18px;
+    margin: 0 auto 24px;
     display: flex;
-    justify-content: flex-end;
+    justify-content: flex-start; /* Align back button to left and action to right */
     gap: 12px;
+}
+
+/* Push print button to the right */
+.ticket-actions .btn-print {
+    margin-left: auto;
 }
 
 .btn-print,
 .btn-back,
+.btn-detail-back,
 .btn-confirm-checkin {
     height: 42px;
-    padding: 0 16px;
+    padding: 0 18px;
     border-radius: 10px;
-    border: none;
     font-size: 14px;
-    font-weight: 800;
+    font-weight: 600;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
     cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
 }
 
 .btn-print {
@@ -46,16 +54,29 @@ body {
 
 .btn-print:hover {
     background-color: #1d4ed8;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
 }
 
 .btn-back {
     background-color: #ffffff;
-    color: #334155;
-    border: 1px solid #cbd5e1;
+    color: #475569;
+    border-color: #cbd5e1;
 }
 
 .btn-back:hover {
-    background-color: #f8fafc;
+    background-color: #f1f5f9;
+    color: #1e293b;
+}
+
+.btn-detail-back {
+    background-color: #ffffff;
+    color: #2563eb;
+    border-color: #bfdbfe;
+}
+
+.btn-detail-back:hover {
+    background-color: #eff6ff;
+    border-color: #3b82f6;
 }
 
 .btn-confirm-checkin {
@@ -65,6 +86,7 @@ body {
 
 .btn-confirm-checkin:hover {
     background-color: #15803d;
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
 }
 
 .message {
@@ -100,15 +122,29 @@ body {
 
 .ticket-header {
     text-align: center;
-    border-bottom: 2px solid #111827;
+    border-bottom: 2px solid #1e293b;
     padding-bottom: 16px;
     margin-bottom: 22px;
+}
+
+.hospital-logo {
+    font-size: 36px;
+    color: #2563eb;
+    margin-bottom: 6px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #eff6ff;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
 }
 
 .ticket-header h1 {
     font-size: 24px;
     font-weight: 800;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
+    letter-spacing: -0.5px;
 }
 
 .ticket-header p {
@@ -118,8 +154,10 @@ body {
 }
 
 .ticket-header h2 {
-    font-size: 22px;
+    font-size: 20px;
     font-weight: 800;
+    color: #0f172a;
+    letter-spacing: 0.5px;
 }
 
 .ticket-main-number {
@@ -135,21 +173,26 @@ body {
     padding: 18px;
     text-align: center;
     background-color: #eff6ff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
 }
 
 .ticket-main-number span {
     display: block;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
     color: #1d4ed8;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .ticket-main-number strong {
     display: block;
-    font-size: 42px;
+    font-size: 40px;
     font-weight: 900;
     color: #1e3a8a;
+    line-height: 1.1;
 }
 
 .ticket-section {
@@ -157,19 +200,22 @@ body {
 }
 
 .ticket-section h3 {
-    font-size: 16px;
-    font-weight: 800;
+    font-size: 15px;
+    font-weight: 700;
     margin-bottom: 12px;
     color: #0f172a;
-    border-bottom: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e2e8f0;
     padding-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .ticket-row {
     display: grid;
     grid-template-columns: 170px 1fr;
-    padding: 9px 0;
+    padding: 8px 0;
     font-size: 15px;
+    align-items: baseline;
 }
 
 .ticket-row span {
@@ -177,22 +223,61 @@ body {
 }
 
 .ticket-row strong {
-    color: #111827;
+    color: #1e293b;
+    font-weight: 600;
 }
 
 .ticket-note {
     background-color: #f8fafc;
-    border-left: 4px solid #2563eb;
+    border-left: 4px solid #3b82f6;
     padding: 12px 14px;
     font-size: 14px;
     color: #475569;
     margin-top: 10px;
+    border-radius: 0 8px 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.ticket-note p {
+    margin: 0;
 }
 
 .error-note {
-    border-left-color: #dc2626;
+    border-left-color: #ef4444;
     background-color: #fef2f2;
     color: #991b1b;
+}
+
+.success-note {
+    border-left-color: #10b981;
+    background-color: #f0fdf4;
+    color: #15803d;
+}
+
+.ticket-barcode {
+    margin-top: 30px;
+    padding-top: 24px;
+    border-top: 2px dashed #cbd5e1;
+    text-align: center;
+}
+
+.barcode-svg {
+    max-width: 240px;
+    height: auto;
+    margin: 0 auto;
+    display: block;
+}
+
+.barcode-text {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 5px;
+    color: #475569;
+    margin-top: 8px;
+    text-transform: uppercase;
 }
 
 .confirm-actions {
@@ -205,6 +290,7 @@ body {
 @media print {
     body {
         background-color: #ffffff;
+        color: #000000;
     }
 
     .page {
@@ -213,8 +299,9 @@ body {
 
     .ticket-actions,
     .message,
-    .confirm-actions {
-        display: none;
+    .confirm-actions,
+    .ticket-note {
+        display: none !important;
     }
 
     .ticket {
@@ -222,6 +309,6 @@ body {
         border: none;
         border-radius: 0;
         box-shadow: none;
-        padding: 24px;
+        padding: 0;
     }
 }

@@ -14,7 +14,6 @@ import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.*;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
 import vn.edu.fpt.SE2034_SWP391_G5.util.CodeGenerator;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -31,6 +30,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final UserRepository userRepository;
     private final MedicalServiceRepository medicalServiceRepository;
 
+    //--------------------------------------- Hoang Linh --------------------------------------------
     @Override
     public Page<AppointmentResponse> getAppointmentListForReceptionist(LocalDate fromDate, LocalDate toDate, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -82,63 +82,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         return statusCounts;
     }
 
-    private Map<String, Long> createDefaultAppointmentStatusCounts() {
-        Map<String, Long> statusCounts = new HashMap<>();
-
-        statusCounts.put("CONFIRMED", 0L);
-        statusCounts.put("WAITING", 0L);
-        statusCounts.put("EXAMINING", 0L);
-        statusCounts.put("COMPLETED", 0L);
-        statusCounts.put("CANCELLED", 0L);
-        statusCounts.put("NO_SHOW", 0L);
-
-        return statusCounts;
-    }
-
     // ---------------------------------------------------------------------------
-    @Override
-    public long countByStatus(List<AppointmentResponse> appointments, String status) {
-        long count = 0;
-        for (AppointmentResponse appointment : appointments) {
-            if (status.equals(appointment.getStatus())) {
-                count++;
-            }
-        }
-        return count;
-    }
-
-    @Override
-    public List<AppointmentResponse> filterAppointments(List<AppointmentResponse> appointments, String search, String status) {
-        List<AppointmentResponse> result = new ArrayList<>();
-
-        String keyword = search != null ? search.trim().toLowerCase() : "";
-        String selectedStatus = status != null ? status.trim() : "";
-
-        for (AppointmentResponse appointment : appointments) {
-            boolean matchesSearch = true;
-            boolean matchesStatus = true;
-
-            if (!keyword.isEmpty()) {
-                matchesSearch =
-                        containsIgnoreCase(appointment.getAppointmentCode(), keyword)
-                                || containsIgnoreCase(appointment.getPatientFullName(), keyword)
-                                || containsIgnoreCase(appointment.getPatientPhone(), keyword)
-                                || containsIgnoreCase(appointment.getDoctorFullName(), keyword)
-                                || containsIgnoreCase(appointment.getDepartmentName(), keyword)
-                                || containsIgnoreCase(appointment.getRoomNumber(), keyword);
-            }
-
-            if (!selectedStatus.isEmpty()) {
-                matchesStatus = selectedStatus.equals(appointment.getStatus());
-            }
-
-            if (matchesSearch && matchesStatus) {
-                result.add(appointment);
-            }
-        }
-
-        return result;
-    }
 
     @Override
     public AppointmentPrintResponse getCheckInTicket(Long appointmentId) {
@@ -242,101 +186,6 @@ public class AppointmentServiceImpl implements AppointmentService {
                     appointmentList
             ));
         }
-
-        return result;
-    }
-
-    @Override
-    public Page<AppointmentResponse> getPagedAppointmentsForReceptionist(
-            String search,
-            String status,
-            LocalDate fromDate,
-            LocalDate toDate,
-            int page,
-            int size
-    ) {
-//        List<AppointmentResponse> allAppointments = getAppointmentListForReceptionist();
-//
-//        List<AppointmentResponse> filteredAppointments =
-//                filterAppointmentsBySearchStatusAndDate(
-//                        allAppointments,
-//                        search,
-//                        status,
-//                        fromDate,
-//                        toDate
-//                );
-//
-//        Pageable pageable = PageRequest.of(page, size);
-//
-//        int start = (int) pageable.getOffset();
-//        int end = Math.min(start + pageable.getPageSize(), filteredAppointments.size());
-//
-//        List<AppointmentResponse> pageContent;
-//
-//        if (start >= filteredAppointments.size()) {
-//            pageContent = new ArrayList<>();
-//        } else {
-//            pageContent = filteredAppointments.subList(start, end);
-//        }
-//
-        //  return new PageImpl<>(pageContent, pageable, filteredAppointments.size());
-        return null;
-    }
-
-    private List<AppointmentResponse> filterAppointmentsBySearchStatusAndDate(List<AppointmentResponse> appointments, String search, String status, LocalDate fromDate, LocalDate toDate) {
-        List<AppointmentResponse> result = new ArrayList<>();
-
-        String keyword = "";
-        if (search != null) {
-            keyword = search.trim().toLowerCase();
-        }
-
-        String selectedStatus = "";
-        if (status != null) {
-            selectedStatus = status.trim();
-        }
-
-        for (AppointmentResponse appointment : appointments) {
-            boolean matchesSearch = true;
-            boolean matchesStatus = true;
-            boolean matchesDate = true;
-
-            if (!keyword.isEmpty()) {
-                matchesSearch =
-                        containsIgnoreCase(appointment.getAppointmentCode(), keyword)
-                                || containsIgnoreCase(appointment.getPatientFullName(), keyword)
-                                || containsIgnoreCase(appointment.getPatientPhone(), keyword)
-                                || containsIgnoreCase(appointment.getDoctorFullName(), keyword)
-                                || containsIgnoreCase(appointment.getDepartmentName(), keyword)
-                                || containsIgnoreCase(appointment.getRoomNumber(), keyword);
-            }
-
-            if (!selectedStatus.isEmpty()) {
-                matchesStatus = selectedStatus.equals(appointment.getStatus());
-            }
-
-            if (fromDate != null) {
-                if (appointment.getBookingDate() == null) {
-                    matchesDate = false;
-                } else {
-                    matchesDate = !appointment.getBookingDate().isBefore(fromDate);
-                }
-            }
-
-            if (toDate != null) {
-                if (appointment.getBookingDate() == null) {
-                    matchesDate = false;
-                } else {
-                    matchesDate = matchesDate
-                            && !appointment.getBookingDate().isAfter(toDate);
-                }
-            }
-
-            if (matchesSearch && matchesStatus && matchesDate) {
-                result.add(appointment);
-            }
-        }
-
         return result;
     }
 
@@ -378,7 +227,6 @@ public class AppointmentServiceImpl implements AppointmentService {
                 baseNumber += slot.getMaxCapacity();
             }
         }
-
         return baseNumber;
     }
 
@@ -422,18 +270,15 @@ public class AppointmentServiceImpl implements AppointmentService {
                 order++;
             }
         }
-
         return order;
     }
 
     private TimeSlot getEffectiveSlotForTicket(Appointment appointment) {
         TimeSlot originalSlot = appointment.getSlot();
-
         if (originalSlot == null) {
             return null;
         }
         List<TimeSlot> slots = getSlotsInSameRoomAndDate(appointment);
-
         return getEffectiveSlot(appointment, slots, appointment.getCheckInTime());
     }
 
@@ -459,7 +304,6 @@ public class AppointmentServiceImpl implements AppointmentService {
                 return nextSlot;
             }
         }
-
         return originalSlot;
     }
 
@@ -494,11 +338,9 @@ public class AppointmentServiceImpl implements AppointmentService {
                 if (i + 1 < slots.size()) {
                     return slots.get(i + 1);
                 }
-
                 return null;
             }
         }
-
         return null;
     }
 
@@ -506,6 +348,8 @@ public class AppointmentServiceImpl implements AppointmentService {
     private boolean containsIgnoreCase(String value, String keyword) {
         return value != null && value.toLowerCase().contains(keyword);
     }
+
+    //------------------------------------- End Hoang Linh -----------------------------------------------
 
     public long getAllAppointment() {
         return appointmentRepository.count();
