@@ -125,13 +125,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     )
     Page<Appointment> searchAppointmentListForReceptionist(@Param("search") String search, @Param("status") String status, @Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate, Pageable pageable);
 
-    // Đếm số lượng lịch hẹn theo từng trạng thái trong khoảng ngày
-    @Query("SELECT new vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentStatusCountResponse(a.status, COUNT(a)) " +
-            "FROM Appointment a " +
-            "WHERE a.bookingDate BETWEEN :fromDate AND :toDate " +
-            "GROUP BY a.status")
-    List<AppointmentStatusCountResponse> countAppointmentsByStatusInDateRangeForReceptionist(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
-
     @Query("SELECT COUNT(a) FROM Appointment a WHERE a.bookingDate BETWEEN :fromDate AND :toDate AND a.status = 'CONFIRMED'")
     long countConfirmedAppointmentsInDateRange(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
 
@@ -189,6 +182,21 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "WHERE a.id = :appointmentId")
     Optional<Appointment> findAppointmentDetailById(@Param("appointmentId") Long appointmentId);
 
+    @Query("SELECT a FROM Appointment a " +
+            "JOIN FETCH a.patient p " +
+            "JOIN FETCH a.doctor d " +
+            "JOIN FETCH a.service s " +
+            "JOIN FETCH s.department dep " +
+            "JOIN FETCH a.slot sl " +
+            "JOIN FETCH sl.schedule sch " +
+            "JOIN FETCH sch.room r " +
+            "WHERE a.bookingDate = :today " +
+            "AND a.status IN ('WAITING', 'EXAMINING') " +
+            "ORDER BY r.roomNumber ASC, a.checkInTime ASC, a.id ASC")
+    List<Appointment> findQueueAppointmentsToday(@Param("today") LocalDate today);
+
+    // ------------------------------------------------------------------------------------
+
     List<Appointment> findByPatientIdOrderByCreatedAtDesc(Long patientId);
 
     // Fetch appointment cùng slot và schedule để tránh LazyInitializationException
@@ -233,6 +241,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findRecentCompletedAppointments(@Param("doctorId") Long doctorId,
                                                       @Param("status") String status,
                                                       Pageable pageable);
+
+
 }
 
     
