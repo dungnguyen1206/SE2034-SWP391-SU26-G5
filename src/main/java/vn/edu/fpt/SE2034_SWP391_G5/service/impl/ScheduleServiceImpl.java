@@ -483,12 +483,6 @@ public class ScheduleServiceImpl implements ScheduleService {
         DoctorSchedule doctorSchedule = doctorScheduleRepository.findById(doctorScheduleUpdateRequest.getScheduleId()).orElseThrow(() -> new ResourceNotFoundException("Lịch không tồn tại"));
         WeekSchedule weekSchedule = weekScheduleRepository.findWeekScheduleById(weekScheduleId);
         String weekScheduleStatus = weekSchedule.getStatus();
-        System.out.println("DB shift: " + doctorSchedule.getShift());
-        System.out.println("DB workDate: " + doctorSchedule.getWorkDate());
-        System.out.println("Request shift: " + doctorScheduleUpdateRequest.getScheduleShift());
-        System.out.println("Request workDate: " + doctorScheduleUpdateRequest.getWorkDate());
-        System.out.println("Shift equals: " + doctorSchedule.getShift().equals(doctorScheduleUpdateRequest.getScheduleShift()));
-        System.out.println("Date equals: " + doctorSchedule.getWorkDate().equals(doctorScheduleUpdateRequest.getWorkDate()));
 
         if (weekScheduleStatus.equals(WeekScheduleStatus.FINALIZED.toString())) {
             doctorSchedule.setStatus(doctorScheduleUpdateRequest.getStatus());
