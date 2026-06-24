@@ -3,10 +3,7 @@ package vn.edu.fpt.SE2034_SWP391_G5.service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateAppointmentRequest;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentDateGroupResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentPrintResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ScheduleSlotResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -63,4 +60,8 @@ public interface AppointmentService {
 
     // Lấy danh sách bệnh nhân đã khám xong gần đây nhất
     List<AppointmentResponse> getRecentCompletedAppointmentsForDoctor(Long doctorId, int limit);
+
+    List<QueueResponse> getTodayQueueBoard();
+
+
 }

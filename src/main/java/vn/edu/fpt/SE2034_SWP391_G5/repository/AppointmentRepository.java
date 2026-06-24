@@ -182,6 +182,21 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "WHERE a.id = :appointmentId")
     Optional<Appointment> findAppointmentDetailById(@Param("appointmentId") Long appointmentId);
 
+    @Query("SELECT a FROM Appointment a " +
+            "JOIN FETCH a.patient p " +
+            "JOIN FETCH a.doctor d " +
+            "JOIN FETCH a.service s " +
+            "JOIN FETCH s.department dep " +
+            "JOIN FETCH a.slot sl " +
+            "JOIN FETCH sl.schedule sch " +
+            "JOIN FETCH sch.room r " +
+            "WHERE a.bookingDate = :today " +
+            "AND a.status IN ('WAITING', 'EXAMINING') " +
+            "ORDER BY r.roomNumber ASC, a.checkInTime ASC, a.id ASC")
+    List<Appointment> findQueueAppointmentsToday(@Param("today") LocalDate today);
+
+    // ------------------------------------------------------------------------------------
+
     List<Appointment> findByPatientIdOrderByCreatedAtDesc(Long patientId);
 
     // Fetch appointment cùng slot và schedule để tránh LazyInitializationException
@@ -226,6 +241,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findRecentCompletedAppointments(@Param("doctorId") Long doctorId,
                                                       @Param("status") String status,
                                                       Pageable pageable);
+
+
 }
 
     

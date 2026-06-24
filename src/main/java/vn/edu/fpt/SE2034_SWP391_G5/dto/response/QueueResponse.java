@@ -5,8 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -14,10 +14,21 @@ import java.time.LocalTime;
 @AllArgsConstructor
 public class QueueResponse {
     private String roomNumber;
-    private String appointmentCode;
-    private String patientName;
-    private String status;
-    private LocalTime startTime;
-    private LocalDateTime checkInTime;
-    private String doctorName;
+    private String departmentName;
+    private String doctorFullName;
+    private int totalWaiting;
+    private PatientInfo examiningPatient;
+    private List<PatientInfo> waitingPatients;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class PatientInfo {
+        private Integer stt;
+        private String appointmentCode;
+        private String patientName;
+        private LocalTime checkInTime;
+        private String status;
+    }
 }

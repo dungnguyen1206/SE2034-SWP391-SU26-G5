@@ -1,0 +1,81 @@
+
+
+/* Tùy chỉnh Thẻ (Card) */
+.queue-card {
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease-in-out;
+}
+
+.queue-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* Badge Phòng Khám */
+.room-badge {
+    background-color: #e0e7ff;
+    color: #4338ca;
+    font-weight: 700;
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.5rem;
+    font-size: 0.9rem;
+}
+
+/* Bệnh nhân Đang Khám */
+.examining-box {
+    background-color: #f0fdf4;
+    border-left: 4px solid #16a34a;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Danh sách chờ tối ưu (Hiển thị 5-6 người) */
+.waiting-list {
+    max-height: 340px; /* Tối ưu chiều cao không gây vỡ layout */
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+/* Custom Scrollbar */
+.waiting-list::-webkit-scrollbar {
+    width: 5px;
+}
+
+.waiting-list::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+}
+
+.waiting-list::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+.waiting-list::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+.waiting-item {
+    border-bottom: 1px dashed #e2e8f0;
+    padding: 0.5rem 0; /* Thu gọn khoảng cách để hiển thị được nhiều hơn */
+}
+
+.waiting-item:last-child {
+    border-bottom: none;
+}
+
+/* Badge Trạng thái */
+.badge-examining {
+    background-color: #dcfce7;
+    color: #16a34a;
+    border: 1px solid #16a34a;
+}
+
+.badge-waiting {
+    background-color: #fef3c7;
+    color: #d97706;
+    border: 1px solid #f59e0b;
+}
