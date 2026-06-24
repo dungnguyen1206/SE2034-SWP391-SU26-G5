@@ -8,6 +8,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateDoctorScheduleRequest;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.request.DoctorScheduleUpdateRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.*;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.*;
 import vn.edu.fpt.SE2034_SWP391_G5.enums.DoctorScheduleStatus;
@@ -404,6 +405,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     }
 
 
+
     //This function can improve processing time by using collector.groupingBy (from O(m*n) -> O(N))
     private Page<DoctorScheduleRowResponse> toDoctorScheduleRowResponse(Long weekScheduleId, Integer departmentId, String doctorName, String shift, int page, int size) {
         if (shift != null && shift.isBlank()) {
@@ -443,6 +445,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
     private DoctorScheduleResponse toDoctorScheduleResponse(DoctorSchedule doctorSchedule) {
         return DoctorScheduleResponse.builder()
+                .id(doctorSchedule.getId())
                 .doctorId(doctorSchedule.getDoctor().getId())
                 .doctorName(doctorSchedule.getDoctor().getFirstName() + " " + doctorSchedule.getDoctor().getMiddleName() + " " + doctorSchedule.getDoctor().getLastName())
                 .shift(doctorSchedule.getShift())
@@ -461,6 +464,99 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .sum();
     }
 
+
+    /*
+    *
+    * This function here related to update doctor schedule
+    *
+    * */
+
+    @Override
+    public DoctorScheduleUpdateRequest getDoctorScheduleUpdateRequest(Long doctorScheduleId) {
+        DoctorSchedule doctorSchedule = doctorScheduleRepository.findById(doctorScheduleId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lịch của bác sĩ"));
+        return toDoctorScheduleUpdateRequest(doctorSchedule);
+    }
+
+    @Transactional
+    @Override
+    public DoctorScheduleUpdateRequest updateDoctorSchedule(DoctorScheduleUpdateRequest doctorScheduleUpdateRequest, Long weekScheduleId) {
+        DoctorSchedule doctorSchedule = doctorScheduleRepository.findById(doctorScheduleUpdateRequest.getScheduleId()).orElseThrow(() -> new ResourceNotFoundException("Lịch không tồn tại"));
+        WeekSchedule weekSchedule = weekScheduleRepository.findWeekScheduleById(weekScheduleId);
+        String weekScheduleStatus = weekSchedule.getStatus();
+        System.out.println("DB shift: " + doctorSchedule.getShift());
+        System.out.println("DB workDate: " + doctorSchedule.getWorkDate());
+        System.out.println("Request shift: " + doctorScheduleUpdateRequest.getScheduleShift());
+        System.out.println("Request workDate: " + doctorScheduleUpdateRequest.getWorkDate());
+        System.out.println("Shift equals: " + doctorSchedule.getShift().equals(doctorScheduleUpdateRequest.getScheduleShift()));
+        System.out.println("Date equals: " + doctorSchedule.getWorkDate().equals(doctorScheduleUpdateRequest.getWorkDate()));
+
+        if (weekScheduleStatus.equals(WeekScheduleStatus.FINALIZED.toString())) {
+            doctorSchedule.setStatus(doctorScheduleUpdateRequest.getStatus());
+            return toDoctorScheduleUpdateRequest(doctorScheduleRepository.save(doctorSchedule));
+        }
+        Room room = roomRepository.findById(doctorScheduleUpdateRequest.getRoomId()).orElseThrow(() -> new ScheduleConflictException("Phòng không tồn tại"));
+        List<String> shifts = getConflictShift(doctorScheduleUpdateRequest.getScheduleShift());
+        if(!doctorSchedule.getWorkDate().equals(doctorScheduleUpdateRequest.getWorkDate())){
+            if(doctorScheduleRepository.existsByDoctorAndWorkDate(doctorSchedule.getDoctor(), doctorScheduleUpdateRequest.getWorkDate())){
+                throw new ScheduleConflictException("Bác sĩ đã tồn tại ca vào ngày " + doctorScheduleUpdateRequest.getWorkDate());
+            }
+            int deleteTimeSLot = deleteTimeSlotBaseOnSchedule(doctorScheduleUpdateRequest.getScheduleId());
+            boolean hasConflictRoom = doctorScheduleRepository.existsByRoomAndWorkDateAndShift(room, doctorScheduleUpdateRequest.getWorkDate(),shifts);
+            if (hasConflictRoom) {
+                throw new ScheduleConflictException("Phòng đã có bác sĩ trực");
+            }
+            doctorSchedule.setNote(doctorScheduleUpdateRequest.getNote());
+            doctorSchedule.setRoom(room);
+            doctorSchedule.setUpdatedAt(LocalDateTime.now());
+            doctorSchedule.setWorkDate(doctorScheduleUpdateRequest.getWorkDate());
+            doctorSchedule.setShift(doctorScheduleUpdateRequest.getScheduleShift());
+            DoctorSchedule saved = doctorScheduleRepository.save(doctorSchedule);
+            List<TimeSlot> timeSlots = generateTimeSlot(saved, doctorScheduleUpdateRequest.getScheduleShift(), doctorScheduleUpdateRequest.getMaxCapacity());
+            timeSlotRepository.saveAll(timeSlots);
+            return toDoctorScheduleUpdateRequest(saved);
+        }
+        if(!doctorSchedule.getShift().equals(doctorScheduleUpdateRequest.getScheduleShift())){
+            int deleteTimeSLot = deleteTimeSlotBaseOnSchedule(doctorScheduleUpdateRequest.getScheduleId());
+            boolean hasConflictRoom = doctorScheduleRepository.existsByRoomAndWorkDateAndShift(room, doctorScheduleUpdateRequest.getWorkDate(),shifts);
+            if (hasConflictRoom) {
+                throw new ScheduleConflictException("Phòng đã có bác sĩ trực");
+            }
+
+            doctorSchedule.setNote(doctorScheduleUpdateRequest.getNote());
+            doctorSchedule.setRoom(room);
+            doctorSchedule.setUpdatedAt(LocalDateTime.now());
+            doctorSchedule.setShift(doctorScheduleUpdateRequest.getScheduleShift());
+            DoctorSchedule saved = doctorScheduleRepository.save(doctorSchedule);
+            List<TimeSlot> timeSlots = generateTimeSlot(saved, doctorScheduleUpdateRequest.getScheduleShift(), doctorScheduleUpdateRequest.getMaxCapacity());
+            timeSlotRepository.saveAll(timeSlots);
+            return toDoctorScheduleUpdateRequest(saved);
+        }
+
+        doctorSchedule.setNote(doctorScheduleUpdateRequest.getNote());
+        doctorSchedule.setRoom(room);
+        doctorSchedule.setUpdatedAt(LocalDateTime.now());
+        doctorSchedule.setWorkDate(doctorScheduleUpdateRequest.getWorkDate());
+        doctorSchedule.setShift(doctorScheduleUpdateRequest.getScheduleShift());
+        DoctorSchedule saved = doctorScheduleRepository.save(doctorSchedule);
+        return toDoctorScheduleUpdateRequest(saved);
+    }
+
+    private int deleteTimeSlotBaseOnSchedule(Long  doctorScheduleId) {
+        return timeSlotRepository.deleteTimeSlotByDoctorScheduleId(doctorScheduleId);
+    }
+
+    private DoctorScheduleUpdateRequest toDoctorScheduleUpdateRequest(DoctorSchedule doctorSchedule) {
+        return DoctorScheduleUpdateRequest
+                .builder()
+                .scheduleId(doctorSchedule.getId())
+                .workDate(doctorSchedule.getWorkDate())
+                .scheduleShift(doctorSchedule.getShift())
+                .roomId(Long.valueOf(doctorSchedule.getRoom().getId()))
+                .maxCapacity(doctorSchedule.getTimeSlots().stream().mapToInt(TimeSlot::getMaxCapacity).sum())
+                .note(doctorSchedule.getNote())
+                .status(doctorSchedule.getStatus())
+                .build();
+    }
 
 
 }

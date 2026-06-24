@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateDoctorScheduleRequest;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.request.DoctorScheduleUpdateRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorScheduleResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorScheduleRowResponse;
@@ -107,6 +108,59 @@ public class ManagerScheduleController {
         return "redirect:/manager/schedules/list";
 
 
+    }
+
+
+    //Update  doctor schedule
+
+    @PostMapping("/update")
+    public String updateDoctorSchedule(@RequestParam Long weekScheduleId,
+                                       @RequestParam(required = false) Long  doctorScheduleId,
+                                       @RequestParam(required = false)Integer departmentId,
+                                       @RequestParam(required = false) String doctorName,
+                                       @RequestParam(required = false) String shift,
+                                       @RequestParam(defaultValue = "0") int page,
+                                       @RequestParam(defaultValue = "5") int size,
+                                       @ModelAttribute DoctorScheduleUpdateRequest doctorScheduleUpdateRequest,
+                                       RedirectAttributes redirectAttributes){
+
+        DoctorScheduleUpdateRequest result = scheduleService.updateDoctorSchedule(doctorScheduleUpdateRequest, weekScheduleId);
+        WeekSchedule presentWeek = weekScheduleService.findWeekScheduleById(weekScheduleId);
+        redirectAttributes.addAttribute("weekScheduleId", weekScheduleId);
+        if (departmentId != null) redirectAttributes.addAttribute("departmentId", departmentId);
+        if (doctorName != null) redirectAttributes.addAttribute("doctorName", doctorName);
+        if (shift != null) redirectAttributes.addAttribute("shift", shift);
+        redirectAttributes.addAttribute("page", page);
+        redirectAttributes.addAttribute("size", size);
+    return "redirect:/manager/schedules/list";
+
+    }
+
+    @GetMapping("/update")
+    public String updateDoctorSchedule(@RequestParam Long weekScheduleId,
+                                       @RequestParam(required = false) Long  doctorScheduleId,
+                                       @RequestParam(required = false)Integer departmentId,
+                                       @RequestParam(required = false) String doctorName,
+                                       @RequestParam(required = false) String doctorNameFilter,
+                                       @RequestParam(required = false) String departmentName,
+                                       @RequestParam(required = false) String shift,
+                                       @RequestParam(defaultValue = "0") int page,
+                                       @RequestParam(defaultValue = "5") int size,Model model){
+        WeekSchedule presentWeek = weekScheduleService.findWeekScheduleById(weekScheduleId);
+        Department department = departmentService.getDepartmentByName(departmentName);
+        List<RoomResponse> rooms = roomService.getRoomsByDepartmentId(Long.valueOf(department.getId()));
+        DoctorScheduleUpdateRequest doctorScheduleUpdateRequest = scheduleService.getDoctorScheduleUpdateRequest(doctorScheduleId);
+        List<LocalDate> workDates = weekScheduleService.workdates(weekScheduleId);
+        model.addAttribute("doctorScheduleUpdateRequest", doctorScheduleUpdateRequest);
+        model.addAttribute("rooms", rooms);
+        model.addAttribute("doctorNameFilter", doctorNameFilter);
+        model.addAttribute("doctorName", doctorName);
+        model.addAttribute("departmentName",departmentName);
+        model.addAttribute("workDates", workDates);
+        model.addAttribute("presentWeek", presentWeek);
+        model.addAttribute("page", page);
+        model.addAttribute("size", size);
+        return "manager/schedules/update";
     }
 
 }

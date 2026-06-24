@@ -10,6 +10,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DoctorScheduleResponse {
+    private Long id;
     private Long doctorId;
     private String doctorName;
     private String shift;

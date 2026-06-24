@@ -50,6 +50,8 @@
                     </form>
                 </th:block>
 
+
+                <!--    Sau cả tiến ở đây nếu cần     -->
                 <th:block th:if="${presentWeek.getStatus()=='FINALIZED' || presentWeek.getStatus()=='EXPIRED'}">
                     <i class="bi bi-lock"></i>
                     Lịch đã hoàn tất
@@ -166,8 +168,11 @@
                                 <article th:if="${cell!=null}"
                                          class="shift-card "
                                          th:classappend="${cell.shift == 'MORNING' ? 'morning' : (cell.shift == 'AFTERNOON' ? 'afternoon' : 'full-day')}">
-                                    <div class="shift-card-header">
+                                    <div class="shift-card-header" style="display: flex;">
                                         <strong th:text="${cell.shift}">Ca sáng</strong>
+                                        <a th:if="${presentWeek.getStatus()!='EXPIRED'}" th:href="@{/manager/schedules/update(weekScheduleId=${presentWeek.getId()},doctorScheduleId=${cell.id},departmentId=${departmentId},doctorName=${row.doctor.fullName},doctorNameFilter=${doctorName},shift=${shift},page=${doctorScheduleRowResponsePage.number},size=${doctorScheduleRowResponsePage.size},departmentName=${row.doctor.departmentName} )}">
+                                           <i class="bi bi-pencil" style="color: #00a651"></i>
+                                        </a>
                                     </div>
                                     <p th:text="${cell.roomName}">Phòng 101</p>
                                     <div class="shift-meta">
@@ -212,7 +217,7 @@
                 </section>
             </div>
 
-            <div th:replace="~{manager/schedules/form :: createShiftPanel}"></div>
+            <div th:replace="~{manager/schedules/create :: createShiftPanel}"></div>
         </div>
     </main>
 </div>
