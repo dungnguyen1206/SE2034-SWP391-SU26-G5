@@ -12,4 +12,6 @@ public interface DoctorService {
     DoctorResponse getDoctorById(Long doctorId);
 
     List<DoctorResponse> getAllDoctors();
+    DoctorResponse toResponse(User u);
+    String buildFullName(String lastName, String middleName, String firstName);
 }

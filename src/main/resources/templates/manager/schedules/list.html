@@ -19,18 +19,52 @@
             <div>
                 <div class="schedule-title-row">
                     <h2>Quản lý lịch làm việc</h2>
-                    <span class="schedule-status-badge finalized">Hoàn tất</span>
+                    <span class="schedule-status-badge "
+                          th:classappend="${presentWeek.getStatus()=='DRAFT' ? 'draft' : (presentWeek.getStatus()=='PUBLISHED' ? 'published' : 'finalized' )}"
+                          th:text="${presentWeek.getStatus()=='DRAFT' ? 'Bản nháp' : (presentWeek.getStatus()=='PUBLISHED' ? 'Bản hoàn chỉnh' : 'Hoàn tất' )}">Hoàn tất</span>
                 </div>
-                <p>Quản lý lịch trực của bác sĩ theo ngày, ca, phòng và số lượt khám</p>
+                <p>Quản lý lịch trực của bác sĩ theo ngày, ca, phòng</p>
             </div>
-            <span class="schedule-lock-note"><i class="bi bi-lock"></i> Lịch đã hoàn tất</span>
+
+            <div class="schedule-lock-note">
+                <th:block th:if="${presentWeek.getStatus()=='PUBLISHED'}">
+                    <form th:action="@{/manager/schedules/{weekScheduleId}/list(weekScheduleId=${presentWeek.getId()},action ='DRAFT',departmentId=${departmentId},doctorName=${doctorName},shift=${shift},page=${doctorScheduleRowResponsePage.number},size=${doctorScheduleRowResponsePage.size})}"
+                          method="post">
+                        <button type="submit" class="btn-draft"><i class="bi bi-send"></i>
+                            Trở về bản nháp
+                        </button>
+                    </form>
+                    <form th:action="@{/manager/schedules/{weekScheduleId}/list(weekScheduleId=${presentWeek.getId()},action ='FINALIZED',departmentId=${departmentId},doctorName=${doctorName},shift=${shift},page=${doctorScheduleRowResponsePage.number},size=${doctorScheduleRowResponsePage.size})}"
+                          method="Post">
+                        <button type="submit" class="btn-publish"><i class="bi bi-send"></i> Hoàn tất lịch làm việc
+                        </button>
+                    </form>
+                </th:block>
+
+                <th:block th:if="${presentWeek.getStatus()=='DRAFT'}">
+                    <form th:action="@{/manager/schedules/{weekScheduleId}/list(weekScheduleId=${presentWeek.getId()},action ='PUBLISHED',departmentId=${departmentId},doctorName=${doctorName},shift=${shift},page=${doctorScheduleRowResponsePage.number},size=${doctorScheduleRowResponsePage.size})}"
+                          method="post">
+                        <button type="submit" class="btn-publish">
+                            <i class="bi bi-send"></i> Công bố lịch làm việc
+                        </button>
+                    </form>
+                </th:block>
+
+
+                <!--    Sau cả tiến ở đây nếu cần     -->
+                <th:block th:if="${presentWeek.getStatus()=='FINALIZED' || presentWeek.getStatus()=='EXPIRED'}">
+                    <i class="bi bi-lock"></i>
+                    Lịch đã hoàn tất
+                </th:block>
+            </div>
         </header>
 
         <!--SCHEDULE MANAGEMENT - CONTEXT BANNER-->
         <section class="schedule-banner">
             <i class="bi bi-exclamation-triangle"></i>
-            <strong>Hạn chốt: Chủ nhật 23:59</strong>
-            <span>lịch tuần này chưa được chốt</span>
+            <strong th:if="${presentWeek.getStatus()=='DRAFT' || presentWeek.getStatus()=='PUBLISHED'}">Hạn chốt: Chủ
+                nhật 23:59</strong>
+            <span th:text="${presentWeek.getStatus()=='FINALIZED' ? 'Lịch tuần này đã được chốt' : (presentWeek.getStatus()=='EXPIRED' ? 'Lịch tuần đã quá thời hạn' : 'Lịch tuần này chưa được chốt') }">lịch tuần này chưa được chốt</span>
         </section>
 
         <input id="createShiftToggle" class="schedule-panel-toggle" type="checkbox">
@@ -42,43 +76,60 @@
                 <section class="schedule-toolbar">
                     <div class="schedule-toolbar-left">
                         <a class="schedule-icon-button" aria-label="Tuần trước"
-                            th:if="${prevWeekId!=null}" th:href="@{/manager/schedules/list(weekScheduleId=${prevWeekId})}">
+                           th:if="${prevWeekId!=null}"
+                           th:href="@{/manager/schedules/list(weekScheduleId=${prevWeekId},departmentId=${departmentId},doctorName=${doctorName},shift=${shift})}">
                             <i class="bi bi-chevron-left"></i>
                         </a>
-                        <button th:if="${prevWeekId==null}" disabled> <i class="bi bi-chevron-left"></i></button>
+                        <button th:if="${prevWeekId==null}" disabled><i class="bi bi-chevron-left"></i></button>
 
-                        <button class="schedule-week-button" type="button" th:text="'Tuần '+ ${presentWeek.getId()} + ' - ' + ${presentWeek.getStartDate()} +'-'+${presentWeek.getEndDate()}">
+                        <button class="schedule-week-button" type="button"
+                                th:text="'Tuần '+ ${presentWeek.getId()} + ' - ' + ${#temporals.format(presentWeek.getStartDate(), 'dd/MM/yyyy')} +' - '+${#temporals.format(presentWeek.getEndDate(), 'dd/MM/yyyy')}">
                             <i class="bi bi-calendar-week"></i>
                             Tuần 24 — 09/06–15/06/2025
                         </button>
 
-                        <a class="schedule-icon-button" type="button" aria-label="Tuần sau"
-                                th:if="${nextWeekId!=null}" th:href="@{/manager/schedules/list(weekScheduleId=${nextWeekId})}">
+                        <a class="schedule-icon-button" aria-label="Tuần sau"
+                           th:if="${nextWeekId!=null}"
+                           th:href="@{/manager/schedules/list(weekScheduleId=${nextWeekId},departmentId=${departmentId},doctorName=${doctorName},shift=${shift})}">
                             <i class="bi bi-chevron-right"></i>
                         </a>
-                        <button th:if="${nextWeekId==null}" disabled> <i class="bi bi-chevron-right"></i></button>
+                        <button th:if="${nextWeekId==null}" disabled><i class="bi bi-chevron-right"></i></button>
 
-                        <select class="schedule-control" aria-label="Khoa">
-                            <option value="0">Tất cả khoa</option>
-                            <option th:each="department : ${departments}"
-                                    th:value="${department.getId()}
-"                                   th:text="${department.getName()}" >Tim mạch</option>
-                        </select>
 
-                        <select class="schedule-control" aria-label="Loại ca">
-                            <option>Tất cả ca</option>
-                            <option value="MORNING">Ca sáng</option>
-                            <option value="AFTERNOON">Ca chiều</option>
-                            <option value="FULL_DAY">Cả ngày</option>
-                        </select>
+                        <form th:action="@{/manager/schedules/list}" method="GET">
+                            <input type="hidden" name="weekScheduleId" th:value="${presentWeek.id}">
+                            <select class="schedule-control" aria-label="Khoa" name="departmentId">
+                                <option value="">Tất cả khoa</option>
+                                <option th:each="department : ${departments}"
+                                        th:value="${department.getId()}"
+                                        th:text="${department.getName()}"
+                                        th:selected="${department.getId() == departmentId}">Tim mạch
+                                </option>
+                            </select>
 
-                        <input class="schedule-search" type="text" placeholder="Tìm bác sĩ">
+                            <select class="schedule-control" aria-label="Loại ca" name="shift">
+                                <option value="ALL">Tất cả ca</option>
+                                <option value="MORNING" th:selected="${shift=='MORNING'}">Ca sáng</option>
+                                <option value="AFTERNOON" th:selected="${shift=='AFTERNOON'}">Ca chiều</option>
+                                <option value="FULL_DAY" th:selected="${shift=='FULL_DAY'}">Cả ngày</option>
+                            </select>
+
+                            <input class="schedule-search" name="doctorName" type="text" placeholder="Tìm bác sĩ"
+                                   th:value="${doctorName}">
+                            <button type="submit" class="search-box"><i class="bi bi-funnel"></i></button>
+                        </form>
                     </div>
 
-                    <label class="schedule-primary-button" for="createShiftToggle">
-                        <i class="bi bi-plus-lg"></i>
-                        Tạo ca làm việc
+                    <label th:unless="${presentWeek.status == 'FINALIZED' or presentWeek.status == 'EXPIRED'}"
+                           class="schedule-primary-button"
+                           for="createShiftToggle">
+                        <i class="bi bi-plus-lg"></i> Tạo ca làm việc
                     </label>
+
+                    <span th:if="${presentWeek.status == 'FINALIZED' or presentWeek.status == 'EXPIRED'}"
+                          class="schedule-primary-button disabled-btn">
+                           <i class="bi bi-plus-lg"></i> Tạo ca làm việc
+                          </span>
                 </section>
 
                 <!--SCHEDULE MANAGEMENT - TABLE-->
@@ -87,149 +138,54 @@
                         <thead>
                         <tr>
                             <th>Bác sĩ</th>
-                            <th>Thứ 2 <span>09/06</span></th>
-                            <th>Thứ 3 <span>10/06</span></th>
-                            <th>Thứ 4 <span>11/06</span></th>
-                            <th>Thứ 5 <span>12/06</span></th>
-                            <th>Thứ 6 <span>13/06</span></th>
-                            <th>Thứ 7 <span>14/06</span></th>
-                            <th>CN <span>15/06</span></th>
+                            <th th:each="workdate,stt : ${workdates}"
+                                th:text="${stt.count == 7 ? 'Chủ nhật' : 'Thứ ' + (stt.count+1)} + ' - ' + ${#temporals.format(workdate, 'dd/MM/yyyy')}">
+                            </th>
                         </tr>
                         </thead>
                         <tbody>
-                        <tr>
+                        <tr th:each="row : ${doctorScheduleRowResponsePage.content}">
                             <td class="doctor-cell">
                                 <div class="schedule-doctor">
-                                    <div class="schedule-avatar">A</div>
+                                    <div class="schedule-avatar">
+                                        <img th:if="${row.doctor.avatar != null}"
+                                             th:src="${row.doctor.avatar}" alt="avatar"/>
+                                        <i th:unless="${row.doctor.avatar !=null}"
+                                           class="bi bi-person"></i>
+                                    </div>
                                     <div>
-                                        <strong>BS. Nguyễn Văn A</strong>
-                                        <span>STF-001 · Tim mạch</span>
+                                        <strong th:text="${row.doctor.fullName}">BS. Nguyễn Văn A</strong>
+                                        <span th:text="'STF-'+${row.doctor.id} + ' · ' + ${row.doctor.departmentName}">STF-001 · Tim mạch</span>
                                     </div>
                                 </div>
                             </td>
-                            <td>
-                                <article class="shift-card morning">
-                                    <div class="shift-card-header">
-                                        <strong>Ca sáng</strong>
+                            <td th:each="date : ${workdates}"
+                                th:with="cell=${row.scheduleByDate.get(date)}">
+                                <!-- Ô trống -->
+                                <div th:if="${cell==null}" class="empty-shift">—</div>
+
+                                <!-- Ô có ca -->
+                                <article th:if="${cell!=null}"
+                                         class="shift-card "
+                                         th:classappend="${cell.shift == 'MORNING' ? 'morning' : (cell.shift == 'AFTERNOON' ? 'afternoon' : 'full-day')}">
+                                    <div class="shift-card-header" style="display: flex;">
+                                        <strong th:text="${cell.shift}">Ca sáng</strong>
+                                        <a th:if="${presentWeek.getStatus()!='EXPIRED'}" th:href="@{/manager/schedules/update(weekScheduleId=${presentWeek.getId()},doctorScheduleId=${cell.id},departmentId=${departmentId},doctorName=${row.doctor.fullName},doctorNameFilter=${doctorName},shift=${shift},page=${doctorScheduleRowResponsePage.number},size=${doctorScheduleRowResponsePage.size},departmentName=${row.doctor.departmentName} )}">
+                                           <i class="bi bi-pencil" style="color: #00a651"></i>
+                                        </a>
                                     </div>
-                                    <p>Phòng 101</p>
+                                    <p th:text="${cell.roomName}">Phòng 101</p>
                                     <div class="shift-meta">
-                                        <small>8 lượt khám</small>
-                                        <span class="shift-status available">Còn trống</span>
+                                        <span class="shift-status "
+                                              th:classappend="${cell.status == 'ACTIVE' ? 'available' : 'cancelled'}"
+                                              th:text="${cell.status == 'ACTIVE' ? 'Đang hoạt động' : 'Đã hủy'}">Còn trống</span>
                                     </div>
                                 </article>
+
                             </td>
-                            <td class="empty-shift">—</td>
-                            <td>
-                                <article class="shift-card afternoon">
-                                    <div class="shift-card-header">
-                                        <strong>Ca chiều</strong>
-                                    </div>
-                                    <p>Phòng 203</p>
-                                    <div class="shift-meta">
-                                        <small>6 lượt khám</small>
-                                        <span class="shift-status available">Còn trống</span>
-                                    </div>
-                                </article>
-                            </td>
-                            <td class="empty-shift">—</td>
-                            <td>
-                                <article class="shift-card full-day">
-                                    <div class="shift-card-header">
-                                        <strong>Cả ngày</strong>
-                                    </div>
-                                    <p>Phòng 101</p>
-                                    <div class="shift-meta">
-                                        <small>16 lượt khám</small>
-                                        <span class="shift-status full">Hết chỗ</span>
-                                    </div>
-                                </article>
-                            </td>
-                            <td class="empty-shift">—</td>
-                            <td class="empty-shift">—</td>
+
                         </tr>
 
-                        <tr>
-                            <td class="doctor-cell">
-                                <div class="schedule-doctor">
-                                    <div class="schedule-avatar">B</div>
-                                    <div>
-                                        <strong>BS. Trần Thị B</strong>
-                                        <span>STF-002 · Thần kinh</span>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="empty-shift">—</td>
-                            <td>
-                                <article class="shift-card morning">
-                                    <div class="shift-card-header">
-                                        <strong>Ca sáng</strong>
-                                    </div>
-                                    <p>Phòng 305</p>
-                                    <div class="shift-meta">
-                                        <small>10 lượt khám</small>
-                                        <span class="shift-status available">Còn trống</span>
-                                    </div>
-                                </article>
-                            </td>
-                            <td class="empty-shift">—</td>
-                            <td>
-                                <article class="shift-card morning">
-                                    <div class="shift-card-header">
-                                        <strong>Ca sáng</strong>
-                                    </div>
-                                    <p>Phòng 305</p>
-                                    <div class="shift-meta">
-                                        <small>10 lượt khám</small>
-                                        <span class="shift-status full">Hết chỗ</span>
-                                    </div>
-                                </article>
-                            </td>
-                            <td class="empty-shift">—</td>
-                            <td class="empty-shift">—</td>
-                            <td class="empty-shift">—</td>
-                        </tr>
-
-                        <tr>
-                            <td class="doctor-cell">
-                                <div class="schedule-doctor">
-                                    <div class="schedule-avatar">C</div>
-                                    <div>
-                                        <strong>BS. Lê Văn C</strong>
-                                        <span>STF-003 · Tim mạch</span>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <article class="shift-card afternoon cancelled">
-                                    <div class="shift-card-header">
-                                        <strong>Ca chiều</strong>
-                                    </div>
-                                    <p>Phòng 102</p>
-                                    <div class="shift-meta">
-                                        <small>6 lượt khám</small>
-                                        <span class="shift-status cancelled">Đã hủy</span>
-                                    </div>
-                                </article>
-                            </td>
-                            <td class="empty-shift">—</td>
-                            <td class="empty-shift">—</td>
-                            <td class="empty-shift">—</td>
-                            <td>
-                                <article class="shift-card morning">
-                                    <div class="shift-card-header">
-                                        <strong>Ca sáng</strong>
-                                    </div>
-                                    <p>Phòng 102</p>
-                                    <div class="shift-meta">
-                                        <small>8 lượt khám</small>
-                                        <span class="shift-status available">Còn trống</span>
-                                    </div>
-                                </article>
-                            </td>
-                            <td class="empty-shift">—</td>
-                            <td class="empty-shift">—</td>
-                        </tr>
                         </tbody>
                     </table>
 
@@ -243,18 +199,25 @@
                         </div>
 
                         <div class="schedule-pagination">
-                            <span>Hiển thị 1–10 trong 34 bác sĩ</span>
-                            <button class="page-size active" type="button">10</button>
-                            <button class="page-size" type="button">20</button>
-                            <button class="page-size" type="button">50</button>
-                            <button class="pager-button" type="button">Trước</button>
-                            <button class="pager-button" type="button">Tiếp</button>
+                            <span th:text="'Trang hiện tại ' +${doctorScheduleRowResponsePage.number + 1}+
+                            ' trong '+${doctorScheduleRowResponsePage.totalPages} ">
+                            </span>
+                            <a th:if="${!doctorScheduleRowResponsePage.first}"
+                               th:href="@{/manager/schedules/list(weekScheduleId=${presentWeek.id},page=${doctorScheduleRowResponsePage.number - 1},size=${doctorScheduleRowResponsePage.size},departmentId=${departmentId},doctorName=${doctorName},shift=${shift})}"
+                               class="pager-button">Trước</a>
+                            <span th:if="${doctorScheduleRowResponsePage.first}"
+                                  class="pager-button disabled">Trước</span>
+
+                            <a th:if="${!doctorScheduleRowResponsePage.last}"
+                               th:href="@{/manager/schedules/list(weekScheduleId=${presentWeek.id},page=${doctorScheduleRowResponsePage.number + 1},size=${doctorScheduleRowResponsePage.size},departmentId=${departmentId},doctorName=${doctorName},shift=${shift})}"
+                               class="pager-button">Sau</a>
+                            <span th:if="${doctorScheduleRowResponsePage.last}" class="pager-button disabled">Sau</span>
                         </div>
                     </footer>
                 </section>
             </div>
 
-            <div th:replace="~{manager/schedules/form :: createShiftPanel}"></div>
+            <div th:replace="~{manager/schedules/create :: createShiftPanel}"></div>
         </div>
     </main>
 </div>
