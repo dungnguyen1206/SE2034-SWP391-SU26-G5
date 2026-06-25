@@ -88,8 +88,8 @@
                         <div class="summary-badges">
                             <span class="code-badge" th:text="${'BN-' + appointment.patientId}">BN-30241</span>
                             <span class="status-badge"
-                                th:classappend="${appointment.status == 'WAITING' ? 'waiting' : (appointment.status == 'IN_PROGRESS' ? 'examining' : 'done')}"
-                                th:text="${appointment.status == 'WAITING' ? 'ĐANG ĐỢI' : (appointment.status == 'IN_PROGRESS' ? 'ĐANG KHÁM' : (appointment.status == 'COMPLETED' ? 'HOÀN THÀNH' : appointment.status))}">ĐANG
+                                th:classappend="${appointment.status == 'WAITING' ? 'waiting' : (appointment.status == 'EXAMINING' ? 'examining' : 'done')}"
+                                th:text="${appointment.status == 'WAITING' ? 'ĐANG ĐỢI' : (appointment.status == 'EXAMINING' ? 'ĐANG KHÁM' : (appointment.status == 'COMPLETED' ? 'HOÀN THÀNH' : appointment.status))}">ĐANG
                                 KHÁM</span>
                         </div>
                     </div>
