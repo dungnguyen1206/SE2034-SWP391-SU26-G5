@@ -9,10 +9,16 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
 import java.time.LocalDate;
 import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalRecord;
+import vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalRecordRepository;
+import vn.edu.fpt.SE2034_SWP391_G5.service.MedicalRecordService;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateMedicalRecordRequest;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/doctor")
@@ -20,6 +26,8 @@ import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
 public class DoctorAppointmentController {
 
     private final AppointmentService appointmentService;
+    private final MedicalRecordRepository medicalRecordRepository;
+    private final MedicalRecordService medicalRecordService;
 
     @GetMapping("/appointment-list")
     public String appointmentList(
@@ -73,7 +81,7 @@ public class DoctorAppointmentController {
         // Tab counts
         model.addAttribute("countAll", appointmentService.countAppointmentsForDoctor(doctorId, bookingDate, "ALL"));
         model.addAttribute("countWaiting", appointmentService.countAppointmentsForDoctor(doctorId, bookingDate, "WAITING"));
-        model.addAttribute("countExamining", appointmentService.countAppointmentsForDoctor(doctorId, bookingDate, "IN_PROGRESS"));
+        model.addAttribute("countExamining", appointmentService.countAppointmentsForDoctor(doctorId, bookingDate, "EXAMINING"));
         model.addAttribute("countCompleted", appointmentService.countAppointmentsForDoctor(doctorId, bookingDate, "COMPLETED"));
 
         return "doctor/appointment-list";
@@ -112,8 +120,43 @@ public class DoctorAppointmentController {
             throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền xem thông tin lịch hẹn này");
         }
         
+        Optional<MedicalRecord> medicalRecordOpt = medicalRecordRepository.findByAppointmentId(id);
+        model.addAttribute("medicalRecord", medicalRecordOpt.orElse(null));
+        
         model.addAttribute("appointment", appointment);
         return "doctor/patient-detail";
+    }
+
+    @PostMapping("/appointments/{id}/records/create")
+    public String createMedicalRecord(
+            @PathVariable Long id,
+            @ModelAttribute CreateMedicalRecordRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
+        Long doctorId = userDetails.getUser().getId();
+        try {
+            medicalRecordService.createMedicalRecord(id, request, doctorId);
+            redirectAttributes.addFlashAttribute("successMessage", "Tạo hồ sơ bệnh án thành công");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/doctor/appointments/" + id + "/detail";
+    }
+
+    @PostMapping("/appointments/{id}/records/update")
+    public String updateMedicalRecord(
+            @PathVariable Long id,
+            @ModelAttribute CreateMedicalRecordRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
+        Long doctorId = userDetails.getUser().getId();
+        try {
+            medicalRecordService.updateMedicalRecord(id, request, doctorId);
+            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật hồ sơ bệnh án thành công");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/doctor/appointments/" + id + "/detail";
     }
 }
 

@@ -106,32 +106,35 @@
 .info-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 26px 40px;
+    gap: 18px 30px;
 }
 
 .info-item {
     display: flex;
-    gap: 15px;
+    gap: 12px;
     align-items: center;
 }
 
 .info-icon {
-    width: 50px;
-    height: 50px;
-    border-radius: 12px;
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
+    font-size: 16px;
 }
 
 .info-item p {
     color: #64748b;
-    margin-bottom: 6px;
+    font-size: 12px;
+    margin: 0 0 3px 0;
 }
 
 .info-item h3 {
-    font-size: 18px;
+    font-size: 15px;
+    font-weight: 600;
+    margin: 0;
 }
 
 /* Helper color classes */
@@ -416,3 +419,94 @@
 .btn-create-record:hover {
     background: #0052cc;
 }
+
+/* Vitals Grid */
+.vitals-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.vital-item {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.vital-label {
+    font-size: 12px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.vital-value {
+    font-size: 15px;
+    color: #0f172a;
+    font-weight: 700;
+}
+
+/* Clinical Details */
+.clinical-details {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.clinical-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.clinical-label {
+    font-size: 13px;
+    color: #475569;
+    font-weight: 700;
+}
+
+.clinical-text {
+    font-size: 14px;
+    color: #0f172a;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin: 0;
+    line-height: 1.5;
+    white-space: pre-line;
+}
+
+.prescription-box {
+    background: #eff6ff;
+    border-color: #bfdbfe;
+    color: #1e3a8a;
+    font-family: inherit;
+}
+
+/* Empty Record State */
+.empty-record-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    text-align: center;
+    color: #64748b;
+}
+
+.empty-record-state i {
+    font-size: 40px;
+    margin-bottom: 12px;
+    color: #cbd5e1;
+}
+
+.empty-record-state p {
+    font-size: 14px;
+    margin: 0;
+}
+

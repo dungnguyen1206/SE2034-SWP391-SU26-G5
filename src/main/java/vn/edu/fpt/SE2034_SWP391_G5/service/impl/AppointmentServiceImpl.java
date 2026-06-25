@@ -465,7 +465,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         Map<String, Long> statusCount = new HashMap<>();
         statusCount.put("WAITING", 0L);
         statusCount.put("CONFIRMED", 0L);
-        statusCount.put("IN_PROGRESS", 0L);
+        statusCount.put("EXAMINING", 0L);
         statusCount.put("COMPLETED", 0L);
         statusCount.put("CANCELLED", 0L);
 
@@ -843,7 +843,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         List<String> statuses;
 
         if (status == null || status.trim().isEmpty() || "ALL".equalsIgnoreCase(status)) {
-            statuses = List.of("WAITING", "IN_PROGRESS", "COMPLETED");
+            statuses = List.of("WAITING", "EXAMINING", "COMPLETED");
         } else {
             statuses = List.of(status.toUpperCase());
         }
@@ -858,7 +858,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             return appointmentRepository.countByDoctorIdAndBookingDateAndStatusIn(
                     doctorId,
                     bookingDate,
-                    List.of("WAITING", "IN_PROGRESS", "COMPLETED")
+                    List.of("WAITING", "EXAMINING", "COMPLETED")
             );
         }
 
