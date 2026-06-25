@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
 import java.time.LocalDate;
+import java.util.Locale;
 import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalRecord;
@@ -53,7 +54,7 @@ public class DoctorAppointmentController {
 
         // Current date in Vietnamese
         String currentDate = java.time.format.DateTimeFormatter
-                .ofPattern("EEEE, 'ngày' dd 'tháng' MM, yyyy", new java.util.Locale("vi", "VN"))
+                .ofPattern("EEEE, 'ngày' dd 'tháng' MM, yyyy", Locale.of("vi", "VN"))
                 .format(bookingDate);
         // Capitalize first letter of the day (e.g. "Thứ hai" -> "Thứ Hai")
         if (currentDate.length() > 0) {
