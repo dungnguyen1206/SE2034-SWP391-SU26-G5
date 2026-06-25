@@ -103,7 +103,6 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     // ---------------------------------------------------------------------------
-    @Override
     public long countByStatus(List<AppointmentResponse> appointments, String status) {
         long count = 0;
         for (AppointmentResponse appointment : appointments) {
@@ -114,7 +113,6 @@ public class AppointmentServiceImpl implements AppointmentService {
         return count;
     }
 
-    @Override
     public List<AppointmentResponse> filterAppointments(List<AppointmentResponse> appointments, String search, String status) {
         List<AppointmentResponse> result = new ArrayList<>();
 
@@ -254,8 +252,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         return result;
     }
 
-    @Override
     public Page<AppointmentResponse> getPagedAppointmentsForReceptionist(
+
             String search,
             String status,
             LocalDate fromDate,
