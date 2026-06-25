@@ -10,7 +10,7 @@
                 <strong class="breadcrumb-current" th:text="${pageTitle}"></strong>
             </div>
 
-        <div class="header-right">
+            <div class="header-right">
 
                 <div class="system-status">
                     <span class="status-icon">⌁</span>
@@ -19,30 +19,38 @@
 
                 <div class="header-divider"></div>
 
-                <div class="datetime-box">
-                    <span class="time-icon">◷</span>
-                    <span th:text="${currentDateTime}"></span>
-                </div>
 
-                <div class="notification-box">
-                    <span class="notification-icon">🔔</span>
-                    <span class="notification-dot"></span>
-                </div>
+                <details class="header-user-dropdown">
 
-                <div class="header-user">
-                    <div class="header-avatar" th:text="${receptionist.avatarText}"></div>
+                    <summary class="header-user">
+                        <div class="header-avatar" th:text="${receptionist.avatarText}">PL</div>
 
-                    <div class="header-user-info">
-                        <strong th:text="${receptionist.fullName}"></strong>
-                        <p>Tiếp tân</p>
+                        <div class="header-user-info">
+                            <strong th:text="${receptionist.fullName}">Phạm Thị Linh</strong>
+                            <p>Tiếp tân</p>
+                        </div>
+
+                        <span class="header-arrow">⌄</span>
+                    </summary>
+
+                    <div class="header-dropdown-menu">
+                        <form th:action="@{/logout}" method="post" class="dropdown-logout-form">
+                            <th:block th:if="${_csrf != null}">
+                                <input type="hidden"
+                                       th:name="${_csrf.parameterName}"
+                                       th:value="${_csrf.token}">
+                            </th:block>
+
+                            <button type="submit" class="dropdown-item logout-item">
+                                Đăng xuất
+                            </button>
+                        </form>
                     </div>
 
-                    <span class="header-arrow">⌄</span>
-                </div>
+                </details>
 
             </div>
 
         </header>
-
     </body>
 </html>

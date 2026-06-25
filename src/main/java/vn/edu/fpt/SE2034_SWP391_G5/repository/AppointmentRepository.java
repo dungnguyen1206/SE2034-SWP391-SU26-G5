@@ -10,7 +10,6 @@ import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentStatusCountResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Appointment;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,17 +30,120 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "order by sl.startTime asc")
     List<Appointment> findAppointmentsByBookingDate(@Param("today") LocalDate today);
 
-    @Query("SELECT a FROM Appointment a " +
-            "LEFT JOIN FETCH a.patient " +
-            "LEFT JOIN FETCH a.doctor " +
-            "LEFT JOIN FETCH a.service sv " +
-            "LEFT JOIN FETCH sv.department " +
-            "LEFT JOIN FETCH a.slot sl " +
-            "LEFT JOIN FETCH sl.schedule sch " +
-            "LEFT JOIN FETCH sch.room " +
-            "ORDER BY a.bookingDate DESC, sl.startTime ASC")
-    List<Appointment> findAllForReceptionistList();
+    //-------------------------------------- Receptionist -----------------------------------------------
+    // -------------------------- Dashboard ----------------------------------------
+    // Đếm tổng lịch hẹn trong ngày hiện tại.
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.bookingDate = :today")
+    long countTodayAppointments(@Param("today") LocalDate today);
 
+    // Đếm số lịch hẹn đã check-in trong ngày hiện tại.
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.bookingDate = :today AND a.checkInTime IS NOT NULL")
+    long countTodayCheckedInAppointments(@Param("today") LocalDate today);
+
+    // Đếm số bệnh nhân đang chờ khám trong ngày hiện tại.
+    @Query("SELECT COUNT(a) FROM Appointment a " +
+            "WHERE a.bookingDate = :today " +
+            "AND a.status = 'WAITING'")
+    long countTodayWaitingAppointments(@Param("today") LocalDate today);
+
+    // Đếm số bệnh nhân đang khám trong ngày hiện tại.
+    @Query("SELECT COUNT(a) FROM Appointment a " +
+            "WHERE a.bookingDate = :today " +
+            "AND a.status = 'EXAMINING'")
+    long countTodayExaminingAppointments(@Param("today") LocalDate today);
+
+
+    // Lấy danh sách lịch hẹn hôm nay trên Dashboard.
+    // Có hỗ trợ tìm kiếm theo họ, tên đệm, tên hoặc số điện thoại bệnh nhân.
+    // Chỉ query lịch hẹn của ngày hiện tại, không lấy toàn bộ danh sách.
+    @Query("SELECT a FROM Appointment a " +
+            "JOIN FETCH a.patient p " +
+            "JOIN FETCH a.doctor d " +
+            "JOIN FETCH a.service s " +
+            "JOIN FETCH s.department dep " +
+            "JOIN FETCH a.slot sl " +
+            "JOIN FETCH sl.schedule ds " +
+            "JOIN FETCH ds.room r " +
+            "WHERE a.bookingDate = :today " +
+            "AND (:search IS NULL OR :search = '' " +
+            "OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "OR LOWER(p.middleName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "OR p.phone LIKE CONCAT('%', :search, '%')) " +
+            "ORDER BY sl.startTime ASC")
+    List<Appointment> findTodayAppointmentsForDashboard(
+            @Param("today") LocalDate today,
+            @Param("search") String search
+    );
+
+    // ------------------------------------------------------------------------------------------------------------
+
+    // Lấy danh sách lịch hẹn theo ngày hiển thị lên màn hình Appointment List of Receptionist
+    @Query(
+            value = "SELECT a FROM Appointment a " +
+                    "JOIN FETCH a.patient p " +
+                    "JOIN FETCH a.doctor d " +
+                    "JOIN FETCH a.service s " +
+                    "JOIN FETCH s.department dep " +
+                    "JOIN FETCH a.slot sl " +
+                    "JOIN FETCH sl.schedule sch " +
+                    "JOIN FETCH sch.room r " +
+                    "WHERE a.bookingDate BETWEEN :fromDate AND :toDate " +
+                    "ORDER BY a.bookingDate DESC, sl.startTime ASC",
+            countQuery = "SELECT COUNT(a) FROM Appointment a " +
+                    "WHERE a.bookingDate BETWEEN :fromDate AND :toDate"
+    )
+    Page<Appointment> findAppointmentListForReceptionistList(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate, Pageable pageable);
+
+    // Tìm kiếm, lọc trạng thái, lọc ngày lịch hẹn
+    @Query(
+            value = "SELECT a FROM Appointment a " +
+                    "JOIN FETCH a.patient p " +
+                    "JOIN FETCH a.doctor d " +
+                    "JOIN FETCH a.service s " +
+                    "JOIN FETCH s.department dep " +
+                    "JOIN FETCH a.slot sl " +
+                    "JOIN FETCH sl.schedule ds " +
+                    "JOIN FETCH ds.room r " +
+                    "WHERE a.bookingDate BETWEEN :fromDate AND :toDate " +
+                    "AND (:status IS NULL OR :status = '' OR a.status = :status) " +
+                    "AND (:search IS NULL OR :search = '' " +
+                    "OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR LOWER(p.middleName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR p.phone LIKE CONCAT('%', :search, '%')) " +
+                    "ORDER BY a.bookingDate DESC, sl.startTime ASC",
+            countQuery = "SELECT COUNT(a) FROM Appointment a " +
+                    "JOIN a.patient p " +
+                    "WHERE a.bookingDate BETWEEN :fromDate AND :toDate " +
+                    "AND (:status IS NULL OR :status = '' OR a.status = :status) " +
+                    "AND (:search IS NULL OR :search = '' " +
+                    "OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR LOWER(p.middleName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR p.phone LIKE CONCAT('%', :search, '%'))"
+    )
+    Page<Appointment> searchAppointmentListForReceptionist(@Param("search") String search, @Param("status") String status, @Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate, Pageable pageable);
+
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.bookingDate BETWEEN :fromDate AND :toDate AND a.status = 'CONFIRMED'")
+    long countConfirmedAppointmentsInDateRange(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
+
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.bookingDate BETWEEN :fromDate AND :toDate AND a.status = 'WAITING'")
+    long countWaitingAppointmentsInDateRange(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
+
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.bookingDate BETWEEN :fromDate AND :toDate AND a.status = 'EXAMINING'")
+    long countExaminingAppointmentsInDateRange(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
+
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.bookingDate BETWEEN :fromDate AND :toDate AND a.status = 'COMPLETED'")
+    long countCompletedAppointmentsInDateRange(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
+
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.bookingDate BETWEEN :fromDate AND :toDate AND a.status = 'CANCELLED'")
+    long countCancelledAppointmentsInDateRange(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
+
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.bookingDate BETWEEN :fromDate AND :toDate AND a.status = 'NO_SHOW'")
+    long countNoShowAppointmentsInDateRange(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
+
+    // ------------------------------------------------------------------------
     @Query("SELECT a FROM Appointment a " +
             "LEFT JOIN FETCH a.patient " +
             "LEFT JOIN FETCH a.doctor " +
@@ -67,9 +169,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("roomId") Integer roomId
     );
 
-    @Query("SELECT a FROM Appointment a " +
+    @Query("SELECT DISTINCT a FROM Appointment a " +
             "LEFT JOIN FETCH a.patient p " +
-            "LEFT JOIN FETCH p.addresses " +
+            "LEFT JOIN FETCH p.addresses addr " +
+            "LEFT JOIN FETCH addr.province " +
             "LEFT JOIN FETCH a.doctor " +
             "LEFT JOIN FETCH a.service sv " +
             "LEFT JOIN FETCH sv.department " +
@@ -78,6 +181,21 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "LEFT JOIN FETCH sch.room " +
             "WHERE a.id = :appointmentId")
     Optional<Appointment> findAppointmentDetailById(@Param("appointmentId") Long appointmentId);
+
+    @Query("SELECT a FROM Appointment a " +
+            "JOIN FETCH a.patient p " +
+            "JOIN FETCH a.doctor d " +
+            "JOIN FETCH a.service s " +
+            "JOIN FETCH s.department dep " +
+            "JOIN FETCH a.slot sl " +
+            "JOIN FETCH sl.schedule sch " +
+            "JOIN FETCH sch.room r " +
+            "WHERE a.bookingDate = :today " +
+            "AND a.status IN ('WAITING', 'EXAMINING') " +
+            "ORDER BY r.roomNumber ASC, a.checkInTime ASC, a.id ASC")
+    List<Appointment> findQueueAppointmentsToday(@Param("today") LocalDate today);
+
+    // ------------------------------------------------------------------------------------
 
     List<Appointment> findByPatientIdOrderByCreatedAtDesc(Long patientId);
 
@@ -116,13 +234,15 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     long countByDoctorIdAndBookingDateAndStatusIn(Long doctorId, LocalDate bookingDate, List<String> statuses);
 
     @Query("SELECT a FROM Appointment a " +
-           "LEFT JOIN FETCH a.patient " +
-           "LEFT JOIN FETCH a.slot sl " +
-           "WHERE a.doctor.id = :doctorId AND a.status = :status " +
-           "ORDER BY a.bookingDate DESC, a.id DESC")
+            "LEFT JOIN FETCH a.patient " +
+            "LEFT JOIN FETCH a.slot sl " +
+            "WHERE a.doctor.id = :doctorId AND a.status = :status " +
+            "ORDER BY a.bookingDate DESC, a.id DESC")
     List<Appointment> findRecentCompletedAppointments(@Param("doctorId") Long doctorId,
                                                       @Param("status") String status,
                                                       Pageable pageable);
+
+
 }
 
     

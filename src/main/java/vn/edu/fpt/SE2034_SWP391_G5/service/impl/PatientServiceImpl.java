@@ -81,6 +81,7 @@ public class PatientServiceImpl implements PatientService {
         user.setDateOfBirth(request.getDateOfBirth());
         user.setBloodType(request.getBloodType());
         user.setUpdatedAt(LocalDateTime.now());
+        user.setAvatar(request.getAvatar());
         userRepository.save(user);
 
         if (request.getAddressLine() != null && request.getProvinceId() != null) {

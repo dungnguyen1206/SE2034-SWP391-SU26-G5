@@ -35,6 +35,8 @@ public class DoctorDashboardController {
 
         Long doctorId = userDetails.getUser().getId();
         LocalDate today = LocalDate.now();
+        String doctorAvatar = userDetails.getUser().getAvatar();
+        model.addAttribute("doctorAvatar", doctorAvatar);
 
         // 1. Số bệnh nhân hôm nay (WAITING, EXAMINING, COMPLETED)
         long todayPatients = appointmentService.countAppointmentsForDoctor(doctorId, today, "ALL");

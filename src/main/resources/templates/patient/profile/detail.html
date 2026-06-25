@@ -33,8 +33,7 @@
                 <div>
                     <div class="profile-avatar-card">
                         <div class="profile-avatar">
-                            <span
-                                th:text="${profile.firstName != null} ? ${profile.firstName.substring(0,1).toUpperCase()} : 'P'">P</span>
+                            <img th:src="${profile.getAvatar()}" alt="avatar"></img>
                         </div>
                         <div class="profile-name" th:text="${profile.fullName}">Nguyễn Văn A</div>
                         <div class="profile-username" th:text="'@' + ${profile.username}">@username</div>
