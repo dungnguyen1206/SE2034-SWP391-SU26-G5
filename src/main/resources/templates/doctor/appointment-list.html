@@ -92,8 +92,8 @@
                     th:onclick="|location.href='@{/doctor/appointment-list(status='ALL', date=${selectedDate})}'|">
                     Tất cả (<span th:text="${countAll}">7</span>)
                 </button>
-                <button th:classappend="${currentStatus == 'IN_PROGRESS'} ? 'active' : ''"
-                    th:onclick="|location.href='@{/doctor/appointment-list(status='IN_PROGRESS', date=${selectedDate})}'|">
+                <button th:classappend="${currentStatus == 'EXAMINING'} ? 'active' : ''"
+                    th:onclick="|location.href='@{/doctor/appointment-list(status='EXAMINING', date=${selectedDate})}'|">
                     Đang khám (<span th:text="${countExamining}">1</span>)
                 </button>
                 <button th:classappend="${currentStatus == 'WAITING'} ? 'active' : ''"
@@ -147,10 +147,10 @@
                                     <input type="hidden" name="page" th:value="${currentPage}" />
                                     <input type="hidden" name="date" th:value="${selectedDate}" />
                                     <select name="status" class="status-select"
-                                        th:classappend="${a.status == 'WAITING' ? 'waiting' : (a.status == 'IN_PROGRESS' ? 'examining' : 'done')}"
+                                        th:classappend="${a.status == 'WAITING' ? 'waiting' : (a.status == 'EXAMINING' ? 'examining' : 'done')}"
                                         style="margin-bottom: 0;">
                                         <option value="WAITING" th:selected="${a.status == 'WAITING'}">ĐANG ĐỢI</option>
-                                        <option value="IN_PROGRESS" th:selected="${a.status == 'IN_PROGRESS'}">ĐANG KHÁM
+                                        <option value="EXAMINING" th:selected="${a.status == 'EXAMINING'}">ĐANG KHÁM
                                         </option>
                                         <option value="COMPLETED" th:selected="${a.status == 'COMPLETED'}">HOÀN THÀNH
                                         </option>

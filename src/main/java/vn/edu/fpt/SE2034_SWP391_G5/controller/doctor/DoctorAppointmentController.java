@@ -73,7 +73,7 @@ public class DoctorAppointmentController {
         // Tab counts
         model.addAttribute("countAll", appointmentService.countAppointmentsForDoctor(doctorId, bookingDate, "ALL"));
         model.addAttribute("countWaiting", appointmentService.countAppointmentsForDoctor(doctorId, bookingDate, "WAITING"));
-        model.addAttribute("countExamining", appointmentService.countAppointmentsForDoctor(doctorId, bookingDate, "IN_PROGRESS"));
+        model.addAttribute("countExamining", appointmentService.countAppointmentsForDoctor(doctorId, bookingDate, "EXAMINING"));
         model.addAttribute("countCompleted", appointmentService.countAppointmentsForDoctor(doctorId, bookingDate, "COMPLETED"));
 
         return "doctor/appointment-list";
