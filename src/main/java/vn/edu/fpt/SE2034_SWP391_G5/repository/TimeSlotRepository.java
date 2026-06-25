@@ -1,6 +1,7 @@
 package vn.edu.fpt.SE2034_SWP391_G5.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -34,4 +35,8 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
             @Param("roomId") Integer roomId,
             @Param("workDate") LocalDate workDate
     );
+
+    @Modifying
+    @Query("DELETE FROM TimeSlot t where t.schedule.id=:doctorScheduleId")
+    int deleteTimeSlotByDoctorScheduleId(@Param("doctorScheduleId") Long doctorScheduleId);
 }

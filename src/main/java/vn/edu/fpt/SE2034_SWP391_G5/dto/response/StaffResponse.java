@@ -19,6 +19,7 @@ public class StaffResponse {
     private String role;
     private String status;
     private String createdBy;
+    private String avatar;
     private LocalDateTime createdDate;
     private LocalDateTime lastModifiedDate;
 }

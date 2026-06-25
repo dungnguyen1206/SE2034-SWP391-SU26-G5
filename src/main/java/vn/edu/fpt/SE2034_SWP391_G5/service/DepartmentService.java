@@ -7,6 +7,6 @@ import java.util.List;
 public interface DepartmentService {
     List<Department> getAllActiveDepartments();
     Department getDepartmentById(Integer id);
-
+    Department getDepartmentByName(String name);
 
 }

@@ -125,10 +125,11 @@
                                 <div class="dashboard-search-box">
                                     <span class="search-icon"> ⌕ </span>
 
-                                    <input type="text" name="search" placeholder="Tìm kiếm theo tên bệnh nhân, sdt..." th:value="${search}">
+                                    <input type="text" name="search" placeholder="Tìm kiếm theo tên bệnh nhân, sdt..."
+                                           th:value="${search}">
                                 </div>
 
-                                <button type="submit" class="btn-dashboard-search"> Tìm </button>
+                                <button type="submit" class="btn-dashboard-search"> Tìm</button>
 
                                 <a th:href="@{/receptionist/dashboard}" class="btn-dashboard-reset"> Làm mới </a>
                             </form>
@@ -170,11 +171,13 @@
                                         <td th:text="${appointment.doctorFullName != null ? appointment.doctorFullName : '-'}"></td>
 
                                         <td>
-                                            <span class="room-badge" th:text="${appointment.roomNumber != null ? appointment.roomNumber : '-'}"></span>
+                                <span class="room-badge"
+                                      th:text="${appointment.roomNumber != null ? appointment.roomNumber : '-'}"></span>
                                         </td>
 
                                         <td>
-                                            <span class="status-badge" th:classappend="${appointment.statusClass}" th:text="${appointment.statusLabel}"></span>
+                                <span class="status-badge" th:classappend="${appointment.statusClass}"
+                                      th:text="${appointment.statusLabel}"></span>
                                         </td>
 
                                         <td>

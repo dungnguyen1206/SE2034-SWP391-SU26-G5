@@ -8,6 +8,7 @@ body {
     font-family: "Segoe UI", Arial, sans-serif;
     background-color: #f5f7fb;
     color: #1f2937;
+    line-height: normal;
 }
 
 .layout {
@@ -51,13 +52,16 @@ body {
 .brand h2 {
     font-size: 18px;
     font-weight: 700;
-    margin-bottom: 3px;
+    margin: 0 0 3px 0;
+    line-height: normal;
 }
 
 .brand p {
     font-size: 12px;
     color: #94a3b8;
     letter-spacing: 0.4px;
+    margin: 0;
+    line-height: normal;
 }
 
 .receptionist-card {
@@ -89,12 +93,15 @@ body {
     font-size: 15px;
     font-weight: 700;
     color: #ffffff;
-    margin-bottom: 4px;
+    margin: 0 0 4px 0;
+    line-height: normal;
 }
 
 .receptionist-info p {
     font-size: 13px;
     color: #cbd5e1;
+    margin: 0;
+    line-height: normal;
 }
 
 .menu-title {

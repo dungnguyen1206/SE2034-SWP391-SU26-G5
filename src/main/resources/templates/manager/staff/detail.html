@@ -49,7 +49,14 @@
             <div class="staff-detail-body">
                 <!--PROFILE SUMMARY-->
                 <section class="staff-form-card staff-detail-summary">
-                    <div class="staff-detail-avatar">S</div>
+                    <div class="staff-detail-avatar">
+                        <img th:if="${staff.getAvatar() != null and staff.getAvatar() != ''}"
+                             th:src="${staff.avatar}"
+                             alt="Avatar"/>
+
+                        <i th:unless="${staff.getAvatar() != null and staff.getAvatar() != ''}"
+                           class="bi bi-person"></i>
+                        </div>
 
                     <div class="staff-detail-summary-main">
                         <h3 th:text="${staff.getFullName()}">Hồ sơ nhân viên</h3>

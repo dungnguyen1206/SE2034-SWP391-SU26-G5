@@ -2,6 +2,9 @@ package vn.edu.fpt.SE2034_SWP391_G5.controller.manager;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -11,20 +14,21 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.UpdateUserRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorStaffDetailResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ReceptionistStaffDetailResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.StaffResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 import vn.edu.fpt.SE2034_SWP391_G5.enums.AppointmentStatus;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.RoleRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRoleRepository;
-import vn.edu.fpt.SE2034_SWP391_G5.service.DepartmentService;
-import vn.edu.fpt.SE2034_SWP391_G5.service.DoctorService;
-import vn.edu.fpt.SE2034_SWP391_G5.service.ReceptionistService;
-import vn.edu.fpt.SE2034_SWP391_G5.service.StaffService;
+import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
+import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetailsService;
+import vn.edu.fpt.SE2034_SWP391_G5.service.*;
 
 import java.util.List;
 
@@ -37,6 +41,7 @@ public class ManagerStaffController {
     private final StaffService staffService;
     private final ReceptionistService receptionistService;
     private final DepartmentService departmentService;
+    private final ImageUploadService imageUploadService;
 
 
 
@@ -84,7 +89,7 @@ public class ManagerStaffController {
     public String updateStaff(@PathVariable Long staffId,
                               @Valid @ModelAttribute("updateUserForm") UpdateUserRequest updateUserForm,
                               BindingResult bindingResult,
-                              Model model, RedirectAttributes redirectAttributes) {
+                              Model model, RedirectAttributes redirectAttributes, @RequestParam("avatarFile") MultipartFile avatarFile) {
         updateUserForm.setId(staffId);
 
         if (bindingResult.hasErrors()) {
@@ -93,6 +98,11 @@ public class ManagerStaffController {
         }
 
         try {
+            CustomUserDetails customUserDetails =  (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            User manager = customUserDetails.getUser();
+            updateUserForm.setCreatedBy(manager);
+            String avatar = imageUploadService.uploadImage(avatarFile);
+            updateUserForm.setAvatar(avatar);
             staffService.updateStaffProfile(staffId, updateUserForm);
         } catch (BadRequestException | ResourceNotFoundException e) {
             model.addAttribute("errorMessage", e.getMessage());

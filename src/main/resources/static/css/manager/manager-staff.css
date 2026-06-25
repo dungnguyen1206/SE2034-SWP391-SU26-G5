@@ -236,6 +236,13 @@
     font-size: 13px;
     font-weight: 700;
     flex-shrink: 0;
+    overflow: hidden;
+
+}
+.staff-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .staff-type-badge {
@@ -708,8 +715,8 @@ Staff form success
 }
 
 .staff-photo-preview {
-    width: 80px;
-    height: 80px;
+    width: 120px;
+    height: 120px   ;
     border-radius: 50%;
     margin: 4px auto 14px;
     display: flex;
@@ -719,9 +726,14 @@ Staff form success
     color: #ffffff;
     font-size: 24px;
     font-weight: 700;
+    overflow: hidden;
+}
+.staff-photo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.staff-upload-button,
 .staff-save-button,
 .staff-cancel-button {
     width: 100%;
@@ -732,7 +744,9 @@ Staff form success
 }
 
 .staff-upload-button {
-    border: 1px dashed #cbd5e1;
+    margin: 16px;
+    padding: 8px ;
+    border: 1px solid #c3c2c2;
     background: #ffffff;
     color: #64748b;
     display: flex;
@@ -879,8 +893,8 @@ Staff form success
 }
 
 .staff-detail-avatar {
-    width: 72px;
-    height: 72px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     background: #86a7ff;
     color: #ffffff;
@@ -889,6 +903,12 @@ Staff form success
     justify-content: center;
     font-size: 24px;
     font-weight: 700;
+    overflow: hidden;
+}
+.staff-detail-avatar img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .staff-detail-summary-main h3 {

@@ -36,4 +36,10 @@ public class DepartmentServiceImpl implements DepartmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khoa với id: " + id));
     }
 
+    @Override
+    public Department getDepartmentByName(String name) {
+        return departmentRepository.findDepartmentByDepartmentName(name);
+    }
+
+
 }
