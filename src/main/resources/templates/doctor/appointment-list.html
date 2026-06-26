@@ -90,19 +90,19 @@
             <div class="filter-tabs">
                 <button th:classappend="${currentStatus == 'ALL'} ? 'active' : ''"
                     th:onclick="|location.href='@{/doctor/appointment-list(status='ALL', date=${selectedDate})}'|">
-                    Tất cả (<span th:text="${countAll}">7</span>)
+                    Tất cả (<span th:text="${countAll}"></span>)
                 </button>
                 <button th:classappend="${currentStatus == 'EXAMINING'} ? 'active' : ''"
                     th:onclick="|location.href='@{/doctor/appointment-list(status='EXAMINING', date=${selectedDate})}'|">
-                    Đang khám (<span th:text="${countExamining}">1</span>)
+                    Đang khám (<span th:text="${countExamining}"></span>)
                 </button>
                 <button th:classappend="${currentStatus == 'WAITING'} ? 'active' : ''"
                     th:onclick="|location.href='@{/doctor/appointment-list(status='WAITING', date=${selectedDate})}'|">
-                    Đang đợi (<span th:text="${countWaiting}">5</span>)
+                    Đang đợi (<span th:text="${countWaiting}"></span>)
                 </button>
                 <button th:classappend="${currentStatus == 'COMPLETED'} ? 'active' : ''"
                     th:onclick="|location.href='@{/doctor/appointment-list(status='COMPLETED', date=${selectedDate})}'|">
-                    Hoàn thành (<span th:text="${countCompleted}">1</span>)
+                    Hoàn thành (<span th:text="${countCompleted}"></span>)
                 </button>
             </div>
 
@@ -147,10 +147,10 @@
                                     <input type="hidden" name="page" th:value="${currentPage}" />
                                     <input type="hidden" name="date" th:value="${selectedDate}" />
                                     <select name="status" class="status-select"
-                                        th:classappend="${a.status == 'WAITING' ? 'waiting' : (a.status == 'EXAMINING' ? 'examining' : 'done')}"
+                                        th:classappend="${a.status == 'WAITING' ? 'waiting' : (a.status == 'IN_PROGRESS' ? 'examining' : 'done')}"
                                         style="margin-bottom: 0;">
                                         <option value="WAITING" th:selected="${a.status == 'WAITING'}">ĐANG ĐỢI</option>
-                                        <option value="EXAMINING" th:selected="${a.status == 'EXAMINING'}">ĐANG KHÁM
+                                        <option value="IN_PROGRESS" th:selected="${a.status == 'IN_PROGRESS'}">ĐANG KHÁM
                                         </option>
                                         <option value="COMPLETED" th:selected="${a.status == 'COMPLETED'}">HOÀN THÀNH
                                         </option>

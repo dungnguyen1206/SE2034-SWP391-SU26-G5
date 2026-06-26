@@ -2,6 +2,7 @@ package vn.edu.fpt.SE2034_SWP391_G5.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -11,8 +12,8 @@ import vn.edu.fpt.SE2034_SWP391_G5.dto.response.*;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.*;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.*;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
+import vn.edu.fpt.SE2034_SWP391_G5.repository.*;
 import vn.edu.fpt.SE2034_SWP391_G5.util.CodeGenerator;
 
 import java.time.LocalDate;
@@ -31,8 +32,6 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final UserRepository userRepository;
     private final MedicalServiceRepository medicalServiceRepository;
 
-    // --------------------------------------- Hoang Linh
-    // --------------------------------------------
     @Override
     public Page<AppointmentResponse> getAppointmentListForReceptionist(LocalDate fromDate, LocalDate toDate, int page,
                                                                        int size) {
@@ -147,8 +146,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     public AppointmentPrintResponse getCheckInTicket(Long appointmentId) {
-        Appointment appointment = appointmentRepository.findCheckInTicketById(appointmentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin lịch hẹn"));
+        Appointment appointment = appointmentRepository.findCheckInTicketById(appointmentId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin lịch hẹn"));
         AppointmentPrintResponse ticket = toPrintResponse(appointment);
         if (appointment.getCheckInTime() != null) {
             TimeSlot effectiveSlot = getEffectiveSlotForTicket(appointment);
@@ -197,8 +195,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             TimeSlot nextSlot = findNextSlot(slots, slot);
             if (nextSlot == null) {
                 markAppointmentNoShow(appointment, now);
-                throw new BadRequestException(
-                        "Bệnh nhân đã trễ slot khám và không còn slot tiếp theo. Vui lòng đặt lịch lại.");
+                throw new BadRequestException("Bệnh nhân đã trễ slot khám và không còn slot tiếp theo. Vui lòng đặt lịch lại.");
             }
         }
 
@@ -388,11 +385,10 @@ public class AppointmentServiceImpl implements AppointmentService {
         return baseNumber;
     }
 
-    private Long calculateOrderInEffectiveSlot(Appointment targetAppointment, List<TimeSlot> slots,
-                                               TimeSlot effectiveSlot) {
+    private Long calculateOrderInEffectiveSlot(Appointment targetAppointment, List<TimeSlot> slots, TimeSlot effectiveSlot) {
         Integer roomId = getRoomId(targetAppointment);
 
-        if (roomId == null) {
+        if(roomId == null){
             return 0L;
         }
 
@@ -525,7 +521,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         Map<String, Long> statusCount = new HashMap<>();
         statusCount.put("WAITING", 0L);
         statusCount.put("CONFIRMED", 0L);
-        statusCount.put("IN_PROGRESS", 0L);
+        statusCount.put("EXAMINING", 0L);
         statusCount.put("COMPLETED", 0L);
         statusCount.put("CANCELLED", 0L);
 
@@ -740,6 +736,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         String patientGender = patient != null ? patient.getGender() : null;
+        LocalDate patientDateOfBirth = patient != null ? patient.getDateOfBirth() : null;
+        String patientBloodType = patient != null ? patient.getBloodType() : null;
 
         String patientInitials = "";
         if (!patientFullName.trim().isEmpty()) {
@@ -764,6 +762,8 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .patientAddress(buildPatientAddress(patient))
                 .patientAge(patientAge)
                 .patientGender(patientGender)
+                .patientDateOfBirth(patientDateOfBirth)
+                .patientBloodType(patientBloodType)
                 .patientInitials(patientInitials)
                 .doctorId(doctor != null ? doctor.getId() : null)
                 .doctorFullName(doctorFullName)
@@ -896,7 +896,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         List<String> statuses;
 
         if (status == null || status.trim().isEmpty() || "ALL".equalsIgnoreCase(status)) {
-            statuses = List.of("WAITING", "IN_PROGRESS", "COMPLETED");
+            statuses = List.of("WAITING", "EXAMINING", "COMPLETED");
         } else {
             statuses = List.of(status.toUpperCase());
         }
@@ -911,18 +911,17 @@ public class AppointmentServiceImpl implements AppointmentService {
             return appointmentRepository.countByDoctorIdAndBookingDateAndStatusIn(
                     doctorId,
                     bookingDate,
-                    List.of("WAITING", "IN_PROGRESS", "COMPLETED"));
+                    List.of("WAITING", "EXAMINING", "COMPLETED")
+            );
         }
 
-        return appointmentRepository.countByDoctorIdAndBookingDateAndStatus(doctorId, bookingDate,
-                status.toUpperCase());
+        return appointmentRepository.countByDoctorIdAndBookingDateAndStatus(doctorId, bookingDate, status.toUpperCase());
     }
 
     @Override
     @Transactional
     public void updateAppointmentStatus(Long appointmentId, String newStatus) {
-        Appointment appointment = appointmentRepository.findById(appointmentId)
-                .orElseThrow(() -> new ResourceNotFoundException(
+        Appointment appointment = appointmentRepository.findById(appointmentId).orElseThrow(() -> new ResourceNotFoundException(
                         "Không tìm thấy lịch hẹn với ID: " + appointmentId));
 
         appointment.setStatus(newStatus.toUpperCase());
