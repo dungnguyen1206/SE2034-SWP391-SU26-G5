@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Tổng quan doanh thu</title>
-    <link rel="stylesheet" th:href="@{/css/manager/manager-common.css}">]
+    <link rel="stylesheet" th:href="@{/css/manager/manager-common.css}">
+    ]<link rel="stylesheet" th:href="@{/css/manager/manager-schedules.css}">
     <link rel="stylesheet" th:href="@{/css/manager/manager-invoices.css}">
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
             integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
@@ -41,9 +42,12 @@
                             <div>
                                 <label>Tổng doanh thu</label>
                                 <br>
-                                <label style="font-size: 20px; font-weight: 600; color: #1e293b" th:text="${paidInvoice.getTotalPaymentAmount() + ' VND'}">100,000,000 VND</label>
+                                <label style="font-size: 20px; font-weight: 600; color: #1e293b"
+                                       th:text="${paidInvoice.getTotalPaymentAmount() + ' VND'}">100,000,000 VND</label>
                                 <br>
-                                <label style="font-size: 12px;color: #00a651" th:text="${paidInvoice.getPaymentAmount() + ' hóa đơn đã thanh toán'}">200 hóa đơn đã thanh toán</label>
+                                <label style="font-size: 12px;color: #00a651"
+                                       th:text="${paidInvoice.getPaymentAmount() + ' hóa đơn đã thanh toán'}">200 hóa
+                                    đơn đã thanh toán</label>
                             </div>
 
                             <!-- Icon bên phải -->
@@ -63,9 +67,13 @@
                             <div>
                                 <label>Đang thanh toán</label>
                                 <br>
-                                <label style="font-size: 20px; font-weight: 600; color: #1e293b" th:text="${pendingInvoice.getTotalPaymentAmount()}+ ' VND'">100,000,000 VND</label>
+                                <label style="font-size: 20px; font-weight: 600; color: #1e293b"
+                                       th:text="${pendingInvoice.getTotalPaymentAmount() != null} ? (${#numbers.formatDecimal(pendingInvoice.getTotalPaymentAmount(), 0, 'POINT', 0, 'COMMA')} + ' VND') : '0 VND'">100,000,000
+                                    VND</label>
                                 <br>
-                                <label style="font-size: 12px;color: #aa8d00" th:text="${pendingInvoice.getPaymentAmount()} + ' hóa đơn đang thanh toán'">12 hóa đơn đang thanh toán</label>
+                                <label style="font-size: 12px;color: #aa8d00"
+                                       th:text="${paidInvoice.getTotalPaymentAmount() != null} ? (${#numbers.formatDecimal(paidInvoice.getTotalPaymentAmount(), 0, 'POINT', 0, 'COMMA')} + ' VND') : '0 VND'">12
+                                    hóa đơn đang thanh toán</label>
                             </div>
 
                             <!-- Icon bên phải -->
@@ -89,9 +97,10 @@
                                         <label style="display: flex; align-items: center;font-weight: 600; color: #535353">Tháng:
                                             <select class="form-select" aria-label="Default select example"
                                                     style="margin-left: 10px;width: 140px" name="month">
-                                                <option th:value="0" >Chọn tháng</option>
+                                                <option th:value="0">Chọn tháng</option>
                                                 <option th:each="i : ${#numbers.sequence(1,12)}"
-                                                        th:value="${i}" th:text="${'Tháng ' + i}" th:selected="${i==month}"></option>
+                                                        th:value="${i}" th:text="${'Tháng ' + i}"
+                                                        th:selected="${i==month}"></option>
                                             </select>
                                         </label>
                                     </div>
@@ -101,7 +110,8 @@
                                                     style="margin-left: 10px; width: 150px;" name="year">
                                                 <option th:value="0">Chọn năm</option>
                                                 <option th:each="i : ${#numbers.sequence(yearSelect - 5, yearSelect)}"
-                                                        th:value="${i}" th:text="${'Năm ' + i}" th:selected="${i==year}"></option>
+                                                        th:value="${i}" th:text="${'Năm ' + i}"
+                                                        th:selected="${i==year}"></option>
                                             </select>
                                         </label>
                                     </div>
@@ -111,13 +121,15 @@
                                     <div class="col-md-5">
                                         <label style="display: flex; align-items: center;font-weight: 600;color: #535353">Từ:
                                             <input class="form-control form-control-sm" type="date"
-                                                   style="width: 160px; margin-left: 10px;" name="startDate" th:value="${startDate}">
+                                                   style="width: 160px; margin-left: 10px;" name="startDate"
+                                                   th:value="${startDate}">
                                         </label>
                                     </div>
                                     <div class="col-md-5">
                                         <label style="display: flex; align-items: center;font-weight: 600;color: #535353">Đến:
                                             <input class="form-control form-control-sm" type="date"
-                                                   style="width: 160px; margin-left: 10px;" name="endDate" th:value="${endDate}">
+                                                   style="width: 160px; margin-left: 10px;" name="endDate"
+                                                   th:value="${endDate}">
                                         </label>
                                     </div>
                                     <div class="col-md-2">
@@ -135,11 +147,12 @@
                 <div class="row mt-3">
                     <div class="col-md-12 mt-3">
                         <div class="card invoice-card">
-                          <div class="card-body p-0">
-                              <table class="invoice-table">
-                                  <thead>
+                            <div class="card-body p-0">
+                                <table class="invoice-table">
+                                    <thead>
                                     <tr>
                                         <th>Mã hóa đơn</th>
+                                        <th>Mã lịch khám</th>
                                         <th>Bệnh nhân</th>
                                         <th>Bác sĩ</th>
                                         <th>Khoa</th>
@@ -147,26 +160,43 @@
                                         <th>Trạng thái</th>
                                         <th>Ngày</th>
                                     </tr>
-                                  </thead>
-                                  <tbody>
-                                    <tr>
-                                        <td>HD-123</td>
-                                        <td>Nguyễn Việt Kiều</td>
-                                        <td>Nguyễn Việt Dũng</td>
-                                        <td>Tim mạch</td>
-                                        <td>12,000,000 VND</td>
-                                        <td>Đã thanh toán</td>
-                                        <td>28/06/2026</td>
+                                    </thead>
+                                    <tbody>
+                                    <tr th:each="invoiceRowResponse : ${invoiceRowResponses}">
+                                        <td th:text="${invoiceRowResponse.getInvoiceCode()}">HD-123</td>
+                                        <td th:text="${invoiceRowResponse.getAppointmentCode()}">APT-123</td>
+                                        <td th:text="${invoiceRowResponse.getPatientName()}">Nguyễn Việt Kiều</td>
+                                        <td th:text="${invoiceRowResponse.getDoctorName()}">Nguyễn Việt Dũng</td>
+                                        <td th:text="${invoiceRowResponse.getDepartmentName()}">Tim mạch</td>
+                                        <td th:text="${#numbers.formatDecimal(invoiceRowResponse.getTotalAmount(), 0, 'POINT', 0, 'COMMA')} + ' VND'">12,000,000 VND</td>
+                                        <td th:text="${invoiceRowResponse.getStatus()}">Đã thanh toán</td>
+                                        <td th:text="${#temporals.format(invoiceRowResponse.getDate(),'HH:mm - dd/MM/yyyy')}">28/06/2026</td>
                                     </tr>
 
-                                  </tbody>
+                                    </tbody>
 
-                              </table>
-                              <!-- FOOTER + PAGING -->
-                              <div class="invoice-footer">
+                                </table>
 
-                              </div>
-                          </div>
+                                <!-- FOOTER + PAGING -->
+
+                                <div class="schedule-pagination" style="justify-content: flex-end;">
+                            <span th:text="'Trang hiện tại ' +${currentPage + 1}+
+                            ' trong '+${totalPages} "
+                                  style=" font-weight: 500;padding: 6px 10px ; border-radius: 5px; margin-top: 5px; margin-bottom: 5px; font-size: 14px">
+                            </span>
+                                    <a th:if="${currentPage!=0}"
+                                       th:href="@{/manager/invoices(role=${selectedRole},page=${currentPage - 1},filterKey=${filterKey},startDate=${startDate},endDate=${endDate})}"
+                                       class="pager-button">Trước</a>
+                                    <span th:if="${currentPage==0}"
+                                          class="pager-button disabled">Trước</span>
+
+                                    <a th:if="${currentPage <(totalPages - 1)}"
+                                       th:href="@{/manager/invoices(role=${selectedRole},page=${currentPage + 1},filterKey=${filterKey},startDate=${startDate},endDate=${endDate})}"
+                                       class="pager-button">Sau</a>
+                                    <span th:if="${currentPage == (totalPages - 1)}"
+                                          class="pager-button disabled">Sau</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

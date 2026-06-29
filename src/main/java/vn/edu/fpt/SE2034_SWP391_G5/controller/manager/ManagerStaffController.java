@@ -49,7 +49,7 @@ public class ManagerStaffController {
     public String staff(@RequestParam(required = false) String role,
                         @RequestParam(required = false) String filterKey,
                         @RequestParam(defaultValue = "0") int page,
-                        @RequestParam(defaultValue = "5") int size,
+                        @RequestParam(defaultValue = "7") int size,
                         Model model) {
         String selectedRole = ("DOCTOR".equals(role) || "RECEPTIONIST".equals(role)) ? role : null;
 

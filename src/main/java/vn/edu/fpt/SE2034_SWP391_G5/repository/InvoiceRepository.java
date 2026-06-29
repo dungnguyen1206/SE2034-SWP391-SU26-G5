@@ -1,15 +1,19 @@
 package vn.edu.fpt.SE2034_SWP391_G5.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.InvoiceRowResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Invoice;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.InvoiceSummaryResponse;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -46,6 +50,32 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     Optional<InvoiceSummaryResponse> getTotalAmountByPaymentStatus(@Param("paymentStatus") String paymentStatus,
                                                                    @Param("startDate")LocalDateTime startDate,
                                                                    @Param("endDate") LocalDateTime endDate, @Param("month") Integer month, @Param("year") Integer year);
+
+
+
+    @Query("select new vn.edu.fpt.SE2034_SWP391_G5.dto.response.InvoiceRowResponse(" +
+            " i.id," +
+            " i.invoiceCode," +
+            " a.appointmentCode," +
+            " concat(p.firstName,' ',coalesce(p.middleName,''),' ',p.lastName)," +
+            " concat(d.firstName,' ',coalesce(d.middleName,''),' ',d.lastName)," +
+            " dpt.name," +
+            " i.totalAmount," +
+            " i.paymentStatus," +
+            " i.createdAt) " +
+            " From Invoice i " +
+            " left join  i.medicalRecord m " +
+            " left join  m.doctor d " +
+            " left join  m.patient p" +
+            " left join  d.department dpt" +
+            " left join  m.appointment a" +
+            " Where (:month is null or month(i.createdAt)=:month)" +
+            " and (:year is null or year (i.createdAt)=:year)" +
+            " and ((:startDate is null and :endDate is null) or i.createdAt between :startDate and :endDate)")
+    Page<InvoiceRowResponse> getInvoiceInforByFilter(@Param("startDate")LocalDateTime startDate,
+                                                     @Param("endDate") LocalDateTime endDate,
+                                                     @Param("month") Integer month,
+                                                     @Param("year") Integer year, Pageable pageable);
 
 
 
