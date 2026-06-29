@@ -1,5 +1,6 @@
 package vn.edu.fpt.SE2034_SWP391_G5.service;
 
+import org.springframework.data.domain.Page;
 import org.springframework.validation.BindingResult;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.UpdateUserRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorStaffDetailResponse;
@@ -10,7 +11,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 import java.util.List;
 
 public interface StaffService {
-    List<StaffResponse> findStaff(String roleName, String filterKey);
+    Page<StaffResponse> findStaff(String roleName, String filterKey, int page, int size);
 
     StaffResponse findStaffById(Long id);
 

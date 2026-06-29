@@ -138,13 +138,13 @@
                             <tr th:each="a : ${appointments}">
                                 <td>
                                     <div class="patient">
-                                        <span th:text="${a.patientInitials}">TB</span>
-                                        <b th:text="${a.patientFullName}">Trần Thị Bích</b>
+                                        <span th:text="${a.patientInitials}"></span>
+                                        <b th:text="${a.patientFullName}"></b>
                                     </div>
                                 </td>
-                                <td th:text="${a.serviceName}">Tái khám định kỳ</td>
+                                <td th:text="${a.serviceName}"></td>
                                 <td>
-                                    <span class="badge" th:text="${a.statusLabel}">CHƯA XÁC NHẬN</span>
+                                    <span class="badge" th:text="${a.statusLabel}"></span>
                                 </td>
                             </tr>
 
@@ -170,10 +170,9 @@
                     <div class="patient-card" th:each="p : ${recentPatients}">
                         <div class="circle" th:text="${p.patientInitials}">N</div>
                         <div>
-                            <h3 th:text="${p.patientFullName}">Nguyễn Văn An</h3>
-                            <p th:text="'ID: BN-' + ${p.patientId}">ID: BN-103</p>
-                            <small th:text="'Lần khám cuối: ' + ${#temporals.format(p.bookingDate, 'dd/MM/yyyy')}">Lần
-                                khám cuối: 12/10/2023</small>
+                            <h3 th:text="${p.patientFullName}"></h3>
+                            <p th:text="'ID: BN-' + ${p.patientId}"></p>
+                            <small th:text="'Lần khám cuối: ' + ${#temporals.format(p.bookingDate, 'dd/MM/yyyy')}"></small>
                         </div>
                     </div>
 

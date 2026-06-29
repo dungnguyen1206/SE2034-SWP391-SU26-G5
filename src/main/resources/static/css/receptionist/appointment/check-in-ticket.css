@@ -1,18 +1,5 @@
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: 'Inter', "Segoe UI", Arial, sans-serif;
-    background-color: #f8fafc;
-    color: #1e293b;
-}
-
 .page {
-    min-height: 100vh;
-    padding: 40px 16px;
+    /* Removed custom padding and min-height to use global container-fluid spacing */
 }
 
 .ticket-actions {
@@ -293,8 +280,26 @@ body {
         color: #000000;
     }
 
+    .sidebar,
+    .topbar,
+    .header-container {
+        display: none !important;
+    }
+
+    .layout {
+        display: block !important;
+    }
+
+    .main {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 0 !important;
+    }
+
     .page {
-        padding: 0;
+        padding: 0 !important;
+        margin: 0 !important;
+        min-height: auto;
     }
 
     .ticket-actions,

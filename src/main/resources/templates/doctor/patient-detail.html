@@ -9,6 +9,8 @@
         th:href="@{/css/doctor/dashboard-doctor.css}">
     <link rel="stylesheet" href="../../static/css/doctor/patient-detail.css"
         th:href="@{/css/doctor/patient-detail.css}">
+    <link rel="stylesheet" href="../../static/css/doctor/create-record.css" th:href="@{/css/doctor/create-record.css}">
+    <link rel="stylesheet" href="../../static/css/doctor/edit-record.css" th:href="@{/css/doctor/edit-record.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 
@@ -79,6 +81,25 @@
                 </div>
             </div>
 
+            <!-- Alert Messages -->
+            <div th:if="${errorMessage}"
+                style="margin: 20px 0; padding: 15px; background-color: #fee2e2; color: #b91c1c; border-radius: 8px; border-left: 4px solid #ef4444; font-weight: 500;">
+                <i class="fa-solid fa-circle-exclamation" style="margin-right: 8px;"></i>
+                <span th:text="${errorMessage}"></span>
+            </div>
+            <div th:if="${successMessage}"
+                style="margin: 20px 0; padding: 15px; background-color: #d1fae5; color: #065f46; border-radius: 8px; border-left: 4px solid #10b981; font-weight: 500;">
+                <i class="fa-solid fa-circle-check" style="margin-right: 8px;"></i>
+                <span th:text="${successMessage}"></span>
+            </div>
+
+            <!-- Client-side Alert Message (hidden by default) -->
+            <div id="clientAlert"
+                style="display: none; margin: 20px 0; padding: 15px; background-color: #fee2e2; color: #b91c1c; border-radius: 8px; border-left: 4px solid #ef4444; font-weight: 500;">
+                <i class="fa-solid fa-circle-exclamation" style="margin-right: 8px;"></i>
+                <span id="clientAlertMessage"></span>
+            </div>
+
             <!-- Patient Summary Card -->
             <div class="patient-summary-card">
                 <div class="summary-avatar" th:text="${appointment.patientInitials}">LT</div>
@@ -102,7 +123,6 @@
             <!-- Tabs Section -->
             <div class="detail-tabs">
                 <button class="active">Thông tin cá nhân</button>
-                <button>Hồ sơ bệnh án</button>
                 <button>Hóa đơn</button>
             </div>
 
@@ -112,19 +132,51 @@
                 <!-- Tab Pane 1: Thông tin cá nhân -->
                 <div class="tab-pane active">
                     <div class="detail-content-card">
-                        <h3 class="card-title">Thông tin cá nhân</h3>
+                        <div class="card-header-row">
+                            <h3 class="card-title" style="font-size: 16px; font-weight: 700; color: #0f172a;">Thông tin
+                                cá nhân</h3>
+                            <a href="javascript:void(0);"
+                                th:onclick="${medicalRecord != null} ? 'showExistingRecordAlert()' : 'openRecordModal()'"
+                                class="btn-create-record">
+                                <i class="fa-solid fa-plus"></i> Tạo hồ sơ bệnh án
+                            </a>
+                        </div>
                         <hr class="card-divider">
 
                         <div class="info-grid">
                             <div class="info-item">
                                 <div class="info-icon blue">
-                                    <i class="fa-regular fa-user"></i>
+                                    <i class="fa-regular fa-calendar-days"></i>
                                 </div>
                                 <div>
-                                    <p>Tuổi</p>
+                                    <p>Ngày sinh</p>
                                     <h3
-                                        th:text="${appointment.patientAge != null ? appointment.patientAge + ' tuổi' : 'Chưa rõ tuổi'}">
-                                        45 tuổi</h3>
+                                        th:text="${appointment.patientDateOfBirth != null ? #temporals.format(appointment.patientDateOfBirth, 'dd/MM/yyyy') : 'Chưa cập nhật'}">
+                                    </h3>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-icon purple">
+                                    <i class="fa-solid fa-venus-mars"></i>
+                                </div>
+                                <div>
+                                    <p>Giới tính</p>
+                                    <h3
+                                        th:text="${appointment.patientGender == 'MALE'} ? 'Nam' : (${appointment.patientGender == 'FEMALE'} ? 'Nữ' : (${appointment.patientGender != null} ? ${appointment.patientGender} : 'Chưa cập nhật'))">
+                                    </h3>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-icon red">
+                                    <i class="fa-solid fa-droplet"></i>
+                                </div>
+                                <div>
+                                    <p>Nhóm máu</p>
+                                    <h3
+                                        th:text="${appointment.patientBloodType != null ? appointment.patientBloodType : 'Chưa cập nhật'}">
+                                    </h3>
                                 </div>
                             </div>
 
@@ -136,7 +188,7 @@
                                     <p>Số điện thoại</p>
                                     <h3
                                         th:text="${appointment.patientPhone != null && !appointment.patientPhone.isEmpty() ? appointment.patientPhone : 'Chưa cập nhật'}">
-                                        0901234567</h3>
+                                    </h3>
                                 </div>
                             </div>
 
@@ -148,16 +200,13 @@
                                     <p>Địa chỉ</p>
                                     <h3
                                         th:text="${appointment.patientAddress != null && !appointment.patientAddress.isEmpty() ? appointment.patientAddress : 'Chưa cập nhật'}">
-                                        123 Nguyễn Huệ, Quận 1, TP.HCM</h3>
+                                    </h3>
                                 </div>
                             </div>
 
-                            <!-- Placeholder cell for matching the grid spacing in screenshot -->
-                            <div class="info-item empty-placeholder"></div>
-
                             <div class="info-item">
                                 <div class="info-icon purple">
-                                    <i class="fa-regular fa-calendar"></i>
+                                    <i class="fa-regular fa-clock"></i>
                                 </div>
                                 <div>
                                     <p>Giờ hẹn</p>
@@ -173,24 +222,116 @@
                                 </div>
                                 <div>
                                     <p>Loại khám</p>
-                                    <h3 th:text="${appointment.serviceName}">Tái khám định kỳ</h3>
+                                    <h3 th:text="${appointment.serviceName}"></h3>
+                                </div>
+                            </div>
+
+                            <div class="info-item">
+                                <div class="info-icon blue">
+                                    <i class="fa-regular fa-clipboard"></i>
+                                </div>
+                                <div>
+                                    <p>Ghi chú lịch hẹn</p>
+                                    <h3 th:text="${appointment.note != null && !appointment.note.isEmpty() ? appointment.note : 'Không có ghi chú'}"></h3>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Tab Pane 2: Hồ sơ bệnh án -->
-                <div class="tab-pane">
-                    <div class="detail-content-card">
-                        <h3 class="card-title">Hồ sơ bệnh án</h3>
+                    <!-- Medical Record Section -->
+                    <div class="detail-content-card" style="margin-top: 24px;">
+                        <div class="card-header-row">
+                            <h3 class="card-title"
+                                style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 0;">Hồ sơ bệnh
+                                án</h3>
+                            <a th:if="${medicalRecord != null}" href="javascript:void(0);"
+                                onclick="openEditRecordModal()" class="btn-create-record"
+                                style="background-color: #f59e0b;">
+                                <i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa
+                            </a>
+                        </div>
                         <hr class="card-divider">
-                        <div class="empty-tab-state">
-                            <i class="fa-solid fa-file-medical"></i>
-                            <p>Không tìm thấy hồ sơ bệnh án nào được ghi nhận cho lịch hẹn này.</p>
+
+                        <!-- If medical record exists -->
+                        <div th:if="${medicalRecord != null}">
+                            <!-- Vital Signs Grid -->
+                            <h4
+                                style="font-size: 14px; font-weight: 700; color: #334155; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-heart-pulse" style="color: #ef4444;"></i> Chỉ số sinh tồn
+                            </h4>
+                            <div class="vitals-grid">
+                                <div class="vital-item">
+                                    <span class="vital-label">Huyết áp:</span>
+                                    <span class="vital-value"
+                                        th:text="${medicalRecord.bloodPressure != null && !medicalRecord.bloodPressure.isEmpty() ? medicalRecord.bloodPressure + ' mmHg' : 'Chưa cập nhật'}"></span>
+                                </div>
+                                <div class="vital-item">
+                                    <span class="vital-label">Nhịp tim:</span>
+                                    <span class="vital-value"
+                                        th:text="${medicalRecord.heartRate != null ? medicalRecord.heartRate + ' bpm' : 'Chưa cập nhật'}"></span>
+                                </div>
+                                <div class="vital-item">
+                                    <span class="vital-label">Đường huyết:</span>
+                                    <span class="vital-value"
+                                        th:text="${medicalRecord.bloodGlucose != null ? medicalRecord.bloodGlucose + ' mmol/L' : 'Chưa cập nhật'}"></span>
+                                </div>
+                                <div class="vital-item">
+                                    <span class="vital-label">Cân nặng:</span>
+                                    <span class="vital-value"
+                                        th:text="${medicalRecord.weight != null ? medicalRecord.weight + ' kg' : 'Chưa cập nhật'}"></span>
+                                </div>
+                            </div>
+
+                            <hr class="card-divider" style="margin: 20px 0;">
+
+                            <!-- Clinical Details -->
+                            <h4
+                                style="font-size: 14px; font-weight: 700; color: #334155; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-stethoscope" style="color: #2563eb;"></i> Thông tin khám lâm sàng
+                            </h4>
+                            <div class="clinical-details">
+                                <div class="clinical-item">
+                                    <strong class="clinical-label">Triệu chứng:</strong>
+                                    <p class="clinical-text"
+                                        th:text="${medicalRecord.symptoms != null && !medicalRecord.symptoms.isEmpty() ? medicalRecord.symptoms : 'Không có'}">
+                                    </p>
+                                </div>
+                                <div class="clinical-item">
+                                    <strong class="clinical-label">Chẩn đoán:</strong>
+                                    <p class="clinical-text"
+                                        th:text="${medicalRecord.diagnosis != null && !medicalRecord.diagnosis.isEmpty() ? medicalRecord.diagnosis : 'Không có'}">
+                                    </p>
+                                </div>
+                                <div class="clinical-item">
+                                    <strong class="clinical-label">Kết luận:</strong>
+                                    <p class="clinical-text"
+                                        th:text="${medicalRecord.conclusion != null && !medicalRecord.conclusion.isEmpty() ? medicalRecord.conclusion : 'Không có'}">
+                                    </p>
+                                </div>
+                                <div class="clinical-item">
+                                    <strong class="clinical-label">Đơn thuốc:</strong>
+                                    <p class="clinical-text prescription-box"
+                                        th:text="${medicalRecord.prescriptionText != null && !medicalRecord.prescriptionText.isEmpty() ? medicalRecord.prescriptionText : 'Không có đơn thuốc'}">
+                                    </p>
+                                </div>
+                                <div class="clinical-item">
+                                    <strong class="clinical-label">Ghi chú:</strong>
+                                    <p class="clinical-text"
+                                        th:text="${medicalRecord.notes != null && !medicalRecord.notes.isEmpty() ? medicalRecord.notes : 'Không có'}">
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- If medical record does not exist -->
+                        <div th:if="${medicalRecord == null}" class="empty-record-state">
+                            <i class="fa-regular fa-folder-open"></i>
+                            <p>Chưa có hồ sơ bệnh án cho lịch hẹn này.</p>
                         </div>
                     </div>
                 </div>
+
+
 
                 <!-- Tab Pane 3: Hóa đơn -->
                 <div class="tab-pane">
@@ -210,7 +351,159 @@
 
     </div>
 
-    <!-- Script for interactive client-side tab switching -->
+    <!-- Modal Tạo hồ sơ bệnh án -->
+    <div id="recordModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Tạo hồ sơ bệnh án</h2>
+                <button type="button" class="btn-close-modal" onclick="closeRecordModal()">&times;</button>
+            </div>
+            <form th:action="@{/doctor/appointments/{id}/records/create(id=${appointment.id})}" method="POST"
+                id="createRecordForm">
+                <div class="modal-body">
+                    <!-- Chỉ số sinh tồn -->
+                    <h3 class="modal-section-title">
+                        <i class="fa-solid fa-heart-pulse" style="color: #ef4444;"></i> Chỉ số sinh tồn
+                    </h3>
+                    <div class="modal-vitals-grid">
+                        <div class="form-group">
+                            <label for="bloodPressure">Huyết áp (mmHg)</label>
+                            <input type="text" name="bloodPressure" id="bloodPressure" placeholder="Ví dụ: 120/80">
+                        </div>
+                        <div class="form-group">
+                            <label for="heartRate">Nhịp tim (bpm)</label>
+                            <input type="number" name="heartRate" id="heartRate" placeholder="Ví dụ: 80">
+                        </div>
+                        <div class="form-group">
+                            <label for="bloodGlucose">Đường huyết (mmol/L)</label>
+                            <input type="number" step="0.01" name="bloodGlucose" id="bloodGlucose"
+                                placeholder="Ví dụ: 5.6">
+                        </div>
+                        <div class="form-group">
+                            <label for="weight">Cân nặng (kg)</label>
+                            <input type="number" step="0.1" name="weight" id="weight" placeholder="Ví dụ: 60.5">
+                        </div>
+                    </div>
+
+                    <hr class="modal-divider">
+
+                    <!-- Thông tin khám lâm sàng -->
+                    <h3 class="modal-section-title">
+                        <i class="fa-solid fa-stethoscope" style="color: #2563eb;"></i> Thông tin khám lâm sàng
+                    </h3>
+                    <div class="form-group">
+                        <label for="symptoms">Triệu chứng <span style="color: #ef4444;">*</span></label>
+                        <textarea name="symptoms" id="symptoms" placeholder="Mô tả triệu chứng của bệnh nhân..."
+                            rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="diagnosis">Chẩn đoán <span style="color: #ef4444;">*</span></label>
+                        <textarea name="diagnosis" id="diagnosis" placeholder="Chẩn đoán bệnh lý chính..." rows="3"
+                            required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="conclusion">Kết luận <span style="color: #ef4444;">*</span></label>
+                        <textarea name="conclusion" id="conclusion" placeholder="Kết luận và hướng điều trị..." rows="3"
+                            required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="prescriptionText">Đơn thuốc</label>
+                        <textarea name="prescriptionText" id="prescriptionText"
+                            placeholder="Kê đơn thuốc (tên thuốc, liều dùng, tần suất)..." rows="4"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">Ghi chú</label>
+                        <textarea name="notes" id="notes" placeholder="Các ghi chú hoặc dặn dò thêm..."
+                            rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeRecordModal()">Hủy</button>
+                    <button type="submit" class="btn-submit">Lưu bệnh án</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Chỉnh sửa hồ sơ bệnh án -->
+    <div id="editRecordModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>Chỉnh sửa hồ sơ bệnh án</h2>
+                <button type="button" class="btn-close-modal" onclick="closeEditRecordModal()">&times;</button>
+            </div>
+            <form th:action="@{/doctor/appointments/{id}/records/update(id=${appointment.id})}" method="POST"
+                id="editRecordForm">
+                <div class="modal-body" th:if="${medicalRecord != null}">
+                    <!-- Chỉ số sinh tồn -->
+                    <h3 class="modal-section-title">
+                        <i class="fa-solid fa-heart-pulse" style="color: #ef4444;"></i> Chỉ số sinh tồn
+                    </h3>
+                    <div class="modal-vitals-grid">
+                        <div class="form-group">
+                            <label for="edit_bloodPressure">Huyết áp (mmHg)</label>
+                            <input type="text" name="bloodPressure" id="edit_bloodPressure"
+                                th:value="${medicalRecord.bloodPressure}" placeholder="Ví dụ: 120/80">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_heartRate">Nhịp tim (bpm)</label>
+                            <input type="number" name="heartRate" id="edit_heartRate"
+                                th:value="${medicalRecord.heartRate}" placeholder="Ví dụ: 80">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_bloodGlucose">Đường huyết (mmol/L)</label>
+                            <input type="number" step="0.01" name="bloodGlucose" id="edit_bloodGlucose"
+                                th:value="${medicalRecord.bloodGlucose}" placeholder="Ví dụ: 5.6">
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_weight">Cân nặng (kg)</label>
+                            <input type="number" step="0.1" name="weight" id="edit_weight"
+                                th:value="${medicalRecord.weight}" placeholder="Ví dụ: 60.5">
+                        </div>
+                    </div>
+
+                    <hr class="modal-divider">
+
+                    <!-- Thông tin khám lâm sàng -->
+                    <h3 class="modal-section-title">
+                        <i class="fa-solid fa-stethoscope" style="color: #2563eb;"></i> Thông tin khám lâm sàng
+                    </h3>
+                    <div class="form-group">
+                        <label for="edit_symptoms">Triệu chứng <span style="color: #ef4444;">*</span></label>
+                        <textarea name="symptoms" id="edit_symptoms" placeholder="Mô tả triệu chứng của bệnh nhân..."
+                            rows="3" required th:text="${medicalRecord.symptoms}"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_diagnosis">Chẩn đoán <span style="color: #ef4444;">*</span></label>
+                        <textarea name="diagnosis" id="edit_diagnosis" placeholder="Chẩn đoán bệnh lý chính..." rows="3"
+                            required th:text="${medicalRecord.diagnosis}"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_conclusion">Kết luận <span style="color: #ef4444;">*</span></label>
+                        <textarea name="conclusion" id="edit_conclusion" placeholder="Kết luận và hướng điều trị..."
+                            rows="3" required th:text="${medicalRecord.conclusion}"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_prescriptionText">Đơn thuốc</label>
+                        <textarea name="prescriptionText" id="edit_prescriptionText"
+                            placeholder="Kê đơn thuốc (tên thuốc, liều dùng, tần suất)..." rows="4"
+                            th:text="${medicalRecord.prescriptionText}"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit_notes">Ghi chú</label>
+                        <textarea name="notes" id="edit_notes" placeholder="Các ghi chú hoặc dặn dò thêm..." rows="2"
+                            th:text="${medicalRecord.notes}"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn-cancel" onclick="closeEditRecordModal()">Hủy</button>
+                    <button type="submit" class="btn-submit">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script for interactive client-side tab switching and modal controls -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const tabButtons = document.querySelectorAll(".detail-tabs button");
@@ -228,6 +521,56 @@
                 });
             });
         });
+
+        function showExistingRecordAlert() {
+            const alertDiv = document.getElementById('clientAlert');
+            const alertMsg = document.getElementById('clientAlertMessage');
+            alertMsg.innerText = "Hồ sơ bệnh án đã tồn tại";
+            alertDiv.style.display = 'block';
+            alertDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function openRecordModal() {
+            document.getElementById('recordModal').style.display = 'flex';
+            document.body.classList.add('no-scroll');
+        }
+
+        function closeRecordModal() {
+            document.getElementById('recordModal').style.display = 'none';
+            if (document.getElementById('editRecordModal').style.display !== 'flex') {
+                document.body.classList.remove('no-scroll');
+            }
+        }
+
+        function openEditRecordModal() {
+            document.getElementById('editRecordModal').style.display = 'flex';
+            document.body.classList.add('no-scroll');
+        }
+
+        function closeEditRecordModal() {
+            document.getElementById('editRecordModal').style.display = 'none';
+            if (document.getElementById('recordModal').style.display !== 'flex') {
+                document.body.classList.remove('no-scroll');
+            }
+        }
+
+        // Close modal when clicking outside of modal card
+        window.onclick = function (event) {
+            const modal = document.getElementById('recordModal');
+            const editModal = document.getElementById('editRecordModal');
+            if (event.target === modal) {
+                modal.style.display = 'none';
+                if (editModal.style.display !== 'flex') {
+                    document.body.classList.remove('no-scroll');
+                }
+            }
+            if (event.target === editModal) {
+                editModal.style.display = 'none';
+                if (modal.style.display !== 'flex') {
+                    document.body.classList.remove('no-scroll');
+                }
+            }
+        }
     </script>
 
 </body>
