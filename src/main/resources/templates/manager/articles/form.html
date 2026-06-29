@@ -27,7 +27,7 @@
             </div>
         </header>
 
-        <form action="#" method="post">
+        <form th:action="${articleId != null ? '/manager/articles/edit/' + articleId : '/manager/articles/create'}" method="post" th:object="${articleRequest}">
             <div class="article-form-layout">
                 
                 <!-- Left Column -->
@@ -36,14 +36,14 @@
                     <div class="form-card">
                         <div class="form-group">
                             <label class="form-label">Tiêu đề bài viết <span>*</span></label>
-                            <input type="text" class="form-control" placeholder="Nhập tiêu đề bài viết..." required>
+                            <input type="text" class="form-control" th:field="*{title}" placeholder="Nhập tiêu đề bài viết..." required>
                         </div>
                     </div>
 
                     <div class="form-card">
                         <div class="form-group">
                             <label class="form-label">Tóm tắt / Đoạn trích</label>
-                            <textarea class="form-control" placeholder="Viết 1-2 câu tóm tắt hiển thị trên danh sách bài viết..."></textarea>
+                            <textarea class="form-control" th:field="*{summary}" placeholder="Viết 1-2 câu tóm tắt hiển thị trên danh sách bài viết..."></textarea>
                         </div>
                     </div>
 
@@ -58,7 +58,7 @@
                                 <i class="bi bi-list-ul cursor-pointer"></i>
                                 <i class="bi bi-image cursor-pointer"></i>
                             </div>
-                            <textarea class="editor-placeholder" style="width: 100%; border: 1px solid #e2e8f0; border-radius: 0 0 8px 8px; outline: none; padding: 16px; font-family: inherit;" placeholder="Viết toàn bộ nội dung bài viết tại đây. Sử dụng các tiêu đề rõ ràng, gạch đầu dòng và ngôn ngữ ngắn gọn..."></textarea>
+                            <textarea class="editor-placeholder" th:field="*{content}" style="width: 100%; border: 1px solid #e2e8f0; border-radius: 0 0 8px 8px; outline: none; padding: 16px; font-family: inherit;" placeholder="Viết toàn bộ nội dung bài viết tại đây. Sử dụng các tiêu đề rõ ràng, gạch đầu dòng và ngôn ngữ ngắn gọn..."></textarea>
                         </div>
                     </div>
 
@@ -71,13 +71,13 @@
                         <div class="form-card-title">Cài đặt xuất bản</div>
                         
                         <label class="publish-option">
-                            <input type="radio" name="status" value="DRAFT" checked>
+                            <input type="radio" th:field="*{status}" value="DRAFT">
                             <div class="dot draft"></div>
                             <span>Bản nháp</span>
                         </label>
 
                         <label class="publish-option">
-                            <input type="radio" name="status" value="PUBLISHED">
+                            <input type="radio" th:field="*{status}" value="PUBLISHED">
                             <div class="dot published"></div>
                             <span>Đã xuất bản</span>
                         </label>
@@ -88,7 +88,7 @@
                         
                         <div class="form-group">
                             <label class="form-label">Chuyên mục <span>*</span></label>
-                            <select class="form-control" required>
+                            <select class="form-control" th:field="*{category}" required>
                                 <option value="" disabled selected>Chọn chuyên mục...</option>
                                 <option value="Tim mạch">Tim mạch</option>
                                 <option value="Nhi khoa">Nhi khoa</option>
@@ -99,24 +99,17 @@
 
                         <div class="form-group">
                             <label class="form-label">Tác giả</label>
-                            <select class="form-control">
-                                <option value="" disabled selected>Chọn tác giả...</option>
+                            <select class="form-control" th:field="*{doctorId}">
+                                <option value="">Chọn tác giả (Admin nếu để trống)...</option>
                                 <option value="1">BS. Trần Minh Tuấn</option>
                                 <option value="2">BS. Ngô Thị Linh</option>
-                                <option value="3">Admin</option>
                             </select>
                         </div>
 
-                        <div class="form-group">
-                            <label class="form-label">Thẻ (Tags)</label>
-                            <input type="text" class="form-control" placeholder="tim mạch, sức khỏe...">
-                            <small style="color: #94a3b8; font-size: 12px; margin-top: 4px; display: block;">Các thẻ cách nhau bởi dấu phẩy</small>
-                        </div>
                     </div>
 
                     <div class="form-card" style="background: transparent; border: none; padding: 0;">
-                        <button type="submit" class="btn-publish">Xuất bản bài viết</button>
-                        <button type="button" class="btn-draft"><i class="bi bi-save"></i> Lưu bản nháp</button>
+                        <button type="submit" class="btn-publish">Xác nhận tạo bài viết</button>
                         <a th:href="@{/manager/articles}" class="btn-cancel">Hủy bỏ</a>
                     </div>
 

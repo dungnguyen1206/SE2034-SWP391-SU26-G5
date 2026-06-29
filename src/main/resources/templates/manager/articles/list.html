@@ -27,35 +27,41 @@
         </header>
 
         <!-- Search and Filter -->
-        <div class="article-filter-card">
+        <form class="article-filter-card" th:action="@{/manager/articles}" method="get">
             <div class="article-search-box">
                 <i class="bi bi-search"></i>
-                <input type="text" placeholder="Tìm kiếm bài viết theo tiêu đề hoặc tác giả...">
+                <input type="text" name="keyword" th:value="${keyword}" placeholder="Tìm kiếm bài viết theo tiêu đề...">
+                <button type="submit" style="display:none;"></button>
             </div>
             
             <div class="article-filter-row">
                 <div class="filter-group">
                     <span class="filter-label">Chuyên mục:</span>
-                    <div class="filter-options">
-                        <button class="filter-btn active">Tất cả</button>
-                        <button class="filter-btn">Tim mạch</button>
-                        <button class="filter-btn">Nhi khoa</button>
-                        <button class="filter-btn">Da liễu</button>
-                        <button class="filter-btn">Sức khỏe</button>
-                        <button class="filter-btn">Dinh dưỡng</button>
-                    </div>
+                    <select name="category" class="form-control" style="width: auto; padding: 6px 12px; border-radius: 6px;" onchange="this.form.submit()">
+                        <option value="" th:selected="${category == null or category == ''}">Tất cả</option>
+                        <option value="Tim mạch" th:selected="${category == 'Tim mạch'}">Tim mạch</option>
+                        <option value="Nhi khoa" th:selected="${category == 'Nhi khoa'}">Nhi khoa</option>
+                        <option value="Da liễu" th:selected="${category == 'Da liễu'}">Da liễu</option>
+                        <option value="Sức khỏe" th:selected="${category == 'Sức khỏe'}">Sức khỏe</option>
+                        <option value="Dinh dưỡng" th:selected="${category == 'Dinh dưỡng'}">Dinh dưỡng</option>
+                    </select>
                 </div>
 
                 <div class="filter-group">
                     <span class="filter-label">Trạng thái:</span>
-                    <div class="filter-options">
-                        <button class="filter-btn active">Tất cả</button>
-                        <button class="filter-btn">Đã xuất bản</button>
-                        <button class="filter-btn">Bản nháp</button>
-                    </div>
+                    <select name="status" class="form-control" style="width: auto; padding: 6px 12px; border-radius: 6px;" onchange="this.form.submit()">
+                        <option value="" th:selected="${status == null or status == ''}">Tất cả</option>
+                        <option value="PUBLISHED" th:selected="${status == 'PUBLISHED'}">Đã xuất bản</option>
+                        <option value="DRAFT" th:selected="${status == 'DRAFT'}">Bản nháp</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group" style="margin-left: auto;">
+                    <button type="submit" class="article-create-button" style="padding: 6px 16px;">Lọc</button>
+                    <a th:href="@{/manager/articles}" style="color: #64748b; font-size: 14px; margin-left: 10px; text-decoration: none;">Xóa lọc</a>
                 </div>
             </div>
-        </div>
+        </form>
 
         <!-- Article Card List -->
         <div class="article-list-container">
@@ -79,8 +85,7 @@
                     <div class="card-actions">
                         <a th:href="@{'/manager/articles/detail/' + ${article.id}}" class="action-btn" title="Xem chi tiết"><i class="bi bi-eye"></i></a>
                         <a th:href="@{'/manager/articles/edit/' + ${article.id}}" class="action-btn" title="Chỉnh sửa"><i class="bi bi-pencil-square"></i></a>
-                        <!-- Added an onclick confirm as discussed -->
-                        <button class="action-btn delete" title="Xóa" onclick="return confirm('Bạn có chắc chắn muốn xóa bài viết này không?');"><i class="bi bi-trash"></i></button>
+                        <a th:href="@{'/manager/articles/delete/' + ${article.id}}" class="action-btn delete" title="Xóa" onclick="return confirm('Bạn có chắc chắn muốn xóa bài viết này không?');"><i class="bi bi-trash"></i></a>
                     </div>
                 </div>
             </div>
