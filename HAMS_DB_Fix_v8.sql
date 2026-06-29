@@ -223,7 +223,7 @@ CREATE TABLE appointments (
     booking_date        DATE            NOT NULL,
     check_in_time       DATETIME2       NULL,
     note                NVARCHAR(MAX)   NULL,
-    status              VARCHAR(20)     NOT NULL        DEFAULT 'PENDING',
+    status              VARCHAR(20)     NOT NULL        DEFAULT 'CONFIRMED',
     created_at          DATETIME2       NOT NULL        DEFAULT GETDATE(),
     updated_at          DATETIME2       NOT NULL        DEFAULT GETDATE(),
 

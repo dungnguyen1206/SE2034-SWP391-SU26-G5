@@ -12,6 +12,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 @Repository
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     @Query("Select coalesce(sum(i.totalAmount),0) From Invoice i where i.paymentStatus =:paymentStatus AND month(i.paidAt)=:month AND year(i.paidAt)= :year")
@@ -48,5 +51,29 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
                                                                    @Param("endDate") LocalDateTime endDate, @Param("month") Integer month, @Param("year") Integer year);
 
 
+    @Query("SELECT i FROM Invoice i " +
+           "JOIN i.medicalRecord mr " +
+           "JOIN mr.appointment a " +
+           "JOIN a.patient p " +
+           "WHERE (:keyword IS NULL OR :keyword = '' " +
+           "  OR LOWER(i.invoiceCode) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "  OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
+           "  OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
+           "AND (:paymentStatus IS NULL OR :paymentStatus = '' OR i.paymentStatus = :paymentStatus)")
+    Page<Invoice> findInvoicesWithFilter(@Param("keyword") String keyword,
+                                                                         @Param("paymentStatus") String paymentStatus,
+                                                                         Pageable pageable);
 
+    @Query("SELECT i FROM Invoice i " +
+           "LEFT JOIN FETCH i.medicalRecord mr " +
+           "LEFT JOIN FETCH mr.appointment a " +
+           "LEFT JOIN FETCH a.patient p " +
+           "LEFT JOIN FETCH a.doctor d " +
+           "LEFT JOIN FETCH a.slot s " +
+           "LEFT JOIN FETCH s.schedule sc " +
+           "LEFT JOIN FETCH sc.room r " +
+           "LEFT JOIN FETCH d.department dep " +
+           "LEFT JOIN FETCH i.invoiceItems items " +
+           "WHERE i.id = :id")
+    Optional<Invoice> findByIdWithDetails(@Param("id") Long id);
 }

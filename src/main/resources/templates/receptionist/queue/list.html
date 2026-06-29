@@ -64,9 +64,9 @@
                                             <span class="badge badge-examining rounded-pill">Đang khám</span>
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center mt-3">
-                                            <small class="text-muted"
-                                                   th:text="'Mã: ' + ${room.examiningPatient.appointmentCode}">Mã:
-                                                APT-20260028</small>
+                                            <small class="text-muted fw-bold"
+                                                   th:text="'Số phiếu: ' + ${room.examiningPatient.stt}">Số phiếu:
+                                                1</small>
                                             <small class="text-muted fw-semibold"
                                                    th:text="'Vào lúc: ' + (${room.examiningPatient.checkInTime != null} ? ${#temporals.format(room.examiningPatient.checkInTime, 'HH:mm')} : '--:--')">Vào
                                                 lúc: 08:35</small>

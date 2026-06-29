@@ -1005,7 +1005,6 @@ public class AppointmentServiceImpl implements AppointmentService {
 
             QueueResponse.PatientInfo examiningPatient = null;
             List<QueueResponse.PatientInfo> waitingPatients = new ArrayList<>();
-            int stt = 1;
 
             for (Appointment a : roomAppointments) {
                 String patientName = "-";
@@ -1013,17 +1012,19 @@ public class AppointmentServiceImpl implements AppointmentService {
                     patientName = buildFullName(a.getPatient().getLastName(), a.getPatient().getMiddleName(), a.getPatient().getFirstName());
                 }
 
+                Long realQueueNumber = calculateQueueNumber(a);
+
                 QueueResponse.PatientInfo patientInfo = QueueResponse.PatientInfo.builder()
                         .appointmentCode(a.getAppointmentCode())
                         .patientName(patientName)
                         .checkInTime(a.getCheckInTime() != null ? a.getCheckInTime().toLocalTime() : null)
                         .status(a.getStatus())
+                        .stt(realQueueNumber != null ? realQueueNumber.intValue() : 0)
                         .build();
 
                 if ("EXAMINING".equalsIgnoreCase(a.getStatus())) {
                     examiningPatient = patientInfo;
                 } else if ("WAITING".equalsIgnoreCase(a.getStatus())) {
-                    patientInfo.setStt(stt++);
                     waitingPatients.add(patientInfo);
                 }
             }
