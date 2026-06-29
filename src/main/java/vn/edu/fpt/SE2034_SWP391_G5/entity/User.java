@@ -138,4 +138,18 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    public String getFullName() {
+        StringBuilder fullName = new StringBuilder();
+        if (lastName != null && !lastName.isEmpty()) {
+            fullName.append(lastName).append(" ");
+        }
+        if (middleName != null && !middleName.isEmpty()) {
+            fullName.append(middleName).append(" ");
+        }
+        if (firstName != null && !firstName.isEmpty()) {
+            fullName.append(firstName);
+        }
+        return fullName.toString().trim();
+    }
+
 }

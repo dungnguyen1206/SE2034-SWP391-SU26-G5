@@ -1,10 +1,85 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Chi tiết bài viết</title>
+    <link rel="stylesheet" th:href="@{/css/manager/manager-common.css}">
+    <link rel="stylesheet" th:href="@{/css/manager/manager-articles.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
-<body>
 
+<body>
+<div class="manager-layout">
+
+    <div th:replace="~{manager/fragments/sidebar :: managerSidebar('articles')}"></div>
+
+    <main class="manager-main">
+        <header class="article-header">
+            <div style="display: flex; align-items: center; gap: 16px;">
+                <a th:href="@{/manager/articles}" class="staff-back-link" title="Quay lại">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div class="article-header-title">
+                    <h2>Chi tiết bài viết</h2>
+                    <p>Xem thông tin chi tiết bài viết, tin tức</p>
+                </div>
+            </div>
+            
+            <div class="article-actions">
+                <a th:href="@{'/manager/articles/edit/' + ${article.id}}" class="article-create-button" style="background: #00a651;">
+                    <i class="bi bi-pencil-square"></i> Chỉnh sửa
+                </a>
+            </div>
+        </header>
+
+        <div class="article-detail-card" th:if="${article != null}">
+            <div class="article-detail-header">
+                <!-- Title -->
+                <h1 class="article-detail-title" th:text="${article.title}">Tiêu đề bài viết</h1>
+                
+                <!-- Meta Information -->
+                <div class="article-detail-meta">
+                    <span>
+                        <i class="bi bi-person"></i>
+                        <span th:text="${article.doctorAuthor != null ? article.doctorAuthor.fullName : (article.createdBy != null ? article.createdBy.fullName : 'Admin')}">Tác giả</span>
+                    </span>
+                    <span>
+                        <i class="bi bi-calendar3"></i>
+                        <span th:text="${article.createdAt != null ? #temporals.format(article.createdAt, 'dd/MM/yyyy HH:mm') : ''}">Ngày tạo</span>
+                    </span>
+                    <span>
+                        <i class="bi bi-folder2-open"></i>
+                        <span th:text="${article.category}">Chuyên mục</span>
+                    </span>
+                    <span>
+                        <i class="bi bi-circle-fill" th:style="${article.status == 'PUBLISHED'} ? 'color: #008236; font-size: 8px;' : 'color: #b45309; font-size: 8px;'"></i>
+                        <strong th:text="${article.status == 'PUBLISHED'} ? 'Đã xuất bản' : 'Bản nháp'"
+                                th:style="${article.status == 'PUBLISHED'} ? 'color: #008236;' : 'color: #b45309;'">
+                            Trạng thái
+                        </strong>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div class="article-detail-content">
+                <!-- Image -->
+                <img th:if="${article.thumbnailUrl != null}" th:src="${article.thumbnailUrl}" alt="Hình ảnh bài viết" class="article-detail-image">
+
+                <!-- HTML Content -->
+                <div th:utext="${article.content}">
+                    Nội dung bài viết
+                </div>
+            </div>
+        </div>
+
+        <div th:if="${article == null}">
+            <p>Bài viết không tồn tại.</p>
+        </div>
+
+    </main>
+
+</div>
 </body>
 </html>
