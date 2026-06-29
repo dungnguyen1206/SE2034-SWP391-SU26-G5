@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import vn.edu.fpt.SE2034_SWP391_G5.exception.Invoice.DataConflictException;
+import vn.edu.fpt.SE2034_SWP391_G5.exception.Invoice.InvoiceNotFoundException;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.Schedule.ScheduleConflictException;
 
 @ControllerAdvice
@@ -61,9 +63,23 @@ public class GlobalExceptionHandler {
         return  "redirect:" + (referer != null ? referer : "/manager/schedules/list");
     }
 
+    /*
+     *
+     * Function helps handle invoice conflict
+     *
+     */
 
+    @ExceptionHandler(DataConflictException.class)
+    private String handleDataConflict(Exception ex, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        return "/manager/invoices/overview";
+    }
 
-
+    @ExceptionHandler(InvoiceNotFoundException.class)
+    private String handleInvoiceNotFound(Exception ex, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+        redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
+        return "/manager/invoices/overview";
+    }
 
 
 }

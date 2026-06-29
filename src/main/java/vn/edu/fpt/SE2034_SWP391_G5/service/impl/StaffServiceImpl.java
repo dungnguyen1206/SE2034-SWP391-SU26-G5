@@ -1,5 +1,8 @@
 package vn.edu.fpt.SE2034_SWP391_G5.service.impl;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -44,8 +47,10 @@ public class StaffServiceImpl implements StaffService {
     }
 
     //find all active staff
-    public List<StaffResponse> findStaff(String roleName, String filterKey) {
-        return userRepository.findActiveStaffList(roleName, filterKey);
+    @Override
+    public Page<StaffResponse> findStaff(String roleName, String filterKey, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return userRepository.findActiveStaffList(roleName, filterKey,pageable);
     }
 
     public StaffResponse findStaffById(Long id) {

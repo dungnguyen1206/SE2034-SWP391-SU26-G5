@@ -46,11 +46,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
                 " AND u.status = 'ACTIVE'" +
                 " AND (:roleName IS NULL OR r.name = :roleName)" +
                 " AND (:keyword IS NULL OR :keyword = ''" +
-                "          OR LOWER(CONCAT(u.firstName, ' ', COALESCE(u.middleName, ''), ' ', u.lastName)) LIKE LOWER(CONCAT('%', :keyword, '%')) "
-                +
+                "          OR LOWER(CONCAT(u.firstName, ' ', COALESCE(u.middleName, ''), ' ', u.lastName)) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
                 "          OR LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
                 "          OR u.phone LIKE CONCAT('%', :keyword, '%'))")
-        List<StaffResponse> findActiveStaffList(@Param("roleName") String roleName, String keyword);
+        Page<StaffResponse> findActiveStaffList(@Param("roleName") String roleName, @Param("keyword") String keyword, Pageable pageable);
 
         @Query("SELECT DISTINCT u FROM User u " +
                 "JOIN u.userRoles ur JOIN ur.role r " +

@@ -5,9 +5,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Invoice;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.InvoiceSummaryResponse;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Repository
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
@@ -31,4 +34,19 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
             "WHERE a.bookingDate = :today " +
             "AND i.paymentStatus = 'UNPAID'")
     long countTodayUnpaidInvoices(@Param("today") LocalDate today);
+
+
+    @Query("SELECT new vn.edu.fpt.SE2034_SWP391_G5.dto.response.InvoiceSummaryResponse(i.paymentStatus,count(i),sum(i.totalAmount)) " +
+            " FROM Invoice i" +
+            " WHERE ((:startDate is null and :endDate is null) or i.createdAt between :startDate and :endDate  )" +
+            " AND (:month is null or month(i.createdAt)=:month)" +
+            " AND (:year is null or year(i.createdAt)=:year )" +
+            " and i.paymentStatus=:paymentStatus" +
+            " group by i.paymentStatus")
+    Optional<InvoiceSummaryResponse> getTotalAmountByPaymentStatus(@Param("paymentStatus") String paymentStatus,
+                                                                   @Param("startDate")LocalDateTime startDate,
+                                                                   @Param("endDate") LocalDateTime endDate, @Param("month") Integer month, @Param("year") Integer year);
+
+
+
 }

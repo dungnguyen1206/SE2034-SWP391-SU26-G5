@@ -5,6 +5,7 @@
     <title>Danh sách tài khoản nhân viên</title>
     <link rel="stylesheet" th:href="@{/css/manager/manager-common.css}">
     <link rel="stylesheet" th:href="@{/css/manager/manager-staff.css}">
+    <link rel="stylesheet" th:href="@{/css/manager/manager-schedules.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
 <body>
@@ -139,7 +140,22 @@
                 </tr>
                 </tbody>
             </table>
+            <!--            paging-->
+            <div class="schedule-pagination" style="justify-content: flex-end;">
+                            <span th:text="'Trang hiện tại ' +${currentPage + 1}+
+                            ' trong '+${totalPages} " style=" font-weight: 500;padding: 6px 10px ; border-radius: 5px; margin-top: 5px; margin-bottom: 5px;">
+                            </span>
+                <a th:if="${currentPage!=0}"
+                   th:href="@{/manager/staff/list(role=${selectedRole},page=${currentPage - 1},filterKey=${filterKey})}"
+                   class="pager-button">Trước</a>
+                <span th:if="${currentPage==0}"
+                      class="pager-button disabled">Trước</span>
 
+                <a th:if="${currentPage <(totalPages - 1)}"
+                   th:href="@{/manager/staff/list(role=${selectedRole},page=${currentPage + 1},filterKey=${filterKey})}"
+                   class="pager-button">Sau</a>
+                <span th:if="${currentPage == (totalPages - 1)}" class="pager-button disabled">Sau</span>
+            </div>
         </section>
     </main>
 </div>

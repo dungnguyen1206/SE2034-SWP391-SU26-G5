@@ -28,9 +28,9 @@
             <li><a th:href="@{/manager/schedules/list}" class="manager-nav-link" th:classappend="${activeMenu == 'schedule'} ? 'active'"><i class="bi bi-calendar-week"></i>Quản lý lịch làm việc</a></li>
             <li><a href="#" class="manager-nav-link"><i class="bi bi-newspaper"></i>Danh sách bài viết</a></li>
             <li><a href="#" class="manager-nav-link"><i class="bi bi-megaphone"></i>Danh sách tin tức</a></li>
-            <li><a href="#" class="manager-nav-link"><i class="bi bi-calendar-check"></i>Danh sách lịch hẹn</a></li>
-            <li><a href="#" class="manager-nav-link"><i class="bi bi-file-earmark-medical"></i>Hồ sơ bệnh án</a></li>
-            <li><a href="#" class="manager-nav-link"><i class="bi bi-receipt"></i>Tổng quan hóa đơn</a></li>
+<!--            <li><a href="#" class="manager-nav-link"><i class="bi bi-calendar-check"></i>Danh sách lịch hẹn</a></li>-->
+<!--            <li><a href="#" class="manager-nav-link"><i class="bi bi-file-earmark-medical"></i>Hồ sơ bệnh án</a></li>-->
+            <li><a th:href="@{/manager/invoices}" th:classappend="${activeMenu=='invoices'} ? 'active'" class="manager-nav-link"><i class="bi bi-receipt"></i>Tổng quan hóa đơn</a></li>
         </ul>
     </nav>
     <div class="manager-sidebar-footer">

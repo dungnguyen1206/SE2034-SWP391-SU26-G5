@@ -2,6 +2,7 @@ package vn.edu.fpt.SE2034_SWP391_G5.controller.manager;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -44,11 +45,11 @@ public class ManagerStaffController {
     private final ImageUploadService imageUploadService;
 
 
-
-
     @GetMapping("/list")
     public String staff(@RequestParam(required = false) String role,
                         @RequestParam(required = false) String filterKey,
+                        @RequestParam(defaultValue = "0") int page,
+                        @RequestParam(defaultValue = "5") int size,
                         Model model) {
         String selectedRole = ("DOCTOR".equals(role) || "RECEPTIONIST".equals(role)) ? role : null;
 
@@ -56,15 +57,16 @@ public class ManagerStaffController {
         long receptionistCount = receptionistService.findByRoleNameAndStatus("RECEPTIONIST", "ACTIVE").size();
         long totalStaff = doctorCount + receptionistCount;
 
-        List<StaffResponse> staffResponses = staffService.findStaff(selectedRole, filterKey);
-        int numberOfResult = staffResponses.size();
-
+        Page<StaffResponse> staffResponses = staffService.findStaff(selectedRole, filterKey, page, size);
+        model.addAttribute("totalPages", staffResponses.getTotalPages());
+        model.addAttribute("currentPage", page);
         model.addAttribute("totalStaff", totalStaff);
         model.addAttribute("doctorCount", doctorCount);
         model.addAttribute("receptionistCount", receptionistCount);
-        model.addAttribute("staffResponses", staffResponses);
-        model.addAttribute("numberOfResult", numberOfResult);
+        model.addAttribute("staffResponses", staffResponses.getContent());
+        model.addAttribute("numberOfResult", staffResponses.getTotalElements());
         model.addAttribute("selectedRole", selectedRole);
+        model.addAttribute("filterKey", filterKey);
 
         return "manager/staff/list";
     }
@@ -98,7 +100,7 @@ public class ManagerStaffController {
         }
 
         try {
-            CustomUserDetails customUserDetails =  (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             User manager = customUserDetails.getUser();
             updateUserForm.setCreatedBy(manager);
             String avatar = imageUploadService.uploadImage(avatarFile);
