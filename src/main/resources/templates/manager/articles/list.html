@@ -62,16 +62,13 @@
             
             <div th:each="article : ${articleList}" class="article-card">
                 <div class="article-card-left">
-                    <div class="article-icon" th:classappend="${article.status == 'PUBLISHED'} ? 'published' : 'draft'">
-                        <i class="bi" th:classappend="${article.status == 'PUBLISHED'} ? 'bi-globe2' : 'bi-file-earmark-text'"></i>
-                    </div>
+
                     <div class="article-info">
                         <a th:href="@{'/manager/articles/detail/' + ${article.id}}" class="article-title" th:text="${article.title}">Tiêu đề bài viết</a>
                         <div class="article-meta">
                             <span class="meta-category" th:text="${article.category}">Chuyên mục</span>
                             <span>Bởi <span th:text="${article.doctorAuthor != null ? article.doctorAuthor.fullName : (article.createdBy != null ? article.createdBy.fullName : 'Admin')}">Tác giả</span></span>
                             <span th:text="${article.createdAt != null ? #temporals.format(article.createdAt, 'yyyy-MM-dd') : ''}">2026-05-15</span>
-                            <span><i class="bi bi-eye"></i> <span th:text="${article.viewCount != null ? article.viewCount : '0'}">0</span> lượt xem</span>
                         </div>
                     </div>
                 </div>
