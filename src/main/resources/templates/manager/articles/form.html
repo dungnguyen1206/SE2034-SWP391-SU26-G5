@@ -50,15 +50,8 @@
                     <div class="form-card">
                         <div class="form-group">
                             <label class="form-label">Nội dung bài viết</label>
-                            <!-- Mocking the WYSIWYG Editor interface -->
-                            <div style="border: 1px solid #e2e8f0; border-bottom: none; border-radius: 8px 8px 0 0; padding: 10px; background: #f8fafc; display: flex; gap: 12px; color: #64748b;">
-                                <i class="bi bi-type-bold cursor-pointer"></i>
-                                <i class="bi bi-type-italic cursor-pointer"></i>
-                                <i class="bi bi-link-45deg cursor-pointer"></i>
-                                <i class="bi bi-list-ul cursor-pointer"></i>
-                                <i class="bi bi-image cursor-pointer"></i>
-                            </div>
-                            <textarea class="editor-placeholder" th:field="*{content}" style="width: 100%; border: 1px solid #e2e8f0; border-radius: 0 0 8px 8px; outline: none; padding: 16px; font-family: inherit;" placeholder="Viết toàn bộ nội dung bài viết tại đây. Sử dụng các tiêu đề rõ ràng, gạch đầu dòng và ngôn ngữ ngắn gọn..."></textarea>
+                            <!-- TinyMCE Rich Text Editor -->
+                            <textarea class="editor-placeholder" th:field="*{content}" style="width: 100%; min-height: 400px; border: 1px solid #e2e8f0; border-radius: 8px; outline: none; padding: 16px; font-family: inherit;" placeholder="Viết toàn bộ nội dung bài viết tại đây..."></textarea>
                         </div>
                     </div>
 
@@ -101,8 +94,7 @@
                             <label class="form-label">Tác giả</label>
                             <select class="form-control" th:field="*{doctorId}">
                                 <option value="">Chọn tác giả (Admin nếu để trống)...</option>
-                                <option value="1">BS. Trần Minh Tuấn</option>
-                                <option value="2">BS. Ngô Thị Linh</option>
+                                <option th:each="doc : ${doctors}" th:value="${doc.id}" th:text="${doc.fullName}"></option>
                             </select>
                         </div>
 
@@ -122,9 +114,28 @@
 
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js" referrerpolicy="origin"></script>
+<script>
+    tinymce.init({
+        selector: '.editor-placeholder',
+        plugins: 'lists link image table code help wordcount',
+        toolbar: 'undo redo | formatselect | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | link image | code',
+        height: 500,
+        menubar: false,
+        promotion: false, // Disables the "Upgrade" button
+        setup: function (editor) {
+            editor.on('change', function () {
+                editor.save(); // Ensures the textarea gets updated with the HTML content before form submit
+            });
+        }
+    });
+</script>
+
 <style>
     .cursor-pointer { cursor: pointer; transition: color 0.2s; }
     .cursor-pointer:hover { color: #0f172a; }
+    /* Hide any remaining TinyMCE warnings */
+    .tox-notifications-container { display: none !important; }
 </style>
 </body>
 </html>

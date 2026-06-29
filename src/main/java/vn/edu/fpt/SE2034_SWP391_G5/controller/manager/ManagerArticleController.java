@@ -21,8 +21,8 @@ public class ManagerArticleController {
     @Autowired
     private ArticleService articleService;
 
-    // Optional: @Autowired private DoctorService doctorService;
-    // For now we will just assume we can pass doctors or we fetch users with DOCTOR role.
+    @Autowired
+    private UserRepository userRepository;
 
     @GetMapping
     public String listArticles(
@@ -33,7 +33,6 @@ public class ManagerArticleController {
         
         List<Article> articleList = articleService.getArticlesByFilters(keyword, category, status);
         model.addAttribute("articleList", articleList);
-        // Retain filter state in view
         model.addAttribute("keyword", keyword);
         model.addAttribute("category", category);
         model.addAttribute("status", status);
@@ -50,7 +49,8 @@ public class ManagerArticleController {
     @GetMapping("/create")
     public String createArticleForm(Model model) {
         model.addAttribute("articleRequest", new CreateArticleRequest());
-        // TODO: Pass actual doctor list from DB. Right now we use static HTML or need a DoctorService
+        List<User> doctors = userRepository.findByRoleName("DOCTOR");
+        model.addAttribute("doctors", doctors);
         return "manager/articles/form";
     }
 
@@ -83,6 +83,10 @@ public class ManagerArticleController {
         
         model.addAttribute("articleRequest", request);
         model.addAttribute("articleId", id);
+        
+        List<User> doctors = userRepository.findByRoleName("DOCTOR");
+        model.addAttribute("doctors", doctors);
+        
         return "manager/articles/form";
     }
 
