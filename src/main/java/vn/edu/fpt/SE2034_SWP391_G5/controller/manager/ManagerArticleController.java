@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateArticleRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Article;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
+import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.ArticleService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DoctorService; // We need this or UserRepository to get doctors

@@ -401,3 +401,140 @@ textarea.form-control {
 .btn-cancel:hover {
     color: #0f172a;
 }
+
+/* New Detail Layout (Hong Ngoc Style) */
+.article-breadcrumb-header {
+    background: #f1f5f9;
+    padding: 32px 40px;
+    margin: 0; 
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.article-breadcrumb-header h2 {
+    margin: 0 0 12px 0;
+    font-size: 36px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.breadcrumb {
+    font-size: 14px;
+    color: #64748b;
+}
+
+.breadcrumb a {
+    color: #64748b;
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb span.meta-cat {
+    color: #10b981; 
+}
+
+.article-detail-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 48px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.article-title-main {
+    font-size: 32px;
+    font-weight: 700;
+    color: #0f172a;
+    line-height: 1.4;
+    margin: 0 0 16px 0;
+}
+
+.article-meta-simple {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 15px;
+    color: #475569;
+    margin-bottom: 32px;
+}
+
+.dot-separator {
+    color: #cbd5e1;
+}
+
+.meta-cat {
+    color: #059669; 
+    font-weight: 500;
+}
+
+.article-summary-box {
+    background: #f3f4f6;
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 32px;
+}
+
+.summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    color: #1f2937;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 12px;
+}
+
+.summary-header i {
+    background: #115e59;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
+
+.summary-body {
+    font-size: 15px;
+    line-height: 1.6;
+    font-weight: 600;
+    color: #111827;
+}
+
+.article-body-text {
+    font-size: 16px;
+    line-height: 1.8;
+    color: #374151;
+}
+
+.article-body-text h2, .article-body-text h3 {
+    color: #065f46; 
+    margin-top: 32px;
+    margin-bottom: 16px;
+    font-weight: 700;
+}
+
+.btn-edit-float {
+    position: absolute;
+    top: -20px;
+    right: 48px;
+    background: #3b82f6;
+    color: white;
+    padding: 10px 24px;
+    border-radius: 24px;
+    font-weight: 600;
+    font-size: 14px;
+    text-decoration: none;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.4);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-edit-float:hover {
+    background: #2563eb;
+    color: white;
+    transform: translateY(-2px);
+}

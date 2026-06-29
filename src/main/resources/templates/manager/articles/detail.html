@@ -15,9 +15,10 @@
     <div th:replace="~{manager/fragments/sidebar :: managerSidebar('articles')}"></div>
 
     <main class="manager-main">
+        
         <header class="article-header">
             <div style="display: flex; align-items: center; gap: 16px;">
-                <a th:href="@{/manager/articles}" class="staff-back-link" title="Quay lại">
+                <a th:href="@{/manager/articles}" class="staff-back-link" title="Quay lại" style="color: #64748b; font-size: 20px; text-decoration: none;">
                     <i class="bi bi-arrow-left"></i>
                 </a>
                 <div class="article-header-title">
@@ -33,49 +34,41 @@
             </div>
         </header>
 
+        <!-- Main Article Container -->
         <div class="article-detail-card" th:if="${article != null}">
-            <div class="article-detail-header">
-                <!-- Title -->
-                <h1 class="article-detail-title" th:text="${article.title}">Tiêu đề bài viết</h1>
-                
-                <!-- Meta Information -->
-                <div class="article-detail-meta">
-                    <span>
-                        <i class="bi bi-person"></i>
-                        <span th:text="${article.doctorAuthor != null ? article.doctorAuthor.fullName : (article.createdBy != null ? article.createdBy.fullName : 'Admin')}">Tác giả</span>
-                    </span>
-                    <span>
-                        <i class="bi bi-calendar3"></i>
-                        <span th:text="${article.createdAt != null ? #temporals.format(article.createdAt, 'dd/MM/yyyy HH:mm') : ''}">Ngày tạo</span>
-                    </span>
-                    <span>
-                        <i class="bi bi-folder2-open"></i>
-                        <span th:text="${article.category}">Chuyên mục</span>
-                    </span>
-                    <span>
-                        <i class="bi bi-circle-fill" th:style="${article.status == 'PUBLISHED'} ? 'color: #008236; font-size: 8px;' : 'color: #b45309; font-size: 8px;'"></i>
-                        <strong th:text="${article.status == 'PUBLISHED'} ? 'Đã xuất bản' : 'Bản nháp'"
-                                th:style="${article.status == 'PUBLISHED'} ? 'color: #008236;' : 'color: #b45309;'">
-                            Trạng thái
-                        </strong>
-                    </span>
+            
+            <!-- Huge Title -->
+            <h1 class="article-title-main" th:text="${article.title}">Tiêu đề bài viết</h1>
+            
+            <!-- Simple Meta Data -->
+            <div class="article-meta-simple">
+                <span th:text="${article.createdAt != null ? #temporals.format(article.createdAt, 'dd-MM-yyyy') : ''}">26-06-2026</span>
+                <span class="dot-separator">•</span>
+                <span class="meta-cat" th:text="${article.category}">Khoa nhi</span>
+                <span class="dot-separator">•</span>
+                <span th:text="${article.doctorAuthor != null ? article.doctorAuthor.fullName : (article.createdBy != null ? article.createdBy.fullName : 'Admin')}">Tác giả</span>
+            </div>
+
+            <!-- Highlighted Summary Box (like the image) -->
+            <div class="article-summary-box" th:if="${article.summary != null and !article.summary.isEmpty()}">
+                <div class="summary-header">
+                    <strong>Tóm tắt ý chính bài viết</strong>
+                </div>
+                <div class="summary-body" th:text="${article.summary}">
+                    Đoạn tóm tắt sẽ hiển thị ở đây với chữ đậm...
                 </div>
             </div>
 
-            <!-- Content -->
-            <div class="article-detail-content">
-                <!-- Image -->
-                <img th:if="${article.thumbnailUrl != null}" th:src="${article.thumbnailUrl}" alt="Hình ảnh bài viết" class="article-detail-image">
-
-                <!-- HTML Content -->
-                <div th:utext="${article.content}">
-                    Nội dung bài viết
-                </div>
+            <!-- WYSIWYG HTML Content -->
+            <div class="article-body-text" th:utext="${article.content}">
+                Nội dung bài viết
             </div>
         </div>
 
-        <div th:if="${article == null}">
+        <!-- Fallback if not found -->
+        <div th:if="${article == null}" style="padding: 48px; background: white; border-radius: 12px; border: 1px solid #e2e8f0;">
             <p>Bài viết không tồn tại.</p>
+            <a th:href="@{/manager/articles}" style="color: #3b82f6;">Quay lại danh sách</a>
         </div>
 
     </main>
