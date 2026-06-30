@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -163,10 +163,37 @@
     <ul class="navbar-nav">
         <li><a href="/home" class="active">Trang chủ</a></li>
         <li><a href="/patient/departments">Chuyên khoa</a></li>
+        <li><a href="/doctors">Bác sĩ</a></li>
     </ul>
     <div class="navbar-actions">
-        <a href="/login" class="btn-outline">Đăng nhập</a>
-        <a href="/register" class="btn-filled">Đăng ký</a>
+        <!-- Nếu chưa đăng nhập: Hiện Đăng nhập & Đăng ký -->
+        <div sec:authorize="!isAuthenticated()" style="display: flex; gap: 10px;">
+            <a href="/login" class="btn-outline">Đăng nhập</a>
+            <a href="/register" class="btn-filled">Đăng ký</a>
+        </div>
+        
+        <!-- Nếu đã đăng nhập: Hiện link đi tới Dashboard tương ứng & nút Đăng xuất -->
+        <div sec:authorize="isAuthenticated()" style="display: flex; gap: 12px; align-items: center;">
+            <a sec:authorize="hasAuthority('ROLE_PATIENT')" href="/patient/dashboard" class="btn-outline" style="text-decoration: none;">
+                <i class="bi bi-speedometer2"></i> Trang cá nhân
+            </a>
+            <a sec:authorize="hasAuthority('ROLE_DOCTOR')" href="/doctor/dashboard" class="btn-outline" style="text-decoration: none;">
+                <i class="bi bi-speedometer2"></i> Bảng điều khiển
+            </a>
+            <a sec:authorize="hasAuthority('ROLE_RECEPTIONIST')" href="/receptionist/dashboard" class="btn-outline" style="text-decoration: none;">
+                <i class="bi bi-speedometer2"></i> Bảng điều khiển
+            </a>
+            <a sec:authorize="hasAuthority('ROLE_MANAGER')" href="/manager/dashboard" class="btn-outline" style="text-decoration: none;">
+                <i class="bi bi-speedometer2"></i> Bảng điều khiển
+            </a>
+            <a sec:authorize="hasAuthority('ROLE_ADMIN')" href="/admin/account-list" class="btn-outline" style="text-decoration: none;">
+                <i class="bi bi-speedometer2"></i> Quản trị
+            </a>
+            
+            <a href="/logout" class="btn-filled" style="background: #ef4444; border-color: #ef4444; text-decoration: none;">
+                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+            </a>
+        </div>
     </div>
 </nav>
 

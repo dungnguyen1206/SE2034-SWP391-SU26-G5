@@ -73,7 +73,7 @@ body {
 }
 
 .patient-nav {
-    flex: 1;
+    /* Removed flex: 1 to prevent stretching on tall pages */
 }
 
 .patient-nav-list {
@@ -120,6 +120,7 @@ body {
     display: flex;
     align-items: center;
     gap: 12px;
+    margin-top: auto; /* Pushes the footer to the bottom */
 }
 
 .patient-user-avatar {
