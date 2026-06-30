@@ -630,6 +630,13 @@ public class AppointmentServiceImpl implements AppointmentService {
         TimeSlot slot = timeSlotRepository.findByIdWithSchedule(request.getSlotId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khung giờ"));
 
+        // Chỉ cho phép đặt lịch khi tuần làm việc đã được FINALIZED
+        DoctorSchedule schedule = slot.getSchedule();
+        if (schedule == null || schedule.getWeekSchedule() == null
+                || !"FINALIZED".equals(schedule.getWeekSchedule().getStatus())) {
+            throw new BadRequestException("Lịch khám này chưa được công bố, vui lòng chọn lịch khác");
+        }
+
         if (!"AVAILABLE".equals(slot.getStatus()) || slot.getBookedCapacity() >= slot.getMaxCapacity()) {
             throw new BadRequestException("Khung giờ này đã đầy, vui lòng chọn khung giờ khác");
         }
