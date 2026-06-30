@@ -58,6 +58,11 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .findByDoctorIdAndWorkDateBetweenAndStatusOrderByWorkDateAscShiftAsc(
                         doctorId, monday, sunday, "ACTIVE");
 
+        // Filter: only display if week_schedule status is PUBLISHED
+        schedules = schedules.stream()
+                .filter(ds -> ds.getWeekSchedule() != null && "PUBLISHED".equalsIgnoreCase(ds.getWeekSchedule().getStatus()))
+                .collect(Collectors.toList());
+
         // Group by date
         Map<LocalDate, List<DoctorSchedule>> schedulesByDate = schedules.stream()
                 .collect(Collectors.groupingBy(DoctorSchedule::getWorkDate));

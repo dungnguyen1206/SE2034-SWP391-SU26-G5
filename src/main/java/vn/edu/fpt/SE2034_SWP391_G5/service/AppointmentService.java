@@ -48,16 +48,19 @@ public interface AppointmentService {
     // Hủy lịch hẹn
     void cancelAppointment(Long appointmentId, Long patientId);
 
-    //LinhNH 01/06/2026
+    //LinhNH
     // Lấy danh sách lịch hẹn của bác sĩ có phân trang và bộ lọc trạng thái theo ngày
     Page<AppointmentResponse> getAppointmentsForDoctor(Long doctorId, LocalDate bookingDate, String status, Pageable pageable);
 
+    //LinhNH
     // Đếm số lượng lịch hẹn của bác sĩ theo trạng thái theo ngày
     long countAppointmentsForDoctor(Long doctorId, LocalDate bookingDate, String status);
 
+    //LinhNH
     // Cập nhật trạng thái lịch hẹn
     void updateAppointmentStatus(Long appointmentId, String newStatus);
 
+    //LinhNH
     // Lấy danh sách bệnh nhân đã khám xong gần đây nhất
     List<AppointmentResponse> getRecentCompletedAppointmentsForDoctor(Long doctorId, int limit);
 
