@@ -25,7 +25,7 @@
     margin-bottom: 30px;
 }
 
-.filter-tabs button {
+.filter-tabs button, .filter-tabs a {
     padding: 9px 16px;
     border: 1px solid #ddd;
     background: white;
@@ -33,9 +33,12 @@
     font-weight: 700;
     font-size: 13px;
     cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    color: inherit;
 }
 
-.filter-tabs button.active {
+.filter-tabs button.active, .filter-tabs a.active {
     background: #020617;
     color: white;
 }
@@ -160,7 +163,7 @@
     gap: 6px;
 }
 
-.pagination button {
+.pagination button, .pagination a {
     height: 32px;
     padding: 0 12px;
     border: 1px solid #e5e7eb;
@@ -169,11 +172,22 @@
     font-size: 13px;
     font-weight: 700;
     cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: inherit;
 }
 
-.pagination button.active {
+.pagination button.active, .pagination a.active {
     background: #020617;
     color: white;
+}
+
+.pagination a.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 /* Modal Overlay styling */
