@@ -1,6 +1,8 @@
 package vn.edu.fpt.SE2034_SWP391_G5.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateArticleRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Article;
@@ -31,6 +33,11 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public List<Article> getArticlesByFilters(String keyword, String category, String status) {
         return articleRepository.findByFilters(keyword, category, status);
+    }
+
+    @Override
+    public Page<Article> getArticlesByFilters(String keyword, String category, String status, Pageable pageable) {
+        return articleRepository.findByFiltersPageable(keyword, category, status, pageable);
     }
 
     @Override

@@ -42,7 +42,7 @@
             
             <!-- Simple Meta Data -->
             <div class="article-meta-simple">
-                <span th:text="${article.createdAt != null ? #temporals.format(article.createdAt, 'dd-MM-yyyy') : ''}">26-06-2026</span>
+                <span th:text="${article.createdAt != null ? #temporals.format(article.createdAt, 'dd/MM/yyyy') : ''}">26-06-2026</span>
                 <span class="dot-separator">•</span>
                 <span class="meta-cat" th:text="${article.category}">Khoa nhi</span>
                 <span class="dot-separator">•</span>

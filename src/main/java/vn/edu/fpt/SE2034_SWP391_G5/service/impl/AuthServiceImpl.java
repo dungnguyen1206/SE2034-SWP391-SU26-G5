@@ -180,6 +180,10 @@ public class AuthServiceImpl implements AuthService {
         }
 
         User user = userRepository.findByEmail(resetEmail).orElse(null);
+        // Check if new password is the same as old password
+        if (user != null && passwordEncoder.matches(newPassword, user.getPasswordHash())) {
+            throw new RuntimeException("Mật khẩu mới không được trùng với mật khẩu cũ.");
+        }
         // Update password if user is found
         if (user != null) {
             user.setPasswordHash(passwordEncoder.encode(newPassword));
