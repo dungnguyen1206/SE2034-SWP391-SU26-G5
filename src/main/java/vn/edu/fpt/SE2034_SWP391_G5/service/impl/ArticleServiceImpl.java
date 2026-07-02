@@ -42,17 +42,30 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public Article getArticleById(Long id) {
-        return articleRepository.findById(id).orElse(null);
+        Article article = articleRepository.findById(id).orElse(null);
+        if (article != null && "DELETED".equals(article.getStatus())) {
+            return null;
+        }
+        return article;
     }
 
     @Override
     public void createArticle(CreateArticleRequest request, User currentUser) {
+        if (currentUser == null) {
+            throw new IllegalArgumentException("Người tạo bài viết không hợp lệ.");
+        }
+
         Article article = new Article();
         article.setTitle(request.getTitle());
         article.setSummary(request.getSummary());
         article.setContent(request.getContent());
         article.setCategory(request.getCategory());
-        article.setStatus(request.getStatus());
+        
+        String status = request.getStatus();
+        if (status == null || status.trim().isEmpty()) {
+            status = "DRAFT";
+        }
+        article.setStatus(status);
         article.setCreatedAt(LocalDateTime.now());
         article.setUpdatedAt(LocalDateTime.now());
         article.setCreatedBy(currentUser);
@@ -88,8 +101,15 @@ public class ArticleServiceImpl implements ArticleService {
         // Handle publishing transitions
         if ("PUBLISHED".equals(request.getStatus()) && !"PUBLISHED".equals(article.getStatus())) {
             article.setPublishedAt(LocalDateTime.now());
+        } else if ("DRAFT".equals(request.getStatus()) && "PUBLISHED".equals(article.getStatus())) {
+            article.setPublishedAt(null);
         }
-        article.setStatus(request.getStatus());
+        
+        String status = request.getStatus();
+        if (status == null || status.trim().isEmpty()) {
+            status = "DRAFT";
+        }
+        article.setStatus(status);
         article.setUpdatedAt(LocalDateTime.now());
         
         if (request.getTitle() != null) {
