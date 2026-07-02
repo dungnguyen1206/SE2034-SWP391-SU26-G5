@@ -49,7 +49,9 @@ public class SecurityConfig {
                     "/forgot-password", "/reset-password",
                     "/css/**", "/js/**", "/images/**",
                     // Xem danh sách + chi tiết chuyên khoa — public
-                    "/patient/departments", "/patient/departments/**"
+                    "/patient/departments", "/patient/departments/**",
+                    // Xem danh sách + chi tiết bác sĩ — public
+                    "/doctors", "/doctors/**"
                 ).permitAll()
                 .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/manager/**").hasAuthority("ROLE_MANAGER")
