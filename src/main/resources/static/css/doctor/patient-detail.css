@@ -313,28 +313,30 @@
     margin-bottom: 28px;
 }
 
-.detail-tabs button {
+.detail-tabs button, .detail-tabs a {
     padding: 8px 16px;
     font-size: 13px;
     font-weight: 700;
     border-radius: 8px;
     cursor: pointer;
     transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
 }
 
-.detail-tabs button.active {
+.detail-tabs button.active, .detail-tabs a.active {
     background: #1764ff;
     color: white;
     border: none;
 }
 
-.detail-tabs button:not(.active) {
+.detail-tabs button:not(.active), .detail-tabs a:not(.active) {
     background: white;
     color: #64748b;
     border: 1px solid #e2e8f0;
 }
 
-.detail-tabs button:not(.active):hover {
+.detail-tabs button:not(.active):hover, .detail-tabs a:not(.active):hover {
     background: #f8fafc;
     color: #0f172a;
     border-color: #cbd5e1;

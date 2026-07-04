@@ -1,10 +1,202 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <title>Title</title>
-    </head>
-    <body>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết Hóa đơn</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/receptionist/common/sidebar.css" rel="stylesheet">
+    <link href="/css/receptionist/common/header.css" rel="stylesheet">
+    <link href="/css/receptionist/invoice/list.css" rel="stylesheet">
+</head>
+<body>
+    <div class="layout">
+        <div th:replace="~{receptionist/common/sidebar :: sidebar('invoice')}"></div>
 
-    </body>
+        <main class="main">
+            <div th:replace="~{receptionist/common/header :: header('Chi tiết Hóa đơn')}"></div>
+
+            <div class="container-fluid py-4 px-4">
+                
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <a th:href="@{/receptionist/invoice}" class="btn btn-outline-secondary rounded-pill shadow-sm px-4">
+                        <i class="bi bi-arrow-left me-2"></i> Quay lại
+                    </a>
+                    
+                    <div th:if="${invoice.paymentStatus == 'PAID'}">
+                        <button class="btn btn-primary rounded-pill shadow-sm px-4" onclick="window.print()">
+                            <i class="bi bi-printer me-2"></i> In hóa đơn
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Notification -->
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i><span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+
+                <div class="row gx-4">
+                    <!-- Invoice Details Left -->
+                    <div class="col-lg-8">
+                        <div class="card shadow-sm border-0 rounded-4 mb-4">
+                            <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                                <h5 class="fw-bold text-dark mb-0"><i class="bi bi-receipt me-2 text-primary"></i>Thông tin dịch vụ</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <div class="table-responsive">
+                                    <table class="table table-borderless align-middle mb-0">
+                                        <thead class="border-bottom border-light">
+                                            <tr>
+                                                <th class="text-muted fw-semibold">Tên dịch vụ</th>
+                                                <th class="text-muted fw-semibold text-center">Số lượng</th>
+                                                <th class="text-muted fw-semibold text-end">Đơn giá</th>
+                                                <th class="text-muted fw-semibold text-end">Thành tiền</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="item : ${invoice.items}">
+                                                <td><span class="fw-medium text-dark" th:text="${item.itemName}"></span></td>
+                                                <td class="text-center" th:text="${item.quantity}"></td>
+                                                <td class="text-end" th:text="${#numbers.formatDecimal(item.priceApplied, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                                                <td class="text-end fw-bold text-dark" th:text="${#numbers.formatDecimal(item.lineTotal, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                                            </tr>
+                                        </tbody>
+                                        <tfoot class="border-top border-light">
+                                            <tr>
+                                                <td colspan="3" class="text-end pt-4 pb-2">
+                                                    <span class="fs-5 text-muted fw-semibold">TỔNG CỘNG:</span>
+                                                </td>
+                                                <td class="text-end pt-4 pb-2">
+                                                    <span class="fs-4 text-primary fw-bold" th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Payment Action Right -->
+                    <div class="col-lg-4">
+                        
+                        <!-- General Info -->
+                        <div class="card shadow-sm border-0 rounded-4 mb-4 bg-light">
+                            <div class="card-body p-4">
+                                <h6 class="text-muted fw-bold mb-3 text-uppercase" style="font-size: 0.8rem; letter-spacing: 1px;">Thông tin bệnh nhân</h6>
+                                <div class="mb-3">
+                                    <div class="fw-bold text-dark fs-5 mb-1" th:text="${invoice.patientFullName}"></div>
+                                    <div class="text-muted"><i class="bi bi-telephone me-2"></i><span th:text="${invoice.patientPhone}"></span></div>
+                                    <div class="text-muted mt-1"><i class="bi bi-geo-alt me-2"></i><span th:text="${invoice.patientAddress}"></span></div>
+                                </div>
+                                
+                                <hr class="border-secondary opacity-25 my-3">
+                                
+                                <h6 class="text-muted fw-bold mb-3 text-uppercase" style="font-size: 0.8rem; letter-spacing: 1px;">Lịch khám</h6>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Bác sĩ:</span>
+                                    <span class="fw-medium text-dark" th:text="${invoice.doctorFullName}"></span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Phòng:</span>
+                                    <span class="fw-medium text-dark" th:text="${invoice.roomNumber}"></span>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">Khoa:</span>
+                                    <span class="fw-medium text-dark" th:text="${invoice.departmentName}"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment form -->
+                        <div class="card shadow-sm border-0 rounded-4" th:if="${invoice.paymentStatus == 'UNPAID'}">
+                            <div class="card-header bg-white border-bottom-0 pt-4 pb-2 px-4">
+                                <h5 class="fw-bold text-dark mb-0">Xử lý thanh toán</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <form th:action="@{/receptionist/invoice/{id}/pay(id=${invoice.id})}" method="post">
+                                    <div class="mb-4">
+                                        <label class="form-label text-muted fw-semibold mb-3">Phương thức thanh toán</label>
+                                        
+                                        <div class="payment-methods">
+                                            <label class="payment-method-card w-100 mb-3">
+                                                <input type="radio" name="paymentMethod" value="CASH" class="d-none" required>
+                                                <div class="card bg-white border border-2 rounded-3 p-3 text-center cursor-pointer radio-card">
+                                                    <i class="bi bi-cash-stack fs-2 text-success mb-2"></i>
+                                                    <div class="fw-bold">Tiền mặt</div>
+                                                </div>
+                                            </label>
+                                            
+                                            <label class="payment-method-card w-100 mb-2">
+                                                <input type="radio" name="paymentMethod" value="TRANSFER" class="d-none" required>
+                                                <div class="card bg-white border border-2 rounded-3 p-3 text-center cursor-pointer radio-card">
+                                                    <i class="bi bi-bank fs-2 text-primary mb-2"></i>
+                                                    <div class="fw-bold">Chuyển khoản</div>
+                                                </div>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-success w-100 py-3 rounded-3 fw-bold shadow-sm" onclick="return confirm('Xác nhận đã thu đủ tiền từ bệnh nhân?');">
+                                        XÁC NHẬN ĐÃ THU TIỀN
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Paid status -->
+                        <div class="card shadow-sm border-0 rounded-4 bg-success bg-opacity-10" th:if="${invoice.paymentStatus == 'PAID'}">
+                            <div class="card-body p-4 text-center">
+                                <div class="mb-3">
+                                    <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
+                                </div>
+                                <h4 class="fw-bold text-success mb-2">ĐÃ THANH TOÁN</h4>
+                                <div class="text-dark mb-1">
+                                    <span class="text-muted">Phương thức:</span> 
+                                    <span class="fw-bold" th:text="${invoice.paymentMethod == 'CASH' ? 'Tiền mặt' : 'Chuyển khoản'}"></span>
+                                </div>
+                                <div class="text-dark">
+                                    <span class="text-muted">Thời gian:</span> 
+                                    <span class="fw-medium" th:text="${#temporals.format(invoice.paidAt, 'HH:mm - dd/MM/yyyy')}"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <style>
+        .cursor-pointer {
+            cursor: pointer;
+        }
+        .radio-card {
+            transition: all 0.2s ease;
+        }
+        .payment-method-card input:checked + .radio-card {
+            border-color: #0d6efd !important;
+            background-color: #f8fbff !important;
+        }
+        
+        @media print {
+            .sidebar, .header, .btn, form, .payment-methods, .card-footer {
+                display: none !important;
+            }
+            .layout { display: block; }
+            .main { margin-left: 0 !important; width: 100% !important; padding: 0 !important; }
+            body { background: white !important; }
+            .card { box-shadow: none !important; border: 1px solid #dee2e6 !important; }
+        }
+    </style>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>  

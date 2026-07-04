@@ -1,95 +1,220 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="UTF-8">
-    <title>Danh sách bác sĩ</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đội ngũ bác sĩ - HAMS</title>
     <link rel="stylesheet" th:href="@{/css/patient/patient-common.css}">
     <link rel="stylesheet" th:href="@{/css/patient/patient-appointment.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        /* ── Doctor card ── */
+        .doc-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: box-shadow .2s, transform .2s;
+            box-shadow: 0 1px 4px rgba(0,0,0,.04);
+        }
+        .doc-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(37,99,235,.1);
+            border-color: #bfdbfe;
+        }
+        .doc-card-top {
+            padding: 20px 20px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .doc-av {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: 800;
+            color: #1d4ed8;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .doc-av img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+        .doc-name { font-size: 15px; font-weight: 700; color: #0f172a; margin-bottom: 2px; }
+        .doc-degree { font-size: 12px; color: #2563eb; font-weight: 500; }
+        .doc-card-body {
+            padding: 14px 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+        .doc-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 13px;
+            color: #475569;
+        }
+        .doc-meta-item i { color: #2563eb; font-size: 14px; flex-shrink: 0; }
+        .doc-bio {
+            font-size: 12px;
+            color: #64748b;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-top: 2px;
+        }
+        .doc-card-footer {
+            padding: 12px 20px 16px;
+            display: flex;
+            gap: 8px;
+        }
+
+        /* ── Filter tabs ── */
+        .dept-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .dept-tag {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+            border: 1.5px solid #e2e8f0;
+            color: #475569;
+            text-decoration: none;
+            transition: all .2s;
+            background: #fff;
+        }
+        .dept-tag:hover { border-color: #2563eb; color: #2563eb; }
+        .dept-tag.active {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: #fff;
+        }
+
+        /* ── Results count ── */
+        .result-info {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+    </style>
 </head>
-
 <body>
-    <div class="patient-layout">
-        <div th:replace="~{patient/fragments/sidebar :: patientSidebar('doctors')}"></div>
-        <main class="patient-main">
+<div class="patient-layout">
+    <div th:replace="~{patient/fragments/sidebar :: patientSidebar('doctors')}"></div>
+    <main class="patient-main">
 
-            <div class="patient-page-header">
-                <div>
-                    <h2>Đội ngũ bác sĩ</h2>
-                    <p>Tìm kiếm và xem thông tin bác sĩ theo chuyên khoa</p>
-                </div>
-                <a th:href="@{/patient/appointments/book}" class="btn-primary">
-                    <i class="bi bi-calendar-plus"></i> Đặt lịch khám
+        <!-- Header -->
+        <div class="patient-page-header">
+            <div>
+                <h2>Đội ngũ bác sĩ</h2>
+                <p>Tìm kiếm bác sĩ theo chuyên khoa và đặt lịch khám</p>
+            </div>
+            <a th:href="@{/patient/appointments/book}" class="btn-primary">
+                <i class="bi bi-calendar-plus"></i> Đặt lịch khám
+            </a>
+        </div>
+
+        <!-- Filter theo khoa -->
+        <div class="dept-filter">
+            <a th:href="@{/patient/doctors}"
+               class="dept-tag"
+               th:classappend="${selectedDepartmentId == null} ? ' active'">
+                <i class="bi bi-grid-3x3-gap"></i> Tất cả
+            </a>
+            <a th:each="dept : ${departments}"
+               th:href="@{/patient/doctors(departmentId=${dept.id})}"
+               class="dept-tag"
+               th:classappend="${selectedDepartmentId != null and selectedDepartmentId == dept.id} ? ' active'"
+               th:text="${dept.name}">Khoa</a>
+        </div>
+
+        <!-- Empty state -->
+        <div th:if="${#lists.isEmpty(doctors)}" class="patient-card">
+            <div class="empty-state">
+                <i class="bi bi-person-x" style="font-size:40px;"></i>
+                <p>Không có bác sĩ nào</p>
+                <a th:href="@{/patient/doctors}" class="btn-secondary" style="margin-top:12px;">
+                    Xem tất cả bác sĩ
                 </a>
             </div>
+        </div>
 
-            <!-- Filter theo khoa -->
-            <div class="appt-filter-bar" style="flex-wrap:wrap;gap:8px;">
-                <a th:href="@{/patient/doctors}" class="appt-filter-btn"
-                    th:classappend="${selectedDepartmentId == null} ? ' active'">Tất cả</a>
-                <a th:each="dept : ${departments}" th:href="@{/patient/doctors(departmentId=${dept.id})}"
-                    class="appt-filter-btn"
-                    th:classappend="${selectedDepartmentId != null and selectedDepartmentId == dept.id} ? ' active'"
-                    th:text="${dept.name}">Khoa</a>
-            </div>
+        <!-- Doctor grid -->
+        <div th:unless="${#lists.isEmpty(doctors)}"
+             style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px;">
 
-            <!-- Empty state -->
-            <div th:if="${#lists.isEmpty(doctors)}" class="patient-card">
-                <div class="empty-state">
-                    <i class="bi bi-person-x" style="font-size:40px;"></i>
-                    <p>Không có bác sĩ nào trong khoa này</p>
-                </div>
-            </div>
+            <div th:each="doc : ${doctors}" class="doc-card">
 
-            <!-- Doctor grid -->
-            <div th:unless="${#lists.isEmpty(doctors)}"
-                style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-top:4px;">
-                <div th:each="doc : ${doctors}" class="patient-card"
-                    style="padding:20px;display:flex;flex-direction:column;gap:14px;">
-                    <!-- Avatar + tên -->
-                    <div style="display:flex;align-items:center;gap:14px;">
-                        <div class="doctor-avatar" style="width:52px;height:52px;font-size:20px;flex-shrink:0;"
-                            th:text="${doc.firstName != null} ? ${doc.firstName.substring(0,1).toUpperCase()} : 'BS'">
-                        </div>
-                        <div>
-                            <div style="font-weight:700;font-size:15px;color:#0f172a;" th:text="${doc.fullName}"></div>
-                            <div style="font-size:12px;color:#1d4ed8;" th:text="${doc.degree}"></div>
-                        </div>
+                <!-- Top: avatar + tên -->
+                <div class="doc-card-top">
+                    <div class="doc-av">
+                        <img th:if="${doc.avatar != null}" th:src="${doc.avatar}" th:alt="${doc.fullName}">
+                        <span th:if="${doc.avatar == null}"
+                              th:text="${doc.firstName != null ? doc.firstName.substring(0,1).toUpperCase() : 'BS'}"></span>
                     </div>
-                    <!-- Thông tin -->
-                    <div style="font-size:13px;color:#475569;display:flex;flex-direction:column;gap:5px;">
-                        <div th:if="${doc.departmentName != null}">
-                            <i class="bi bi-building-cross" style="color:#0f4c81;margin-right:5px;"></i>
-                            <span th:text="${doc.departmentName}"></span>
+                    <div style="min-width:0;">
+                        <div class="doc-name">
+                            <span th:if="${doc.degree != null}" th:text="${doc.degree + '. '}"></span>
+                            <span th:text="${doc.fullName}"></span>
                         </div>
-                        <div th:if="${doc.experienceYears != null and doc.experienceYears > 0}">
-                            <i class="bi bi-award" style="color:#0f4c81;margin-right:5px;"></i>
-                            <span th:text="${doc.experienceYears} + ' năm kinh nghiệm'"></span>
-                        </div>
-                        <div th:if="${doc.bio != null}" style="color:#64748b;font-size:12px;line-height:1.5;
-                         display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;"
-                            th:text="${doc.bio}"></div>
-                    </div>
-                    <!-- Actions -->
-                    <div style="display:flex;gap:8px;margin-top:auto;">
-                        <a th:href="@{/patient/doctors/{id}(id=${doc.id})}" class="btn-secondary"
-                            style="flex:1;justify-content:center;font-size:13px;">
-                            <i class="bi bi-person-lines-fill"></i> Xem chi tiết
-                        </a>
-                        <a th:href="@{/patient/appointments/book/step2(departmentId=${doc.departmentId},doctorId=${doc.id})}"
-                            class="btn-primary" style="flex:1;justify-content:center;font-size:13px;">
-                            <i class="bi bi-calendar-plus"></i> Đặt lịch
-                        </a>
+                        <div class="doc-degree" th:if="${doc.degree != null}" th:text="${doc.degree}"></div>
                     </div>
                 </div>
+
+                <!-- Body: thông tin -->
+                <div class="doc-card-body">
+                    <div class="doc-meta-item" th:if="${doc.departmentName != null}">
+                        <i class="bi bi-building-cross"></i>
+                        <span th:text="${doc.departmentName}"></span>
+                    </div>
+                    <div class="doc-meta-item"
+                         th:if="${doc.experienceYears != null and doc.experienceYears > 0}">
+                        <i class="bi bi-award"></i>
+                        <span th:text="${doc.experienceYears} + ' năm kinh nghiệm'"></span>
+                    </div>
+                    <div class="doc-meta-item" th:if="${doc.licenseNumber != null}">
+                        <i class="bi bi-patch-check"></i>
+                        <span th:text="'CC: ' + ${doc.licenseNumber}"></span>
+                    </div>
+                    <p class="doc-bio" th:if="${doc.bio != null}" th:text="${doc.bio}"></p>
+                </div>
+
+                <!-- Footer: actions -->
+                <div class="doc-card-footer">
+                    <a th:href="@{/patient/doctors/{id}(id=${doc.id})}"
+                       class="btn-secondary"
+                       style="flex:1;justify-content:center;font-size:13px;">
+                        <i class="bi bi-person-lines-fill"></i> Chi tiết
+                    </a>
+                    <a th:href="@{/patient/appointments/book/step2(departmentId=${doc.departmentId},doctorId=${doc.id})}"
+                       class="btn-primary"
+                       style="flex:1;justify-content:center;font-size:13px;">
+                        <i class="bi bi-calendar-plus"></i> Đặt lịch
+                    </a>
+                </div>
+
             </div>
+        </div>
 
-            <div style="margin-top:12px;font-size:13px;color:#94a3b8;" th:unless="${#lists.isEmpty(doctors)}"
-                th:text="${#lists.size(doctors)} + ' bác sĩ'"></div>
+        <!-- Count -->
+        <div class="result-info" th:unless="${#lists.isEmpty(doctors)}"
+             th:text="${#lists.size(doctors)} + ' bác sĩ'"></div>
 
-        </main>
-    </div>
+    </main>
+</div>
 </body>
-
 </html>

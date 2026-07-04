@@ -1,4 +1,4 @@
-﻿USE master;
+USE master;
 GO
 
 IF EXISTS (SELECT * FROM sys.databases WHERE name = 'hams_db')
@@ -154,7 +154,14 @@ CREATE TABLE medical_services (
 GO
 
 -- ============================================================
--- 9. week_schedules
+-- 9. week_schedules  [MỚI - v8.2, giữ nguyên v8.3]
+-- Quản lý lifecycle lịch theo tuần cho toàn bệnh viện
+-- status: DRAFT / PUBLISHED / FINALIZED / EXPIRED
+--
+-- DRAFT     : Manager đang soạn lịch, bệnh nhân chưa book được
+-- PUBLISHED : Lịch hiển thị cho bác sĩ xem, bệnh nhân chưa book được
+-- FINALIZED : Lịch chính thức, bệnh nhân book được
+-- EXPIRED   : Quá deadline chủ nhật mà chưa Finalized
 -- ============================================================
 CREATE TABLE week_schedules (
     id              BIGINT          IDENTITY(1,1)   PRIMARY KEY,
@@ -171,7 +178,16 @@ CREATE TABLE week_schedules (
 GO
 
 -- ============================================================
--- 10. doctor_schedules
+-- 10. doctor_schedules  [CẬP NHẬT - v8.3]
+-- Thêm FK week_schedule_id để gắn shift vào tuần
+-- Thêm note (max 256 ký tự) cho Manager ghi chú khi tạo shift
+-- status: ACTIVE / CANCELLED
+--   ACTIVE    : Ca làm việc bình thường
+--   CANCELLED : Ca bị hủy (có hoặc không có appointment)
+-- shift: MORNING / AFTERNOON / FULL_DAY
+--   MORNING  : 07:00 - 12:00 (2 khung: 07:00-09:00, 09:00-12:00)
+--   AFTERNOON: 13:00 - 17:00 (2 khung: 13:00-15:00, 15:00-17:00)
+--   FULL_DAY : 07:00 - 17:00 (4 khung, gộp MORNING + AFTERNOON)
 -- ============================================================
 CREATE TABLE doctor_schedules (
     id                  BIGINT          IDENTITY(1,1)   PRIMARY KEY,
@@ -180,7 +196,7 @@ CREATE TABLE doctor_schedules (
     room_id             INT             NOT NULL,
     work_date           DATE            NOT NULL,
     shift               VARCHAR(20)     NOT NULL,
-    note                NVARCHAR(256)   NULL,
+    note                NVARCHAR(256)   NULL,               -- [MỚI v8.3] Ghi chú của Manager
     status              VARCHAR(20)     NOT NULL        DEFAULT 'ACTIVE',
     created_by          BIGINT          NULL,
     created_at          DATETIME2       NOT NULL        DEFAULT GETDATE(),
@@ -195,6 +211,9 @@ GO
 
 -- ============================================================
 -- 11. time_slots
+-- Slot khám bệnh nhân đặt lịch vào
+-- status: AVAILABLE / FULL
+-- version: optimistic locking tránh race condition khi book đồng thời
 -- ============================================================
 CREATE TABLE time_slots (
     id              BIGINT      IDENTITY(1,1)   PRIMARY KEY,
@@ -212,6 +231,11 @@ GO
 
 -- ============================================================
 -- 12. appointments
+-- status: PENDING / CONFIRMED / COMPLETED / CANCELLED
+--   PENDING   : Bệnh nhân vừa đặt, chờ xác nhận
+--   CONFIRMED : Đã xác nhận lịch hẹn
+--   COMPLETED : Đã khám xong
+--   CANCELLED : Đã hủy (bởi patient hoặc do shift bị cancel)
 -- ============================================================
 CREATE TABLE appointments (
     id                  BIGINT          IDENTITY(1,1)   PRIMARY KEY,
@@ -223,7 +247,7 @@ CREATE TABLE appointments (
     booking_date        DATE            NOT NULL,
     check_in_time       DATETIME2       NULL,
     note                NVARCHAR(MAX)   NULL,
-    status              VARCHAR(20)     NOT NULL        DEFAULT 'CONFIRMED',
+    status              VARCHAR(20)     NOT NULL        DEFAULT 'PENDING',
     created_at          DATETIME2       NOT NULL        DEFAULT GETDATE(),
     updated_at          DATETIME2       NOT NULL        DEFAULT GETDATE(),
 
@@ -235,7 +259,7 @@ CREATE TABLE appointments (
 GO
 
 -- ============================================================
--- 13. medical_records
+-- 13. medical_records (Quan hệ 1-1 STRICT với Appointment)
 -- ============================================================
 CREATE TABLE medical_records (
     id                  BIGINT          IDENTITY(1,1)   PRIMARY KEY,
@@ -267,7 +291,7 @@ CREATE TABLE medical_records (
 GO
 
 -- ============================================================
--- 14. invoices
+-- 14. invoices (Quan hệ 1-1 STRICT với Medical Record)
 -- ============================================================
 CREATE TABLE invoices (
     id                  BIGINT          IDENTITY(1,1)   PRIMARY KEY,
@@ -379,3 +403,86 @@ CREATE TABLE notifications (
 );
 GO
 
+-- ============================================================
+-- QUICK VERIFY
+-- ============================================================
+SELECT [table], [rows] FROM (
+    SELECT 'roles'              AS [table], COUNT(*) AS [rows] FROM roles
+    UNION ALL SELECT 'users'                , COUNT(*) FROM users
+    UNION ALL SELECT 'user_roles'           , COUNT(*) FROM user_roles
+    UNION ALL SELECT 'user_addresses'       , COUNT(*) FROM user_addresses
+    UNION ALL SELECT 'departments'          , COUNT(*) FROM departments
+    UNION ALL SELECT 'rooms'               , COUNT(*) FROM rooms
+    UNION ALL SELECT 'provinces'           , COUNT(*) FROM provinces
+    UNION ALL SELECT 'medical_services'    , COUNT(*) FROM medical_services
+    UNION ALL SELECT 'week_schedules'      , COUNT(*) FROM week_schedules
+    UNION ALL SELECT 'doctor_schedules'    , COUNT(*) FROM doctor_schedules
+    UNION ALL SELECT 'time_slots'          , COUNT(*) FROM time_slots
+    UNION ALL SELECT 'appointments'        , COUNT(*) FROM appointments
+    UNION ALL SELECT 'medical_records'     , COUNT(*) FROM medical_records
+    UNION ALL SELECT 'invoices'            , COUNT(*) FROM invoices
+    UNION ALL SELECT 'invoice_items'       , COUNT(*) FROM invoice_items
+    UNION ALL SELECT 'articles'            , COUNT(*) FROM articles
+    UNION ALL SELECT 'news'               , COUNT(*) FROM news
+    UNION ALL SELECT 'email_logs'         , COUNT(*) FROM email_logs
+    UNION ALL SELECT 'notifications'      , COUNT(*) FROM notifications
+) t ORDER BY [table];
+GO
+
+-- ============================================================
+-- SEED DATA: roles
+-- ============================================================
+INSERT INTO roles (name, description) VALUES
+('ADMIN',        N'Quản trị hệ thống'),
+('MANAGER',      N'Quản lý bệnh viện'),
+('DOCTOR',       N'Bác sĩ'),
+('PATIENT',      N'Bệnh nhân'),
+('RECEPTIONIST', N'Lễ tân');
+GO
+
+-- ============================================================
+-- SEED DATA: users  (password cho tất cả: 123456)
+-- ============================================================
+INSERT INTO users
+(username, email, password_hash, status, email_verified, first_name, last_name, gender, experience_years)
+VALUES
+('admin',    'admin@hams.com',    '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'System',   N'Admin',   'MALE',   0),
+('manager1', 'manager1@hams.com', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Hospital', N'Manager', 'MALE',   0),
+('doctor1',  'doctor1@hams.com',  '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Nguyen',   N'An',      'MALE',   5),
+('doctor2',  'doctor2@hams.com',  '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Tran',     N'Binh',    'FEMALE', 8),
+('patient1', 'patient1@hams.com', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Le',       N'Cuong',   'MALE',   0),
+('patient2', 'patient2@hams.com', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Pham',     N'Dung',    'FEMALE', 0),
+('patient3', 'patient3@hams.com', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Hoang',    N'Giang',   'MALE',   0),
+('patient4', 'patient4@hams.com', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Vu',       N'Huong',   'FEMALE', 0);
+GO
+
+-- ============================================================
+-- SEED DATA: user_roles  (gán role cho từng user)
+-- ============================================================
+INSERT INTO user_roles (user_id, role_id)
+SELECT u.id, r.id FROM users u CROSS JOIN roles r WHERE u.username = 'admin'    AND r.name = 'ADMIN';
+INSERT INTO user_roles (user_id, role_id)
+SELECT u.id, r.id FROM users u CROSS JOIN roles r WHERE u.username = 'manager1' AND r.name = 'MANAGER';
+INSERT INTO user_roles (user_id, role_id)
+SELECT u.id, r.id FROM users u CROSS JOIN roles r WHERE u.username = 'doctor1'  AND r.name = 'DOCTOR';
+INSERT INTO user_roles (user_id, role_id)
+SELECT u.id, r.id FROM users u CROSS JOIN roles r WHERE u.username = 'doctor2'  AND r.name = 'DOCTOR';
+INSERT INTO user_roles (user_id, role_id)
+SELECT u.id, r.id FROM users u CROSS JOIN roles r WHERE u.username = 'patient1' AND r.name = 'PATIENT';
+INSERT INTO user_roles (user_id, role_id)
+SELECT u.id, r.id FROM users u CROSS JOIN roles r WHERE u.username = 'patient2' AND r.name = 'PATIENT';
+INSERT INTO user_roles (user_id, role_id)
+SELECT u.id, r.id FROM users u CROSS JOIN roles r WHERE u.username = 'patient3' AND r.name = 'PATIENT';
+INSERT INTO user_roles (user_id, role_id)
+SELECT u.id, r.id FROM users u CROSS JOIN roles r WHERE u.username = 'patient4' AND r.name = 'PATIENT';
+GO
+
+-- ============================================================
+-- VERIFY SEED DATA
+-- ============================================================
+SELECT u.username, r.name AS role_name
+FROM users u
+JOIN user_roles ur ON u.id = ur.user_id
+JOIN roles r       ON r.id = ur.role_id
+ORDER BY u.id;
+GO
