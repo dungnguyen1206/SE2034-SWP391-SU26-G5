@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/manager/fragments/layout}"
+      th:with="pageTitle='Cập nhật lịch làm việc của bác sĩ', pageSubtitle='Chỉnh sửa thông tin ca làm việc của bác sĩ' , activeMenu='staff'">
 <head>
     <meta charset="UTF-8">
     <title>Quản lý lịch làm việc</title>
@@ -12,20 +14,12 @@
 <body>
 
 <!--SCHEDULE MANAGEMENT - MAIN CONTENT-->
-<main class="container-fluid p-0">
+<main class="container-fluid p-0" layout:fragment="content">
     <div class="row">
-        <div class="col-auto">
-            <div th:replace="~{manager/fragments/sidebar :: managerSidebar('schedule')}"></div>
-        </div>
+
         <div class="col d-flex flex-column me-3">
             <!--SCHEDULE MANAGEMENT - PAGE HEADER-->
-            <header class="mb-3 mt-3">
-                <div>
-                    <div>
-                        <h2>Quản lý lịch làm việc</h2>
-                    </div>
-                    <p>Quản lý lịch trực của bác sĩ theo ngày, ca, phòng</p>
-                </div>
+            <header class="mb-3">
                 <div class="schedule-conflict"
                      id="conflictBox"
                      th:style="${errorMessage != null} ? 'display:block' : 'display:none'">

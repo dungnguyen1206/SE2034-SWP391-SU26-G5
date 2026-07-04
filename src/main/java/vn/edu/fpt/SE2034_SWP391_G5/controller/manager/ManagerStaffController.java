@@ -91,7 +91,7 @@ public class ManagerStaffController {
     public String updateStaff(@PathVariable Long staffId,
                               @Valid @ModelAttribute("updateUserForm") UpdateUserRequest updateUserForm,
                               BindingResult bindingResult,
-                              Model model, RedirectAttributes redirectAttributes, @RequestParam("avatarFile") MultipartFile avatarFile) {
+                              Model model, RedirectAttributes redirectAttributes, @RequestParam(value = "avatarFile",required = false) MultipartFile avatarFile) {
         updateUserForm.setId(staffId);
 
         if (bindingResult.hasErrors()) {

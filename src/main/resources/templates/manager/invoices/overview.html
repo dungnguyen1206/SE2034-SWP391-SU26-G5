@@ -1,11 +1,13 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/manager/fragments/layout}"
+      th:with="pageTitle='Tổng quan về doanh thu', pageSubtitle='Theo dõi doanh thu của bệnh viện theo ngày, tháng, năm' , activeMenu='invoices'">
 
 <head>
     <meta charset="UTF-8">
     <title>Tổng quan doanh thu</title>
     <link rel="stylesheet" th:href="@{/css/manager/manager-common.css}">
-    ]<link rel="stylesheet" th:href="@{/css/manager/manager-schedules.css}">
+    <link rel="stylesheet" th:href="@{/css/manager/manager-schedules.css}">
     <link rel="stylesheet" th:href="@{/css/manager/manager-invoices.css}">
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
             integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
@@ -17,186 +19,164 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
 <body>
-<div class="container-fluid p-0 ">
+
+<div class="container-fluid p-0 h-100" layout:fragment="content">
     <div class="row">
-        <div class="col-auto">
-            <div th:replace="~{/manager/fragments/sidebar :: managerSidebar('invoices')}">
+        <!--            Summary invoice Overview-->
+        <div class="row">
+            <div class="col-md-6 mt-3">
+                <div class="card h-100"
+                     style="border-color: #00a651; border-radius: 15px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1)">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <label class="text-secondary small fw-bold">Tổng doanh thu</label>
+                            <br>
+                            <label style="font-size: 22px; font-weight: 700; color: #1e293b"
+                                   th:text="${paidInvoice.getTotalPaymentAmount() != null} ? (${#numbers.formatDecimal(paidInvoice.getTotalPaymentAmount(), 0, 'POINT', 0, 'COMMA')} + ' VND') : '0 VND'">100,000,000
+                                VND</label>
+                            <br>
+                            <label style="font-size: 12px; color: #00a651"
+                                   th:text="${paidInvoice.getPaymentAmount() + ' hóa đơn đã thanh toán'}">200 hóa
+                                đơn đã thanh toán</label>
+                        </div>
+                        <div style="width: 52px; height: 52px; border-radius: 12px; background: rgba(0, 166, 81, 0.1); display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-cash-stack" style="font-size: 24px; color: #00a651;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mt-3">
+                <div class="card h-100"
+                     style="border-color: #FCD34D; border-radius: 15px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+                    <div class="card-body d-flex justify-content-between align-items-center">
+                        <div>
+                            <label class="text-secondary small fw-bold">Đang thanh toán</label>
+                            <br>
+                            <label style="font-size: 22px; font-weight: 700; color: #1e293b"
+                                   th:text="${pendingInvoice.getTotalPaymentAmount() != null} ? (${#numbers.formatDecimal(pendingInvoice.getTotalPaymentAmount(), 0, 'POINT', 0, 'COMMA')} + ' VND') : '0 VND'">100,000,000
+                                VND</label>
+                            <br>
+                            <label style="font-size: 12px; color: #aa8d00"
+                                   th:text="${pendingInvoice.getPaymentAmount() + ' hóa đơn đang thanh toán'}">12
+                                hóa đơn đang thanh toán</label>
+                        </div>
+                        <div style="width: 52px; height: 52px; border-radius: 12px; background: rgb(255 255 196); display: flex; align-items: center; justify-content: center;">
+                            <i class="bi bi-clock" style="font-size: 24px; color: #ac9300;"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="col d-flex flex-column me-3">
-            <div class="row">
-                <div class="col-md-12 mt-3">
-                    <h3>Tổng quan về hóa đơn và thanh toán</h3>
-                    <p>Tóm tắt tài chính và theo dõi trạng thái hóa đơn</p>
-                </div>
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <form th:action="@{/manager/invoices}" method="GET">
+                    <div class="card border-0"
+                         style="border-radius: 15px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); bg-color: #fff;">
+                        <div class="card-body p-3">
+                            <div class="row g-3 align-items-end">
+                                <div class="col-md-2">
+                                    <label class="form-label small fw-bold text-secondary">Tháng</label>
+                                    <select class="form-select" name="month">
+                                        <option th:value="0">Chọn tháng</option>
+                                        <option th:each="i : ${#numbers.sequence(1,12)}"
+                                                th:value="${i}" th:text="${'Tháng ' + i}"
+                                                th:selected="${i==month}"></option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-2">
+                                    <label class="form-label small fw-bold text-secondary">Năm</label>
+                                    <select class="form-select" name="year">
+                                        <option th:value="0">Chọn năm</option>
+                                        <option th:each="i : ${#numbers.sequence(yearSelect - 5, yearSelect)}"
+                                                th:value="${i}" th:text="${'Năm ' + i}"
+                                                th:selected="${i==year}"></option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label small fw-bold text-secondary">Từ ngày</label>
+                                    <input class="form-control" type="date" name="startDate"
+                                           th:value="${startDate}">
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label class="form-label small fw-bold text-secondary">Đến ngày</label>
+                                    <input class="form-control" type="date" name="endDate" th:value="${endDate}">
+                                </div>
+
+                                <div class="col-md-2">
+                                    <button type="submit"
+                                            class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2"
+                                            style="height: 38px;">
+                                        <i class="bi bi-funnel"></i> Lọc dữ liệu
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
             </div>
+        </div>
 
-            <!--            Summary invoice Overview-->
-            <div class="row">
-                <div class="col-md-4 mt-3">
-                    <div class="card"
-                         style="border-color: #00a651;border-radius: 15px;box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1)">
-                        <div class="card-body d-flex justify-content-between align-items-center">
+        <!--                Data table-->
+        <div class="row mt-3">
+            <div class="col-md-12 mt-3">
+                <div class="card invoice-card">
+                    <div class="card-body p-0">
+                        <table class="invoice-table">
+                            <thead>
+                            <tr>
+                                <th>Mã hóa đơn</th>
+                                <th>Mã lịch khám</th>
+                                <th>Bệnh nhân</th>
+                                <th>Bác sĩ</th>
+                                <th>Khoa</th>
+                                <th>Hóa đơn</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="invoiceRowResponse : ${invoiceRowResponses}">
+                                <td th:text="${invoiceRowResponse.getInvoiceCode()}">HD-123</td>
+                                <td th:text="${invoiceRowResponse.getAppointmentCode()}">APT-123</td>
+                                <td th:text="${invoiceRowResponse.getPatientName()}">Nguyễn Việt Kiều</td>
+                                <td th:text="${invoiceRowResponse.getDoctorName()}">Nguyễn Việt Dũng</td>
+                                <td th:text="${invoiceRowResponse.getDepartmentName()}">Tim mạch</td>
+                                <td th:text="${#numbers.formatDecimal(invoiceRowResponse.getTotalAmount(), 0, 'POINT', 0, 'COMMA')} + ' VND'">
+                                    12,000,000 VND
+                                </td>
+                                <td th:text="${invoiceRowResponse.getStatus()}">Đã thanh toán</td>
+                                <td th:text="${#temporals.format(invoiceRowResponse.getDate(),'HH:mm - dd/MM/yyyy')}">
+                                    28/06/2026
+                                </td>
+                            </tr>
 
-                            <!-- Phần text bên trái -->
-                            <div>
-                                <label>Tổng doanh thu</label>
-                                <br>
-                                <label style="font-size: 20px; font-weight: 600; color: #1e293b"
-                                       th:text="${paidInvoice.getTotalPaymentAmount() + ' VND'}">100,000,000 VND</label>
-                                <br>
-                                <label style="font-size: 12px;color: #00a651"
-                                       th:text="${paidInvoice.getPaymentAmount() + ' hóa đơn đã thanh toán'}">200 hóa
-                                    đơn đã thanh toán</label>
-                            </div>
+                            </tbody>
 
-                            <!-- Icon bên phải -->
-                            <div style="width: 52px; height: 52px; border-radius: 12px; background: rgba(0, 166, 81, 0.1);
-                        display: flex; align-items: center; justify-content: center;">
-                                <i class="bi bi-cash-stack" style="font-size: 24px; color: #00a651;"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mt-3">
-                    <div class="card"
-                         style="border-color: #FCD34D; border-radius: 15px;box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
-                        <div class="card-body d-flex justify-content-between align-items-center">
+                        </table>
 
-                            <!-- Phần text bên trái -->
-                            <div>
-                                <label>Đang thanh toán</label>
-                                <br>
-                                <label style="font-size: 20px; font-weight: 600; color: #1e293b"
-                                       th:text="${pendingInvoice.getTotalPaymentAmount() != null} ? (${#numbers.formatDecimal(pendingInvoice.getTotalPaymentAmount(), 0, 'POINT', 0, 'COMMA')} + ' VND') : '0 VND'">100,000,000
-                                    VND</label>
-                                <br>
-                                <label style="font-size: 12px;color: #aa8d00"
-                                       th:text="${paidInvoice.getTotalPaymentAmount() != null} ? (${#numbers.formatDecimal(paidInvoice.getTotalPaymentAmount(), 0, 'POINT', 0, 'COMMA')} + ' VND') : '0 VND'">12
-                                    hóa đơn đang thanh toán</label>
-                            </div>
+                        <!-- FOOTER + PAGING -->
 
-                            <!-- Icon bên phải -->
-                            <div style="width: 52px; height: 52px; border-radius: 12px; background: rgb(255 255 196);
-                        display: flex; align-items: center; justify-content: center;">
-                                <i class="bi bi-clock" style="font-size: 24px; color: #ac9300;"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!--            Filter-->
-
-                <div class="col-md-4 mt-3">
-                    <form th:action="@{/manager/invoices}" method="GET">
-                        <div class="card"
-                             style="border-color: #8fb3d9; border-radius: 15px;box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
-                            <div class="card-body ">
-                                <div class="row">
-                                    <div class="col-md-5">
-                                        <label style="display: flex; align-items: center;font-weight: 600; color: #535353">Tháng:
-                                            <select class="form-select" aria-label="Default select example"
-                                                    style="margin-left: 10px;width: 140px" name="month">
-                                                <option th:value="0">Chọn tháng</option>
-                                                <option th:each="i : ${#numbers.sequence(1,12)}"
-                                                        th:value="${i}" th:text="${'Tháng ' + i}"
-                                                        th:selected="${i==month}"></option>
-                                            </select>
-                                        </label>
-                                    </div>
-                                    <div class="col-md-5">
-                                        <label style="display: flex; align-items: center;font-weight: 600;color: #535353">Năm:
-                                            <select class="form-select" aria-label="Default select example"
-                                                    style="margin-left: 10px; width: 150px;" name="year">
-                                                <option th:value="0">Chọn năm</option>
-                                                <option th:each="i : ${#numbers.sequence(yearSelect - 5, yearSelect)}"
-                                                        th:value="${i}" th:text="${'Năm ' + i}"
-                                                        th:selected="${i==year}"></option>
-                                            </select>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="row mt-3">
-                                    <div class="col-md-5">
-                                        <label style="display: flex; align-items: center;font-weight: 600;color: #535353">Từ:
-                                            <input class="form-control form-control-sm" type="date"
-                                                   style="width: 160px; margin-left: 10px;" name="startDate"
-                                                   th:value="${startDate}">
-                                        </label>
-                                    </div>
-                                    <div class="col-md-5">
-                                        <label style="display: flex; align-items: center;font-weight: 600;color: #535353">Đến:
-                                            <input class="form-control form-control-sm" type="date"
-                                                   style="width: 160px; margin-left: 10px;" name="endDate"
-                                                   th:value="${endDate}">
-                                        </label>
-                                    </div>
-                                    <div class="col-md-2">
-                                        <button type="submit" class="btn btn-sm" style="background: #c3e2ff"><i
-                                                class="bi bi-funnel"></i></button>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                    </form>
-                </div>
-
-                <!--                Data table-->
-                <div class="row mt-3">
-                    <div class="col-md-12 mt-3">
-                        <div class="card invoice-card">
-                            <div class="card-body p-0">
-                                <table class="invoice-table">
-                                    <thead>
-                                    <tr>
-                                        <th>Mã hóa đơn</th>
-                                        <th>Mã lịch khám</th>
-                                        <th>Bệnh nhân</th>
-                                        <th>Bác sĩ</th>
-                                        <th>Khoa</th>
-                                        <th>Hóa đơn</th>
-                                        <th>Trạng thái</th>
-                                        <th>Ngày</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <tr th:each="invoiceRowResponse : ${invoiceRowResponses}">
-                                        <td th:text="${invoiceRowResponse.getInvoiceCode()}">HD-123</td>
-                                        <td th:text="${invoiceRowResponse.getAppointmentCode()}">APT-123</td>
-                                        <td th:text="${invoiceRowResponse.getPatientName()}">Nguyễn Việt Kiều</td>
-                                        <td th:text="${invoiceRowResponse.getDoctorName()}">Nguyễn Việt Dũng</td>
-                                        <td th:text="${invoiceRowResponse.getDepartmentName()}">Tim mạch</td>
-                                        <td th:text="${#numbers.formatDecimal(invoiceRowResponse.getTotalAmount(), 0, 'POINT', 0, 'COMMA')} + ' VND'">12,000,000 VND</td>
-                                        <td th:text="${invoiceRowResponse.getStatus()}">Đã thanh toán</td>
-                                        <td th:text="${#temporals.format(invoiceRowResponse.getDate(),'HH:mm - dd/MM/yyyy')}">28/06/2026</td>
-                                    </tr>
-
-                                    </tbody>
-
-                                </table>
-
-                                <!-- FOOTER + PAGING -->
-
-                                <div class="schedule-pagination" style="justify-content: flex-end;">
+                        <div class="schedule-pagination" style="justify-content: flex-end;">
                             <span th:text="'Trang hiện tại ' +${currentPage + 1}+
                             ' trong '+${totalPages} "
                                   style=" font-weight: 500;padding: 6px 10px ; border-radius: 5px; margin-top: 5px; margin-bottom: 5px; font-size: 14px">
                             </span>
-                                    <a th:if="${currentPage!=0}"
-                                       th:href="@{/manager/invoices(role=${selectedRole},page=${currentPage - 1},filterKey=${filterKey},startDate=${startDate},endDate=${endDate})}"
-                                       class="pager-button">Trước</a>
-                                    <span th:if="${currentPage==0}"
-                                          class="pager-button disabled">Trước</span>
+                            <a th:if="${currentPage!=0}"
+                               th:href="@{/manager/invoices(month=${month},page=${currentPage - 1},year=${year},startDate=${startDate},endDate=${endDate})}"
+                               class="pager-button">Trước</a>
+                            <span th:if="${currentPage==0}"
+                                  class="pager-button disabled">Trước</span>
 
-                                    <a th:if="${currentPage <(totalPages - 1)}"
-                                       th:href="@{/manager/invoices(role=${selectedRole},page=${currentPage + 1},filterKey=${filterKey},startDate=${startDate},endDate=${endDate})}"
-                                       class="pager-button">Sau</a>
-                                    <span th:if="${currentPage == (totalPages - 1)}"
-                                          class="pager-button disabled">Sau</span>
-                                </div>
-                            </div>
+                            <a th:if="${currentPage <(totalPages - 1)}"
+                               th:href="@{/manager/invoices(month=${month},page=${currentPage + 1},year=${year},startDate=${startDate},endDate=${endDate})}"
+                               class="pager-button">Sau</a>
+                            <span th:if="${currentPage == (totalPages - 1)}"
+                                  class="pager-button disabled">Sau</span>
                         </div>
                     </div>
                 </div>
@@ -204,5 +184,6 @@
         </div>
     </div>
 </div>
+
 </body>
 </html>

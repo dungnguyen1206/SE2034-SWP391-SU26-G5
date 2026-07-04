@@ -1,0 +1,30 @@
+
+.nav-pills .nav-link {
+    padding: 4px 12px !important;
+    font-size: 13px !important;
+    border-radius: 6px !important;
+    background: #efefef !important;
+    color: #2b2b2b !important;
+    font-weight: 400 !important;
+}
+
+.nav-pills .nav-item a.nav-link.active {
+    background-color: #1a579e !important;
+    color: #fff !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+}
+.nav-pills .nav-link:hover, .nav-pills .nav-link:focus {
+    color: #fff !important;
+    background: #63a5ff !important;
+}
+
+.service-count-badge {
+    font-size: 13px;
+    font-weight: 600;
+    color: #00a651;
+    background: rgba(0, 166, 81, 0.1);
+    padding: 6px 14px;
+    border-radius: 20px;
+    white-space: nowrap;
+}

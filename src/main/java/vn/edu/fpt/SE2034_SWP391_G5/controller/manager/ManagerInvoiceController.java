@@ -29,7 +29,7 @@ public class ManagerInvoiceController {
                                  @RequestParam(required = false) Integer month,
                                  @RequestParam(required = false) Integer year,
                                  @RequestParam(defaultValue = "0") Integer page,
-                                 @RequestParam(defaultValue = "10") Integer size) {
+                                 @RequestParam(defaultValue = "7") Integer size) {
 
         ModelAndView mv = new ModelAndView("manager/invoices/overview");
 

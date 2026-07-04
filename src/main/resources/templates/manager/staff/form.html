@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/manager/fragments/layout}"
+      th:with="pageTitle='Cập nhật hồ sơ nhân viên', pageSubtitle='Chỉnh sửa thông tin hồ sơ của bác sĩ hoặc lễ tân đã có tài khoản' , activeMenu='staff'">
 <head>
     <meta charset="UTF-8">
     <title>Cập nhật hồ sơ nhân viên</title>
@@ -8,24 +10,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
 <body>
-<div class="manager-layout">
-    <div th:replace="~{manager/fragments/sidebar :: managerSidebar('staff')}"></div>
+<div class="manager-layout" layout:fragment="content">
 
     <!-- STAFF UPDATE - Page content -->
-    <main class="manager-main">
-
-
+    <main class="manager-main-staff">
         <!-- STAFF UPDATE - Header -->
-        <header class="staff-form-header">
-            <a th:href="@{/manager/staff/list}" class="staff-back-link">
-                <i class="bi bi-arrow-left"></i>
-            </a>
-            <div class="staff-header-title">
-                <h2>Cập nhật hồ sơ nhân viên</h2>
-                <p>Chỉnh sửa thông tin hồ sơ của bác sĩ hoặc lễ tân đã có tài khoản</p>
-            </div>
-        </header>
-
         <div th:if="${successMessage}" class="staff-form-success">
             <i class="bi bi-check-circle-fill"></i>
             <span th:text="${successMessage}"></span>
@@ -47,15 +36,15 @@
             <div th:replace="~{fragments/user-update-form :: metaFields}"></div>
 
             <!-- STAFF UPDATE - Staff role display only, role is managed by Admin flow -->
-            <section class="staff-form-card staff-type-section">
+<!--            <section class="staff-form-card staff-type-section">-->
 
-                <div class="staff-role-note">
-                    <i class="bi bi-lock"></i>
-                    <span>Vai trò hiện tại:</span>
-                    <strong th:text="${roleName}">ROLE_DOCTOR</strong>
-                    <em>Manager chỉ cập nhật hồ sơ, không đổi vai trò tài khoản.</em>
-                </div>
-            </section>
+<!--                <div class="staff-role-note">-->
+<!--                    <i class="bi bi-lock"></i>-->
+<!--                    <span>Vai trò hiện tại:</span>-->
+<!--                    <strong th:text="${roleName}">ROLE_DOCTOR</strong>-->
+<!--                    <em>Manager chỉ cập nhật hồ sơ, không đổi vai trò tài khoản.</em>-->
+<!--                </div>-->
+<!--            </section>-->
 
             <div class="staff-form-layout">
                 <div class="staff-form-main">

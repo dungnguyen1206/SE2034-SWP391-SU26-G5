@@ -1,10 +1,134 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/manager/fragments/layout}"
+      th:with="pageTitle='Danh sách dịch vụ', pageSubtitle='Theo dõi về các loại dịch vụ y tế của bệnh viện' , activeMenu='service'">
+
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Tổng quan dịch vụ</title>
+    <link rel="stylesheet" th:href="@{/css/manager/manager-common.css}">
+    <link rel="stylesheet" th:href="@{/css/manager/manager-schedules.css}">
+    <link rel="stylesheet" th:href="@{/css/manager/manager-service.css}">
+    <link rel="stylesheet" th:href="@{/css/manager/manager-invoices.css}">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.min.js"
+            integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y"
+            crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
 <body>
+<div class="container-fluid p-0" layout:fragment="content">
+    <div class="row g-0 align-items-stretch" style="background: #f4f6f9">
+        <div class="col d-flex flex-column p-0">
+            <form th:action="@{/manager/services/list}" method="get">
+                <div class="row mt-3">
+                    <div class="col-md-12 mt-3">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                    <div class="input-group" style="width: 60%;">
+                                        <input type="text" class="form-control" name="filterKey"
+                                               placeholder="Tìm kiếm theo tên dịch vụ..."
+                                               style="background: #f4f6f9;">
+                                        <button class="btn btn-primary" type="submit"
+                                                style="background: #1a579e;border-color: #f4f6f9;">
+                                            <i class="bi bi-search"></i>
+                                        </button>
+                                    </div>
+
+                                    <div class="service-count-badge"
+                                         th:text="${'Có ' + totalService + ' dịch vụ đang hoạt động'}">
+                                        Có 20 dịch vụ đang hoạt động
+                                    </div>
+                                </div>
+                                <div class="input-group mt-2" style="width: 100%;">
+                                    <input type="hidden" name="departmentId" th:value="${departmentId}">
+                                    <ul class="nav nav-pills gap-3">
+                                        <li class="nav-item">
+                                            <a class="nav-link" th:classappend="${departmentId == null}?'active'"
+                                               aria-current="page" th:href="@{/manager/services/list}">ALL</a>
+                                        </li>
+                                        <li class="nav-item" th:each="department : ${departmentList}">
+                                            <a class="nav-link"
+                                               th:href="@{/manager/services/list(departmentId=${department.getId()})}"
+                                               th:classappend="${departmentId == department.getId()} ? 'active'"
+                                               th:text="${department.getName()}">Link</a>
+                                        </li>
+
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </form>
+
+            <!--            Service list-->
+            <div class="row mt-3">
+                <div class="col-md-12 mt-3">
+                    <div class="card invoice-card">
+                        <div class="card-body p-0">
+                            <table class="invoice-table">
+                                <thead>
+                                <tr class="text-center">
+                                    <th>STT</th>
+                                    <th>Tên dịch vụ</th>
+                                    <th>Khoa</th>
+                                    <th>Giá</th>
+                                    <th>Thời gian ước tính</th>
+                                    <th>Trạng thái</th>
+                                    <th>Hành động</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr class="text-center" th:each=" medicalServie : ${medicalServiceResponseForManagers}">
+                                    <td th:text="${'SER-'+medicalServie.getId()}">HD-123</td>
+                                    <td th:text="${medicalServie.getServiceName()}">APT-123</td>
+                                    <td th:text="${medicalServie.department.getName()}">Nguyễn Việt Kiều</td>
+                                    <td th:text="${#numbers.formatDecimal(medicalServie.getServicePrice(),0,'POINT',0,'COMMA') + ' VNĐ'}">
+                                        Nguyễn Việt Dũng
+                                    </td>
+                                    <td class="text-center" th:text="${medicalServie.getTimeDuration() + ' Phút'}"><i
+                                            class="bi bi-clock"></i>Tim mạch
+                                    </td>
+                                    <td th:text="${medicalServie.getStatus().equals('ACTIVE') ? 'Đang hoạt động' : 'Ngưng hoạt động'}"></td>
+                                    <td><a th:href="@{/manager/services/update(serviceId=${medicalServie.getId()})}"><i
+                                            class="bi bi-pencil"></i></a></td>
+                                </tr>
+
+                                </tbody>
+
+                            </table>
+
+                            <!--                             FOOTER + PAGING-->
+
+                            <div class="schedule-pagination" style="justify-content: flex-end;">
+                            <span th:text="'Trang hiện tại ' +${currentPage + 1}+
+                            ' trong '+${totalPages} "
+                                  style=" font-weight: 500;padding: 6px 10px ; border-radius: 5px; margin-top: 5px; margin-bottom: 5px; font-size: 14px">
+                            </span>
+                                <a th:if="${currentPage!=0}"
+                                   th:href="@{/manager/services/list(departmentId=${departmentId},filterKey=${filterKey},page=${currentPage - 1})}"
+                                   class="pager-button">Trước</a>
+                                <span th:if="${currentPage==0}"
+                                      class="pager-button disabled">Trước</span>
+
+                                <a th:if="${currentPage <(totalPages - 1)}"
+                                   th:href="@{/manager/services/list(departmentId=${departmentId},filterKey=${filterKey},page=${currentPage + 1})}"
+                                   class="pager-button">Sau</a>
+                                <span th:if="${currentPage == (totalPages - 1)}"
+                                      class="pager-button disabled">Sau</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
 
 </body>
 </html>

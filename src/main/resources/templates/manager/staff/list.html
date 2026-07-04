@@ -1,5 +1,7 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/manager/fragments/layout}"
+      th:with="pageTitle='Tài khoản nhân viên', pageSubtitle='Quản lý tài khoản bác sĩ, lễ tân trong hệ thống' , activeMenu='staff'">
 <head>
     <meta charset="UTF-8">
     <title>Danh sách tài khoản nhân viên</title>
@@ -9,19 +11,11 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
 <body>
-<div class="manager-layout">
 
-    <div th:replace="~{manager/fragments/sidebar :: managerSidebar('staff')}"></div>
+<div class="manager-layout" layout:fragment="content" >
 
     <!--MAIN CONTENT-->
-    <main class="manager-main">
-        <header class="staff-header">
-            <div class="staff-header-title">
-                <h2>Tài khoản nhân viên</h2>
-                <p>Quản lý tài khoản bác sĩ, lễ tân trong hệ thống</p>
-            </div>
-        </header>
-
+    <main class="manager-main-staff">
         <section class="staff-stats">
             <div class="staff-stat-card">
                 <div class="staff-stat-value" th:text="${totalStaff}">8</div>

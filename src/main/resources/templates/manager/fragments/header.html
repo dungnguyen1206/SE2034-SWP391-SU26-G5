@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<div th:fragment="managerHeader(title, subtitle)" class="manager-topbar">
+
+    <div class="manager-topbar-title">
+        <h3 th:text="${title}">Tiêu đề trang</h3>
+        <p th:if="${subtitle != null}" th:text="${subtitle}">Mô tả trang</p>
+    </div>
+
+    <div class="manager-topbar-user"
+         sec:authorize="isAuthenticated()"
+         th:with="currentUser=${#authentication.principal.user},
+                  displayName=${currentUser.lastName} + ' ' +
+                              ${currentUser.middleName != null ? currentUser.middleName + ' ' : ''} +
+                              ${currentUser.firstName}">
+
+        <img th:if="${currentUser.avatar != null}"
+             th:src="${currentUser.avatar}"
+             class="manager-topbar-avatar-img" alt="avatar">
+        <div th:unless="${currentUser.avatar != null}"
+             class="manager-topbar-avatar"
+             th:text="${#strings.substring(displayName, 0, 1)}">A</div>
+
+        <div class="manager-topbar-info">
+            <strong th:text="${displayName}">Tên người dùng</strong>
+            <span sec:authentication="principal.username">username</span>
+        </div>
+
+        <a class="manager-topbar-logout" th:href="@{/login}" title="Đăng xuất">
+            <i class="bi bi-box-arrow-right"></i>
+        </a>
+    </div>
+
+</div>
+
+</body>
+</html>
