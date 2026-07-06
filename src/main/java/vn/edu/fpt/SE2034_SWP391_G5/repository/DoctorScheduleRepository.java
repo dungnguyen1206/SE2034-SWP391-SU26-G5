@@ -40,6 +40,7 @@ public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, 
                         @Param("doctorId") Long doctorId,
                         @Param("fromDate") LocalDate fromDate);
 
+        //LinhNH
         List<DoctorSchedule> findByDoctorIdAndWorkDateBetweenAndStatusOrderByWorkDateAscShiftAsc(
                         Long doctorId, LocalDate startDate, LocalDate endDate, String status);
 
