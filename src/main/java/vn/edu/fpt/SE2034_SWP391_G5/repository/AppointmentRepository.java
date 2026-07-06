@@ -23,7 +23,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "JOIN fetch a.patient p " +
             "JOIN fetch a.doctor d " +
             "JOIN fetch a.service s " +
-            "join fetch a.slot sl " +
+            "join fetch a.slot sl " + 
             "join fetch sl.schedule ds " +
             "join fetch ds.room r " +
             "WHERE a.bookingDate =:today " +
@@ -221,11 +221,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
 
     //LinhNH 1/6/2026
-    Page<Appointment> findByDoctorIdAndStatusIn(Long doctorId, List<String> statuses, Pageable pageable);
-
-    long countByDoctorIdAndStatus(Long doctorId, String status);
-
-    long countByDoctorIdAndStatusIn(Long doctorId, List<String> statuses);
 
     Page<Appointment> findByDoctorIdAndBookingDateAndStatusIn(Long doctorId, LocalDate bookingDate, List<String> statuses, Pageable pageable);
 
