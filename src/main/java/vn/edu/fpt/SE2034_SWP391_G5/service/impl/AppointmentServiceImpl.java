@@ -741,7 +741,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         Integer patientAge = null;
         if (patient != null && patient.getDateOfBirth() != null) {
-            patientAge = patient.getDateOfBirth() != null ? Period.between(patient.getDateOfBirth(), LocalDate.now()).getYears() : 0;
+            patientAge = patient.getDateOfBirth() != null ? Period.between(patient.getDateOfBirth(), LocalDate.now()).getYears() : 0;   
         }
 
         String patientGender = patient != null ? patient.getGender() : null;
