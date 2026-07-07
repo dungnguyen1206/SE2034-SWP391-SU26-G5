@@ -47,6 +47,7 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final TimeSlotRepository timeSlotRepository;
     private final DoctorService doctorService;
 
+    //LinhNH
     @Override
     public List<DoctorScheduleWeekResponse> getWeeklySchedule(Long doctorId, LocalDate targetDate) {
         // Find Monday of the target week
@@ -140,6 +141,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         return doctorOnDutyResponses;
     }
 
+    //LinhNH
     @Override
     public DoctorScheduleReportResponse getWeeklyScheduleReport(Long doctorId, LocalDate targetDate) {
         LocalDate localTargetDate = (targetDate != null) ? targetDate : LocalDate.now();

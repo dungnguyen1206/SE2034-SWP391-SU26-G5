@@ -123,9 +123,9 @@
             <!-- Tabs Section -->
             <div class="detail-tabs">
                 <a th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab='info')}"
-                   th:class="${tab == 'info' || tab == null ? 'active' : ''}">Thông tin cá nhân</a>
+                    th:class="${tab == 'info' || tab == null ? 'active' : ''}">Thông tin cá nhân</a>
                 <a th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab='invoice')}"
-                   th:class="${tab == 'invoice' ? 'active' : ''}">Hóa đơn</a>
+                    th:class="${tab == 'invoice' ? 'active' : ''}">Hóa đơn</a>
             </div>
 
             <!-- Tab Content Pane Container -->
@@ -248,10 +248,9 @@
                             <h3 class="card-title"
                                 style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 0;">Hồ sơ bệnh
                                 án</h3>
-                            <a th:if="${medicalRecord != null}" 
+                            <a th:if="${medicalRecord != null}"
                                 th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab}, action='edit')}"
-                                class="btn-create-record"
-                                style="background-color: #f59e0b;">
+                                class="btn-create-record" style="background-color: #f59e0b;">
                                 <i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa
                             </a>
                         </div>
@@ -361,7 +360,8 @@
         <div class="modal-card">
             <div class="modal-header">
                 <h2>Tạo hồ sơ bệnh án</h2>
-                <a th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab})}" class="btn-close-modal" style="text-decoration: none;">&times;</a>
+                <a th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab})}"
+                    class="btn-close-modal" style="text-decoration: none;">&times;</a>
             </div>
             <form th:action="@{/doctor/appointments/{id}/records/create(id=${appointment.id})}" method="POST"
                 id="createRecordForm">
@@ -372,21 +372,29 @@
                     </h3>
                     <div class="modal-vitals-grid">
                         <div class="form-group">
-                            <label for="bloodPressure">Huyết áp (mmHg)</label>
-                            <input type="text" name="bloodPressure" id="bloodPressure" placeholder="Ví dụ: 120/80">
+                            <label for="bloodPressure">Huyết áp (mmHg) <span style="color: #ef4444;">*</span></label>
+                            <input type="text" name="bloodPressure" id="bloodPressure" placeholder="Ví dụ: 120/80"
+                                th:value="${tempRecord != null ? tempRecord.bloodPressure : ''}"
+                                required pattern="^\d{2,3}/\d{2,3}$" title="Định dạng huyết áp phải là Tâm thu/Tâm trương (Ví dụ: 120/80)">
                         </div>
                         <div class="form-group">
-                            <label for="heartRate">Nhịp tim (bpm)</label>
-                            <input type="number" name="heartRate" id="heartRate" placeholder="Ví dụ: 80">
+                            <label for="heartRate">Nhịp tim (bpm) <span style="color: #ef4444;">*</span></label>
+                            <input type="number" name="heartRate" id="heartRate" placeholder="Ví dụ: 80"
+                                th:value="${tempRecord != null ? tempRecord.heartRate : ''}"
+                                required min="30" max="250">
                         </div>
                         <div class="form-group">
-                            <label for="bloodGlucose">Đường huyết (mmol/L)</label>
+                            <label for="bloodGlucose">Đường huyết (mmol/L) <span style="color: #ef4444;">*</span></label>
                             <input type="number" step="0.01" name="bloodGlucose" id="bloodGlucose"
-                                placeholder="Ví dụ: 5.6">
+                                placeholder="Ví dụ: 5.6"
+                                th:value="${tempRecord != null ? tempRecord.bloodGlucose : ''}"
+                                required min="0.1" max="50.0">
                         </div>
                         <div class="form-group">
-                            <label for="weight">Cân nặng (kg)</label>
-                            <input type="number" step="0.1" name="weight" id="weight" placeholder="Ví dụ: 60.5">
+                            <label for="weight">Cân nặng (kg) <span style="color: #ef4444;">*</span></label>
+                            <input type="number" step="0.1" name="weight" id="weight" placeholder="Ví dụ: 60.5"
+                                th:value="${tempRecord != null ? tempRecord.weight : ''}"
+                                required min="1.0" max="300.0">
                         </div>
                     </div>
 
@@ -399,31 +407,33 @@
                     <div class="form-group">
                         <label for="symptoms">Triệu chứng <span style="color: #ef4444;">*</span></label>
                         <textarea name="symptoms" id="symptoms" placeholder="Mô tả triệu chứng của bệnh nhân..."
-                            rows="3" required></textarea>
+                            rows="3" required th:text="${tempRecord != null ? tempRecord.symptoms : ''}"></textarea>
                     </div>
                     <div class="form-group">
                         <label for="diagnosis">Chẩn đoán <span style="color: #ef4444;">*</span></label>
                         <textarea name="diagnosis" id="diagnosis" placeholder="Chẩn đoán bệnh lý chính..." rows="3"
-                            required></textarea>
+                            required th:text="${tempRecord != null ? tempRecord.diagnosis : ''}"></textarea>
                     </div>
                     <div class="form-group">
                         <label for="conclusion">Kết luận <span style="color: #ef4444;">*</span></label>
                         <textarea name="conclusion" id="conclusion" placeholder="Kết luận và hướng điều trị..." rows="3"
-                            required></textarea>
+                            required th:text="${tempRecord != null ? tempRecord.conclusion : ''}"></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="prescriptionText">Đơn thuốc</label>
+                        <label for="prescriptionText">Đơn thuốc <span style="color: #ef4444;">*</span></label>
                         <textarea name="prescriptionText" id="prescriptionText"
-                            placeholder="Kê đơn thuốc (tên thuốc, liều dùng, tần suất)..." rows="4"></textarea>
+                            placeholder="Kê đơn thuốc (tên thuốc, liều dùng, tần suất)..." rows="4"
+                            required th:text="${tempRecord != null ? tempRecord.prescriptionText : ''}"></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="notes">Ghi chú</label>
+                        <label for="notes">Ghi chú <span style="color: #ef4444;">*</span></label>
                         <textarea name="notes" id="notes" placeholder="Các ghi chú hoặc dặn dò thêm..."
-                            rows="2"></textarea>
+                            rows="2" required th:text="${tempRecord != null ? tempRecord.notes : ''}"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <a th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab})}" class="btn-cancel" style="text-decoration: none; display: inline-block;">Hủy</a>
+                    <a th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab})}"
+                        class="btn-cancel" style="text-decoration: none; display: inline-block;">Hủy</a>
                     <button type="submit" class="btn-submit">Lưu bệnh án</button>
                 </div>
             </form>
@@ -431,11 +441,13 @@
     </div>
 
     <!-- Modal Chỉnh sửa hồ sơ bệnh án -->
-    <div id="editRecordModal" class="modal-overlay" th:style="${action == 'edit' ? 'display: flex;' : 'display: none;'}">
+    <div id="editRecordModal" class="modal-overlay"
+        th:style="${action == 'edit' ? 'display: flex;' : 'display: none;'}">
         <div class="modal-card">
             <div class="modal-header">
                 <h2>Chỉnh sửa hồ sơ bệnh án</h2>
-                <a th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab})}" class="btn-close-modal" style="text-decoration: none;">&times;</a>
+                <a th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab})}"
+                    class="btn-close-modal" style="text-decoration: none;">&times;</a>
             </div>
             <form th:action="@{/doctor/appointments/{id}/records/update(id=${appointment.id})}" method="POST"
                 id="editRecordForm">
@@ -446,24 +458,28 @@
                     </h3>
                     <div class="modal-vitals-grid">
                         <div class="form-group">
-                            <label for="edit_bloodPressure">Huyết áp (mmHg)</label>
+                            <label for="edit_bloodPressure">Huyết áp (mmHg) <span style="color: #ef4444;">*</span></label>
                             <input type="text" name="bloodPressure" id="edit_bloodPressure"
-                                th:value="${medicalRecord.bloodPressure}" placeholder="Ví dụ: 120/80">
+                                th:value="${tempRecord != null ? tempRecord.bloodPressure : (medicalRecord.bloodPressure != null ? medicalRecord.bloodPressure : '')}" placeholder="Ví dụ: 120/80"
+                                required pattern="^\d{2,3}/\d{2,3}$" title="Định dạng huyết áp phải là Tâm thu/Tâm trương (Ví dụ: 120/80)">
                         </div>
                         <div class="form-group">
-                            <label for="edit_heartRate">Nhịp tim (bpm)</label>
+                            <label for="edit_heartRate">Nhịp tim (bpm) <span style="color: #ef4444;">*</span></label>
                             <input type="number" name="heartRate" id="edit_heartRate"
-                                th:value="${medicalRecord.heartRate}" placeholder="Ví dụ: 80">
+                                th:value="${tempRecord != null ? tempRecord.heartRate : (medicalRecord.heartRate != null ? medicalRecord.heartRate : '')}" placeholder="Ví dụ: 80"
+                                required min="30" max="250">
                         </div>
                         <div class="form-group">
-                            <label for="edit_bloodGlucose">Đường huyết (mmol/L)</label>
+                            <label for="edit_bloodGlucose">Đường huyết (mmol/L) <span style="color: #ef4444;">*</span></label>
                             <input type="number" step="0.01" name="bloodGlucose" id="edit_bloodGlucose"
-                                th:value="${medicalRecord.bloodGlucose}" placeholder="Ví dụ: 5.6">
+                                th:value="${tempRecord != null ? tempRecord.bloodGlucose : (medicalRecord.bloodGlucose != null ? medicalRecord.bloodGlucose : '')}" placeholder="Ví dụ: 5.6"
+                                required min="0.1" max="50.0">
                         </div>
                         <div class="form-group">
-                            <label for="edit_weight">Cân nặng (kg)</label>
+                            <label for="edit_weight">Cân nặng (kg) <span style="color: #ef4444;">*</span></label>
                             <input type="number" step="0.1" name="weight" id="edit_weight"
-                                th:value="${medicalRecord.weight}" placeholder="Ví dụ: 60.5">
+                                th:value="${tempRecord != null ? tempRecord.weight : (medicalRecord.weight != null ? medicalRecord.weight : '')}" placeholder="Ví dụ: 60.5"
+                                required min="1.0" max="300.0">
                         </div>
                     </div>
 
@@ -476,32 +492,33 @@
                     <div class="form-group">
                         <label for="edit_symptoms">Triệu chứng <span style="color: #ef4444;">*</span></label>
                         <textarea name="symptoms" id="edit_symptoms" placeholder="Mô tả triệu chứng của bệnh nhân..."
-                            rows="3" required th:text="${medicalRecord.symptoms}"></textarea>
+                            rows="3" required th:text="${tempRecord != null ? tempRecord.symptoms : (medicalRecord.symptoms != null ? medicalRecord.symptoms : '')}"></textarea>
                     </div>
                     <div class="form-group">
                         <label for="edit_diagnosis">Chẩn đoán <span style="color: #ef4444;">*</span></label>
                         <textarea name="diagnosis" id="edit_diagnosis" placeholder="Chẩn đoán bệnh lý chính..." rows="3"
-                            required th:text="${medicalRecord.diagnosis}"></textarea>
+                            required th:text="${tempRecord != null ? tempRecord.diagnosis : (medicalRecord.diagnosis != null ? medicalRecord.diagnosis : '')}"></textarea>
                     </div>
                     <div class="form-group">
                         <label for="edit_conclusion">Kết luận <span style="color: #ef4444;">*</span></label>
                         <textarea name="conclusion" id="edit_conclusion" placeholder="Kết luận và hướng điều trị..."
-                            rows="3" required th:text="${medicalRecord.conclusion}"></textarea>
+                            rows="3" required th:text="${tempRecord != null ? tempRecord.conclusion : (medicalRecord.conclusion != null ? medicalRecord.conclusion : '')}"></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="edit_prescriptionText">Đơn thuốc</label>
+                        <label for="edit_prescriptionText">Đơn thuốc <span style="color: #ef4444;">*</span></label>
                         <textarea name="prescriptionText" id="edit_prescriptionText"
                             placeholder="Kê đơn thuốc (tên thuốc, liều dùng, tần suất)..." rows="4"
-                            th:text="${medicalRecord.prescriptionText}"></textarea>
+                            required th:text="${tempRecord != null ? tempRecord.prescriptionText : (medicalRecord.prescriptionText != null ? medicalRecord.prescriptionText : '')}"></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="edit_notes">Ghi chú</label>
+                        <label for="edit_notes">Ghi chú <span style="color: #ef4444;">*</span></label>
                         <textarea name="notes" id="edit_notes" placeholder="Các ghi chú hoặc dặn dò thêm..." rows="2"
-                            th:text="${medicalRecord.notes}"></textarea>
+                            required th:text="${tempRecord != null ? tempRecord.notes : (medicalRecord.notes != null ? medicalRecord.notes : '')}"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <a th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab})}" class="btn-cancel" style="text-decoration: none; display: inline-block;">Hủy</a>
+                    <a th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab})}"
+                        class="btn-cancel" style="text-decoration: none; display: inline-block;">Hủy</a>
                     <button type="submit" class="btn-submit">Lưu thay đổi</button>
                 </div>
             </form>
