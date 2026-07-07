@@ -90,8 +90,7 @@ public class StaffServiceImpl implements StaffService {
         doctorStaffDetailResponse.setPhone(doctor.getPhone());
         doctorStaffDetailResponse.setDepartmentName(doctor.getDepartment().getName());
         doctorStaffDetailResponse.setFullName(doctor.getFirstName() + " " + doctor.getMiddleName() + " " + doctor.getLastName());
-        doctorStaffDetailResponse.setExperienceYears(Period.between(doctor.getLicenseIssueDate(), LocalDate.now()).getYears());
-        doctorStaffDetailResponse.setLicenseIssueDate(doctor.getLicenseIssueDate());
+        doctorStaffDetailResponse.setExperienceYears(doctor.getLicenseIssueDate() != null ? Period.between(doctor.getLicenseIssueDate(), LocalDate.now()).getYears() : 0);        doctorStaffDetailResponse.setLicenseIssueDate(doctor.getLicenseIssueDate());
         doctorStaffDetailResponse.setLicenseNumber(String.valueOf(doctor.getLicenseNumber()));
         doctorStaffDetailResponse.setRoleName("DOCTOR");
         doctorStaffDetailResponse.setRoleLabel("Bác sĩ");

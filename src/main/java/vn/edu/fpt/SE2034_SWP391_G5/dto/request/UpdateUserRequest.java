@@ -66,6 +66,5 @@ public class UpdateUserRequest {
     private String doctorStatus;
 
     public Integer getExperienceYear(){
-        return Period.between(this.getLicenseIssueDate(), LocalDate.now()).getYears();
-    }
+        return this.getLicenseIssueDate() != null ? Period.between(this.getLicenseIssueDate(), LocalDate.now()).getYears() : 0;    }
 }

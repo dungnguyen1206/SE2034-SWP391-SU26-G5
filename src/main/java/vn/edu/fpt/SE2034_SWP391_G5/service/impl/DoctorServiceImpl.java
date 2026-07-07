@@ -66,7 +66,7 @@ public class DoctorServiceImpl implements DoctorService {
                 .licenseNumber(u.getLicenseNumber())
                 .bio(u.getBio())
                 .avatar(u.getAvatar())
-                .experienceYears(Period.between(u.getLicenseIssueDate(), LocalDate.now()).getYears())
+                .experienceYears(u.getLicenseIssueDate() != null ? Period.between(u.getLicenseIssueDate(), LocalDate.now()).getYears() : 0)
                 .licenseIssueDate(u.getLicenseIssueDate())
                 .departmentName(u.getDepartment() != null ? u.getDepartment().getName() : null)
                 .departmentId(u.getDepartment() != null ? u.getDepartment().getId() : null)
