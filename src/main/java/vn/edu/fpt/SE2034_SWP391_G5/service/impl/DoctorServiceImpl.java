@@ -8,6 +8,8 @@ import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DoctorService;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +48,7 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public List<DoctorResponse> getAllDoctors() {
-        List<User> users = userRepository.findByRoleName("DOCTOR");
+        List<User> users = userRepository.countByRoleNameAndStatus("DOCTOR","ACTIVE");
         List<DoctorResponse> doctorResponses = new ArrayList<>();
         users.forEach(user -> doctorResponses.add(toResponse(user)));
         return doctorResponses;
@@ -64,7 +66,8 @@ public class DoctorServiceImpl implements DoctorService {
                 .licenseNumber(u.getLicenseNumber())
                 .bio(u.getBio())
                 .avatar(u.getAvatar())
-                .experienceYears(u.getExperienceYears())
+                .experienceYears(Period.between(u.getLicenseIssueDate(), LocalDate.now()).getYears())
+                .licenseIssueDate(u.getLicenseIssueDate())
                 .departmentName(u.getDepartment() != null ? u.getDepartment().getName() : null)
                 .departmentId(u.getDepartment() != null ? u.getDepartment().getId() : null)
                 .doctorStatus(u.getDoctorStatus())

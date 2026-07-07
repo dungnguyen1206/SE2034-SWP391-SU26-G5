@@ -10,6 +10,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 
 @Data
 @AllArgsConstructor
@@ -59,8 +60,12 @@ public class UpdateUserRequest {
     private String degree;
     private String licenseNumber;
 
-    @Min(value = 0, message = "Số năm kinh nghiệm không được âm")
-    private Integer experienceYears;
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate licenseIssueDate;
 
     private String doctorStatus;
+
+    public Integer getExperienceYear(){
+        return Period.between(this.getLicenseIssueDate(), LocalDate.now()).getYears();
+    }
 }

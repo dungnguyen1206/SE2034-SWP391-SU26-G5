@@ -8,6 +8,8 @@ import lombok.Setter;
 import lombok.Data;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 @Builder
@@ -24,6 +26,7 @@ public class DoctorResponse {
     private String bio;
     private String avatar;
     private Integer experienceYears;
+    private LocalDate licenseIssueDate;
     private String departmentName;
     private Integer departmentId;
     private String doctorStatus;

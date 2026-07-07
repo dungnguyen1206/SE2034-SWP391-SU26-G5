@@ -22,10 +22,12 @@ import vn.edu.fpt.SE2034_SWP391_G5.repository.DepartmentRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.RoleRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRoleRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRepository;
+import vn.edu.fpt.SE2034_SWP391_G5.service.ImageUploadService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.StaffService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.util.List;
 import java.util.Objects;
 
@@ -37,20 +39,22 @@ public class StaffServiceImpl implements StaffService {
     private final DepartmentRepository departmentRepository;
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
+    private final ImageUploadService imageUploadService;
 
-    public StaffServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, DepartmentRepository departmentRepository, RoleRepository roleRepository, UserRoleRepository userRoleRepository) {
+    public StaffServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, DepartmentRepository departmentRepository, RoleRepository roleRepository, UserRoleRepository userRoleRepository, ImageUploadService imageUploadService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.departmentRepository = departmentRepository;
         this.roleRepository = roleRepository;
         this.userRoleRepository = userRoleRepository;
+        this.imageUploadService = imageUploadService;
     }
 
     //find all active staff
     @Override
     public Page<StaffResponse> findStaff(String roleName, String filterKey, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return userRepository.findActiveStaffList(roleName, filterKey,pageable);
+        return userRepository.findActiveStaffList(roleName, filterKey, pageable);
     }
 
     public StaffResponse findStaffById(Long id) {
@@ -82,16 +86,22 @@ public class StaffServiceImpl implements StaffService {
         doctorStaffDetailResponse.setDegree(doctor.getDegree());
         doctorStaffDetailResponse.setEmail(doctor.getEmail());
         doctorStaffDetailResponse.setCreatedAt(doctor.getCreatedAt());
-        doctorStaffDetailResponse.setAccountStatus(doctor.getStatus());
         doctorStaffDetailResponse.setCreatedBy(doctor.getCreatedBy().getFirstName() + " " + doctor.getCreatedBy().getMiddleName() + " " + doctor.getCreatedBy().getLastName());
         doctorStaffDetailResponse.setPhone(doctor.getPhone());
         doctorStaffDetailResponse.setDepartmentName(doctor.getDepartment().getName());
         doctorStaffDetailResponse.setFullName(doctor.getFirstName() + " " + doctor.getMiddleName() + " " + doctor.getLastName());
-        doctorStaffDetailResponse.setExperienceYears(doctor.getExperienceYears());
+        doctorStaffDetailResponse.setExperienceYears(Period.between(doctor.getLicenseIssueDate(), LocalDate.now()).getYears());
+        doctorStaffDetailResponse.setLicenseIssueDate(doctor.getLicenseIssueDate());
         doctorStaffDetailResponse.setLicenseNumber(String.valueOf(doctor.getLicenseNumber()));
         doctorStaffDetailResponse.setRoleName("DOCTOR");
         doctorStaffDetailResponse.setRoleLabel("Bác sĩ");
-        doctorStaffDetailResponse.setWorkingStatus(doctor.getStatus());
+        if (doctor.getDoctorStatus().equals("INACTIVE")) {
+            doctorStaffDetailResponse.setAccountStatus("INACTIVE");
+            doctorStaffDetailResponse.setWorkingStatus("INACTIVE");
+        } else {
+            doctorStaffDetailResponse.setWorkingStatus(doctor.getDoctorStatus());
+            doctorStaffDetailResponse.setAccountStatus(doctor.getStatus());
+        }
         doctorStaffDetailResponse.setAvatar(doctor.getAvatar());
         return doctorStaffDetailResponse;
     }
@@ -182,7 +192,7 @@ public class StaffServiceImpl implements StaffService {
             updateUserRequest.setDoctorStatus(user.getDoctorStatus());
             updateUserRequest.setDepartmentId(user.getDepartment() != null ? user.getDepartment().getId() : null);
             updateUserRequest.setDegree(user.getDegree());
-            updateUserRequest.setExperienceYears(user.getExperienceYears());
+            updateUserRequest.setLicenseIssueDate(user.getLicenseIssueDate());
             updateUserRequest.setLicenseNumber(user.getLicenseNumber());
         }
 
@@ -210,14 +220,24 @@ public class StaffServiceImpl implements StaffService {
         staff.setPhone(request.getPhone());
         staff.setGender(request.getGender());
 
-        if (!vertifyDOB(request.getDateOfBirth())) {
+        if (!vertifyDOB(request.getDateOfBirth(), request.getStaffRole())) {
             throw new BadRequestException("Ngày sinh phải hợp lệ theo quy định của pháp luật về độ tuổi lao động");
         }
         staff.setDateOfBirth(request.getDateOfBirth());
 
-        staff.setAvatar(request.getAvatar());
+        if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
+            if (staff.getAvatar() != null && !staff.getAvatar().isEmpty() && !request.getAvatar().equals(staff.getAvatar())) {
+                imageUploadService.deleteImage(staff.getAvatar());
+            }
+            staff.setAvatar(request.getAvatar());
+        }
+
         staff.setBio(request.getBio());
-        staff.setStatus(request.getAccountStatus());
+        if (request.getDoctorStatus() != null && !request.getDoctorStatus().isEmpty()) {
+            staff.setStatus(request.getDoctorStatus());
+        } else {
+            staff.setStatus(request.getAccountStatus());
+        }
         staff.setUpdatedAt(LocalDateTime.now());
         staff.setCreatedBy(request.getCreatedBy());
 
@@ -225,7 +245,11 @@ public class StaffServiceImpl implements StaffService {
             Department department = departmentRepository.findById(request.getDepartmentId()).orElseThrow(() -> new ResourceNotFoundException("Phòng ban không hợp lệ"));
             staff.setDepartment(department);
             staff.setDegree(request.getDegree());
-            staff.setExperienceYears(request.getExperienceYears());
+            if (request.getLicenseIssueDate().getYear()  - request.getDateOfBirth().getYear() >=25 ) {
+                throw new BadRequestException("Số năm kinh nghiệm phải nhỏ hơn hoặc bằng số năm từ lúc lấy giấy phép hành nghê lần đầu tiên");
+            } else {
+                staff.setLicenseIssueDate(request.getLicenseIssueDate());
+            }
             staff.setLicenseNumber(request.getLicenseNumber());
             if (!staff.getLicenseNumber().equalsIgnoreCase(request.getLicenseNumber()) && userRepository.existsByLicenseNumber(request.getLicenseNumber())) {
                 throw new BadRequestException("Mã giấy phép đã tồn tại");
@@ -235,20 +259,27 @@ public class StaffServiceImpl implements StaffService {
             staff.setDepartment(null);
             staff.setDegree(null);
             staff.setLicenseNumber(null);
-            staff.setExperienceYears(0);
+            staff.setLicenseIssueDate(null);
             staff.setDoctorStatus(null);
         }
         userRepository.save(staff);
     }
 
-    private boolean vertifyDOB(LocalDate dob) {
+    private boolean vertifyDOB(LocalDate dob, String role) {
         if (dob == null) {
             return false;
         }
 
         LocalDate today = LocalDate.now();
-        LocalDate minRange = today.minusYears(60);
-        LocalDate maxRange = today.minusYears(18);
-        return dob.isAfter(minRange) && dob.isBefore(maxRange);
+        LocalDate minRange4Receptionist = today.minusYears(60);
+        LocalDate maxRange4Receptionist = today.minusYears(18);
+        LocalDate minRange4Doctor = today.minusYears(75);
+        LocalDate maxRange4Doctor = today.minusYears(25);
+        if (role.equalsIgnoreCase("DOCTOR")) {
+            return dob.isAfter(minRange4Doctor) && dob.isBefore(maxRange4Doctor);
+        } else if (role.equalsIgnoreCase("RECEPTIONIST")) {
+            return dob.isAfter(minRange4Receptionist) && dob.isBefore(maxRange4Receptionist);
+        }
+        return false;
     }
 }

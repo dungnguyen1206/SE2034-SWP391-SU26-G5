@@ -1,10 +1,12 @@
 package vn.edu.fpt.SE2034_SWP391_G5.controller.manager;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateDoctorScheduleRequest;
@@ -115,25 +117,55 @@ public class ManagerScheduleController {
 
     @PostMapping("/update")
     public String updateDoctorSchedule(@RequestParam Long weekScheduleId,
-                                       @RequestParam(required = false) Long  doctorScheduleId,
-                                       @RequestParam(required = false)Integer departmentId,
+                                       @RequestParam(required = false) Integer departmentId,
+                                       @RequestParam(required = false) String doctorNameFilter,
                                        @RequestParam(required = false) String doctorName,
+                                       @RequestParam(required = false) String departmentName,
                                        @RequestParam(required = false) String shift,
                                        @RequestParam(defaultValue = "0") int page,
                                        @RequestParam(defaultValue = "5") int size,
-                                       @ModelAttribute DoctorScheduleUpdateRequest doctorScheduleUpdateRequest,
-                                       RedirectAttributes redirectAttributes){
+                                       @Valid @ModelAttribute DoctorScheduleUpdateRequest doctorScheduleUpdateRequest,
+                                       BindingResult bindingResult,
+                                       RedirectAttributes redirectAttributes, Model model) {
 
-        DoctorScheduleUpdateRequest result = scheduleService.updateDoctorSchedule(doctorScheduleUpdateRequest, weekScheduleId);
-        WeekSchedule presentWeek = weekScheduleService.findWeekScheduleById(weekScheduleId);
+        if (bindingResult.hasErrors()) {
+            // Có lỗi xảy ra -> Đẩy ngược lại toàn bộ dữ liệu hidden vào model để giữ trạng thái cho giao diện
+            model.addAttribute("weekScheduleId", weekScheduleId);
+            model.addAttribute("departmentId", departmentId);
+            model.addAttribute("doctorNameFilter", doctorNameFilter);
+            model.addAttribute("doctorName", doctorName);
+            model.addAttribute("departmentName", departmentName);
+            model.addAttribute("shift", shift);
+            model.addAttribute("page", page);
+            model.addAttribute("size", size);
+
+            // Nạp lại các danh sách xổ xuống (Dropdown)
+            WeekSchedule presentWeek = weekScheduleService.findWeekScheduleById(weekScheduleId);
+            model.addAttribute("presentWeek", presentWeek);
+
+            List<LocalDate> workDates = weekScheduleService.workdates(weekScheduleId);
+            model.addAttribute("workDates", workDates);
+
+            //departmentID ở đây phải theo department name
+            if (departmentName != null) {
+                List<RoomResponse> rooms = roomService.getRoomsByDepartmentId(Long.valueOf(departmentService.getDepartmentByName(departmentName).getId()));
+                model.addAttribute("rooms", rooms);
+            }
+
+            return "manager/schedules/update";
+        }
+
+        // Nếu thành công -> Redirect về trang list kèm các filter cũ để giữ bộ lọc cho người dùng
+        scheduleService.updateDoctorSchedule(doctorScheduleUpdateRequest, weekScheduleId);
+
         redirectAttributes.addAttribute("weekScheduleId", weekScheduleId);
         if (departmentId != null) redirectAttributes.addAttribute("departmentId", departmentId);
-        if (doctorName != null) redirectAttributes.addAttribute("doctorName", doctorName);
+        if (doctorNameFilter != null) redirectAttributes.addAttribute("doctorName", doctorNameFilter);
         if (shift != null) redirectAttributes.addAttribute("shift", shift);
         redirectAttributes.addAttribute("page", page);
         redirectAttributes.addAttribute("size", size);
-    return "redirect:/manager/schedules/list";
 
+        return "redirect:/manager/schedules/list";
     }
 
     @GetMapping("/update")
@@ -157,6 +189,7 @@ public class ManagerScheduleController {
         model.addAttribute("doctorName", doctorName);
         model.addAttribute("departmentName",departmentName);
         model.addAttribute("workDates", workDates);
+        model.addAttribute("departmentId", departmentId);
         model.addAttribute("presentWeek", presentWeek);
         model.addAttribute("page", page);
         model.addAttribute("size", size);

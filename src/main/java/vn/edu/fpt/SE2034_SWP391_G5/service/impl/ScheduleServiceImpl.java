@@ -387,30 +387,29 @@ public class ScheduleServiceImpl implements ScheduleService {
     public WeekSchedule updateWeekSchedule(Long weekScheduleId, String action, Long managerId) {
 
         WeekSchedule presentWeek = weekScheduleRepository.findWeekScheduleById(weekScheduleId);
-        User manager= userRepository.findById(managerId).orElseThrow(()-> new ResourceNotFoundException("Không rõ danh tính người đang thao tác"));
+        User manager = userRepository.findById(managerId).orElseThrow(() -> new ResourceNotFoundException("Không rõ danh tính người đang thao tác"));
         switch (action) {
             case "DRAFT":
                 presentWeek.setStatus(WeekScheduleStatus.DRAFT.toString());
                 presentWeek.setUpdatedAt(LocalDateTime.now());
                 presentWeek.setCreatedBy(manager);
-                presentWeek=weekScheduleRepository.save(presentWeek);
+                presentWeek = weekScheduleRepository.save(presentWeek);
                 break;
             case "PUBLISHED":
                 presentWeek.setStatus(WeekScheduleStatus.PUBLISHED.toString());
                 presentWeek.setUpdatedAt(LocalDateTime.now());
                 presentWeek.setCreatedBy(manager);
-                presentWeek=weekScheduleRepository.save(presentWeek);
+                presentWeek = weekScheduleRepository.save(presentWeek);
                 break;
             case "FINALIZED":
                 presentWeek.setStatus(WeekScheduleStatus.FINALIZED.toString());
                 presentWeek.setUpdatedAt(LocalDateTime.now());
                 presentWeek.setCreatedBy(manager);
-                presentWeek=weekScheduleRepository.save(presentWeek);
+                presentWeek = weekScheduleRepository.save(presentWeek);
                 break;
         }
         return presentWeek;
     }
-
 
 
     //This function can improve processing time by using collector.groupingBy (from O(m*n) -> O(N))
@@ -437,7 +436,7 @@ public class ScheduleServiceImpl implements ScheduleService {
             DoctorScheduleRowResponse doctorScheduleRowResponse = new DoctorScheduleRowResponse(doctorResponse);
             Map<LocalDate, DoctorScheduleResponse> scheduleByDate = doctorSchedules.stream()
                     .filter(s -> s.getDoctor().getId().equals(doctorResponse.getId()))
-                    .collect(Collectors.toMap(DoctorSchedule::getWorkDate,this::toDoctorScheduleResponse));
+                    .collect(Collectors.toMap(DoctorSchedule::getWorkDate, this::toDoctorScheduleResponse));
             doctorScheduleRowResponse.setScheduleByDate(scheduleByDate);
             return doctorScheduleRowResponse;
         }).toList();
@@ -473,10 +472,10 @@ public class ScheduleServiceImpl implements ScheduleService {
 
 
     /*
-    *
-    * This function here related to update doctor schedule
-    *
-    * */
+     *
+     * This function here related to update doctor schedule
+     *
+     * */
 
     @Override
     public DoctorScheduleUpdateRequest getDoctorScheduleUpdateRequest(Long doctorScheduleId) {
@@ -496,13 +495,14 @@ public class ScheduleServiceImpl implements ScheduleService {
             return toDoctorScheduleUpdateRequest(doctorScheduleRepository.save(doctorSchedule));
         }
         Room room = roomRepository.findById(doctorScheduleUpdateRequest.getRoomId()).orElseThrow(() -> new ScheduleConflictException("Phòng không tồn tại"));
-        List<String> shifts = getConflictShift(doctorScheduleUpdateRequest.getScheduleShift());
-        if(!doctorSchedule.getWorkDate().equals(doctorScheduleUpdateRequest.getWorkDate())){
-            if(doctorScheduleRepository.existsByDoctorAndWorkDate(doctorSchedule.getDoctor(), doctorScheduleUpdateRequest.getWorkDate())){
+        ArrayList<String> shifts = new ArrayList<>(getConflictShift(doctorScheduleUpdateRequest.getScheduleShift()));
+
+        if (!doctorSchedule.getWorkDate().equals(doctorScheduleUpdateRequest.getWorkDate())) {
+            if (doctorScheduleRepository.existsByDoctorAndWorkDate(doctorSchedule.getDoctor(), doctorScheduleUpdateRequest.getWorkDate())) {
                 throw new ScheduleConflictException("Bác sĩ đã tồn tại ca vào ngày " + doctorScheduleUpdateRequest.getWorkDate());
             }
             int deleteTimeSLot = deleteTimeSlotBaseOnSchedule(doctorScheduleUpdateRequest.getScheduleId());
-            boolean hasConflictRoom = doctorScheduleRepository.existsByRoomAndWorkDateAndShift(room, doctorScheduleUpdateRequest.getWorkDate(),shifts);
+            boolean hasConflictRoom = doctorScheduleRepository.existsByRoomAndWorkDateAndShiftAndIdNot(room, doctorScheduleUpdateRequest.getWorkDate(), shifts, doctorSchedule.getId());
             if (hasConflictRoom) {
                 throw new ScheduleConflictException("Phòng đã có bác sĩ trực");
             }
@@ -516,9 +516,9 @@ public class ScheduleServiceImpl implements ScheduleService {
             timeSlotRepository.saveAll(timeSlots);
             return toDoctorScheduleUpdateRequest(saved);
         }
-        if(!doctorSchedule.getShift().equals(doctorScheduleUpdateRequest.getScheduleShift())){
+        if (!doctorSchedule.getShift().equals(doctorScheduleUpdateRequest.getScheduleShift())) {
             int deleteTimeSLot = deleteTimeSlotBaseOnSchedule(doctorScheduleUpdateRequest.getScheduleId());
-            boolean hasConflictRoom = doctorScheduleRepository.existsByRoomAndWorkDateAndShift(room, doctorScheduleUpdateRequest.getWorkDate(),shifts);
+            boolean hasConflictRoom = doctorScheduleRepository.existsByRoomAndWorkDateAndShiftAndIdNot(room, doctorScheduleUpdateRequest.getWorkDate(), shifts, doctorSchedule.getId());
             if (hasConflictRoom) {
                 throw new ScheduleConflictException("Phòng đã có bác sĩ trực");
             }
@@ -534,7 +534,14 @@ public class ScheduleServiceImpl implements ScheduleService {
         }
 
         doctorSchedule.setNote(doctorScheduleUpdateRequest.getNote());
-        doctorSchedule.setRoom(room);
+        // So sánh room cũ và room mới
+        if (!doctorSchedule.getRoom().getId().equals(room.getId())) {
+            boolean hasConflictRoom = doctorScheduleRepository.existsByRoomAndWorkDateAndShiftAndIdNot(
+                    room, doctorSchedule.getWorkDate(), shifts, doctorSchedule.getId());
+            if (hasConflictRoom) {
+                throw new ScheduleConflictException("Phòng đã có bác sĩ trực");
+            }
+        }
         doctorSchedule.setUpdatedAt(LocalDateTime.now());
         doctorSchedule.setWorkDate(doctorScheduleUpdateRequest.getWorkDate());
         doctorSchedule.setShift(doctorScheduleUpdateRequest.getScheduleShift());
@@ -542,7 +549,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         return toDoctorScheduleUpdateRequest(saved);
     }
 
-    private int deleteTimeSlotBaseOnSchedule(Long  doctorScheduleId) {
+    private int deleteTimeSlotBaseOnSchedule(Long doctorScheduleId) {
         return timeSlotRepository.deleteTimeSlotByDoctorScheduleId(doctorScheduleId);
     }
 

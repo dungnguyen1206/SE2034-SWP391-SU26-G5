@@ -64,6 +64,17 @@ public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, 
                         @Param("room") Room room,
                         @Param("workDate") LocalDate workDate,
                         @Param("shifts") List<String> shifts);
+        //this function for update Schedule
+        @Query("Select count(ds) > 0 from DoctorSchedule ds " +
+                " where ds.room = :room" +
+                " and ds.workDate = :workDate" +
+                " and ds.shift in :shifts" +
+                " and ds.id <> :excludeId")
+        boolean existsByRoomAndWorkDateAndShiftAndIdNot(
+                @Param("room") Room room,
+                @Param("workDate") LocalDate workDate,
+                @Param("shifts") List<String> shifts,
+                @Param("excludeId") Long excludeId);
 
         @Query("Select distinct ds from DoctorSchedule ds " +
                         " left join fetch ds.doctor d " +

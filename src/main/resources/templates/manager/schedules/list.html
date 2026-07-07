@@ -169,7 +169,7 @@
                                          class="shift-card "
                                          th:classappend="${cell.shift == 'MORNING' ? 'morning' : (cell.shift == 'AFTERNOON' ? 'afternoon' : 'full-day')}">
                                     <div class="shift-card-header" style="display: flex;">
-                                        <strong th:text="${cell.shift}">Ca sáng</strong>
+                                        <strong th:text="${cell.shift == 'MORNING' ? 'Ca sáng' : (cell.shift =='AFTERNOON' ? 'Ca chiều' : 'Cả ngày')}">Ca sáng</strong>
                                         <a th:if="${presentWeek.status != 'EXPIRED' and !date.isBefore(#temporals.createToday())}"
                                            th:href="@{/manager/schedules/update(weekScheduleId=${presentWeek.id},doctorScheduleId=${cell.id},departmentId=${departmentId},doctorName=${row.doctor.fullName},doctorNameFilter=${doctorName},shift=${shift},page=${doctorScheduleRowResponsePage.number},size=${doctorScheduleRowResponsePage.size},departmentName=${row.doctor.departmentName})}">
                                             <i class="bi bi-pencil" style="color: #00a651"></i>

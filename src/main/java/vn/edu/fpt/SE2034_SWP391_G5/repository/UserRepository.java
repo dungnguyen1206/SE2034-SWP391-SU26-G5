@@ -43,7 +43,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
                 " JOIN ur.role r" +
                 " LEFT JOIN u.createdBy cb" +
                 " WHERE r.name IN ('DOCTOR', 'RECEPTIONIST')" +
-                " AND u.status = 'ACTIVE'" +
                 " AND (:roleName IS NULL OR r.name = :roleName)" +
                 " AND (:keyword IS NULL OR :keyword = ''" +
                 "          OR LOWER(CONCAT(u.firstName, ' ', COALESCE(u.middleName, ''), ' ', u.lastName)) LIKE LOWER(CONCAT('%', :keyword, '%')) " +

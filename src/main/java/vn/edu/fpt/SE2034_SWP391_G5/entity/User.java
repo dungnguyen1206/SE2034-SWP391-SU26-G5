@@ -69,8 +69,8 @@ public class User {
     @JoinColumn(name = "department_id")
     private Department department;
 
-    @Column(name = "experience_years")
-    private Integer experienceYears;
+    @Column(name = "license_issue_date")
+    private LocalDate licenseIssueDate;
 
     private String degree;
 
@@ -125,9 +125,6 @@ public class User {
 
     @OneToMany(mappedBy = "createdBy")
     private Set<Article> createdArticles;
-
-    @OneToMany(mappedBy = "createdBy")
-    private Set<News> createdNews;
 
     @OneToMany(mappedBy = "user")
     private Set<Notification> notifications;

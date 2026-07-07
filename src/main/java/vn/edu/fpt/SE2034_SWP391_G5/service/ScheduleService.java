@@ -2,6 +2,7 @@ package vn.edu.fpt.SE2034_SWP391_G5.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Service;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateDoctorScheduleRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.DoctorScheduleUpdateRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.*;
@@ -13,7 +14,6 @@ import vn.edu.fpt.SE2034_SWP391_G5.entity.DoctorSchedule;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Room;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.WeekSchedule;
-
 
 public interface ScheduleService {
     List<DoctorOnDutyResponse> findDoctorScheduleByDate(LocalDate date);
