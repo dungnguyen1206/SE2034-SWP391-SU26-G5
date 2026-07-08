@@ -133,9 +133,9 @@
                             <div><span>Trạng thái tài khoản</span><strong
                                     th:text="${staff.getAccountStatus() == 'ACTIVE'} ? 'Đang hoạt động' : 'Ngưng hoạt động '">N/A</strong>
                             </div>
-                            <div><span>Ngày tạo</span><strong th:text="${#dates.format(staff.getCreatedAt(),'dd/MM/yyyy')}">N/A</strong></div>
+                            <div><span>Ngày tạo</span><strong th:text="${doctor.getCreatedAt() != null ? #temporals.format(doctor.getCreatedAt(), 'dd/MM/yyyy') : 'N/A'}">N/A</strong></div>
                             <div><span>Ngày cập nhật</span><strong
-                                    th:text="${staff.getUpdatedAt() == null} ? 'N/A' : ${#dates.format(staff.getUpdatedAt(),'dd/MM/yyyy')}">N/A</strong>
+                                    th:text="${doctor.getUpdatedAt() != null ? #temporals.format(doctor.getUpdatedAt(), 'dd/MM/yyyy') : 'N/A'}">N/A</strong>
                             </div>
                         </div>
                     </section>
@@ -156,7 +156,7 @@
                                     th:text="${doctor.getLicenseNumber()}">N/A</strong></div>
                             <div><span>Bằng cấp</span><strong th:text="${doctor.getDegree()}">N/A</strong></div>
                             <div><span>Ngày cấp</span><strong
-                                    th:text="${#dates.format(doctor.getLicenseIssueDate(),'dd/MM/yyyy')}">N/A</strong></div>
+                                    th:text="${doctor.getLicenseIssueDate() != null ? #temporals.format(doctor.getLicenseIssueDate(), 'dd/MM/yyyy') : 'N/A'}">N/A</strong></div>
                             <div><span>Bằng cấp</span><strong th:text="${doctor.getDegree()}">N/A</strong></div>
                             <div><span>Số năm kinh nghiệm</span><strong
                                     th:text="${doctor.getExperienceYears()}">N/A</strong></div>

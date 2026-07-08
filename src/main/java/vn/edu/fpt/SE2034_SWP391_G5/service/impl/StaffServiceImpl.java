@@ -222,6 +222,9 @@ public class StaffServiceImpl implements StaffService {
         if (!vertifyDOB(request.getDateOfBirth(), request.getStaffRole())) {
             throw new BadRequestException("Ngày sinh phải hợp lệ theo quy định của pháp luật về độ tuổi lao động");
         }
+        else if(Period.between(request.getDateOfBirth(), request.getLicenseIssueDate()).getYears() < 25) {
+            throw new BadRequestException("Ngày sinh xung đột với ngày cấp giấy phép hành nghề !" +"   Bác sĩ chưa đủ tuổi để được cấp giấy phép hành nghề");
+        }
         staff.setDateOfBirth(request.getDateOfBirth());
 
         if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
@@ -244,7 +247,7 @@ public class StaffServiceImpl implements StaffService {
             Department department = departmentRepository.findById(request.getDepartmentId()).orElseThrow(() -> new ResourceNotFoundException("Phòng ban không hợp lệ"));
             staff.setDepartment(department);
             staff.setDegree(request.getDegree());
-            if (request.getLicenseIssueDate().getYear()  - request.getDateOfBirth().getYear() >=25 ) {
+            if (request.getLicenseIssueDate().getYear()  - request.getDateOfBirth().getYear() <=25 ) {
                 throw new BadRequestException("Số năm kinh nghiệm phải nhỏ hơn hoặc bằng số năm từ lúc lấy giấy phép hành nghê lần đầu tiên");
             } else {
                 staff.setLicenseIssueDate(request.getLicenseIssueDate());

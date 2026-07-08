@@ -28,7 +28,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "join fetch ds.room r " +
             "WHERE a.bookingDate =:today " +
             "order by sl.startTime asc")
-    List<Appointment> findAppointmentsByBookingDate(@Param("today") LocalDate today);
+    Page<Appointment> findAppointmentsByBookingDate(@Param("today") LocalDate today, Pageable pageable);
 
     //-------------------------------------- Receptionist -----------------------------------------------
     // -------------------------- Dashboard ----------------------------------------
@@ -238,6 +238,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                                                       Pageable pageable);
 
 
+    @Query("SELECT a FROM Appointment a WHERE a.slot.schedule.id = :scheduleId AND a.status IN ('WAITING', 'CONFIRMED')")
+    List<Appointment> findActiveAppointmentsByScheduleId(@Param("scheduleId") Long scheduleId);
 }
 
     

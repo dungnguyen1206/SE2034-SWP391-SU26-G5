@@ -8,6 +8,7 @@
     <link rel="stylesheet" th:href="@{/css/manager/manager-dashboard.css}">
     <link rel="stylesheet" th:href="@{/css/manager/manager-common.css}">
     <link rel="stylesheet" th:href="@{/css/manager/manager-staff.css}">
+    <link rel="stylesheet" th:href="@{/css/manager/manager-schedules.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
 
@@ -111,6 +112,23 @@
                                 </tbody>
                             </table>
 
+                            <div class="schedule-pagination" style="justify-content: flex-end;">
+                            <span th:text="'Trang hiện tại ' +${currentPageAppointment + 1}+
+                            ' trong '+${totalPageAppointment} "
+                                  style=" font-weight: 500;padding: 6px 10px ; border-radius: 5px; margin-top: 5px; margin-bottom: 5px; font-size: 14px">
+                            </span>
+                                <a th:if="${currentPageAppointment!=0}"
+                                   th:href="@{/manager/dashboard(pageAppointment=${currentPageAppointment - 1})}"
+                                   class="pager-button">Trước</a>
+                                <span th:if="${currentPageAppointment==0}"
+                                      class="pager-button disabled">Trước</span>
+
+                                <a th:if="${currentPageAppointment <(totalPageAppointment - 1)}"
+                                   th:href="@{/manager/dashboard(pageAppointment=${currentPageAppointment + 1})}"
+                                   class="pager-button">Sau</a>
+                                <span th:if="${currentPageAppointment == (totalPageAppointment - 1)}"
+                                      class="pager-button disabled">Sau</span>
+                            </div>
                         </div>
                     </div>
                     <div class="dashboard-panel">
@@ -134,7 +152,7 @@
                                     <td th:text="${index.count}"></td>
                                     <td th:text="${doctor.getDoctorName()}">BS. Trần Minh Tuấn</td>
                                     <td th:text="${doctor.getDepartmentName()}">Tim mạch</td>
-                                    <td th:text="${doctor.getShift()}">Ca sáng</td>
+                                    <td th:text="${doctor.getShift() == 'MORNING' ? 'Ca sáng' : (doctor.getShift()=='AFTERNOON' ? 'Ca chiều' : 'Cả ngày')}">Ca sáng</td>
                                     <td>
                                         <div class="staff-status-text"
                                              th:classappend="${doctor.getStatus().equals('ACTIVE')} ? ' active' : ' inactive'">
@@ -150,6 +168,24 @@
                                 </tr>
                                 </tbody>
                             </table>
+
+                            <div class="schedule-pagination" style="justify-content: flex-end;">
+                            <span th:text="'Trang hiện tại ' +${currentPageDoctor + 1}+
+                            ' trong '+${totalPageDoctor} "
+                                  style=" font-weight: 500;padding: 6px 10px ; border-radius: 5px; margin-top: 5px; margin-bottom: 5px; font-size: 14px">
+                            </span>
+                                <a th:if="${currentPageDoctor!=0}"
+                                   th:href="@{/manager/dashboard(pageDoctor=${currentPageDoctor - 1})}"
+                                   class="pager-button">Trước</a>
+                                <span th:if="${currentPageDoctor==0}"
+                                      class="pager-button disabled">Trước</span>
+
+                                <a th:if="${currentPageDoctor <(totalPageDoctor - 1)}"
+                                   th:href="@{/manager/dashboard(pageDoctor=${currentPageDoctor + 1})}"
+                                   class="pager-button">Sau</a>
+                                <span th:if="${currentPageDoctor == (totalPageDoctor - 1)}"
+                                      class="pager-button disabled">Sau</span>
+                            </div>
                         </div>
                     </div>
 

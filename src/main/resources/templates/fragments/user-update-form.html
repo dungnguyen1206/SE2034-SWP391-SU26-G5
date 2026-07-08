@@ -118,9 +118,7 @@
 
         <label class="staff-form-field">
             <span>Số năm kinh nghiệm <strong>*</strong></span>
-            <div >
-                <span th:text="${getExperienceYear}"></span>
-            </div>
+            <input type="text" readonly th:value="*{experienceYear != null ? experienceYear + ' năm' : '0 năm'}" style="background-color: #f1f5f9; color: #161719; cursor: not-allowed;">
         </label>
 
         <label class="staff-form-field">

@@ -1,0 +1,174 @@
+/* =====================================================
+   NOTIFICATION PAGE - SHARED STYLES
+   Dùng chung cho Manager / Doctor / Patient / Receptionist
+   ===================================================== */
+
+.notif-wrap {
+    padding: 28px;
+    max-width: 820px;
+}
+
+/* Header (tiêu đề trang + nút đánh dấu tất cả) */
+.notif-page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.notif-page-header h4 {
+    margin: 0;
+    font-size: 20px;
+    color: #0f172a;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Card thông báo */
+.notif-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.notif-card:hover {
+    border-color: #c7d2fe;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.08);
+}
+
+/* Trạng thái chưa đọc - nền xanh nhạt */
+.notif-card.unread {
+    background: #f5f3ff;
+    border-left: 4px solid #6366f1;
+}
+
+.notif-card.unread .notif-title {
+    font-weight: 700;
+}
+
+/* Icon tròn bên trái */
+.notif-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.notif-icon.schedule  { background: #dbeafe; color: #2563eb; }
+.notif-icon.appointment { background: #fce7f3; color: #db2777; }
+.notif-icon.default   { background: #f1f5f9; color: #64748b; }
+
+/* Phần nội dung text */
+.notif-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.notif-title {
+    margin: 0 0 4px;
+    font-size: 15px;
+    color: #1e293b;
+}
+
+.notif-message {
+    margin: 0 0 8px;
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.5;
+    white-space: pre-line;
+}
+
+.notif-time {
+    font-size: 12px;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Phần action bên phải */
+.notif-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+/* Chấm tròn đỏ báo chưa đọc */
+.notif-unread-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #6366f1;
+}
+
+/* Nút đánh dấu đã đọc (từng cái) */
+.btn-mark-read {
+    background: none;
+    border: 1px solid #c7d2fe;
+    color: #4f46e5;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    transition: background 0.15s;
+}
+
+.btn-mark-read:hover {
+    background: #eef2ff;
+}
+
+/* Nút đánh dấu TẤT CẢ đã đọc */
+.btn-read-all {
+    background: white;
+    border: 1px solid #dde3ea;
+    color: #1e293b;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s;
+}
+
+.btn-read-all:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+/* Trạng thái rỗng (không có thông báo) */
+.notif-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: #94a3b8;
+    background: white;
+    border-radius: 12px;
+    border: 1px dashed #e2e8f0;
+}
+
+.notif-empty i {
+    font-size: 52px;
+    display: block;
+    margin-bottom: 12px;
+    opacity: 0.6;
+}
+
+.notif-empty p {
+    margin: 0;
+    font-size: 15px;
+}

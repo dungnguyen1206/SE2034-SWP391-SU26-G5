@@ -14,7 +14,7 @@ public interface AppointmentService {
 
     Map<String, Long> findTodayAppointmentsByStatus(LocalDate localDate);
 
-    List<AppointmentResponse> findAppointmentsByBookingDate(LocalDate today);
+    Page<AppointmentResponse> findAppointmentsByBookingDate(LocalDate today, Integer pageNumber, Integer pageSize);
 
     //------------------------------ Hoàng Linh ---------------------------------------------------------------
     // Lấy danh sách lịch hẹn để hiển thị lên màn hình Appointment List

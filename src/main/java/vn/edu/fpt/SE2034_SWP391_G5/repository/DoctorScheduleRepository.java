@@ -17,8 +17,8 @@ import java.util.List;
 @Repository
 public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, Long> {
 
-        @Query("SELECT ds from DoctorSchedule ds Join fetch ds.doctor d join fetch d.department dpt join fetch dpt.rooms r where ds.workDate= :date")
-        public List<DoctorSchedule> findByDate(@Param("date") LocalDate date);
+        @Query(value = "SELECT ds FROM DoctorSchedule ds JOIN FETCH ds.doctor d JOIN FETCH d.department dpt WHERE ds.workDate = :date")
+        public Page<DoctorSchedule> findByDate(@Param("date") LocalDate date, Pageable pageable);
 
         @Query("SELECT ds FROM DoctorSchedule ds " +
                         "LEFT JOIN FETCH ds.doctor d " +
@@ -85,6 +85,9 @@ public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, 
                         " where d.id IN :doctorId and ws.id=:weekScheduleId")
         List<DoctorSchedule> getAllDoctorScheduleByWeekSchedule(@Param("doctorId") List<Long> doctorIds,
                         @Param("weekScheduleId") Long weekScheduleId);
+
+        @Query("SELECT DISTINCT ds.doctor FROM DoctorSchedule ds WHERE ds.weekSchedule.id = :weekScheduleId")
+        List<User> findDoctorsByWeekScheduleId(@Param("weekScheduleId") Long weekScheduleId);
 
 
     @Query("SELECT distinct u FROM User u " +

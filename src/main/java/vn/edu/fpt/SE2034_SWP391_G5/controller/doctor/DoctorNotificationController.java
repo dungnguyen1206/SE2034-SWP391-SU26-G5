@@ -12,7 +12,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 public class DoctorNotificationController {
 
     @GetMapping("/notification")
-    public String notification(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
-        return "doctor/notification";
+    public String notification() {
+        return "redirect:/notifications/list";
     }
 }
