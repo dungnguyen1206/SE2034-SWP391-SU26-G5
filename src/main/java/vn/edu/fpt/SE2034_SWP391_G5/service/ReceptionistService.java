@@ -3,6 +3,8 @@ package vn.edu.fpt.SE2034_SWP391_G5.service;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ReceptionistDashboardResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ReceptionistResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
@@ -18,7 +20,7 @@ public interface ReceptionistService {
     ReceptionistDashboardResponse getTodayDashboardStatistics();
 
     // Lấy danh sách lịch hẹn hôm nay trên Dashboard, có tìm kiếm theo tên hoặc SĐT bệnh nhân.
-    List<AppointmentResponse> getTodayAppointmentsForDashboard(String search);
+    Page<AppointmentResponse> getTodayAppointmentsForDashboard(String search, Pageable pageable);
 }
 
 

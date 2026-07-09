@@ -11,6 +11,8 @@ import vn.edu.fpt.SE2034_SWP391_G5.repository.AppointmentRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.InvoiceRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.service.ReceptionistService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -55,10 +57,11 @@ public class ReceptionistServiceImpl implements ReceptionistService {
     }
 
     @Override
-    public List<AppointmentResponse> getTodayAppointmentsForDashboard(String search) {
+    public Page<AppointmentResponse> getTodayAppointmentsForDashboard(String search, Pageable pageable) {
         LocalDate today = LocalDate.now();
         String keyword = searchText(search);
-        return appointmentRepository.findTodayAppointmentsForDashboard(today, keyword).stream().map(this::toDashboardAppointmentResponse).toList();
+        return appointmentRepository.findTodayAppointmentsForDashboard(today, keyword, pageable)
+                .map(this::toDashboardAppointmentResponse);
     }
 
     // Map dữ liệu cho bảng "Lịch hẹn hôm nay" trên Dashboard.

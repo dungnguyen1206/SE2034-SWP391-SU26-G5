@@ -139,6 +139,7 @@
                             <table class="today-table">
                                 <thead>
                                     <tr>
+                                        <th>STT</th>
                                         <th>Mã lịch hẹn</th>
                                         <th>Slot</th>
                                         <th>Bệnh nhân</th>
@@ -152,7 +153,8 @@
                                 </thead>
 
                                 <tbody>
-                                    <tr th:each="appointment : ${todayAppointments}">
+                                    <tr th:each="appointment, status : ${todayAppointments.content}">
+                                        <td th:text="${status.count + (todayAppointments.number * todayAppointments.size)}"></td>
                                         <td>
                                             <a class="appointment-code"
                                                th:href="@{/receptionist/appointment/{id}(id=${appointment.id})}"
@@ -188,13 +190,42 @@
                                         </td>
                                     </tr>
 
-                                    <tr th:if="${todayAppointments == null || todayAppointments.isEmpty()}">
-                                        <td colspan="9" class="empty-row">
+                                    <tr th:if="${todayAppointments == null || todayAppointments.empty}">
+                                        <td colspan="10" class="empty-row">
                                             Hôm nay chưa có lịch hẹn nào
                                         </td>
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="pagination-wrapper" 
+                             th:if="${todayAppointments != null and todayAppointments.totalPages > 1}" 
+                             th:with="maxPages=5,
+                                      halfMax=2,
+                                      startPage=${todayAppointments.number - halfMax < 0 ? 0 : 
+                                                  (todayAppointments.number + halfMax >= todayAppointments.totalPages ? 
+                                                   (todayAppointments.totalPages - maxPages < 0 ? 0 : todayAppointments.totalPages - maxPages) : 
+                                                   todayAppointments.number - halfMax)},
+                                      endPage=${startPage + maxPages - 1 >= todayAppointments.totalPages ? todayAppointments.totalPages - 1 : startPage + maxPages - 1}"
+                             style="margin-top: 20px; text-align: center;">
+                            <ul class="pagination" style="display: inline-flex; list-style-type: none; gap: 5px; padding: 0;">
+                                <li th:classappend="${todayAppointments.first} ? 'disabled'" style="display: inline-block;">
+                                    <a th:href="@{/receptionist/dashboard(page=${todayAppointments.number - 1}, search=${search})}" 
+                                       style="padding: 8px 12px; border: 1px solid #dbe3ef; text-decoration: none; color: #334155; border-radius: 4px;">&laquo; Trước</a>
+                                </li>
+                                <li th:each="i : ${#numbers.sequence(startPage, endPage)}" 
+                                    th:classappend="${todayAppointments.number == i} ? 'active'" style="display: inline-block;">
+                                    <a th:href="@{/receptionist/dashboard(page=${i}, search=${search})}" 
+                                       th:text="${i + 1}"
+                                       th:style="${todayAppointments.number == i} ? 'padding: 8px 12px; border: 1px solid #2563eb; background-color: #2563eb; color: white; text-decoration: none; border-radius: 4px;' : 'padding: 8px 12px; border: 1px solid #dbe3ef; text-decoration: none; color: #334155; border-radius: 4px;'"></a>
+                                </li>
+                                <li th:classappend="${todayAppointments.last} ? 'disabled'" style="display: inline-block;">
+                                    <a th:href="@{/receptionist/dashboard(page=${todayAppointments.number + 1}, search=${search})}" 
+                                       style="padding: 8px 12px; border: 1px solid #dbe3ef; text-decoration: none; color: #334155; border-radius: 4px;">Sau &raquo;</a>
+                                </li>
+                            </ul>
                         </div>
                     </section>
                 </section>

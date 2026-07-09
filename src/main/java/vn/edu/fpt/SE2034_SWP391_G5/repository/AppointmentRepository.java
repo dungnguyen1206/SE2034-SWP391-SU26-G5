@@ -56,7 +56,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     // Lấy danh sách lịch hẹn hôm nay trên Dashboard.
     // Có hỗ trợ tìm kiếm theo họ, tên đệm, tên hoặc số điện thoại bệnh nhân.
     // Chỉ query lịch hẹn của ngày hiện tại, không lấy toàn bộ danh sách.
-    @Query("SELECT a FROM Appointment a " +
+    @Query(
+            value = "SELECT a FROM Appointment a " +
             "JOIN FETCH a.patient p " +
             "JOIN FETCH a.doctor d " +
             "JOIN FETCH a.service s " +
@@ -70,10 +71,20 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "OR LOWER(p.middleName) LIKE LOWER(CONCAT('%', :search, '%')) " +
             "OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
             "OR p.phone LIKE CONCAT('%', :search, '%')) " +
-            "ORDER BY sl.startTime ASC")
-    List<Appointment> findTodayAppointmentsForDashboard(
+            "ORDER BY sl.startTime ASC",
+            countQuery = "SELECT COUNT(a) FROM Appointment a " +
+            "JOIN a.patient p " +
+            "WHERE a.bookingDate = :today " +
+            "AND (:search IS NULL OR :search = '' " +
+            "OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "OR LOWER(p.middleName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "OR p.phone LIKE CONCAT('%', :search, '%'))"
+    )
+    Page<Appointment> findTodayAppointmentsForDashboard(
             @Param("today") LocalDate today,
-            @Param("search") String search
+            @Param("search") String search,
+            Pageable pageable
     );
 
     // ------------------------------------------------------------------------------------------------------------
@@ -227,6 +238,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     long countByDoctorIdAndBookingDateAndStatus(Long doctorId, LocalDate bookingDate, String status);
 
     long countByDoctorIdAndBookingDateAndStatusIn(Long doctorId, LocalDate bookingDate, List<String> statuses);
+
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.doctor.id = :doctorId AND a.bookingDate = :bookingDate")
+    long countByDoctorIdAndBookingDate(@Param("doctorId") Long doctorId, @Param("bookingDate") LocalDate bookingDate);
+
 
     @Query("SELECT a FROM Appointment a " +
             "LEFT JOIN FETCH a.patient " +

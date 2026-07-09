@@ -35,26 +35,25 @@ DELETE FROM roles;
 GO
 
 -- ============================================================
--- 2. RESET IDENTITY COUNTERS (Để ID tự tăng bắt đầu lại từ 1)
+-- 2. RESET IDENTITY COUNTERS
 -- ============================================================
-DBCC CHECKIDENT ('roles', RESEED, 0);
-DBCC CHECKIDENT ('provinces', RESEED, 0);
-DBCC CHECKIDENT ('departments', RESEED, 0);
-DBCC CHECKIDENT ('rooms', RESEED, 0);
-DBCC CHECKIDENT ('users', RESEED, 0);
-DBCC CHECKIDENT ('user_addresses', RESEED, 0);
-DBCC CHECKIDENT ('medical_services', RESEED, 0);
-DBCC CHECKIDENT ('week_schedules', RESEED, 0);
-DBCC CHECKIDENT ('doctor_schedules', RESEED, 0);
-DBCC CHECKIDENT ('time_slots', RESEED, 0);
-DBCC CHECKIDENT ('appointments', RESEED, 0);
-DBCC CHECKIDENT ('medical_records', RESEED, 0);
-DBCC CHECKIDENT ('medical_service_orders', RESEED, 0);
-DBCC CHECKIDENT ('invoices', RESEED, 0);
-DBCC CHECKIDENT ('invoice_items', RESEED, 0);
-DBCC CHECKIDENT ('articles', RESEED, 0);
-DBCC CHECKIDENT ('email_logs', RESEED, 0);
-DBCC CHECKIDENT ('notifications', RESEED, 0);
+-- SQL Server behavior: 
+-- If table has NEVER had data (last_value IS NULL), RESEED 1 -> next ID is 1.
+-- If table HAD data and was DELETEd, RESEED 0 -> next ID is 1.
+-- (The DELETEs were already performed above in correct FK order)
+
+EXEC sp_MSForEachTable '
+    IF OBJECTPROPERTY(OBJECT_ID(''?''), ''TableHasIdentity'') = 1
+    BEGIN
+        DECLARE @LastValue sql_variant;
+        SELECT @LastValue = last_value FROM sys.identity_columns WHERE object_id = OBJECT_ID(''?'');
+        
+        IF @LastValue IS NULL
+            DBCC CHECKIDENT (''?'', RESEED, 1) WITH NO_INFOMSGS;
+        ELSE
+            DBCC CHECKIDENT (''?'', RESEED, 0) WITH NO_INFOMSGS;
+    END
+';
 GO
 
 -- ============================================================
@@ -337,17 +336,17 @@ INSERT INTO users (username, email, password_hash, status, email_verified, first
 VALUES ('patient.hoa', 'hoatran@gmail.com', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Hoa', N'Thị', N'Trần', '0905555557', 'FEMALE', '1982-10-05', 'O+');
 GO
 
--- [06e] Users - PATIENT (Tạo thêm 50 bệnh nhân test)
+-- [06e] Users - PATIENT (Tạo thêm 500 bệnh nhân test)
 DECLARE @i INT = 1;
 DECLARE @username VARCHAR(50);
 DECLARE @email VARCHAR(100);
 DECLARE @phone VARCHAR(20);
 
-WHILE @i <= 50
+WHILE @i <= 500
 BEGIN
-    SET @username = 'patient.test' + CAST(@i AS VARCHAR(2));
-    SET @email = 'patient.test' + CAST(@i AS VARCHAR(2)) + '@gmail.com';
-    SET @phone = '0990000' + RIGHT('00' + CAST(@i AS VARCHAR(2)), 2);
+    SET @username = 'patient.test' + CAST(@i AS VARCHAR(10));
+    SET @email = 'patient.test' + CAST(@i AS VARCHAR(10)) + '@gmail.com';
+    SET @phone = '099' + RIGHT('0000000' + CAST(@i AS VARCHAR(10)), 7);
     
     INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, date_of_birth, blood_type)
     VALUES (@username, @email, '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Test', N'Bệnh Nhân', CAST(@i AS NVARCHAR(10)), @phone, 'MALE', '1990-01-01', 'O+');
@@ -390,7 +389,7 @@ SELECT id, 30, N'12 Cộng Hòa, Phường 4, Tân Bình', 1 FROM users WHERE us
 INSERT INTO user_addresses (user_id, province_id, address_line, is_default)
 SELECT id, 1, N'Số 1, Phố Cổ, Hà Nội', 1 FROM users WHERE username IN ('patient.nam', 'patient.dung', 'patient.hoa');
 
--- Thêm địa chỉ tự động cho 50 bệnh nhân test (Chọn province ngẫu nhiên hoặc 1)
+-- Thêm địa chỉ tự động cho 500 bệnh nhân test (Chọn province ngẫu nhiên hoặc 1)
 INSERT INTO user_addresses (user_id, province_id, address_line, is_default)
 SELECT id, 1, N'Nhà số ' + CAST(id AS NVARCHAR(10)) + N', Đường Test', 1 
 FROM users 
@@ -506,7 +505,7 @@ CROSS JOIN (
 WHERE ds.shift = t.shift;
 GO
 
--- [12] Appointments (Sinh data mẫu cho 15 ngày từ -7 đến +7, tổng cộng 75 cuộc hẹn)
+-- [12] Appointments (Sinh data mẫu cho 15 ngày từ -7 đến +7, mỗi ngày 100 cuộc hẹn, tổng cộng 1500 cuộc hẹn)
 DECLARE @DayOffset INT = -7;
 DECLARE @ApptIndex INT = 1;
 
@@ -515,7 +514,7 @@ BEGIN
     DECLARE @TargetDate DATE = CAST(DATEADD(day, @DayOffset, GETDATE()) AS DATE);
     DECLARE @DailyAppts INT = 1;
     
-    WHILE @DailyAppts <= 5 
+    WHILE @DailyAppts <= 100
     BEGIN
         DECLARE @SelectedSlotId BIGINT;
         DECLARE @SelectedDoctorId BIGINT;
