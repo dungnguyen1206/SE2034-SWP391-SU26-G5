@@ -19,10 +19,13 @@ public class ReceptionistDashboardController {
     private final ReceptionistService receptionistService;
 
     @GetMapping("/receptionist/dashboard")
-    public String showDashboard(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestParam(required = false) String search, Model model) {
+    public String showDashboard(@AuthenticationPrincipal CustomUserDetails userDetails, 
+                                @RequestParam(required = false) String search,
+                                @RequestParam(defaultValue = "0") int page,
+                                Model model) {
         model.addAttribute("receptionist", receptionistService.getReceptionistByUsername(userDetails.getUser().getEmail()));
         model.addAttribute("stats", receptionistService.getTodayDashboardStatistics());
-        model.addAttribute("todayAppointments", receptionistService.getTodayAppointmentsForDashboard(search));
+        model.addAttribute("todayAppointments", receptionistService.getTodayAppointmentsForDashboard(search, org.springframework.data.domain.PageRequest.of(page, 20)));
         model.addAttribute("search", search);
         model.addAttribute("todayText", getTodayText());
 

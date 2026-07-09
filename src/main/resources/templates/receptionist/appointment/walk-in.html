@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Tạo Lịch Khám Trực Tiếp</title>
+
+    <link rel="stylesheet" th:href="@{/css/receptionist/common/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/css/receptionist/common/header.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    
+    <style>
+        .walk-in-container {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            max-width: 800px;
+            margin: 20px auto;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #333;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .d-flex {
+            display: flex;
+            gap: 12px;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .btn-primary { background: #0066cc; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-secondary { background: #6c757d; color: white; text-decoration: none; display: inline-block;}
+        
+        .patient-info {
+            background: #f8f9fa;
+            padding: 16px;
+            border-radius: 4px;
+            margin-bottom: 24px;
+            border: 1px solid #eee;
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: #28a745;
+            color: white;
+            border-radius: 4px;
+            display: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+        }
+        .toast.error {
+            background: #dc3545;
+        }
+        .loading-spinner {
+            display: none;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-top: 2px solid transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="layout">
+        <div th:replace="~{receptionist/common/sidebar :: sidebar('appointment')}"></div>
+
+        <main class="main">
+            <div th:replace="~{receptionist/common/header :: header('Tạo Lịch Khám Trực Tiếp')}"></div>
+
+            <section class="walk-in-container">
+                <h2 style="margin-bottom: 24px; color: #333;">Nhập thông tin bệnh nhân</h2>
+                
+                <div class="form-group">
+                    <label>Số điện thoại <span style="color:red">*</span></label>
+                    <div class="d-flex">
+                        <input type="text" id="phone" class="form-control" placeholder="Nhập số điện thoại bệnh nhân" style="flex: 1;">
+                        <button type="button" class="btn btn-primary" id="btnSearch" onclick="searchPatient()">
+                            <span class="btn-text">Kiểm tra</span>
+                            <div class="loading-spinner" id="searchSpinner"></div>
+                        </button>
+                    </div>
+                    <small id="phoneMsg" style="color: #666; display: block; margin-top: 6px;"></small>
+                </div>
+
+                <div class="patient-info" id="patientInfoSection" style="display: none;">
+                    <div class="d-flex" style="margin-bottom: 15px;">
+                        <div style="flex: 1;">
+                            <label>Họ (Last Name)</label>
+                            <input type="text" id="lastName" class="form-control" placeholder="VD: Nguyễn">
+                        </div>
+                        <div style="flex: 1;">
+                            <label>Tên (First Name)</label>
+                            <input type="text" id="firstName" class="form-control" placeholder="VD: Văn A">
+                        </div>
+                        <div style="flex: 1;">
+                            <label>Giới tính</label>
+                            <select id="gender" class="form-control">
+                                <option value="MALE">Nam</option>
+                                <option value="FEMALE">Nữ</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group" id="departmentSection" style="display: none;">
+                    <label>Khoa Khám Bệnh <span style="color:red">*</span></label>
+                    <select id="departmentId" class="form-control">
+                        <option value="">-- Chọn khoa --</option>
+                    </select>
+                    <small style="color: #666; display: block; margin-top: 6px;">Hệ thống sẽ tự động chọn bác sĩ có ít lịch nhất và slot trống gần nhất.</small>
+                </div>
+
+                <div style="margin-top: 30px; display: flex; gap: 15px; justify-content: flex-end;">
+                    <a th:href="@{/receptionist/appointment}" class="btn btn-secondary">Hủy</a>
+                    <button type="button" class="btn btn-success" id="btnSubmit" style="display: none;" onclick="submitBooking()">
+                        <span class="btn-text">Xác nhận tạo lịch</span>
+                        <div class="loading-spinner" id="submitSpinner"></div>
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="toast" class="toast"></div>
+
+    <script>
+        let patientFound = false;
+
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + (isError ? 'error' : '');
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3000);
+        }
+
+        async function searchPatient() {
+            const phone = document.getElementById('phone').value.trim();
+            if (!phone) {
+                showToast("Vui lòng nhập số điện thoại", true);
+                return;
+            }
+
+            document.getElementById('searchSpinner').style.display = 'inline-block';
+            document.querySelector('#btnSearch .btn-text').style.display = 'none';
+            document.getElementById('btnSearch').disabled = true;
+
+            try {
+                const response = await fetch('/receptionist/api/walk-in/patient?phone=' + phone);
+                const data = await response.json();
+                
+                const infoSection = document.getElementById('patientInfoSection');
+                const deptSection = document.getElementById('departmentSection');
+                const btnSubmit = document.getElementById('btnSubmit');
+                
+                infoSection.style.display = 'block';
+                deptSection.style.display = 'block';
+                btnSubmit.style.display = 'inline-block';
+
+                if (data.error) {
+                    showToast(data.error, true);
+                    infoSection.style.display = 'none';
+                    deptSection.style.display = 'none';
+                    btnSubmit.style.display = 'none';
+                } else if (data.found) {
+                    document.getElementById('phoneMsg').textContent = "Bệnh nhân cũ.";
+                    document.getElementById('phoneMsg').style.color = "#28a745";
+                    document.getElementById('firstName').value = data.firstName;
+                    document.getElementById('lastName').value = data.lastName;
+                    document.getElementById('gender').value = data.gender;
+                    
+                    document.getElementById('firstName').disabled = true;
+                    document.getElementById('lastName').disabled = true;
+                    document.getElementById('gender').disabled = true;
+                    patientFound = true;
+                } else {
+                    document.getElementById('phoneMsg').textContent = "Bệnh nhân mới. Vui lòng nhập thông tin.";
+                    document.getElementById('phoneMsg').style.color = "#0066cc";
+                    document.getElementById('firstName').value = "";
+                    document.getElementById('lastName').value = "";
+                    document.getElementById('gender').value = "MALE";
+                    
+                    document.getElementById('firstName').disabled = false;
+                    document.getElementById('lastName').disabled = false;
+                    document.getElementById('gender').disabled = false;
+                    patientFound = false;
+                }
+                
+                loadDepartments();
+                
+            } catch (error) {
+                showToast("Lỗi kết nối", true);
+            } finally {
+                document.getElementById('searchSpinner').style.display = 'none';
+                document.querySelector('#btnSearch .btn-text').style.display = 'inline-block';
+                document.getElementById('btnSearch').disabled = false;
+            }
+        }
+
+        async function loadDepartments() {
+            const deptSelect = document.getElementById('departmentId');
+            if (deptSelect.options.length > 1) return; // already loaded
+            
+            try {
+                const response = await fetch('/receptionist/api/walk-in/departments');
+                const departments = await response.json();
+                
+                departments.forEach(dept => {
+                    const opt = document.createElement('option');
+                    opt.value = dept.id;
+                    opt.textContent = dept.name;
+                    deptSelect.appendChild(opt);
+                });
+            } catch (error) {
+                console.error("Lỗi tải khoa", error);
+            }
+        }
+
+        async function submitBooking() {
+            const phone = document.getElementById('phone').value.trim();
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const gender = document.getElementById('gender').value;
+            const departmentId = document.getElementById('departmentId').value;
+
+            if (!phone || !firstName || !lastName || !departmentId) {
+                showToast("Vui lòng điền đầy đủ thông tin", true);
+                return;
+            }
+
+            document.getElementById('submitSpinner').style.display = 'inline-block';
+            document.querySelector('#btnSubmit .btn-text').style.display = 'none';
+            document.getElementById('btnSubmit').disabled = true;
+
+            try {
+                const csrfToken = document.querySelector("meta[name='_csrf']").getAttribute("content");
+                const csrfHeader = document.querySelector("meta[name='_csrf_header']").getAttribute("content");
+
+                const response = await fetch('/receptionist/api/walk-in/book', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        [csrfHeader]: csrfToken
+                    },
+                    body: JSON.stringify({
+                        phone: phone,
+                        firstName: firstName,
+                        lastName: lastName,
+                        gender: gender,
+                        departmentId: parseInt(departmentId)
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showToast(data.message);
+                    setTimeout(() => {
+                        window.location.href = '/receptionist/appointment';
+                    }, 2000);
+                } else {
+                    showToast(data.message || "Có lỗi xảy ra", true);
+                    document.getElementById('submitSpinner').style.display = 'none';
+                    document.querySelector('#btnSubmit .btn-text').style.display = 'inline-block';
+                    document.getElementById('btnSubmit').disabled = false;
+                }
+            } catch (error) {
+                showToast("Lỗi kết nối", true);
+                document.getElementById('submitSpinner').style.display = 'none';
+                document.querySelector('#btnSubmit .btn-text').style.display = 'inline-block';
+                document.getElementById('btnSubmit').disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
