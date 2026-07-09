@@ -101,6 +101,7 @@
                         <table class="appointment-table">
                             <thead>
                                 <tr>
+                                    <th>STT</th>
                                     <th>Mã LH</th>
                                     <th>Slot</th>
                                     <th>Phòng</th>
@@ -114,92 +115,47 @@
                                 </tr>
                             </thead>
 
-                            <!-- Group theo ngày -->
-                            <tbody th:each="group : ${appointmentGroups}">
-
-                                <!-- Dòng ngày -->
-                                <tr class="date-group-row">
-                                    <td colspan="10">
-                                        <div class="date-group-header">
-                                            <div class="date-left">
-                                                <span class="date-icon">📅</span>
-
-                                                <strong th:text="${#temporals.format(group.bookingDate, 'dd/MM/yyyy')}">
-                                                    03/06/2026
-                                                </strong>
-
-                                                <span class="today-badge" th:if="${group.today}">
-                                                    Hôm nay
-                                                </span>
-                                            </div>
-
-                                            <div class="date-total"
-                                                 th:text="${group.totalAppointments + ' lịch hẹn'}">
-                                                0 lịch hẹn
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-
-                                <!-- Danh sách lịch hẹn trong ngày -->
-                                <tr th:each="appointment : ${group.appointments}">
+                            <tbody th:if="${appointments != null && !appointments.isEmpty()}">
+                                <tr th:each="appointment, iterStat : ${appointments}">
+                                    <td th:text="${iterStat.count + (appointmentPage.number * appointmentPage.size)}"></td>
                                     <td>
                                         <a class="appointment-code"
                                            th:href="@{/receptionist/appointment/{id}(id=${appointment.id})}"
                                            th:text="${appointment.appointmentCode}">
                                         </a>
                                     </td>
-
                                     <td th:text="${appointment.slotText}"></td>
-
                                     <td>
-                                        <span class="room-badge"
-                                              th:text="${appointment.roomNumber != null ? appointment.roomNumber : '-'}">
-                                        </span>
+                                        <span class="room-badge" th:text="${appointment.roomNumber != null ? appointment.roomNumber : '-'}"></span>
                                     </td>
-
                                     <td th:text="${appointment.patientFullName}"></td>
-
                                     <td th:text="${appointment.patientPhone != null ? appointment.patientPhone : '-'}"></td>
-
                                     <td th:text="${appointment.doctorFullName != null ? appointment.doctorFullName : '-'}"></td>
-
                                     <td th:text="${appointment.departmentName != null ? appointment.departmentName : '-'}"></td>
-
                                     <td>
                                         <span th:if="${appointment.bookingDate != null}"
                                               th:text="${#temporals.format(appointment.bookingDate, 'dd/MM/yyyy')}">
                                         </span>
                                     </td>
-
                                     <td>
                                         <span class="status-badge"
                                               th:classappend="${appointment.statusClass}"
                                               th:text="${appointment.statusLabel}">
                                         </span>
                                     </td>
-
                                     <td class="action-cell">
-                                        <a class="btn-detail"
-                                           th:href="@{/receptionist/appointment/{id}(id=${appointment.id})}">
-                                            Chi tiết
-                                        </a>
-
+                                        <a class="btn-detail" th:href="@{/receptionist/appointment/{id}(id=${appointment.id})}">Chi tiết</a>
                                         <a th:if="${appointment.status == 'CONFIRMED'}"
                                            class="btn-checkin"
-                                           th:href="@{/receptionist/appointment/{id}/check-in-ticket(id=${appointment.id})}">
-                                            Check-in
-                                        </a>
+                                           th:href="@{/receptionist/appointment/{id}/check-in-ticket(id=${appointment.id})}">Check-in</a>
                                     </td>
                                 </tr>
                             </tbody>
 
                             <!-- Không có dữ liệu -->
-                            <tbody th:if="${appointmentGroups == null || appointmentGroups.isEmpty()}">
+                            <tbody th:if="${appointments == null || appointments.isEmpty()}">
                                 <tr>
-                                    <td colspan="10" class="empty-row">
-                                        Không có lịch hẹn nào
-                                    </td>
+                                    <td colspan="11" class="empty-row">Không có lịch hẹn nào</td>
                                 </tr>
                             </tbody>
                         </table>
