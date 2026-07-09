@@ -14,12 +14,14 @@
             integrity="sha384-G/EV+4j2dNv+tEPo3++6LCgdCROaejBqfUeNjuKAiuXbjrxilcCdDz6ZAVfHWe1Y"
             crossorigin="anonymous"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </head>
 <body>
 
 <div layout:fragment="content">
     <div>
-        <form th:action="@{/manager/services/update}" th:object="${updateMedicalServiceRequest}" method="post">
+        <form th:action="@{/manager/services/update}" th:object="${updateMedicalServiceRequest}" method="post" id="serviceForm">
             <div class="card shadow-sm border-0 mb-4">
 
                 <!-- Thông báo lỗi , Thành công -->
@@ -112,7 +114,27 @@
             </div>
         </form>
     </div>
-</div>
 
+</div>
+<script th:inline="javascript" layout:fragment="pageScript">
+    const serviceForm = document.getElementById('serviceForm');
+    serviceForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        Swal.fire({
+            title:'Xác nhận thay đổi',
+            text:'Thông tin dịch vụ thay đổi sẽ được lưu vào hệ thống',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Xác nhận',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                serviceForm.submit();
+            }
+        })
+
+    })
+</script>
 </body>
 </html>
