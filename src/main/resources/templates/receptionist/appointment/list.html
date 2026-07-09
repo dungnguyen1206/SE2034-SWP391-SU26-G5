@@ -207,7 +207,14 @@
 
                     <!-- Pagination -->
                     <div class="pagination-footer"
-                         th:if="${appointmentPage != null && appointmentPage.totalPages > 0}">
+                         th:if="${appointmentPage != null && appointmentPage.totalPages > 1}"
+                         th:with="maxPages=5,
+                                  halfMax=2,
+                                  startPage=${appointmentPage.number - halfMax < 0 ? 0 : 
+                                              (appointmentPage.number + halfMax >= appointmentPage.totalPages ? 
+                                               (appointmentPage.totalPages - maxPages < 0 ? 0 : appointmentPage.totalPages - maxPages) : 
+                                               appointmentPage.number - halfMax)},
+                                  endPage=${startPage + maxPages - 1 >= appointmentPage.totalPages ? appointmentPage.totalPages - 1 : startPage + maxPages - 1}">
 
                         <div class="pagination-info">
                             <span th:text="'Trang ' + ${appointmentPage.number + 1} + ' / ' + ${appointmentPage.totalPages}">
@@ -234,7 +241,7 @@
                             </a>
 
                             <a class="page-number"
-                               th:each="pageNumber : ${#numbers.sequence(0, appointmentPage.totalPages - 1)}"
+                               th:each="pageNumber : ${#numbers.sequence(startPage, endPage)}"
                                th:classappend="${pageNumber == appointmentPage.number} ? ' active'"
                                th:href="@{/receptionist/appointment(
                                     page=${pageNumber},
