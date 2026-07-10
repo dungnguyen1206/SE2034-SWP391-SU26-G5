@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import vn.edu.fpt.SE2034_SWP391_G5.service.SmsService;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
+
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,10 +18,10 @@ public class SmsServiceImpl implements SmsService {
 
     private static final Logger log = LoggerFactory.getLogger(SmsServiceImpl.class);
 
-    @Value("${smsgateway.api-url}")
+    @Value("${traccar.api-url}")
     private String apiUrl;
 
-    @Value("${smsgateway.api-key}")
+    @Value("${traccar.api-key}")
     private String apiKey;
 
     private final RestTemplate restTemplate;
@@ -32,30 +32,35 @@ public class SmsServiceImpl implements SmsService {
 
     @Override
     public void sendOtpSms(String phoneNumber, String otp) {
-        // sms-gateway.app expects standard 0352365217 or E.164, we will pass it directly
-        // because their app uses the Android dialer, local formats are fine.
-        
-        String message = "Ma OTP cua ban tai HAMS la: " + otp + ". Ma co hieu luc trong 5 phut.";
+        // Format phone number to standard E.164 if it starts with 0
+        String formattedPhone = phoneNumber;
+        if (phoneNumber.startsWith("0")) {
+            formattedPhone = "+84" + phoneNumber.substring(1);
+        } else if (!phoneNumber.startsWith("+")) {
+            formattedPhone = "+" + phoneNumber;
+        }
 
-        org.springframework.web.util.UriComponentsBuilder builder = org.springframework.web.util.UriComponentsBuilder.fromHttpUrl(apiUrl)
-                .queryParam("key", apiKey)
-                .queryParam("number", phoneNumber)
-                .queryParam("message", message)
-                .queryParam("devices", "1")
-                .queryParam("type", "sms");
+        String message = "Ma xac thuc OTP cua ban tai HAMS la: " + otp + ". Ma co hieu luc trong 5 phut.";
+
+        // Traccar SMS Gateway requires a JSON body: {"to": "+84...", "message": "..."}
+        Map<String, String> body = new HashMap<>();
+        body.put("to", formattedPhone);
+        body.put("message", message);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        // Traccar uses the raw token in the Authorization header
+        headers.set("Authorization", apiKey);
+
+        HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
 
         try {
-            ResponseEntity<String> response = restTemplate.getForEntity(builder.toUriString(), String.class);
-            log.debug("SMS Gateway response: {}", response.getBody());
-            
-            // Basic error checking based on their API response
-            if (response.getBody() != null && response.getBody().contains("\"success\":false")) {
-                 log.error("SMS Gateway error: {}", response.getBody());
-                 throw new RuntimeException("SMS Gateway từ chối tin nhắn, có thể điện thoại chưa kết nối: " + response.getBody());
-            }
+            // POST request to Traccar SMS Gateway URL (e.g. http://192.168.x.x:8082)
+            ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, request, String.class);
+            log.debug("Traccar SMS Gateway response: {}", response.getBody());
         } catch (Exception e) {
-            log.error("Failed to send SMS via Gateway", e);
-            throw new RuntimeException("Lỗi gửi SMS qua Android Gateway: " + e.getMessage());
+            log.error("Failed to send SMS via Traccar Gateway", e);
+            throw new RuntimeException("Lỗi gửi SMS qua Traccar Gateway nội bộ: " + e.getMessage());
         }
     }
 }

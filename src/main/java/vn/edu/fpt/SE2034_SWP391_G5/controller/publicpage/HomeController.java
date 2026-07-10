@@ -8,13 +8,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DepartmentService;
 
 @Controller
-@RequestMapping("/home")
 @RequiredArgsConstructor
 public class HomeController {
 
     private final DepartmentService departmentService;
 
-    @GetMapping
+    @GetMapping({"/", "/home"})
     public String getHomePage(Model model) {
         model.addAttribute("departments", departmentService.getAllActiveDepartments());
         return "public/home";
