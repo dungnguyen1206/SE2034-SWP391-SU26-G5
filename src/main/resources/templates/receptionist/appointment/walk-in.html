@@ -132,10 +132,21 @@
 
                 <div class="form-group" id="departmentSection" style="display: none;">
                     <label>Khoa Khám Bệnh <span style="color:red">*</span></label>
-                    <select id="departmentId" class="form-control">
+                    <select id="departmentId" class="form-control" onchange="loadSlots()">
                         <option value="">-- Chọn khoa --</option>
                     </select>
-                    <small style="color: #666; display: block; margin-top: 6px;">Hệ thống sẽ tự động chọn bác sĩ có ít lịch nhất và slot trống gần nhất.</small>
+                </div>
+
+                <div class="form-group" id="dateSection" style="display: none;">
+                    <label>Ngày Khám <span style="color:red">*</span></label>
+                    <input type="date" id="bookingDate" class="form-control" onchange="loadSlots()">
+                </div>
+
+                <div class="form-group" id="slotSection" style="display: none;">
+                    <label>Khung Giờ Khám <span style="color:red">*</span></label>
+                    <select id="timeSlotId" class="form-control">
+                        <option value="">-- Chọn khung giờ --</option>
+                    </select>
                 </div>
 
                 <div style="margin-top: 30px; display: flex; gap: 15px; justify-content: flex-end;">
@@ -179,16 +190,26 @@
                 
                 const infoSection = document.getElementById('patientInfoSection');
                 const deptSection = document.getElementById('departmentSection');
+                const dateSection = document.getElementById('dateSection');
+                const slotSection = document.getElementById('slotSection');
                 const btnSubmit = document.getElementById('btnSubmit');
                 
                 infoSection.style.display = 'block';
                 deptSection.style.display = 'block';
+                dateSection.style.display = 'block';
+                slotSection.style.display = 'block';
                 btnSubmit.style.display = 'inline-block';
+                
+                // Set default date to today
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('bookingDate').value = today;
 
                 if (data.error) {
                     showToast(data.error, true);
                     infoSection.style.display = 'none';
                     deptSection.style.display = 'none';
+                    dateSection.style.display = 'none';
+                    slotSection.style.display = 'none';
                     btnSubmit.style.display = 'none';
                 } else if (data.found) {
                     document.getElementById('phoneMsg').textContent = "Bệnh nhân cũ.";
@@ -244,14 +265,48 @@
             }
         }
 
+        async function loadSlots() {
+            const departmentId = document.getElementById('departmentId').value;
+            const bookingDate = document.getElementById('bookingDate').value;
+            const slotSelect = document.getElementById('timeSlotId');
+            
+            slotSelect.innerHTML = '<option value="">-- Chọn khung giờ --</option>';
+            
+            if (!departmentId || !bookingDate) return;
+
+            try {
+                const response = await fetch(`/receptionist/api/walk-in/available-slots?departmentId=${departmentId}&date=${bookingDate}`);
+                const slots = await response.json();
+                
+                if (slots.length === 0) {
+                    const opt = document.createElement('option');
+                    opt.value = "";
+                    opt.textContent = "Không có khung giờ trống";
+                    slotSelect.appendChild(opt);
+                    return;
+                }
+                
+                slots.forEach(slot => {
+                    const opt = document.createElement('option');
+                    opt.value = slot.id;
+                    opt.textContent = slot.time;
+                    slotSelect.appendChild(opt);
+                });
+            } catch (error) {
+                console.error("Lỗi tải khung giờ", error);
+            }
+        }
+
         async function submitBooking() {
             const phone = document.getElementById('phone').value.trim();
             const firstName = document.getElementById('firstName').value.trim();
             const lastName = document.getElementById('lastName').value.trim();
             const gender = document.getElementById('gender').value;
             const departmentId = document.getElementById('departmentId').value;
+            const bookingDate = document.getElementById('bookingDate').value;
+            const timeSlotId = document.getElementById('timeSlotId').value;
 
-            if (!phone || !firstName || !lastName || !departmentId) {
+            if (!phone || !firstName || !lastName || !departmentId || !bookingDate || !timeSlotId) {
                 showToast("Vui lòng điền đầy đủ thông tin", true);
                 return;
             }
@@ -275,7 +330,9 @@
                         firstName: firstName,
                         lastName: lastName,
                         gender: gender,
-                        departmentId: parseInt(departmentId)
+                        departmentId: parseInt(departmentId),
+                        bookingDate: bookingDate,
+                        timeSlotId: parseInt(timeSlotId)
                     })
                 });
                 

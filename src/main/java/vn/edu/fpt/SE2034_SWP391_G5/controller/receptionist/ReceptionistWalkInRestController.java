@@ -22,7 +22,12 @@ public class ReceptionistWalkInRestController {
 
     @GetMapping("/departments")
     public ResponseEntity<?> getDepartments() {
-        List<Department> departments = departmentService.getAllActiveDepartments();
+        List<Map<String, Object>> departments = departmentService.getAllActiveDepartments().stream()
+                .map(d -> Map.<String, Object>of(
+                        "id", d.getId(),
+                        "name", d.getName()
+                ))
+                .toList();
         return ResponseEntity.ok(departments);
     }
 
@@ -30,6 +35,13 @@ public class ReceptionistWalkInRestController {
     public ResponseEntity<?> searchPatient(@RequestParam String phone) {
         Object response = walkInService.searchPatientByPhone(phone);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/available-slots")
+    public ResponseEntity<?> getAvailableSlots(
+            @RequestParam Integer departmentId,
+            @RequestParam java.time.LocalDate date) {
+        return ResponseEntity.ok(walkInService.getAvailableSlots(departmentId, date));
     }
 
     @PostMapping("/book")

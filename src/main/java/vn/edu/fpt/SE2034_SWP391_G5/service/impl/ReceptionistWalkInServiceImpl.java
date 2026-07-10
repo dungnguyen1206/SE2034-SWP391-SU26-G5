@@ -12,6 +12,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.service.ReceptionistWalkInService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -50,6 +51,26 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
     }
 
     @Override
+    public List<Map<String, Object>> getAvailableSlots(Integer departmentId, LocalDate date) {
+        LocalTime currentTime = LocalDate.now().equals(date) ? LocalTime.now() : LocalTime.MIN;
+        List<TimeSlot> slots = timeSlotRepository.findAvailableSlotsByDepartmentAndDate(departmentId, date, currentTime);
+
+        Map<LocalTime, TimeSlot> distinctSlots = new TreeMap<>();
+        for (TimeSlot ts : slots) {
+            distinctSlots.putIfAbsent(ts.getStartTime(), ts);
+        }
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (TimeSlot ts : distinctSlots.values()) {
+            result.add(Map.<String, Object>of(
+                    "id", ts.getId(),
+                    "time", ts.getStartTime().toString() + " - " + ts.getEndTime().toString()
+            ));
+        }
+        return result;
+    }
+
+    @Override
     @Transactional
     public void createWalkInAppointment(WalkInBookingRequest request) {
         // 1. Get or Create Patient
@@ -61,7 +82,6 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
             patient.setFirstName(request.getFirstName());
             patient.setLastName(request.getLastName());
             patient.setGender(request.getGender());
-            // Random password or something default
             patient.setPasswordHash(passwordEncoder.encode("Walkin@123"));
             patient.setStatus("ACTIVE");
             patient.setEmailVerified(true);
@@ -76,52 +96,40 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
             userRole.setRole(patientRole);
             userRoleRepository.save(userRole);
             
-            // TODO: send SMS logic goes here (mocked for now)
             System.out.println("Gửi SMS đến " + request.getPhone() + " với mật khẩu: Walkin@123");
         }
 
         // 2. Get Department's initial Medical Service
-        // Usually the one with lowest price or a specific name like "Khám bệnh"
         List<MedicalService> services = medicalServiceRepository.findByDepartmentIdAndStatus(request.getDepartmentId(), "ACTIVE");
         if (services.isEmpty()) {
             throw new RuntimeException("Không tìm thấy dịch vụ khám cho khoa này.");
         }
-        // Just pick the first one, or the one with "Khám" in name if possible
         MedicalService initialService = services.stream()
                 .filter(s -> s.getName().toLowerCase().contains("khám"))
                 .findFirst()
                 .orElse(services.get(0));
 
-        // 3. Auto Assign Doctor and Slot for TODAY
-        LocalDate today = LocalDate.now();
-        // find all active doctors in this department
-        List<User> doctors = userRepository.findActiveDoctorsByDepartmentId(request.getDepartmentId());
-        if (doctors.isEmpty()) {
-            throw new RuntimeException("Không có bác sĩ nào trong khoa này.");
+        // 3. Validate and Get Slot
+        TimeSlot selectedSlot = timeSlotRepository.findByIdWithSchedule(request.getTimeSlotId())
+                .orElseThrow(() -> new RuntimeException("Khung giờ không tồn tại."));
+
+        if (!selectedSlot.getSchedule().getWorkDate().equals(request.getBookingDate())) {
+            throw new RuntimeException("Khung giờ không khớp với ngày khám.");
         }
 
-        User selectedDoctor = null;
-        TimeSlot selectedSlot = null;
-        long minAppointments = Long.MAX_VALUE;
-
-        for (User doctor : doctors) {
-            // Count today's appointments
-            long count = appointmentRepository.countByDoctorIdAndBookingDate(doctor.getId(), today);
-            
-            // Find available slots for this doctor today
-            // We need a custom query or just fetch schedule
-            List<TimeSlot> availableSlots = timeSlotRepository.findAvailableSlotsByDoctorAndDate(doctor.getId(), today);
-            
-            if (!availableSlots.isEmpty() && count < minAppointments) {
-                minAppointments = count;
-                selectedDoctor = doctor;
-                selectedSlot = availableSlots.get(0); // pick earliest
-            }
+        if (LocalDate.now().equals(request.getBookingDate()) && selectedSlot.getStartTime().isBefore(LocalTime.now())) {
+            throw new RuntimeException("Không thể đặt lịch vào khung giờ trong quá khứ.");
         }
 
-        if (selectedDoctor == null || selectedSlot == null) {
-            throw new RuntimeException("Hệ thống không tìm thấy lịch trống cho bác sĩ nào trong ngày hôm nay ở khoa này.");
+        if (selectedSlot.getBookedCapacity() >= selectedSlot.getMaxCapacity()) {
+            throw new RuntimeException("Khung giờ này đã đầy, vui lòng chọn khung giờ khác.");
         }
+
+        // Increase booked capacity
+        selectedSlot.setBookedCapacity(selectedSlot.getBookedCapacity() + 1);
+        timeSlotRepository.save(selectedSlot);
+
+        User selectedDoctor = selectedSlot.getSchedule().getDoctor();
 
         // 4. Create Appointment
         Appointment appointment = new Appointment();
@@ -130,7 +138,7 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
         appointment.setDoctor(selectedDoctor);
         appointment.setService(initialService);
         appointment.setSlot(selectedSlot);
-        appointment.setBookingDate(today);
+        appointment.setBookingDate(request.getBookingDate());
         appointment.setStatus("WAITING"); // Walk-in is ready to examine
         appointment.setCheckInTime(LocalDateTime.now());
         appointment.setCreatedAt(LocalDateTime.now());
@@ -139,7 +147,7 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
 
         // 5. Create Invoice
         Invoice invoice = new Invoice();
-        String invCode = "INV-" + today.format(DateTimeFormatter.ofPattern("yyyyMM")) + String.format("%04d", new Random().nextInt(10000));
+        String invCode = "INV-" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM")) + String.format("%04d", new Random().nextInt(10000));
         invoice.setInvoiceCode(invCode);
         invoice.setAppointment(appointment);
         invoice.setTotalAmount(initialService.getReferencePrice());
