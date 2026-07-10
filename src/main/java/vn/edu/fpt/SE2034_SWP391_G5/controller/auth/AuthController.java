@@ -36,7 +36,8 @@ public class AuthController {
             @Valid @ModelAttribute("registerRequest") RegisterPatientRequest registerRequest,
             BindingResult bindingResult,
             Model model,
-            HttpSession session) {
+            HttpSession session,
+            @RequestParam(value = "otpChannel", defaultValue = "email") String otpChannel) {
 
         // Check for basic validation errors
         if (bindingResult.hasErrors()) {
@@ -45,7 +46,7 @@ public class AuthController {
         }
 
         try {
-            authService.processRegistration(registerRequest, session);
+            authService.processRegistration(registerRequest, session, otpChannel);
             return "redirect:/verify-otp";
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
@@ -55,12 +56,14 @@ public class AuthController {
 
     // Show OTP verification page
     @GetMapping("/verify-otp")
-    public String showVerifyOtpForm(HttpSession session) {
+    public String showVerifyOtpForm(HttpSession session, Model model) {
         RegisterPatientRequest pending = (RegisterPatientRequest) session.getAttribute("pendingRegister");
         // Redirect to register if no pending registration
         if (pending == null) {
             return "redirect:/register";
         }
+        String otpChannel = (String) session.getAttribute("otpChannel");
+        model.addAttribute("otpChannel", otpChannel);
         return "auth/verify-otp";
     }
 
@@ -89,12 +92,14 @@ public class AuthController {
     // Handle forgot password submission and send OTP
     @PostMapping("/forgot-password")
     public String processForgotPassword(
-            @RequestParam("email") String email,
+            @RequestParam(value = "email", required = false) String email,
+            @RequestParam(value = "phone", required = false) String phone,
+            @RequestParam(value = "otpChannel", defaultValue = "email") String otpChannel,
             Model model,
             HttpSession session) {
         
         try {
-            authService.processForgotPassword(email, session);
+            authService.processForgotPassword(email, phone, session, otpChannel);
             return "redirect:/reset-password";
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
@@ -104,12 +109,14 @@ public class AuthController {
 
     // Show reset password page
     @GetMapping("/reset-password")
-    public String showResetPasswordForm(HttpSession session) {
-        String resetEmail = (String) session.getAttribute("resetEmail");
+    public String showResetPasswordForm(HttpSession session, Model model) {
+        String resetIdentifier = (String) session.getAttribute("resetIdentifier");
         // Redirect to forgot password if no reset session exists
-        if (resetEmail == null) {
+        if (resetIdentifier == null) {
             return "redirect:/forgot-password";
         }
+        String otpChannel = (String) session.getAttribute("otpChannel");
+        model.addAttribute("otpChannel", otpChannel);
         return "auth/reset-password";
     }
 
