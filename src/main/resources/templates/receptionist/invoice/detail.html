@@ -80,16 +80,12 @@
                                     </table>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Payment Action Right -->
+                <div class="row g-4">
+                    <!-- Left side: Patient & Appointment Info -->
                     <div class="col-lg-4">
-                        
-                        <!-- General Info -->
                         <div class="card shadow-sm border-0 rounded-4 mb-4 bg-light">
                             <div class="card-body p-4">
-                                <h6 class="text-muted fw-bold mb-3 text-uppercase" style="font-size: 0.8rem; letter-spacing: 1px;">Thông tin bệnh nhân</h6>
+                                <h6 class="text-muted fw-bold mb-3 text-uppercase invoice-section-title">Thông tin bệnh nhân</h6>
                                 <div class="mb-3">
                                     <div class="fw-bold text-dark fs-5 mb-1" th:text="${invoice.patientFullName}"></div>
                                     <div class="text-muted"><i class="bi bi-telephone me-2"></i><span th:text="${invoice.patientPhone}"></span></div>
@@ -98,7 +94,7 @@
                                 
                                 <hr class="border-secondary opacity-25 my-3">
                                 
-                                <h6 class="text-muted fw-bold mb-3 text-uppercase" style="font-size: 0.8rem; letter-spacing: 1px;">Lịch khám</h6>
+                                <h6 class="text-muted fw-bold mb-3 text-uppercase invoice-section-title">Lịch khám</h6>
                                 <div class="d-flex justify-content-between mb-2">
                                     <span class="text-muted">Bác sĩ:</span>
                                     <span class="fw-medium text-dark" th:text="${invoice.doctorFullName}"></span>
@@ -110,6 +106,24 @@
                                 <div class="d-flex justify-content-between">
                                     <span class="text-muted">Khoa:</span>
                                     <span class="fw-medium text-dark" th:text="${invoice.departmentName}"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Paid status -->
+                        <div class="card shadow-sm border-0 rounded-4 bg-success bg-opacity-10" th:if="${invoice.paymentStatus == 'PAID'}">
+                            <div class="card-body p-4 text-center">
+                                <div class="mb-3">
+                                    <i class="bi bi-check-circle-fill text-success invoice-success-icon"></i>
+                                </div>
+                                <h4 class="fw-bold text-success mb-2">ĐÃ THANH TOÁN</h4>
+                                <div class="text-dark mb-1">
+                                    <span class="text-muted">Phương thức:</span> 
+                                    <span class="fw-bold" th:text="${invoice.paymentMethod == 'CASH' ? 'Tiền mặt' : 'Chuyển khoản'}"></span>
+                                </div>
+                                <div class="text-dark">
+                                    <span class="text-muted">Thời gian:</span> 
+                                    <span class="fw-medium" th:text="${#temporals.format(invoice.paidAt, 'HH:mm - dd/MM/yyyy')}"></span>
                                 </div>
                             </div>
                         </div>

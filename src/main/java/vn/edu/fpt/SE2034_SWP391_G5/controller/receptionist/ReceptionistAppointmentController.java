@@ -10,10 +10,16 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ReceptionistResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.request.WalkInBookingRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.ReceptionistService;
+import vn.edu.fpt.SE2034_SWP391_G5.service.ReceptionistWalkInService;
+import vn.edu.fpt.SE2034_SWP391_G5.service.DepartmentService;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -27,6 +33,8 @@ public class ReceptionistAppointmentController {
 
     private final AppointmentService appointmentService;
     private final ReceptionistService receptionistService;
+    private final ReceptionistWalkInService walkInService;
+    private final DepartmentService departmentService;
 
     @GetMapping("/receptionist/appointment")
     // Hiển thị toàn bộ danh sách lịch hẹn theo ngày
@@ -143,9 +151,66 @@ public class ReceptionistAppointmentController {
     }
 
     @GetMapping("/receptionist/appointment/walk-in")
-    public String showWalkInPage(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+    public String showWalkInPage(
+            @RequestParam(required = false) String phone,
+            @RequestParam(required = false) Integer departmentId,
+            @RequestParam(required = false) LocalDate bookingDate,
+            @AuthenticationPrincipal CustomUserDetails userDetails, 
+            Model model) {
+        
         addReceptionistInfo(model, userDetails);
         model.addAttribute("currentDateTime", getCurrentDateTime());
+        
+        model.addAttribute("phone", phone);
+        model.addAttribute("departmentId", departmentId);
+        
+        if (bookingDate == null) {
+            bookingDate = LocalDate.now();
+        }
+        model.addAttribute("bookingDate", bookingDate);
+
+        if (phone != null && !phone.trim().isEmpty()) {
+            Object patientResult = walkInService.searchPatientByPhone(phone);
+            if (patientResult instanceof Map) {
+                Map<String, Object> result = (Map<String, Object>) patientResult;
+                if (result.containsKey("error")) {
+                    model.addAttribute("phoneError", result.get("error"));
+                } else {
+                    model.addAttribute("patientFound", result.get("found"));
+                    if ((Boolean) result.get("found")) {
+                        model.addAttribute("firstName", result.get("firstName"));
+                        model.addAttribute("lastName", result.get("lastName"));
+                        model.addAttribute("gender", result.get("gender"));
+                    }
+                    
+                    // Load departments
+                    model.addAttribute("departments", departmentService.getAllActiveDepartments());
+                    
+                    if (departmentId != null) {
+                        model.addAttribute("slots", walkInService.getAvailableSlots(departmentId, bookingDate));
+                    }
+                }
+            }
+        }
+
         return "receptionist/appointment/walk-in";
+    }
+
+    @PostMapping("/receptionist/appointment/walk-in/book")
+    public String bookWalkIn(@ModelAttribute WalkInBookingRequest request, RedirectAttributes redirectAttributes) {
+        try {
+            walkInService.createWalkInAppointment(request);
+            redirectAttributes.addFlashAttribute("successMessage", "Đã tạo lịch khám trực tiếp và hóa đơn thành công!");
+            return "redirect:/receptionist/appointment";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            
+            // Redirect back with current values
+            redirectAttributes.addAttribute("phone", request.getPhone());
+            redirectAttributes.addAttribute("departmentId", request.getDepartmentId());
+            redirectAttributes.addAttribute("bookingDate", request.getBookingDate());
+            
+            return "redirect:/receptionist/appointment/walk-in";
+        }
     }
 }

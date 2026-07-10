@@ -200,30 +200,26 @@
                         </div>
 
                         <!-- Pagination -->
-                        <div class="pagination-wrapper" 
-                             th:if="${todayAppointments != null and todayAppointments.totalPages > 1}" 
+                        <div class="pagination-container"
+                             th:if="${todayAppointments != null and todayAppointments.totalPages > 1}"
                              th:with="maxPages=5,
-                                      halfMax=2,
+                                      halfMax=${maxPages / 2},
                                       startPage=${todayAppointments.number - halfMax < 0 ? 0 : 
-                                                  (todayAppointments.number + halfMax >= todayAppointments.totalPages ? 
-                                                   (todayAppointments.totalPages - maxPages < 0 ? 0 : todayAppointments.totalPages - maxPages) : 
-                                                   todayAppointments.number - halfMax)},
-                                      endPage=${startPage + maxPages - 1 >= todayAppointments.totalPages ? todayAppointments.totalPages - 1 : startPage + maxPages - 1}"
-                             style="margin-top: 20px; text-align: center;">
-                            <ul class="pagination" style="display: inline-flex; list-style-type: none; gap: 5px; padding: 0;">
-                                <li th:classappend="${todayAppointments.first} ? 'disabled'" style="display: inline-block;">
-                                    <a th:href="@{/receptionist/dashboard(page=${todayAppointments.number - 1}, search=${search})}" 
-                                       style="padding: 8px 12px; border: 1px solid #dbe3ef; text-decoration: none; color: #334155; border-radius: 4px;">&laquo; Trước</a>
+                                                 (todayAppointments.number + halfMax >= todayAppointments.totalPages ? 
+                                                  (todayAppointments.totalPages - maxPages < 0 ? 0 : todayAppointments.totalPages - maxPages) : 
+                                                  todayAppointments.number - halfMax)},
+                                      endPage=${startPage + maxPages - 1 >= todayAppointments.totalPages ? todayAppointments.totalPages - 1 : startPage + maxPages - 1}">
+                            <ul class="pagination-list">
+                                <li class="pagination-item" th:classappend="${todayAppointments.first} ? 'disabled'">
+                                    <a class="pagination-link" th:href="@{/receptionist/dashboard(page=${todayAppointments.number - 1}, search=${search})}">&laquo; Trước</a>
                                 </li>
-                                <li th:each="i : ${#numbers.sequence(startPage, endPage)}" 
-                                    th:classappend="${todayAppointments.number == i} ? 'active'" style="display: inline-block;">
-                                    <a th:href="@{/receptionist/dashboard(page=${i}, search=${search})}" 
-                                       th:text="${i + 1}"
-                                       th:style="${todayAppointments.number == i} ? 'padding: 8px 12px; border: 1px solid #2563eb; background-color: #2563eb; color: white; text-decoration: none; border-radius: 4px;' : 'padding: 8px 12px; border: 1px solid #dbe3ef; text-decoration: none; color: #334155; border-radius: 4px;'"></a>
+                                <li class="pagination-item" th:each="i : ${#numbers.sequence(startPage, endPage)}">
+                                    <a class="pagination-link" th:classappend="${todayAppointments.number == i} ? 'active'"
+                                       th:href="@{/receptionist/dashboard(page=${i}, search=${search})}" 
+                                       th:text="${i + 1}"></a>
                                 </li>
-                                <li th:classappend="${todayAppointments.last} ? 'disabled'" style="display: inline-block;">
-                                    <a th:href="@{/receptionist/dashboard(page=${todayAppointments.number + 1}, search=${search})}" 
-                                       style="padding: 8px 12px; border: 1px solid #dbe3ef; text-decoration: none; color: #334155; border-radius: 4px;">Sau &raquo;</a>
+                                <li class="pagination-item" th:classappend="${todayAppointments.last} ? 'disabled'">
+                                    <a class="pagination-link" th:href="@{/receptionist/dashboard(page=${todayAppointments.number + 1}, search=${search})}">Sau &raquo;</a>
                                 </li>
                             </ul>
                         </div>

@@ -516,6 +516,41 @@
 
 
 /* =========================
+   PAGINATION
+========================= */
+
+.pagination-container {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.pagination-list {
+    display: inline-flex;
+    list-style-type: none;
+    gap: 5px;
+    padding: 0;
+}
+
+.pagination-item {
+    display: inline-block;
+}
+
+.pagination-link {
+    padding: 8px 12px;
+    border: 1px solid #dbe3ef;
+    text-decoration: none;
+    color: #334155;
+    border-radius: 4px;
+}
+
+.pagination-link.active {
+    border-color: #2563eb;
+    background-color: #2563eb;
+    color: white;
+}
+
+
+/* =========================
    RESPONSIVE
 ========================= */
 

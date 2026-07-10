@@ -67,6 +67,28 @@
     border-bottom: none;
 }
 
+.refresh-spinner {
+    width: 10px;
+    height: 10px;
+}
+
+.search-container {
+    width: 300px;
+}
+
+.room-dept-name {
+    font-size: 0.9rem;
+}
+
+.empty-examining-box {
+    background-color: #f8fafc;
+    border-left-color: #cbd5e1;
+}
+
+.checkin-time-text {
+    font-size: 0.75rem;
+}
+
 /* Badge Trạng thái */
 .badge-examining {
     background-color: #dcfce7;

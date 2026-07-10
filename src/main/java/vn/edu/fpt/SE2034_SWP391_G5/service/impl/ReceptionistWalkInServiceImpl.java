@@ -32,6 +32,23 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
 
     @Override
     public Object searchPatientByPhone(String phone) {
+        if (phone == null || phone.trim().isEmpty()) {
+            return Map.of("error", "Vui lòng nhập số điện thoại.");
+        }
+        phone = phone.trim();
+        
+        if (!phone.matches("\\d+")) {
+            return Map.of("error", "Số điện thoại chỉ được chứa chữ số, không chứa chữ cái hoặc ký tự đặc biệt.");
+        }
+        
+        if (!phone.startsWith("0")) {
+            return Map.of("error", "Số điện thoại phải bắt đầu bằng số 0.");
+        }
+        
+        if (phone.length() != 10) {
+            return Map.of("error", "Số điện thoại phải bao gồm đúng 10 chữ số (bạn đang nhập " + phone.length() + " số).");
+        }
+
         Optional<User> patientOpt = userRepository.findByPhone(phone);
         if (patientOpt.isPresent()) {
             User p = patientOpt.get();
@@ -52,19 +69,41 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
 
     @Override
     public List<Map<String, Object>> getAvailableSlots(Integer departmentId, LocalDate date) {
-        LocalTime currentTime = LocalDate.now().equals(date) ? LocalTime.now() : LocalTime.MIN;
-        List<TimeSlot> slots = timeSlotRepository.findAvailableSlotsByDepartmentAndDate(departmentId, date, currentTime);
+        List<TimeSlot> slots = timeSlotRepository.findSlotsByDepartmentAndDate(departmentId, date);
 
-        Map<LocalTime, TimeSlot> distinctSlots = new TreeMap<>();
+        LocalTime currentTime = LocalDate.now().equals(date) ? LocalTime.now() : LocalTime.MIN;
+
+        // Group slots by startTime to merge multiple doctors' slots at the same time
+        Map<LocalTime, List<TimeSlot>> slotsByTime = new TreeMap<>();
         for (TimeSlot ts : slots) {
-            distinctSlots.putIfAbsent(ts.getStartTime(), ts);
+            slotsByTime.computeIfAbsent(ts.getStartTime(), k -> new ArrayList<>()).add(ts);
         }
 
         List<Map<String, Object>> result = new ArrayList<>();
-        for (TimeSlot ts : distinctSlots.values()) {
+        for (Map.Entry<LocalTime, List<TimeSlot>> entry : slotsByTime.entrySet()) {
+            LocalTime startTime = entry.getKey();
+            List<TimeSlot> timeSlots = entry.getValue();
+            
+            // Find an available slot at this time
+            TimeSlot availableSlot = null;
+            for (TimeSlot ts : timeSlots) {
+                if (ts.getBookedCapacity() < ts.getMaxCapacity()) {
+                    availableSlot = ts;
+                    break;
+                }
+            }
+            
+            // If no slot is available, pick the first one to display
+            TimeSlot displaySlot = availableSlot != null ? availableSlot : timeSlots.get(0);
+            
+            boolean isFull = availableSlot == null;
+            boolean isPast = startTime.isBefore(currentTime) || startTime.equals(currentTime);
+            boolean isAvailable = !isFull && !isPast;
+            
             result.add(Map.<String, Object>of(
-                    "id", ts.getId(),
-                    "time", ts.getStartTime().toString() + " - " + ts.getEndTime().toString()
+                    "id", displaySlot.getId(),
+                    "time", displaySlot.getStartTime().toString() + " - " + displaySlot.getEndTime().toString(),
+                    "available", isAvailable
             ));
         }
         return result;
@@ -73,8 +112,26 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
     @Override
     @Transactional
     public void createWalkInAppointment(WalkInBookingRequest request) {
+        String phone = request.getPhone();
+        if (phone == null || phone.trim().isEmpty()) {
+            throw new RuntimeException("Vui lòng nhập số điện thoại.");
+        }
+        phone = phone.trim();
+        
+        if (!phone.matches("\\d+")) {
+            throw new RuntimeException("Số điện thoại chỉ được chứa chữ số, không chứa chữ cái hoặc ký tự đặc biệt.");
+        }
+        
+        if (!phone.startsWith("0")) {
+            throw new RuntimeException("Số điện thoại phải bắt đầu bằng số 0.");
+        }
+        
+        if (phone.length() != 10) {
+            throw new RuntimeException("Số điện thoại phải bao gồm đúng 10 chữ số (bạn đang nhập " + phone.length() + " số).");
+        }
+
         // 1. Get or Create Patient
-        User patient = userRepository.findByPhone(request.getPhone()).orElse(null);
+        User patient = userRepository.findByPhone(phone).orElse(null);
         if (patient == null) {
             patient = new User();
             patient.setUsername(request.getPhone());
@@ -125,6 +182,14 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
             throw new RuntimeException("Khung giờ này đã đầy, vui lòng chọn khung giờ khác.");
         }
 
+        // Check if patient already booked this exact slot
+        boolean alreadyBooked = appointmentRepository.existsBySlotIdAndPatientIdAndStatusNotIn(
+                selectedSlot.getId(), patient.getId(), Arrays.asList("CANCELLED", "NO_SHOW")
+        );
+        if (alreadyBooked) {
+            throw new RuntimeException("Bệnh nhân này đã có lịch khám tại khung giờ này. Vui lòng chọn khung giờ khác.");
+        }
+
         // Increase booked capacity
         selectedSlot.setBookedCapacity(selectedSlot.getBookedCapacity() + 1);
         timeSlotRepository.save(selectedSlot);
@@ -139,8 +204,8 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
         appointment.setService(initialService);
         appointment.setSlot(selectedSlot);
         appointment.setBookingDate(request.getBookingDate());
-        appointment.setStatus("WAITING"); // Walk-in is ready to examine
-        appointment.setCheckInTime(LocalDateTime.now());
+        appointment.setStatus("CONFIRMED"); // Offline booking always starts as CONFIRMED
+        appointment.setCheckInTime(null); // Must be checked-in manually
         appointment.setCreatedAt(LocalDateTime.now());
         appointment.setUpdatedAt(LocalDateTime.now());
         appointment = appointmentRepository.save(appointment);
