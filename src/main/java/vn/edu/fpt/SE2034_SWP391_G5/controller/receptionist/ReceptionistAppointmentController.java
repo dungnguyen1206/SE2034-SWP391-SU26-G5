@@ -141,4 +141,11 @@ public class ReceptionistAppointmentController {
         model.addAttribute("currentDateTime", getCurrentDateTime());
         return "receptionist/appointment/detail";
     }
-}
+
+    @GetMapping("/receptionist/appointment/walk-in")
+    public String showWalkInPage(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        addReceptionistInfo(model, userDetails);
+        model.addAttribute("currentDateTime", getCurrentDateTime());
+        return "receptionist/appointment/walk-in";
+    }
+}

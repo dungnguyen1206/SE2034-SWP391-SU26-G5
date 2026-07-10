@@ -27,4 +27,5 @@ public interface MedicalServiceRepository extends JpaRepository<MedicalService, 
     @Query("Select ms from MedicalService  ms join fetch ms.department d where ms.id=:id")
     Optional<MedicalService> findMedicalServiceById(@Param("id") Long id);
 
+
 }

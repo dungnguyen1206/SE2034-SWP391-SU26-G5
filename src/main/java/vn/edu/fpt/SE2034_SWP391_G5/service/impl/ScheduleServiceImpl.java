@@ -22,6 +22,8 @@ import vn.edu.fpt.SE2034_SWP391_G5.repository.*;
 import org.springframework.data.repository.query.Param;
 import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DoctorService;
+import vn.edu.fpt.SE2034_SWP391_G5.service.NotificationService;
+import vn.edu.fpt.SE2034_SWP391_G5.service.EmailService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.ScheduleService;
 import vn.edu.fpt.SE2034_SWP391_G5.util.DateTimeUtil;
 
@@ -46,7 +48,11 @@ public class ScheduleServiceImpl implements ScheduleService {
     private final RoomRepository roomRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final DoctorService doctorService;
+    private final NotificationService notificationService;
+    private final AppointmentRepository appointmentRepository;
+    private final EmailService emailService;
 
+    //LinhNH
     @Override
     public List<DoctorScheduleWeekResponse> getWeeklySchedule(Long doctorId, LocalDate targetDate) {
         // Find Monday of the target week
@@ -124,22 +130,24 @@ public class ScheduleServiceImpl implements ScheduleService {
 
 
     //Find all doctor work today
-    public List<DoctorOnDutyResponse> findDoctorScheduleByDate(@Param("date") LocalDate date) {
-        List<DoctorSchedule> doctorSchedules = doctorScheduleRepository.findByDate(date);
-        List<DoctorOnDutyResponse> doctorOnDutyResponses = new ArrayList<>();
-        doctorSchedules.forEach(doctorSchedule -> {
-            DoctorOnDutyResponse response = new DoctorOnDutyResponse();
-            response.setDoctorId(doctorSchedule.getId());
-            response.setDoctorName(doctorSchedule.getDoctor().getFirstName() + " " + doctorSchedule.getDoctor().getMiddleName() + " " + doctorSchedule.getDoctor().getLastName());
-            response.setDepartmentName(doctorSchedule.getDoctor().getDepartment().getName());
-            response.setShift(String.valueOf(doctorSchedule.getShift()));
-            response.setStatus(doctorSchedule.getDoctor().getStatus());
-            response.setRoomNumber(doctorSchedule.getRoom().getRoomNumber());
-            doctorOnDutyResponses.add(response);
-        });
-        return doctorOnDutyResponses;
+    @Override
+    public Page<DoctorOnDutyResponse> findDoctorScheduleByDate(@Param("date") LocalDate date, Integer page, Integer size ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<DoctorSchedule> doctorSchedules = doctorScheduleRepository.findByDate(date, pageable);
+
+        return doctorSchedules.map(this::doctorOnDutyResponse);
+    }
+    private DoctorOnDutyResponse doctorOnDutyResponse(DoctorSchedule doctorSchedule) {
+        DoctorOnDutyResponse response = new DoctorOnDutyResponse();
+        response.setDoctorId(doctorSchedule.getId());
+        response.setDoctorName(doctorSchedule.getDoctor().getFirstName() + " " + doctorSchedule.getDoctor().getMiddleName() + " " + doctorSchedule.getDoctor().getLastName());
+        response.setDepartmentName(doctorSchedule.getDoctor().getDepartment().getName());
+        response.setShift(String.valueOf(doctorSchedule.getShift()));
+        response.setStatus(doctorSchedule.getDoctor().getStatus());
+        return response;
     }
 
+    //LinhNH
     @Override
     public DoctorScheduleReportResponse getWeeklyScheduleReport(Long doctorId, LocalDate targetDate) {
         LocalDate localTargetDate = (targetDate != null) ? targetDate : LocalDate.now();
@@ -387,30 +395,48 @@ public class ScheduleServiceImpl implements ScheduleService {
     public WeekSchedule updateWeekSchedule(Long weekScheduleId, String action, Long managerId) {
 
         WeekSchedule presentWeek = weekScheduleRepository.findWeekScheduleById(weekScheduleId);
-        User manager= userRepository.findById(managerId).orElseThrow(()-> new ResourceNotFoundException("Không rõ danh tính người đang thao tác"));
+        User manager = userRepository.findById(managerId).orElseThrow(() -> new ResourceNotFoundException("Không rõ danh tính người đang thao tác"));
         switch (action) {
             case "DRAFT":
                 presentWeek.setStatus(WeekScheduleStatus.DRAFT.toString());
                 presentWeek.setUpdatedAt(LocalDateTime.now());
                 presentWeek.setCreatedBy(manager);
-                presentWeek=weekScheduleRepository.save(presentWeek);
+                presentWeek = weekScheduleRepository.save(presentWeek);
                 break;
             case "PUBLISHED":
                 presentWeek.setStatus(WeekScheduleStatus.PUBLISHED.toString());
                 presentWeek.setUpdatedAt(LocalDateTime.now());
                 presentWeek.setCreatedBy(manager);
-                presentWeek=weekScheduleRepository.save(presentWeek);
+                presentWeek = weekScheduleRepository.save(presentWeek);
+
+                // Gửi thông báo tới các bác sĩ được xếp lịch trong tuần này
+                try {
+                    List<User> doctors = doctorScheduleRepository.findDoctorsByWeekScheduleId(weekScheduleId);
+                    if (doctors != null) {
+                        for (User doctor : doctors) {
+                            notificationService.createNotification(
+                                    doctor,
+                                    "Lịch làm việc mới",
+                                    "Lịch làm việc tuần từ ngày " + presentWeek.getStartDate() + " đến " + presentWeek.getEndDate() + " đã được công bố. Vui lòng kiểm tra.",
+                                    "SCHEDULE_ASSIGNED",
+                                    presentWeek.getId(),
+                                    "WeekSchedule"
+                            );
+                        }
+                    }
+                } catch (Exception e) {
+                    // Tránh lỗi thông báo làm rollback nghiệp vụ chính
+                }
                 break;
             case "FINALIZED":
                 presentWeek.setStatus(WeekScheduleStatus.FINALIZED.toString());
                 presentWeek.setUpdatedAt(LocalDateTime.now());
                 presentWeek.setCreatedBy(manager);
-                presentWeek=weekScheduleRepository.save(presentWeek);
+                presentWeek = weekScheduleRepository.save(presentWeek);
                 break;
         }
         return presentWeek;
     }
-
 
 
     //This function can improve processing time by using collector.groupingBy (from O(m*n) -> O(N))
@@ -437,7 +463,7 @@ public class ScheduleServiceImpl implements ScheduleService {
             DoctorScheduleRowResponse doctorScheduleRowResponse = new DoctorScheduleRowResponse(doctorResponse);
             Map<LocalDate, DoctorScheduleResponse> scheduleByDate = doctorSchedules.stream()
                     .filter(s -> s.getDoctor().getId().equals(doctorResponse.getId()))
-                    .collect(Collectors.toMap(DoctorSchedule::getWorkDate,this::toDoctorScheduleResponse));
+                    .collect(Collectors.toMap(DoctorSchedule::getWorkDate, this::toDoctorScheduleResponse));
             doctorScheduleRowResponse.setScheduleByDate(scheduleByDate);
             return doctorScheduleRowResponse;
         }).toList();
@@ -473,10 +499,10 @@ public class ScheduleServiceImpl implements ScheduleService {
 
 
     /*
-    *
-    * This function here related to update doctor schedule
-    *
-    * */
+     *
+     * This function here related to update doctor schedule
+     *
+     * */
 
     @Override
     public DoctorScheduleUpdateRequest getDoctorScheduleUpdateRequest(Long doctorScheduleId) {
@@ -492,17 +518,91 @@ public class ScheduleServiceImpl implements ScheduleService {
         String weekScheduleStatus = weekSchedule.getStatus();
 
         if (weekScheduleStatus.equals(WeekScheduleStatus.FINALIZED.toString())) {
-            doctorSchedule.setStatus(doctorScheduleUpdateRequest.getStatus());
-            return toDoctorScheduleUpdateRequest(doctorScheduleRepository.save(doctorSchedule));
+            String oldStatus = doctorSchedule.getStatus();
+            String newStatus = doctorScheduleUpdateRequest.getStatus();
+
+            doctorSchedule.setStatus(newStatus);
+            DoctorSchedule saved = doctorScheduleRepository.save(doctorSchedule);
+
+            // Nếu Manager chuyển trạng thái lịch trực thành CANCELLED
+            if ("CANCELLED".equalsIgnoreCase(newStatus) && !"CANCELLED".equalsIgnoreCase(oldStatus)) {
+                // 1. Tìm tất cả các lịch hẹn đang WAITING hoặc CONFIRMED trong lịch trực này
+                List<Appointment> activeAppointments = appointmentRepository.findActiveAppointmentsByScheduleId(doctorSchedule.getId());
+                if (activeAppointments != null && !activeAppointments.isEmpty()) {
+                    for (Appointment appointment : activeAppointments) {
+                        try {
+                            // Hủy lịch hẹn
+                            appointment.setStatus("CANCELLED");
+                            appointment.setUpdatedAt(LocalDateTime.now());
+                            appointmentRepository.save(appointment);
+
+                            // Giải phóng TimeSlot
+                            TimeSlot slot = appointment.getSlot();
+                            if (slot != null && slot.getBookedCapacity() > 0) {
+                                slot.setBookedCapacity(slot.getBookedCapacity() - 1);
+                                slot.setStatus("AVAILABLE");
+                                timeSlotRepository.save(slot);
+                            }
+
+                            // 2. Gửi thông báo trên App cho bệnh nhân
+                            String serviceName = (appointment.getService() != null) ? appointment.getService().getName() : "Dịch vụ khám";
+                            String startTime = (slot != null && slot.getStartTime() != null) ? slot.getStartTime().toString() : "";
+                            String timeMsg = (startTime.isEmpty()) ? "" : " lúc " + startTime;
+                            String doctorName = (doctorSchedule.getDoctor() != null)
+                                    ? (doctorSchedule.getDoctor().getLastName() + " " + doctorSchedule.getDoctor().getFirstName())
+                                    : "Bác sĩ";
+
+                            notificationService.createNotification(
+                                    appointment.getPatient(),
+                                    "Lịch khám bị hủy (Bác sĩ hủy ca)",
+                                    "Lịch hẹn khám " + serviceName + " với bác sĩ " + doctorName + " của bạn vào ngày " + appointment.getBookingDate() + timeMsg + " đã bị hủy do bác sĩ thay đổi lịch trực đột xuất. Mong quý khách thông cảm.",
+                                    "APPOINTMENT_CANCELLED",
+                                    appointment.getId(),
+                                    "Appointment"
+                            );
+
+                            // 3. Gửi thông báo Email cho bệnh nhân
+                            if (appointment.getPatient() != null && appointment.getPatient().getEmail() != null && !appointment.getPatient().getEmail().isBlank()) {
+                                String slotTimeStr = (slot != null && slot.getStartTime() != null && slot.getEndTime() != null)
+                                        ? (slot.getStartTime() + " - " + slot.getEndTime())
+                                        : "";
+                                String patientName = appointment.getPatient().getLastName() + " " + (appointment.getPatient().getMiddleName() != null ? appointment.getPatient().getMiddleName() + " " : "") + appointment.getPatient().getFirstName();
+
+                                String emailContent = "Chào bạn " + patientName + ",\n\n"
+                                        + "Hệ thống quản lý bệnh viện HAMS xin thông báo lịch hẹn khám của bạn đã bị hủy do bác sĩ trực thay đổi lịch làm việc đột xuất.\n\n"
+                                        + "Chi tiết lịch hẹn bị hủy:\n"
+                                        + "- Mã lịch hẹn: " + appointment.getAppointmentCode() + "\n"
+                                        + "- Chuyên khoa / Dịch vụ: " + serviceName + "\n"
+                                        + "- Ngày khám: " + appointment.getBookingDate() + "\n"
+                                        + "- Giờ khám: " + slotTimeStr + "\n"
+                                        + "- Bác sĩ: " + doctorName + "\n\n"
+                                        + "Hệ thống rất tiếc vì sự cố bất tiện này. Quý khách vui lòng đăng nhập vào ứng dụng để đặt lại lịch hẹn mới.\n\n"
+                                        + "Trân trọng,\n"
+                                        + "Hệ thống quản lý HAMS";
+
+                                emailService.sendSimpleEmail(
+                                        appointment.getPatient().getEmail(),
+                                        "[HAMS] Thông báo hủy lịch hẹn do bác sĩ có lịch làm việc đột xuất",
+                                        emailContent
+                                );
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+            return toDoctorScheduleUpdateRequest(saved);
         }
         Room room = roomRepository.findById(doctorScheduleUpdateRequest.getRoomId()).orElseThrow(() -> new ScheduleConflictException("Phòng không tồn tại"));
-        List<String> shifts = getConflictShift(doctorScheduleUpdateRequest.getScheduleShift());
-        if(!doctorSchedule.getWorkDate().equals(doctorScheduleUpdateRequest.getWorkDate())){
-            if(doctorScheduleRepository.existsByDoctorAndWorkDate(doctorSchedule.getDoctor(), doctorScheduleUpdateRequest.getWorkDate())){
+        ArrayList<String> shifts = new ArrayList<>(getConflictShift(doctorScheduleUpdateRequest.getScheduleShift()));
+
+        if (!doctorSchedule.getWorkDate().equals(doctorScheduleUpdateRequest.getWorkDate())) {
+            if (doctorScheduleRepository.existsByDoctorAndWorkDate(doctorSchedule.getDoctor(), doctorScheduleUpdateRequest.getWorkDate())) {
                 throw new ScheduleConflictException("Bác sĩ đã tồn tại ca vào ngày " + doctorScheduleUpdateRequest.getWorkDate());
             }
             int deleteTimeSLot = deleteTimeSlotBaseOnSchedule(doctorScheduleUpdateRequest.getScheduleId());
-            boolean hasConflictRoom = doctorScheduleRepository.existsByRoomAndWorkDateAndShift(room, doctorScheduleUpdateRequest.getWorkDate(),shifts);
+            boolean hasConflictRoom = doctorScheduleRepository.existsByRoomAndWorkDateAndShiftAndIdNot(room, doctorScheduleUpdateRequest.getWorkDate(), shifts, doctorSchedule.getId());
             if (hasConflictRoom) {
                 throw new ScheduleConflictException("Phòng đã có bác sĩ trực");
             }
@@ -516,9 +616,9 @@ public class ScheduleServiceImpl implements ScheduleService {
             timeSlotRepository.saveAll(timeSlots);
             return toDoctorScheduleUpdateRequest(saved);
         }
-        if(!doctorSchedule.getShift().equals(doctorScheduleUpdateRequest.getScheduleShift())){
+        if (!doctorSchedule.getShift().equals(doctorScheduleUpdateRequest.getScheduleShift())) {
             int deleteTimeSLot = deleteTimeSlotBaseOnSchedule(doctorScheduleUpdateRequest.getScheduleId());
-            boolean hasConflictRoom = doctorScheduleRepository.existsByRoomAndWorkDateAndShift(room, doctorScheduleUpdateRequest.getWorkDate(),shifts);
+            boolean hasConflictRoom = doctorScheduleRepository.existsByRoomAndWorkDateAndShiftAndIdNot(room, doctorScheduleUpdateRequest.getWorkDate(), shifts, doctorSchedule.getId());
             if (hasConflictRoom) {
                 throw new ScheduleConflictException("Phòng đã có bác sĩ trực");
             }
@@ -534,7 +634,14 @@ public class ScheduleServiceImpl implements ScheduleService {
         }
 
         doctorSchedule.setNote(doctorScheduleUpdateRequest.getNote());
-        doctorSchedule.setRoom(room);
+        // So sánh room cũ và room mới
+        if (!doctorSchedule.getRoom().getId().equals(room.getId())) {
+            boolean hasConflictRoom = doctorScheduleRepository.existsByRoomAndWorkDateAndShiftAndIdNot(
+                    room, doctorSchedule.getWorkDate(), shifts, doctorSchedule.getId());
+            if (hasConflictRoom) {
+                throw new ScheduleConflictException("Phòng đã có bác sĩ trực");
+            }
+        }
         doctorSchedule.setUpdatedAt(LocalDateTime.now());
         doctorSchedule.setWorkDate(doctorScheduleUpdateRequest.getWorkDate());
         doctorSchedule.setShift(doctorScheduleUpdateRequest.getScheduleShift());
@@ -542,7 +649,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         return toDoctorScheduleUpdateRequest(saved);
     }
 
-    private int deleteTimeSlotBaseOnSchedule(Long  doctorScheduleId) {
+    private int deleteTimeSlotBaseOnSchedule(Long doctorScheduleId) {
         return timeSlotRepository.deleteTimeSlotByDoctorScheduleId(doctorScheduleId);
     }
 

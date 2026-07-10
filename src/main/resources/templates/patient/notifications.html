@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Thông báo - Bệnh nhân</title>
+    <link rel="stylesheet" th:href="@{/css/patient/patient-common.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="stylesheet" th:href="@{/css/notification-common.css}">
+</head>
+<body>
+<div class="patient-layout">
+    <!-- Sidebar Patient (dùng fragment có sẵn) -->
+    <div th:replace="~{patient/fragments/sidebar :: patientSidebar('notifications')}"></div>
+
+    <main class="patient-main">
+        <div class="notif-wrap">
+            <div class="notif-page-header">
+                <h4><i class="bi bi-bell-fill"></i> Thông báo của bạn</h4>
+                <form th:action="@{/notifications/read-all}" method="post">
+                    <button type="submit" class="btn-read-all">
+                        <i class="bi bi-check2-all"></i> Đánh dấu tất cả đã đọc
+                    </button>
+                </form>
+            </div>
+
+            <!-- Rỗng -->
+            <div th:if="${notifications == null or #lists.isEmpty(notifications)}" class="notif-empty">
+                <i class="bi bi-inbox"></i>
+                <p>Bạn không có thông báo nào.</p>
+            </div>
+
+            <!-- Danh sách -->
+            <div th:each="notif : ${notifications}"
+                 class="notif-card"
+                 th:classappend="${!notif.isRead} ? ' unread' : ''">
+
+                <div class="notif-icon"
+                     th:classappend="${notif.notificationType == 'SCHEDULE_ASSIGNED'} ? ' schedule' :
+                                     (${notif.notificationType == 'APPOINTMENT_CANCELLED'} ? ' appointment' : ' default')">
+                    <i th:class="${notif.notificationType == 'SCHEDULE_ASSIGNED'} ? 'bi bi-calendar-check' :
+                                 (${notif.notificationType == 'APPOINTMENT_CANCELLED'} ? 'bi bi-calendar-x' : 'bi bi-info-circle')"></i>
+                </div>
+
+                <div class="notif-body">
+                    <p class="notif-title" th:text="${notif.title}">Tiêu đề</p>
+                    <p class="notif-message" th:text="${notif.message}">Nội dung</p>
+                    <div class="notif-time">
+                        <i class="bi bi-clock"></i>
+                        <span th:text="${notif.timeAgo}">Vừa xong</span>
+                    </div>
+                </div>
+
+                <div class="notif-actions">
+                    <div th:if="${!notif.isRead}" class="notif-unread-dot"></div>
+                    <form th:if="${!notif.isRead}" th:action="@{/notifications/{id}/read(id=${notif.id})}" method="post">
+                        <button type="submit" class="btn-mark-read">
+                            <i class="bi bi-check2"></i> Đã đọc
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

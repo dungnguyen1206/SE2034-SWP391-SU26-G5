@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
@@ -27,6 +28,7 @@ public class DoctorStaffDetailResponse {
     private String avatar;
     private String departmentName;
     private String licenseNumber;
+    private LocalDate licenseIssueDate;
     private String degree;
     private Integer experienceYears;
     private String bio;

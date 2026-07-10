@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
@@ -18,6 +19,17 @@
     <div class="row">
 
         <div class="col d-flex flex-column me-3">
+            <form th:action="@{/manager/schedules/update}"
+                  th:object="${doctorScheduleUpdateRequest}" method="post"
+                  id="scheduleUpdateForm">
+                <input type="hidden" name="weekScheduleId" th:value="${presentWeek.getId()}">
+                <input type="hidden" name="departmentId" th:value="${departmentId}">
+                <input type="hidden" name="doctorNameFilter" th:value="${doctorNameFilter}">
+                <input type="hidden" name="doctorName" th:value="${doctorName}">
+                <input type="hidden" name="departmentName" th:value="${departmentName}">
+                <input type="hidden" name="shift" th:value="${shift}">
+                <input type="hidden" name="page" th:value="${page}">
+                <input type="hidden" name="size" th:value="${size}">
             <!--SCHEDULE MANAGEMENT - PAGE HEADER-->
             <header class="mb-3">
                 <div class="schedule-conflict"
@@ -26,80 +38,107 @@
                     <i class="bi bi-exclamation-circle"></i>
                     <span id="errorMessage" th:text="${errorMessage}"></span>
                 </div>
+                <div class="schedule-conflict"
+                     id="dataErrorBox"
+                     th:if="${#fields.hasErrors('note')}">
+                    <i class="bi bi-exclamation-circle"></i>
+                    <span th:errors="*{note}">Nội dung lỗi hiển thị ở đây</span>
+                </div>
             </header>
             <div class="card shadow-sm border-0 mb-4">
-                <div class="card-header bg-light mb-3" style="color: #0f62fe"><strong>Cập nhật ca trực</strong></div>
+                <div class="card-header bg-light mb-3" style="color: #7a7a7a"><strong>Cập nhật ca trực</strong></div>
                 <div class="card-body">
-                    <form th:action="@{/manager/schedules/update(weekScheduleId=${presentWeek.getId()},departmentId=${departmentId},doctorName=${doctorNameFilter},shift=${shift},page=${page},size=${size} )}"
-                          th:object="${doctorScheduleUpdateRequest}" method="post">
-                        <input type="hidden" th:field="*{scheduleId}">
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label for="doctorName" class="form-label">Bác sĩ</label>
-                                <span class="form-control" id="doctorName" th:text="${doctorName}"></span>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="departmentName" class="form-label">Phòng ban</label>
-                                <span class="form-control" id="departmentName" th:text="${departmentName}"></span>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label " for="workDate">Ngày</label>
-                                <select class="form-select" th:field="*{workDate}">
-                                    <option th:each="workdate,position : ${workDates}" th:value="${workdate}"
-                                            th:text="${position.count == 7 ? 'Chủ nhật' : 'Thứ ' + (position.count + 1)} + ' - ' + ${#temporals.format(workdate, 'dd/MM/yyyy')}">
-                                        Chọn ngày
-                                    </option>
-                                </select>
-                            </div>
+                    <input type="hidden" th:field="*{scheduleId}">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="doctorName" class="form-label">Bác sĩ</label>
+                            <span class="form-control" id="doctorName" th:text="${doctorName}"></span>
                         </div>
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label for="scheduleShift" class="form-label">Chọn ca</label>
-                                <select class="form-select" th:field="*{scheduleShift}">
-                                    <option th:value="MORNING">Ca Sáng</option>
-                                    <option th:value="AFTERNOON">Ca Chiều</option>
-                                    <option th:value="FULL_DAY">Cả ngày</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="roomId" class="form-label">Phòng</label>
-                                <select class="form-select" th:field="*{roomId}">
-                                    <option th:each="room : ${rooms}" th:value="${room.id}" th:text="${room.name}">
-                                        Chọn ngày
-                                    </option>
-                                </select>
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="maxCapacity" class="form-label">Số lượt khám tối đa</label>
-                                <select class="form-select" th:field="*{maxCapacity}">
-                                    <option th:value="8">8</option>
-                                    <option th:value="10">10</option>
-                                </select>
-                            </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="departmentName" class="form-label">Phòng ban</label>
+                            <span class="form-control" id="departmentName" th:text="${departmentName}"></span>
                         </div>
-                        <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label for="status" class="form-label">Trạng thái</label>
-                                <select class="form-select" th:field="*{status}">
-                                    <option th:value="ACTIVE">Hoạt động bình thường</option>
-                                    <option th:value="CANCELLED">Hủy ca</option>
-                                </select>
-                            </div>
-                            <div class="col-md-8 mb-3">
-                                <label for="note" class="form-label">Ghi chú</label>
-                                <textarea class="form-control" th:field="*{note}"></textarea>
-                            </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label " for="workDate">Ngày</label>
+                            <select class="form-select" th:field="*{workDate}" th:disabled="${presentWeek.getStatus().equals('FINALIZED')}">
+                                <option th:each="workdate,position : ${workDates}" th:value="${workdate}"
+                                        th:text="${position.count == 7 ? 'Chủ nhật' : 'Thứ ' + (position.count + 1)} + ' - ' + ${#temporals.format(workdate, 'dd/MM/yyyy')}">
+                                    Chọn ngày
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="scheduleShift" class="form-label">Chọn ca</label>
+                            <select class="form-select" th:field="*{scheduleShift}" th:disabled="${presentWeek.getStatus().equals('FINALIZED')}">
+                                <option th:value="MORNING">Ca Sáng</option>
+                                <option th:value="AFTERNOON">Ca Chiều</option>
+                                <option th:value="FULL_DAY">Cả ngày</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="roomId" class="form-label">Phòng</label>
+                            <select class="form-select" th:field="*{roomId}" th:disabled="${presentWeek.getStatus().equals('FINALIZED')}">
+                                <option th:each="room : ${rooms}" th:value="${room.id}" th:text="${room.name}">
+                                    Chọn ngày
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="maxCapacity" class="form-label">Số lượt khám tối đa</label>
+                            <select class="form-select" th:field="*{maxCapacity}" th:disabled="${presentWeek.getStatus().equals('FINALIZED')}">
+                                <option th:value="8">8</option>
+                                <option th:value="10">10</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="status" class="form-label">Trạng thái</label>
+                            <select class="form-select" th:field="*{status}">
+                                <option th:value="ACTIVE">Hoạt động bình thường</option>
+                                <option th:value="CANCELLED">Hủy ca</option>
+                            </select>
+                        </div>
+                        <div class="col-md-8 mb-3">
+                            <label for="note" class="form-label">Ghi chú</label>
+                            <textarea class="form-control" th:field="*{note}"></textarea>
+                        </div>
 
-                        </div>
-                        <a style="text-decoration: none;text-align: center; padding: 8px 12px;color: #FFFFFF;margin-right: 10px; cursor: pointer; background-color: #8fb3d9;border: 1px solid #8fb3d9; border-radius: 4px;"
-                           th:href="@{/manager/schedules/list(weekScheduleId=${presentWeek.getId()},departmentId=${departmentId},doctorName=${doctorNameFilter},shift=${shift},page=${page},size=${size} )}">
-                            Quay lại</a>
-                        <button type="submit" style="margin-bottom: 10px" class="btn btn-primary">Lưu thay đổi</button>
-                    </form>
+                    </div>
+                    <a style="text-decoration: none;text-align: center; padding: 8px 12px;color: #FFFFFF;margin-right: 10px; cursor: pointer; background-color: #8fb3d9;border: 1px solid #8fb3d9; border-radius: 4px;"
+                       th:href="@{/manager/schedules/list(weekScheduleId=${presentWeek.getId()},departmentId=${departmentId},doctorName=${doctorNameFilter},shift=${shift},page=${page},size=${size} )}">
+                        Quay lại</a>
+                    <button type="submit" style="margin-bottom: 10px" class="btn btn-primary">Lưu thay đổi</button>
                 </div>
             </div>
+            </form>
         </div>
+
     </div>
+    <script th:inline="javascript">
+        const scheduleUpdateForm = document.getElementById('scheduleUpdateForm')
+        scheduleUpdateForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            Swal.fire({
+                title: 'Xác nhận thay đổi?',
+                text:'Thông tin về việc cập nhật lịch làm việc của bác sĩ sẽ được lưu vào hệ thống!',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText:'Đồng ý thay đổi',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if(result.isConfirmed) {
+                    scheduleUpdateForm.submit();
+                }
+            })
+
+
+        })
+    </script>
 </main>
 </body>
 </html>

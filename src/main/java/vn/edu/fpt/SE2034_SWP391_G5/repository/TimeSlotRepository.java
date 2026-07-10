@@ -39,4 +39,16 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
     @Modifying
     @Query("DELETE FROM TimeSlot t where t.schedule.id=:doctorScheduleId")
     int deleteTimeSlotByDoctorScheduleId(@Param("doctorScheduleId") Long doctorScheduleId);
+
+    @Query("SELECT ts FROM TimeSlot ts " +
+            "JOIN FETCH ts.schedule sch " +
+            "WHERE sch.doctor.id = :doctorId " +
+            "AND sch.workDate = :workDate " +
+            "AND ts.id NOT IN (" +
+            "  SELECT a.slot.id FROM Appointment a WHERE a.slot IS NOT NULL AND a.status NOT IN ('CANCELLED')" +
+            ") ORDER BY ts.startTime ASC")
+    List<TimeSlot> findAvailableSlotsByDoctorAndDate(
+            @Param("doctorId") Long doctorId,
+            @Param("workDate") LocalDate workDate
+    );
 }

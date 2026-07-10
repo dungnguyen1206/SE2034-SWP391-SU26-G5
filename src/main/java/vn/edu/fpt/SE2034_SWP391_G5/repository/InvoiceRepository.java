@@ -27,8 +27,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     // Đếm hóa đơn đã thanh toán trong ngày hiện tại.
 // Dựa theo ngày khám của appointment, không dựa theo ngày tạo hóa đơn.
     @Query("SELECT COUNT(i) FROM Invoice i " +
-            "JOIN i.medicalRecord mr " +
-            "JOIN mr.appointment a " +
+            "JOIN i.appointment a " +
             "WHERE a.bookingDate = :today " +
             "AND i.paymentStatus = 'PAID'")
     long countTodayPaidInvoices(@Param("today") LocalDate today);
@@ -36,8 +35,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     // Đếm hóa đơn chưa thanh toán trong ngày hiện tại.
 // Dựa theo ngày khám của appointment, không lấy toàn bộ hóa đơn rồi đếm bằng Java.
     @Query("SELECT COUNT(i) FROM Invoice i " +
-            "JOIN i.medicalRecord mr " +
-            "JOIN mr.appointment a " +
+            "JOIN i.appointment a " +
             "WHERE a.bookingDate = :today " +
             "AND i.paymentStatus = 'UNPAID'")
     long countTodayUnpaidInvoices(@Param("today") LocalDate today);
@@ -56,8 +54,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
 
     @Query("SELECT i FROM Invoice i " +
-           "JOIN i.medicalRecord mr " +
-           "JOIN mr.appointment a " +
+           "JOIN i.appointment a " +
            "JOIN a.patient p " +
            "WHERE (:keyword IS NULL OR :keyword = '' " +
            "  OR LOWER(i.invoiceCode) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
@@ -69,8 +66,8 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
                                                                          Pageable pageable);
 
     @Query("SELECT i FROM Invoice i " +
-           "LEFT JOIN FETCH i.medicalRecord mr " +
-           "LEFT JOIN FETCH mr.appointment a " +
+           "LEFT JOIN FETCH i.appointment a " +
+           "LEFT JOIN FETCH a.medicalRecord mr " +
            "LEFT JOIN FETCH a.patient p " +
            "LEFT JOIN FETCH a.doctor d " +
            "LEFT JOIN FETCH a.slot s " +
@@ -80,6 +77,9 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
            "LEFT JOIN FETCH i.invoiceItems items " +
            "WHERE i.id = :id")
     Optional<Invoice> findByIdWithDetails(@Param("id") Long id);
+
+
+
     @Query("select new vn.edu.fpt.SE2034_SWP391_G5.dto.response.InvoiceRowResponse(" +
             " i.id," +
             " i.invoiceCode," +
@@ -91,11 +91,10 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
             " i.paymentStatus," +
             " i.createdAt) " +
             " From Invoice i " +
-            " left join  i.medicalRecord m " +
-            " left join  m.doctor d " +
-            " left join  m.patient p" +
+            " left join  i.appointment a " +
+            " left join  a.doctor d " +
+            " left join  a.patient p" +
             " left join  d.department dpt" +
-            " left join  m.appointment a" +
             " Where (:month is null or month(i.createdAt)=:month)" +
             " and (:year is null or year (i.createdAt)=:year)" +
             " and ((:startDate is null and :endDate is null) or i.createdAt between :startDate and :endDate)")

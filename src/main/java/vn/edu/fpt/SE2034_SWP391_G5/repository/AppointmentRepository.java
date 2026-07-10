@@ -23,12 +23,12 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "JOIN fetch a.patient p " +
             "JOIN fetch a.doctor d " +
             "JOIN fetch a.service s " +
-            "join fetch a.slot sl " +
+            "join fetch a.slot sl " + 
             "join fetch sl.schedule ds " +
             "join fetch ds.room r " +
             "WHERE a.bookingDate =:today " +
             "order by sl.startTime asc")
-    List<Appointment> findAppointmentsByBookingDate(@Param("today") LocalDate today);
+    Page<Appointment> findAppointmentsByBookingDate(@Param("today") LocalDate today, Pageable pageable);
 
     //-------------------------------------- Receptionist -----------------------------------------------
     // -------------------------- Dashboard ----------------------------------------
@@ -56,7 +56,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     // Lấy danh sách lịch hẹn hôm nay trên Dashboard.
     // Có hỗ trợ tìm kiếm theo họ, tên đệm, tên hoặc số điện thoại bệnh nhân.
     // Chỉ query lịch hẹn của ngày hiện tại, không lấy toàn bộ danh sách.
-    @Query("SELECT a FROM Appointment a " +
+    @Query(
+            value = "SELECT a FROM Appointment a " +
             "JOIN FETCH a.patient p " +
             "JOIN FETCH a.doctor d " +
             "JOIN FETCH a.service s " +
@@ -70,10 +71,20 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "OR LOWER(p.middleName) LIKE LOWER(CONCAT('%', :search, '%')) " +
             "OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
             "OR p.phone LIKE CONCAT('%', :search, '%')) " +
-            "ORDER BY sl.startTime ASC")
-    List<Appointment> findTodayAppointmentsForDashboard(
+            "ORDER BY sl.startTime ASC",
+            countQuery = "SELECT COUNT(a) FROM Appointment a " +
+            "JOIN a.patient p " +
+            "WHERE a.bookingDate = :today " +
+            "AND (:search IS NULL OR :search = '' " +
+            "OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "OR LOWER(p.middleName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "OR p.phone LIKE CONCAT('%', :search, '%'))"
+    )
+    Page<Appointment> findTodayAppointmentsForDashboard(
             @Param("today") LocalDate today,
-            @Param("search") String search
+            @Param("search") String search,
+            Pageable pageable
     );
 
     // ------------------------------------------------------------------------------------------------------------
@@ -221,17 +232,16 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
 
     //LinhNH 1/6/2026
-    Page<Appointment> findByDoctorIdAndStatusIn(Long doctorId, List<String> statuses, Pageable pageable);
-
-    long countByDoctorIdAndStatus(Long doctorId, String status);
-
-    long countByDoctorIdAndStatusIn(Long doctorId, List<String> statuses);
 
     Page<Appointment> findByDoctorIdAndBookingDateAndStatusIn(Long doctorId, LocalDate bookingDate, List<String> statuses, Pageable pageable);
 
     long countByDoctorIdAndBookingDateAndStatus(Long doctorId, LocalDate bookingDate, String status);
 
     long countByDoctorIdAndBookingDateAndStatusIn(Long doctorId, LocalDate bookingDate, List<String> statuses);
+
+    @Query("SELECT COUNT(a) FROM Appointment a WHERE a.doctor.id = :doctorId AND a.bookingDate = :bookingDate")
+    long countByDoctorIdAndBookingDate(@Param("doctorId") Long doctorId, @Param("bookingDate") LocalDate bookingDate);
+
 
     @Query("SELECT a FROM Appointment a " +
             "LEFT JOIN FETCH a.patient " +
@@ -243,6 +253,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                                                       Pageable pageable);
 
 
+    @Query("SELECT a FROM Appointment a WHERE a.slot.schedule.id = :scheduleId AND a.status IN ('WAITING', 'CONFIRMED')")
+    List<Appointment> findActiveAppointmentsByScheduleId(@Param("scheduleId") Long scheduleId);
 }
 
     

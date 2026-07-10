@@ -64,7 +64,7 @@
                         <div class="staff-detail-badges">
                             <span class="staff-type-badge doctor"
                                   th:text="${staff.getRoleLabel()}">Loại nhân viên</span>
-                            <span class="staff-status active"
+                            <span class="staff-status " th:classappend="${staff.getAccountStatus() == 'ACTIVE'} ? 'active' : 'inactive'"
                                   th:text="${staff.getAccountStatus() == 'ACTIVE'} ?'Đang hoạt động' : 'Ngưng hoạt động'">Trạng thái làm việc</span>
                         </div>
                     </div>
@@ -133,9 +133,9 @@
                             <div><span>Trạng thái tài khoản</span><strong
                                     th:text="${staff.getAccountStatus() == 'ACTIVE'} ? 'Đang hoạt động' : 'Ngưng hoạt động '">N/A</strong>
                             </div>
-                            <div><span>Ngày tạo</span><strong th:text="${staff.getCreatedAt()}">N/A</strong></div>
+                            <div><span>Ngày tạo</span><strong th:text="${doctor.getCreatedAt() != null ? #temporals.format(doctor.getCreatedAt(), 'dd/MM/yyyy') : 'N/A'}">N/A</strong></div>
                             <div><span>Ngày cập nhật</span><strong
-                                    th:text="${staff.getUpdatedAt() == null} ? 'N/A' : ${staff.getUpdatedAt()}">N/A</strong>
+                                    th:text="${doctor.getUpdatedAt() != null ? #temporals.format(doctor.getUpdatedAt(), 'dd/MM/yyyy') : 'N/A'}">N/A</strong>
                             </div>
                         </div>
                     </section>
@@ -154,6 +154,9 @@
                             <div><span>Khoa</span><strong th:text="${doctor.getDepartmentName()}">N/A</strong></div>
                             <div><span>Số giấy phép hành nghề</span><strong
                                     th:text="${doctor.getLicenseNumber()}">N/A</strong></div>
+                            <div><span>Bằng cấp</span><strong th:text="${doctor.getDegree()}">N/A</strong></div>
+                            <div><span>Ngày cấp</span><strong
+                                    th:text="${doctor.getLicenseIssueDate() != null ? #temporals.format(doctor.getLicenseIssueDate(), 'dd/MM/yyyy') : 'N/A'}">N/A</strong></div>
                             <div><span>Bằng cấp</span><strong th:text="${doctor.getDegree()}">N/A</strong></div>
                             <div><span>Số năm kinh nghiệm</span><strong
                                     th:text="${doctor.getExperienceYears()}">N/A</strong></div>

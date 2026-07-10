@@ -9,29 +9,44 @@
         <h3 th:text="${title}">Tiêu đề trang</h3>
         <p th:if="${subtitle != null}" th:text="${subtitle}">Mô tả trang</p>
     </div>
+    <!-- Nhóm bên phải: Chuông + Thông tin User -->
+    <div style="display: flex; align-items: center; gap: 20px;">
+        <!-- Nút Chuông Thông Báo -->
+        <a th:href="@{/notifications/list}" class="manager-topbar-notif"
+           style="position: relative; color: #475569; font-size: 20px; text-decoration: none; display: flex; align-items: center;">
+            <i class="bi bi-bell"></i>
 
-    <div class="manager-topbar-user"
-         sec:authorize="isAuthenticated()"
-         th:with="currentUser=${#authentication.principal.user},
-                  displayName=${currentUser.lastName} + ' ' +
-                              ${currentUser.middleName != null ? currentUser.middleName + ' ' : ''} +
-                              ${currentUser.firstName}">
-
-        <img th:if="${currentUser.avatar != null}"
-             th:src="${currentUser.avatar}"
-             class="manager-topbar-avatar-img" alt="avatar">
-        <div th:unless="${currentUser.avatar != null}"
-             class="manager-topbar-avatar"
-             th:text="${#strings.substring(displayName, 0, 1)}">A</div>
-
-        <div class="manager-topbar-info">
-            <strong th:text="${displayName}">Tên người dùng</strong>
-            <span sec:authentication="principal.username">username</span>
-        </div>
-
-        <a class="manager-topbar-logout" th:href="@{/login}" title="Đăng xuất">
-            <i class="bi bi-box-arrow-right"></i>
+            <!-- Huy hiệu đếm số chưa đọc (chỉ hiện khi có > 0 thông báo) -->
+            <span th:if="${unreadNotificationCount != null and unreadNotificationCount > 0}"
+                  th:text="${unreadNotificationCount}"
+                  style="position: absolute; top: -5px; right: -8px; background: #ef4444; color: white; border-radius: 50%; padding: 2px 6px; font-size: 11px; font-weight: bold; line-height: 1;">
+            </span>
         </a>
+
+        <div class="manager-topbar-user"
+             sec:authorize="isAuthenticated()"
+             th:with="currentUser=${#authentication.principal.user},
+                      displayName=${currentUser.lastName} + ' ' +
+                                  ${currentUser.middleName != null ? currentUser.middleName + ' ' : ''} +
+                                  ${currentUser.firstName}">
+
+            <img th:if="${currentUser.avatar != null}"
+                 th:src="${currentUser.avatar}"
+                 class="manager-topbar-avatar-img" alt="avatar">
+            <div th:unless="${currentUser.avatar != null}"
+                 class="manager-topbar-avatar"
+                 th:text="${#strings.substring(displayName, 0, 1)}">A
+            </div>
+
+            <div class="manager-topbar-info">
+                <strong th:text="${displayName}">Tên người dùng</strong>
+                <span sec:authentication="principal.username">username</span>
+            </div>
+
+            <a class="manager-topbar-logout" th:href="@{/login}" title="Đăng xuất">
+                <i class="bi bi-box-arrow-right"></i>
+            </a>
+        </div>
     </div>
 
 </div>

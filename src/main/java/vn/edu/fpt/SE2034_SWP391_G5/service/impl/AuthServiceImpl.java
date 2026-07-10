@@ -124,7 +124,7 @@ public class AuthServiceImpl implements AuthService {
         user.setMiddleName(pendingRegister.getMiddleName());
         user.setLastName(pendingRegister.getLastName());
         user.setPhone(pendingRegister.getPhone());
-        user.setExperienceYears(0);
+        user.setLicenseIssueDate(null);
         user.setStatus("ACTIVE");
         user.setEmailVerified(true);
         user.setEmailVerifiedAt(LocalDateTime.now());

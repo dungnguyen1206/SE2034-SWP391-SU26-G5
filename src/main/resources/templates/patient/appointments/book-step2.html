@@ -135,12 +135,12 @@
                                     <i class="bi bi-calendar3"></i>
                                     <h3>Chọn ngày khám</h3>
                                 </div>
-                                <div style="display:flex;align-items:center;gap:12px;">
-                                    <input type="date" id="datePicker"
-                                        style="height:42px;border:1px solid #dde3ea;border-radius:9px;background:#f8fafc;color:#0f172a;font-size:14px;padding:0 12px;outline:none;flex:1;"
-                                        onchange="onDateChange(this.value)">
-                                    <span id="dateHint" style="font-size:13px;color:#94a3b8;">Chọn ngày để xem
-                                        lịch</span>
+                                <div>
+                                    <div class="date-scroll-container" id="availableDatesList">
+                                        <!-- Được điền tự động bằng JavaScript -->
+                                    </div>
+                                    <input type="hidden" id="datePicker" onchange="onDateChange(this.value)">
+                                    <div id="dateHint" style="font-size:13px;color:#0f4c81;margin-top:12px;font-weight:600;">Chọn ngày để xem lịch</div>
                                 </div>
                             </div>
 
@@ -229,25 +229,85 @@
     </script>
 
     <script>
-        // ---- Khởi tạo date picker ----
+        // ---- Khởi tạo danh sách ngày có lịch khám ----
         (function () {
+            const container = document.getElementById('availableDatesList');
             const picker = document.getElementById('datePicker');
-            if (!picker) return;
+            if (!container) return;
 
-            // Min = hôm nay
-            const today = new Date();
-            const yyyy = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0');
-            const dd = String(today.getDate()).padStart(2, '0');
-            picker.min = `${yyyy}-${mm}-${dd}`;
+            // Lấy danh sách các ngày duy nhất có lịch làm việc
+            const uniqueDates = [];
+            const seenDates = new Set();
+            (SCHEDULES || []).forEach(s => {
+                if (s.workDate && !seenDates.has(s.workDate)) {
+                    seenDates.add(s.workDate);
+                    uniqueDates.push(s.workDate);
+                }
+            });
 
-            // Max = 30 ngày tới
-            const maxDate = new Date(today);
-            maxDate.setDate(maxDate.getDate() + 30);
-            const mxYyyy = maxDate.getFullYear();
-            const mxMm = String(maxDate.getMonth() + 1).padStart(2, '0');
-            const mxDd = String(maxDate.getDate()).padStart(2, '0');
-            picker.max = `${mxYyyy}-${mxMm}-${mxDd}`;
+            if (uniqueDates.length === 0) {
+                container.innerHTML = '<p style="color:#ef4444;font-size:14px;padding:8px 0;"><i class="bi bi-exclamation-circle-fill"></i> Bác sĩ hiện không có ngày khám nào khả dụng.</p>';
+                return;
+            }
+
+            // Hàm lấy tên thứ trong tiếng Việt hoặc "Hôm nay"
+            function getVietnameseDayOfWeek(dateStr) {
+                const parts = dateStr.split('-');
+                const date = new Date(parts[0], parts[1] - 1, parts[2]);
+                
+                const today = new Date();
+                if (date.getFullYear() === today.getFullYear() &&
+                    date.getMonth() === today.getMonth() &&
+                    date.getDate() === today.getDate()) {
+                    return 'Hôm nay';
+                }
+                
+                const days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+                return days[date.getDay()];
+            }
+
+            // Hàm định dạng ngày hiển thị DD/MM
+            function formatDateDM(dateStr) {
+                const [y, m, d] = dateStr.split('-');
+                return `${d}/${m}`;
+            }
+
+            // Tạo các thẻ chọn ngày (chips)
+            uniqueDates.forEach((dateStr, index) => {
+                const dayName = getVietnameseDayOfWeek(dateStr);
+                const dateDM = formatDateDM(dateStr);
+
+                const chip = document.createElement('div');
+                chip.className = 'date-chip';
+                chip.dataset.date = dateStr;
+                chip.innerHTML = `
+                    <span class="date-day">${dayName}</span>
+                    <span class="date-val">${dateDM}</span>
+                `;
+
+                chip.addEventListener('click', function() {
+                    // Xóa class selected ở các chip khác
+                    container.querySelectorAll('.date-chip').forEach(c => c.classList.remove('selected'));
+                    // Thêm class selected vào chip hiện tại
+                    chip.classList.add('selected');
+                    
+                    // Cập nhật giá trị và trigger
+                    if (picker) {
+                        picker.value = dateStr;
+                        onDateChange(dateStr);
+                    }
+                });
+
+                container.appendChild(chip);
+            });
+
+            // Tự động chọn ngày đầu tiên có lịch
+            if (uniqueDates.length > 0) {
+                const firstChip = container.querySelector('.date-chip');
+                if (firstChip) {
+                    firstChip.click();
+                }
+            }
         })();
 
         // ---- Khi chọn ngày ----
@@ -418,6 +478,90 @@
 
         .shift-select-btn.selected div {
             color: #fff !important;
+        }
+
+        /* Styles for custom date chips */
+        .date-scroll-container {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            padding: 8px 4px;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 4px;
+        }
+
+        .date-scroll-container::-webkit-scrollbar {
+            height: 6px;
+        }
+        .date-scroll-container::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 9px;
+        }
+        .date-scroll-container::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9px;
+        }
+        .date-scroll-container::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .date-chip {
+            border: 2px solid #dde3ea;
+            border-radius: 12px;
+            padding: 10px 16px;
+            background: #ffffff;
+            cursor: pointer;
+            text-align: center;
+            min-width: 90px;
+            flex: 0 0 auto;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            user-select: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            font-family: Arial, sans-serif;
+        }
+
+        .date-chip:hover {
+            border-color: #0f4c81;
+            background: #eff6ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(15, 76, 129, 0.08);
+        }
+
+        .date-chip.selected {
+            border-color: #0f4c81;
+            background: #0f4c81;
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(15, 76, 129, 0.2);
+        }
+
+        .date-chip.selected .date-day {
+            color: #ffffff;
+        }
+
+        .date-chip.selected .date-val {
+            color: #ffffff;
+        }
+
+        .date-day {
+            font-size: 11px;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: color 0.2s;
+        }
+
+        .date-val {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0f172a;
+            transition: color 0.2s;
         }
     </style>
 

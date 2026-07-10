@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${service.name} + ' - HAMS'">Chi tiết dịch vụ</title>
+    <link rel="stylesheet" th:href="@{/css/patient/patient-common.css}">
+    <link rel="stylesheet" th:href="@{/css/patient/patient-appointment.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        .detail-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+        @media (max-width: 768px) {
+            .detail-layout { grid-template-columns: 1fr; }
+        }
+        .profile-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 24px 20px;
+            text-align: center;
+        }
+        .service-image-box {
+            width: 100%;
+            height: 160px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #bfdbfe;
+        }
+        .service-image-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .profile-name { font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 12px; line-height: 1.4; }
+        .profile-meta { text-align: left; display: flex; flex-direction: column; gap: 14px; }
+        .meta-label { font-size: 11px; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 3px; letter-spacing: .5px; }
+        .meta-value { font-size: 14px; color: #334155; }
+        .meta-value a { color: #0f4c81; font-weight: 600; text-decoration: none; }
+        .meta-value a:hover { text-decoration: underline; }
+        
+        .info-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+        }
+        .info-card:last-child { margin-bottom: 0; }
+        .info-card-title {
+            display: flex; align-items: center; gap: 8px;
+            font-size: 15px; font-weight: 700; color: #0f172a;
+            margin-bottom: 14px;
+        }
+        .info-card-title i { color: #0f4c81; }
+        .desc-text { font-size: 14px; color: #334155; line-height: 1.8; white-space: pre-wrap; }
+        
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 13px;
+            color: #475569;
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+        .checklist-item i {
+            color: #10b981;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+<div class="patient-layout">
+    <div th:replace="~{patient/fragments/sidebar :: patientSidebar('services')}"></div>
+    <main class="patient-main">
+
+        <!-- Header -->
+        <div class="patient-page-header">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <a th:href="@{/patient/services}" class="patient-back-link">
+                    <i class="bi bi-arrow-left"></i>
+                </a>
+                <div>
+                    <h2 th:text="${service.name}">Chi tiết dịch vụ</h2>
+                    <p>Dịch vụ y tế chuyên khoa</p>
+                </div>
+            </div>
+            <a th:if="${service.department != null}" 
+               th:href="@{/patient/appointments/book/step2(departmentId=${service.department.id})}"
+               class="btn-primary">
+                <i class="bi bi-calendar-plus"></i> Đặt lịch khám ngay
+            </a>
+        </div>
+
+        <div class="detail-layout">
+
+            <!-- Cột trái: Thông tin dịch vụ nhanh -->
+            <div class="profile-card">
+                <div class="service-image-box">
+                    <img th:if="${service.imageUrl != null}" th:src="${service.imageUrl}" th:alt="${service.name}">
+                    <i th:if="${service.imageUrl == null}" class="bi bi-clipboard2-pulse" style="font-size:54px;color:#0f4c81;opacity:0.6;"></i>
+                </div>
+
+                <div class="profile-name" th:text="${service.name}"></div>
+
+                <div class="profile-meta">
+                    <div th:if="${service.department != null}">
+                        <div class="meta-label">Chuyên khoa</div>
+                        <div class="meta-value">
+                            <a th:href="@{/patient/departments/{id}(id=${service.department.id})}"
+                               th:text="${service.department.name}"></a>
+                        </div>
+                    </div>
+                    
+                    <div th:if="${service.referencePrice != null}">
+                        <div class="meta-label">Giá tham khảo</div>
+                        <div class="meta-value" style="font-weight:700;color:#0f4c81;font-size:16px;"
+                             th:text="${#numbers.formatDecimal(service.referencePrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></div>
+                    </div>
+
+                    <div th:if="${service.estimatedDuration != null}">
+                        <div class="meta-label">Thời gian thực hiện</div>
+                        <div class="meta-value" th:text="${service.estimatedDuration} + ' phút'"></div>
+                    </div>
+                </div>
+
+                <a th:if="${service.department != null}" 
+                   th:href="@{/patient/appointments/book/step2(departmentId=${service.department.id})}"
+                   class="btn-primary"
+                   style="width:100%;justify-content:center;margin-top:24px;display:flex;">
+                    <i class="bi bi-calendar-plus"></i> Đặt lịch ngay
+                </a>
+            </div>
+
+            <!-- Cột phải: Chi tiết và hướng dẫn chuẩn bị -->
+            <div>
+                <!-- Mô tả dịch vụ -->
+                <div class="info-card">
+                    <div class="info-card-title">
+                        <i class="bi bi-info-circle-fill"></i>
+                        Thông tin chi tiết dịch vụ
+                    </div>
+                    <p class="desc-text" th:text="${service.description != null ? service.description : 'Chưa có thông tin mô tả chi tiết cho dịch vụ này.'}"></p>
+                </div>
+
+                <!-- Hướng dẫn chuẩn bị -->
+                <div class="info-card">
+                    <div class="info-card-title">
+                        <i class="bi bi-exclamation-triangle-fill" style="color: #eab308;"></i>
+                        Lưu ý chuẩn bị trước khi khám
+                    </div>
+                    <div style="display:flex;flex-direction:column;gap:4px;">
+                        <div class="checklist-item">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Vui lòng mang theo <strong>Căn cước công dân</strong> hoặc thẻ bảo hiểm y tế khi đến khám.</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Có mặt trước giờ hẹn ít nhất <strong>15 phút</strong> để làm thủ tục check-in tại quầy lễ tân.</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Đối với xét nghiệm máu hoặc nội soi dạ dày, vui lòng nhịn ăn tối thiểu <strong>6 - 8 tiếng</strong> trước giờ hẹn.</span>
+                        </div>
+                        <div class="checklist-item">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Mang theo hồ sơ bệnh án cũ, kết quả xét nghiệm hoặc đơn thuốc đang sử dụng (nếu có).</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quy trình khám -->
+                <div class="info-card">
+                    <div class="info-card-title">
+                        <i class="bi bi-arrow-right-circle-fill"></i>
+                        Quy trình thực hiện dịch vụ
+                    </div>
+                    <div style="position:relative;padding-left:24px;border-left:2px solid #e2e8f0;margin-left:8px;display:flex;flex-direction:column;gap:18px;">
+                        <div>
+                            <div style="position:absolute;left:-7px;width:12px;height:12px;border-radius:50%;background:#0f4c81;border:2px solid #fff;"></div>
+                            <strong style="font-size:13px;color:#0f172a;display:block;margin-bottom:2px;">Bước 1: Tiếp đón & Đăng ký</strong>
+                            <span style="font-size:13px;color:#64748b;">Check-in tại quầy lễ tân bằng mã lịch hẹn đã đặt trên hệ thống.</span>
+                        </div>
+                        <div>
+                            <div style="position:absolute;left:-7px;width:12px;height:12px;border-radius:50%;background:#0f4c81;border:2px solid #fff;"></div>
+                            <strong style="font-size:13px;color:#0f172a;display:block;margin-bottom:2px;">Bước 2: Đo sinh hiệu</strong>
+                            <span style="font-size:13px;color:#64748b;">Được đo chiều cao, cân nặng, huyết áp, nhịp tim bởi nhân viên y tế trước khi gặp bác sĩ.</span>
+                        </div>
+                        <div>
+                            <div style="position:absolute;left:-7px;width:12px;height:12px;border-radius:50%;background:#0f4c81;border:2px solid #fff;"></div>
+                            <strong style="font-size:13px;color:#0f172a;display:block;margin-bottom:2px;">Bước 3: Khám lâm sàng & Tư vấn</strong>
+                            <span style="font-size:13px;color:#64748b;">Bác sĩ chuyên khoa tiến hành khám lâm sàng, đọc kết quả hoặc tư vấn phương án điều trị.</span>
+                        </div>
+                        <div>
+                            <div style="position:absolute;left:-7px;width:12px;height:12px;border-radius:50%;background:#0f4c81;border:2px solid #fff;"></div>
+                            <strong style="font-size:13px;color:#0f172a;display:block;margin-bottom:2px;">Bước 4: Nhận kết quả & Toa thuốc</strong>
+                            <span style="font-size:13px;color:#64748b;">Nhận kết quả chẩn đoán cuối cùng, toa thuốc điều trị và hướng dẫn tái khám (nếu có).</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+</div>
+</body>
+</html>

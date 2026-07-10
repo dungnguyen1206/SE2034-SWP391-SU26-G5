@@ -8,6 +8,7 @@
     <link rel="stylesheet" th:href="@{/css/manager/manager-common.css}">
     <link rel="stylesheet" th:href="@{/css/manager/manager-staff.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 <div class="manager-layout" layout:fragment="content">
@@ -31,20 +32,10 @@
               method="post"
               enctype="multipart/form-data"
               th:action="@{/manager/staff/{staffId}/edit(staffId=${updateUserForm.id})}"
-              th:object="${updateUserForm}">
+              th:object="${updateUserForm}" id="updateUserForm">
 
             <div th:replace="~{fragments/user-update-form :: metaFields}"></div>
 
-            <!-- STAFF UPDATE - Staff role display only, role is managed by Admin flow -->
-<!--            <section class="staff-form-card staff-type-section">-->
-
-<!--                <div class="staff-role-note">-->
-<!--                    <i class="bi bi-lock"></i>-->
-<!--                    <span>Vai trò hiện tại:</span>-->
-<!--                    <strong th:text="${roleName}">ROLE_DOCTOR</strong>-->
-<!--                    <em>Manager chỉ cập nhật hồ sơ, không đổi vai trò tài khoản.</em>-->
-<!--                </div>-->
-<!--            </section>-->
 
             <div class="staff-form-layout">
                 <div class="staff-form-main">
@@ -120,7 +111,7 @@
                             <img th:if="${updateUserForm.avatar != null and updateUserForm.avatar != ''}"
                                  th:src="${updateUserForm.avatar}"
                                  alt="Avatar"/>
-
+                                <input type="hidden" th:field="*{avatar}">
                             <i th:unless="${updateUserForm.avatar != null and updateUserForm.avatar != ''}"
                                class="bi bi-person"></i>
                         </div>
@@ -150,26 +141,49 @@
             </div>
         </form>
     </main>
+
 </div>
-    <script th:inline="javascript">
-            const staffPhotoPreview = document.getElementById('staff-photo-preview');
-            const staffAvatar = document.getElementById("staffAvatarFile");
 
-            staffAvatar.addEventListener("change", (e) => {
+<!-- Vì sử dụng layout:decorate để tạo layout chung ==> nếu để phần JS ở ngoài thì nó sẽ không nhận được ==> có thể sửa dụng 2 cách
+    1.Là sử dụng hay tạo 1 layout:fragment chung cho javascript
+    2.Là đưa đoạn JavaScript vào trong khung layout:Fragment: content nếu không làm theo cách 1-->
+<script th:inline="javascript" layout:fragment="pageScript">
+    const staffPhotoPreview = document.getElementById('staff-photo-preview');
+    const staffAvatar = document.getElementById("staffAvatarFile");
+    const updateUserForm = document.getElementById("updateUserForm");
 
-                const file = e.target.files[0];
-                if (file) {
-                    const url = URL.createObjectURL(file);
-                    staffPhotoPreview.innerHTML = "";
+    staffAvatar.addEventListener("change", (e) => {
 
-                    const newImg = document.createElement("img");
-                    newImg.src = url;
-                    newImg.alt = "Avatar";
-                    staffPhotoPreview.appendChild(newImg);
-                }
+        const file = e.target.files[0];
+        if (file) {
+            const url = URL.createObjectURL(file);
+            staffPhotoPreview.innerHTML = "";
 
-            })
+            const newImg = document.createElement("img");
+            newImg.src = url;
+            newImg.alt = "Avatar";
+            staffPhotoPreview.appendChild(newImg);
+        }
 
-    </script>
+    })
+
+    updateUserForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        Swal.fire({
+            title: 'Xác nhận thay đổi?',
+            text:'Thông tin sau chỉnh sửa của nhân viên sẽ được lưu vào hệ thống!',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Xác nhận thay đổi',
+            cancelButtonText: 'Hủy'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                updateUserForm.submit();
+            }
+        })
+    })
+
+</script>
 </body>
 </html>

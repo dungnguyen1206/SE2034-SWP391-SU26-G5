@@ -1,9 +1,11 @@
 package vn.edu.fpt.SE2034_SWP391_G5.controller.manager;
 
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentStatusCountResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorOnDutyResponse;
@@ -37,7 +39,11 @@ public class ManagerDashboardController {
         this.scheduleService = scheduleService;
     }
     @GetMapping
-    public String dashboard(Model model) {
+    public String dashboard(Model model,
+                            @RequestParam(defaultValue = "10") Integer sizeAppointment,
+                            @RequestParam(defaultValue = "0") Integer pageAppointment,
+                            @RequestParam(defaultValue = "10") Integer sizeDoctor,
+                            @RequestParam(defaultValue = "0") Integer pageDoctor) {
 
         long totalPatient= patientService.findUsersByRoleName("PATIENT").size();
         long totalAppointment = appointmentService.getAllAppointment();
@@ -48,8 +54,8 @@ public class ManagerDashboardController {
         NumberFormat vnCurrencyFormat = NumberFormat.getCurrencyInstance(vietnamLocale);
         String formattedAmount = vnCurrencyFormat.format(totalAmount);
         Map<String,Long> appointmentStatusCountResponseMap = appointmentService.findTodayAppointmentsByStatus(LocalDate.now());
-        List<AppointmentResponse> todayAppointmentsList = appointmentService.findAppointmentsByBookingDate(LocalDate.now());
-        List<DoctorOnDutyResponse> doctorOnDutyResponses = scheduleService.findDoctorScheduleByDate(LocalDate.now());
+        Page<AppointmentResponse> todayAppointmentsList = appointmentService.findAppointmentsByBookingDate(LocalDate.now(),pageAppointment,sizeAppointment);
+        Page<DoctorOnDutyResponse> doctorOnDutyResponses = scheduleService.findDoctorScheduleByDate(LocalDate.now(),pageDoctor,sizeDoctor);
 
         model.addAttribute("totalPatient", totalPatient);
         model.addAttribute("totalAppointment", totalAppointment);
@@ -61,8 +67,14 @@ public class ManagerDashboardController {
         model.addAttribute("examiningAppointment", appointmentStatusCountResponseMap.get("EXAMINING"));
         model.addAttribute("completedAppointment", appointmentStatusCountResponseMap.get("COMPLETED"));
         model.addAttribute("cancelledAppointment", appointmentStatusCountResponseMap.get("CANCELLED"));
-        model.addAttribute("todayAppointmentsList", todayAppointmentsList);
-        model.addAttribute("doctorOnDutyResponses", doctorOnDutyResponses);
+        model.addAttribute("todayAppointmentsList", todayAppointmentsList.getContent());
+        model.addAttribute("doctorOnDutyResponses", doctorOnDutyResponses.getContent());
+        model.addAttribute("currentPageAppointment", pageAppointment);
+        model.addAttribute("currentPageDoctor", pageDoctor);
+        model.addAttribute("totalPageAppointment",todayAppointmentsList.getTotalPages());
+        model.addAttribute("totalPageDoctor",doctorOnDutyResponses.getTotalPages());
+        model.addAttribute("totalAppointment", todayAppointmentsList.getTotalElements());
+        model.addAttribute("totalDoctor", doctorOnDutyResponses.getTotalElements());
         return "manager/dashboard";
     }
 }

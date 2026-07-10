@@ -103,8 +103,10 @@ public class ManagerStaffController {
             CustomUserDetails customUserDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             User manager = customUserDetails.getUser();
             updateUserForm.setCreatedBy(manager);
-            String avatar = imageUploadService.uploadImage(avatarFile);
-            updateUserForm.setAvatar(avatar);
+            if(avatarFile !=null && !avatarFile.isEmpty()) {
+                String avatar = imageUploadService.uploadImage(avatarFile);
+                updateUserForm.setAvatar(avatar);
+            }
             staffService.updateStaffProfile(staffId, updateUserForm);
         } catch (BadRequestException | ResourceNotFoundException e) {
             model.addAttribute("errorMessage", e.getMessage());

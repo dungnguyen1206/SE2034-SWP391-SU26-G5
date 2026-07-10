@@ -118,9 +118,7 @@
 
         <label class="staff-form-field">
             <span>Số năm kinh nghiệm <strong>*</strong></span>
-            <input type="number" min="0" th:field="*{experienceYears}" placeholder="VD: 8">
-            <div class="field-error" th:if="${#fields.hasErrors('experienceYears')}" th:errors="*{experienceYears}">
-            </div>
+            <input type="text" readonly th:value="*{experienceYear != null ? experienceYear + ' năm' : '0 năm'}" style="background-color: #f1f5f9; color: #161719; cursor: not-allowed;">
         </label>
 
         <label class="staff-form-field">
@@ -129,6 +127,11 @@
                 <option value="ACTIVE">Đang hoạt động</option>
                 <option value="INACTIVE">Ngưng hoạt động</option>
             </select>
+        </label>
+        <label th:class="staff-form-field">
+            <span>Ngày cấp giấy chứng nhận</span>
+            <input type="date" th:field="*{licenseIssueDate}">
+            <div class="field-error" th:if="${#fields.hasErrors('licenseIssueDate')}" th:errors="*{licenseIssueDate}"></div>
         </label>
 
         <label class="staff-form-field staff-form-full">

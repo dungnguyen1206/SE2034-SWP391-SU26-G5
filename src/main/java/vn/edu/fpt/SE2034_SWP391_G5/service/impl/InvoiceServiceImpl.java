@@ -56,7 +56,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     public InvoiceSummaryResponse getInvoiceSummary(String paymentStatus, Integer month, Integer year, LocalDate startDate, LocalDate endDate) {
 
         //Xử lí lỗi
-        if (startDate != null && endDate != null & startDate.isAfter(endDate)) {
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
             throw new DataConflictException("Ngày bắt đầu phải trước ngày kết thúc");
         }
         if (startDate != null && startDate.isBefore(LocalDate.parse("2001-01-01"))) {
@@ -127,7 +127,7 @@ public class InvoiceServiceImpl implements InvoiceService {
             year = 0;
         }
         //Xử lí lỗi
-        if (startDate != null && endDate != null & startDate.isAfter(endDate)) {
+        if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
             throw new DataConflictException("Ngày bắt đầu phải trước ngày kết thúc");
         }
         if (startDate != null && startDate.isBefore(LocalDate.parse("2001-01-01"))) {
@@ -176,10 +176,10 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .map(invoice -> InvoiceListResponse.builder()
                         .id(invoice.getId())
                         .invoiceCode(invoice.getInvoiceCode())
-                        .patientFullName(invoice.getMedicalRecord().getAppointment().getPatient().getLastName() + " " +
-                                         (invoice.getMedicalRecord().getAppointment().getPatient().getMiddleName() != null ? invoice.getMedicalRecord().getAppointment().getPatient().getMiddleName() + " " : "") +
-                                         invoice.getMedicalRecord().getAppointment().getPatient().getFirstName())
-                        .appointmentCode(invoice.getMedicalRecord().getAppointment().getAppointmentCode())
+                        .patientFullName(invoice.getAppointment().getPatient().getLastName() + " " +
+                                         (invoice.getAppointment().getPatient().getMiddleName() != null ? invoice.getAppointment().getPatient().getMiddleName() + " " : "") +
+                                         invoice.getAppointment().getPatient().getFirstName())
+                        .appointmentCode(invoice.getAppointment().getAppointmentCode())
                         .totalAmount(invoice.getTotalAmount())
                         .paymentStatus(invoice.getPaymentStatus())
                         .paymentMethod(invoice.getPaymentMethod())
@@ -207,8 +207,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                     .collect(Collectors.toList());
         }
 
-        User patient = invoice.getMedicalRecord().getAppointment().getPatient();
-        User doctor = invoice.getMedicalRecord().getAppointment().getDoctor();
+        User patient = invoice.getAppointment().getPatient();
+        User doctor = invoice.getAppointment().getDoctor();
         String patientFullName = patient != null ? patient.getLastName() + " " + (patient.getMiddleName() != null ? patient.getMiddleName() + " " : "") + patient.getFirstName() : "-";
         String doctorFullName = doctor != null ? doctor.getLastName() + " " + (doctor.getMiddleName() != null ? doctor.getMiddleName() + " " : "") + doctor.getFirstName() : "-";
 
@@ -228,11 +228,11 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .patientFullName(patientFullName)
                 .patientPhone(patient.getPhone() != null ? patient.getPhone() : "-")
                 .patientAddress(address)
-                .appointmentCode(invoice.getMedicalRecord().getAppointment().getAppointmentCode())
+                .appointmentCode(invoice.getAppointment().getAppointmentCode())
                 .doctorFullName(doctorFullName)
                 .departmentName(doctor != null && doctor.getDepartment() != null ? doctor.getDepartment().getName() : "-")
-                .roomNumber(invoice.getMedicalRecord().getAppointment().getSlot() != null && invoice.getMedicalRecord().getAppointment().getSlot().getSchedule() != null && invoice.getMedicalRecord().getAppointment().getSlot().getSchedule().getRoom() != null ? invoice.getMedicalRecord().getAppointment().getSlot().getSchedule().getRoom().getRoomNumber() : "-")
-                .diagnosis(invoice.getMedicalRecord().getDiagnosis())
+                .roomNumber(invoice.getAppointment().getSlot() != null && invoice.getAppointment().getSlot().getSchedule() != null && invoice.getAppointment().getSlot().getSchedule().getRoom() != null ? invoice.getAppointment().getSlot().getSchedule().getRoom().getRoomNumber() : "-")
+                .diagnosis(invoice.getAppointment().getMedicalRecord().getDiagnosis())
                 .totalAmount(invoice.getTotalAmount())
                 .paymentStatus(invoice.getPaymentStatus())
                 .paymentMethod(invoice.getPaymentMethod())

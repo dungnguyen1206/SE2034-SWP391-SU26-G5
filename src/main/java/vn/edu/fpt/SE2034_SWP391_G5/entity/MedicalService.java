@@ -62,4 +62,7 @@ public class MedicalService {
 
     @OneToMany(mappedBy = "service")
     private Set<InvoiceItem> invoiceItems;
+
+    @OneToMany(mappedBy = "medicalService")
+    private Set<MedicalServiceOrder> medicalServiceOrders;
 }

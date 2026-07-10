@@ -1,10 +1,7 @@
 package vn.edu.fpt.SE2034_SWP391_G5.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateAppointmentRequest;
@@ -13,6 +10,8 @@ import vn.edu.fpt.SE2034_SWP391_G5.entity.*;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
+import vn.edu.fpt.SE2034_SWP391_G5.service.NotificationService;
+import vn.edu.fpt.SE2034_SWP391_G5.service.EmailService;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.*;
 import vn.edu.fpt.SE2034_SWP391_G5.util.CodeGenerator;
 
@@ -31,6 +30,8 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final TimeSlotRepository timeSlotRepository;
     private final UserRepository userRepository;
     private final MedicalServiceRepository medicalServiceRepository;
+    private final NotificationService notificationService;
+    private final EmailService emailService;
 
     @Override
     public Page<AppointmentResponse> getAppointmentListForReceptionist(LocalDate fromDate, LocalDate toDate, int page,
@@ -533,32 +534,30 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     //LinhNH
-    public List<AppointmentResponse> findAppointmentsByBookingDate(LocalDate today) {
-        List<Appointment> appointments = appointmentRepository.findAppointmentsByBookingDate(today);
-        List<AppointmentResponse> responses = new ArrayList<>();
+    public Page<AppointmentResponse> findAppointmentsByBookingDate(LocalDate today, Integer page, Integer size) {
 
-        appointments.forEach(a -> {
-            AppointmentResponse response = new AppointmentResponse();
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Appointment> appointments = appointmentRepository.findAppointmentsByBookingDate(today,pageable);
 
-            response.setAppointmentCode(a.getAppointmentCode());
-            response.setPatientFullName(buildFullName(
-                    a.getPatient().getLastName(),
-                    a.getPatient().getMiddleName(),
-                    a.getPatient().getFirstName()));
-            response.setDoctorFullName(buildFullName(
-                    a.getDoctor().getLastName(),
-                    a.getDoctor().getMiddleName(),
-                    a.getDoctor().getFirstName()));
-            response.setId(a.getId());
-            response.setServiceName(a.getService().getName());
-            response.setSlotStartTime(a.getSlot().getStartTime());
-            response.setSlotEndTime(a.getSlot().getEndTime());
-            response.setStatus(a.getStatus());
-
-            responses.add(response);
-        });
-
-        return responses;
+        return appointments.map(this::toAppointmentResponse);
+    }
+    private AppointmentResponse toAppointmentResponse(Appointment a) {
+        AppointmentResponse response = new AppointmentResponse();
+        response.setAppointmentCode(a.getAppointmentCode());
+        response.setPatientFullName(buildFullName(
+                a.getPatient().getLastName(),
+                a.getPatient().getMiddleName(),
+                a.getPatient().getFirstName()));
+        response.setDoctorFullName(buildFullName(
+                a.getDoctor().getLastName(),
+                a.getDoctor().getMiddleName(),
+                a.getDoctor().getFirstName()));
+        response.setId(a.getId());
+        response.setServiceName(a.getService().getName());
+        response.setSlotStartTime(a.getSlot().getStartTime());
+        response.setSlotEndTime(a.getSlot().getEndTime());
+        response.setStatus(a.getStatus());
+        return response;
     }
 
     @Override
@@ -722,6 +721,59 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setUpdatedAt(LocalDateTime.now());
 
         appointmentRepository.save(appointment);
+
+        // Gửi thông báo trên App cho bệnh nhân
+        try {
+            String serviceName = (appointment.getService() != null) ? appointment.getService().getName() : "Dịch vụ khám";
+            String startTime = (slot != null && slot.getStartTime() != null) ? slot.getStartTime().toString() : "";
+            String timeMsg = (startTime.isEmpty()) ? "" : " lúc " + startTime;
+
+            notificationService.createNotification(
+                    appointment.getPatient(),
+                    "Lịch hẹn đã bị hủy",
+                    "Lịch hẹn khám " + serviceName + " của bạn vào ngày " + appointment.getBookingDate() + timeMsg + " đã bị hủy thành công.",
+                    "APPOINTMENT_CANCELLED",
+                    appointment.getId(),
+                    "Appointment"
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Gửi thông báo Email cho bệnh nhân
+        try {
+            if (appointment.getPatient() != null && appointment.getPatient().getEmail() != null && !appointment.getPatient().getEmail().isBlank()) {
+                String serviceName = (appointment.getService() != null) ? appointment.getService().getName() : "Dịch vụ khám";
+                String slotTimeStr = (slot != null && slot.getStartTime() != null && slot.getEndTime() != null) 
+                        ? (slot.getStartTime() + " - " + slot.getEndTime()) 
+                        : "";
+                
+                String doctorName = appointment.getDoctor() != null
+                        ? (appointment.getDoctor().getLastName() + " " + (appointment.getDoctor().getMiddleName() != null ? appointment.getDoctor().getMiddleName() + " " : "") + appointment.getDoctor().getFirstName())
+                        : "Bác sĩ HAMS";
+                String patientName = appointment.getPatient().getLastName() + " " + (appointment.getPatient().getMiddleName() != null ? appointment.getPatient().getMiddleName() + " " : "") + appointment.getPatient().getFirstName();
+
+                String emailContent = "Chào bạn " + patientName + ",\n\n"
+                        + "Hệ thống quản lý bệnh viện HAMS xin thông báo lịch hẹn khám của bạn đã được hủy thành công.\n\n"
+                        + "Chi tiết lịch hẹn bị hủy:\n"
+                        + "- Mã lịch hẹn: " + appointment.getAppointmentCode() + "\n"
+                        + "- Chuyên khoa / Dịch vụ: " + serviceName + "\n"
+                        + "- Ngày khám: " + appointment.getBookingDate() + "\n"
+                        + "- Giờ khám: " + slotTimeStr + "\n"
+                        + "- Bác sĩ: " + doctorName + "\n\n"
+                        + "Nếu bạn không thực hiện yêu cầu này hoặc có thắc mắc, vui lòng liên hệ bộ phận hỗ trợ của chúng tôi.\n\n"
+                        + "Trân trọng,\n"
+                        + "Hệ thống quản lý HAMS";
+
+                emailService.sendSimpleEmail(
+                        appointment.getPatient().getEmail(),
+                        "[HAMS] Thông báo hủy lịch hẹn khám bệnh",
+                        emailContent
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     //LinhNH
@@ -741,7 +793,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         Integer patientAge = null;
         if (patient != null && patient.getDateOfBirth() != null) {
-            patientAge = Period.between(patient.getDateOfBirth(), LocalDate.now()).getYears();
+            patientAge = patient.getDateOfBirth() != null ? Period.between(patient.getDateOfBirth(), LocalDate.now()).getYears() : 0;   
         }
 
         String patientGender = patient != null ? patient.getGender() : null;

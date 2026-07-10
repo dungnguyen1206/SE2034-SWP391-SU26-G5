@@ -59,6 +59,8 @@ public class SecurityConfig {
                 .requestMatchers("/receptionist/**").hasAuthority("ROLE_RECEPTIONIST")
                 // Đặt lịch và các tính năng cá nhân vẫn yêu cầu login
                 .requestMatchers("/patient/**").hasAuthority("ROLE_PATIENT")
+                // Thông báo dùng chung cho tất cả các role đã đăng nhập
+                .requestMatchers("/notifications/**").authenticated()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
