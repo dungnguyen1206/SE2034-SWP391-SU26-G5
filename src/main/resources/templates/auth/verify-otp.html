@@ -19,8 +19,9 @@
         <!-- Left Side: OTP Card -->
         <div class="auth-left">
             <div class="auth-card">
-                <h2 class="auth-card-title">Xác thực Email</h2>
-                <p style="color: #6b7280; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.5;">
+                <h2 class="auth-card-title" th:text="${otpChannel == 'sms'} ? 'Xác thực SMS' : 'Xác thực Email'">Xác thực Email</h2>
+                <p style="color: #6b7280; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.5;"
+                   th:text="${otpChannel == 'sms'} ? 'Hệ thống đã gửi một mã xác thực OTP gồm 6 chữ số đến số điện thoại của bạn. Vui lòng kiểm tra và nhập mã vào ô bên dưới để hoàn tất đăng ký.' : 'Hệ thống đã gửi một mã xác thực OTP gồm 6 chữ số đến Gmail của bạn. Vui lòng kiểm tra và nhập mã vào ô bên dưới để hoàn tất đăng ký.'">
                     Hệ thống đã gửi một mã xác thực OTP gồm 6 chữ số đến Gmail của bạn. Vui lòng kiểm tra và nhập mã vào ô bên dưới để hoàn tất đăng ký.
                 </p>
                 
