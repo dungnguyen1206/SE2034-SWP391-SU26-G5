@@ -10,6 +10,8 @@ import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.ArticleRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.service.ArticleService;
+import vn.edu.fpt.SE2034_SWP391_G5.service.ImageUploadService;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.text.Normalizer;
 import java.time.LocalDateTime;
@@ -24,6 +26,9 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ImageUploadService imageUploadService;
 
     @Override
     public List<Article> getAllArticles() {
@@ -85,6 +90,12 @@ public class ArticleServiceImpl implements ArticleService {
             article.setDoctorAuthor(doctor);
         }
 
+        MultipartFile file = request.getThumbnailFile();
+        if (file != null && !file.isEmpty()) {
+            String thumbnailUrl = imageUploadService.uploadImage(file);
+            article.setThumbnailUrl(thumbnailUrl);
+        }
+
         articleRepository.save(article);
     }
 
@@ -121,6 +132,12 @@ public class ArticleServiceImpl implements ArticleService {
             article.setDoctorAuthor(doctor);
         } else {
             article.setDoctorAuthor(null);
+        }
+
+        MultipartFile file = request.getThumbnailFile();
+        if (file != null && !file.isEmpty()) {
+            String thumbnailUrl = imageUploadService.uploadImage(file);
+            article.setThumbnailUrl(thumbnailUrl);
         }
 
         articleRepository.save(article);

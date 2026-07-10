@@ -76,7 +76,13 @@
         <div class="article-list-container">
             
             <div th:each="article : ${articleList}" class="article-card">
-                <div class="article-card-left">
+                <div class="article-card-left" style="display: flex; gap: 16px; align-items: center;">
+                    <div th:if="${article.thumbnailUrl != null}" style="flex-shrink: 0; width: 120px; height: 80px; border-radius: 8px; overflow: hidden; background: #e2e8f0;">
+                        <img th:src="${article.thumbnailUrl}" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div th:if="${article.thumbnailUrl == null}" style="flex-shrink: 0; width: 120px; height: 80px; border-radius: 8px; overflow: hidden; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8;">
+                        <i class="bi bi-image" style="font-size: 24px;"></i>
+                    </div>
 
                     <div class="article-info">
                         <a th:href="@{'/manager/articles/detail/' + ${article.id}}" class="article-title" th:text="${article.title}">Tiêu đề bài viết</a>
@@ -125,6 +131,23 @@
             <span th:if="${currentPage == 0}" class="pager-button disabled">
                 <i class="bi bi-chevron-left"></i> Trước
             </span>
+
+            <!-- Always show page 1 -->
+            <a th:if="${totalPages >= 1}" class="pager-button" th:classappend="${currentPage == 0} ? 'active' : ''" th:text="1" th:href="@{/manager/articles(keyword=${keyword}, category=${category}, status=${status}, page=0)}">1</a>
+
+            <!-- Show left ellipsis -->
+            <span th:if="${currentPage > 2}" style="padding: 0 8px; color: #64748b; align-self: center;">...</span>
+
+            <!-- Show window (currentPage is 0-indexed) -->
+            <th:block th:if="${totalPages > 2}" th:each="i : ${#numbers.sequence(currentPage - 1 > 0 ? currentPage - 1 : 1, currentPage + 1 < totalPages - 1 ? currentPage + 1 : totalPages - 2)}">
+                <a th:if="${i >= 1 and i < totalPages - 1}" class="pager-button" th:classappend="${currentPage == i} ? 'active' : ''" th:text="${i + 1}" th:href="@{/manager/articles(keyword=${keyword}, category=${category}, status=${status}, page=${i})}"></a>
+            </th:block>
+
+            <!-- Show right ellipsis -->
+            <span th:if="${currentPage < totalPages - 3}" style="padding: 0 8px; color: #64748b; align-self: center;">...</span>
+
+            <!-- Always show last page -->
+            <a th:if="${totalPages > 1}" class="pager-button" th:classappend="${currentPage == totalPages - 1} ? 'active' : ''" th:text="${totalPages}" th:href="@{/manager/articles(keyword=${keyword}, category=${category}, status=${status}, page=${totalPages - 1})}"></a>
 
             <a th:if="${currentPage < totalPages - 1}"
                th:href="@{/manager/articles(keyword=${keyword}, category=${category}, status=${status}, page=${currentPage + 1})}"

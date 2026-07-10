@@ -51,7 +51,9 @@ public class SecurityConfig {
                     // Xem danh sách + chi tiết chuyên khoa — public
                     "/patient/departments", "/patient/departments/**",
                     // Xem danh sách + chi tiết bác sĩ — public
-                    "/doctors", "/doctors/**"
+                    "/doctors", "/doctors/**",
+                    // Xem bài viết - public
+                    "/articles", "/articles/**"
                 ).permitAll()
                 .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/manager/**").hasAuthority("ROLE_MANAGER")
