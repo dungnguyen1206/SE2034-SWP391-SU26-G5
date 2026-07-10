@@ -7,8 +7,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import jakarta.validation.Valid;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateArticleRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Article;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
@@ -69,13 +71,25 @@ public class ManagerArticleController {
 
     @PostMapping("/create")
     public String createArticleSubmit(
-            @ModelAttribute("articleRequest") CreateArticleRequest request,
+            @Valid @ModelAttribute("articleRequest") CreateArticleRequest request,
+            BindingResult bindingResult,
             @AuthenticationPrincipal CustomUserDetails userDetails,
+            Model model,
             RedirectAttributes redirectAttributes) {
         
+        if (bindingResult.hasErrors()) {
+            List<User> doctors = userRepository.findByRoleName("DOCTOR");
+            model.addAttribute("doctors", doctors);
+            return "manager/articles/form";
+        }
+
         User currentUser = userDetails != null ? userDetails.getUser() : null;
-        articleService.createArticle(request, currentUser);
-        redirectAttributes.addFlashAttribute("successMessage", "Tạo bài viết thành công!");
+        try {
+            articleService.createArticle(request, currentUser);
+            redirectAttributes.addFlashAttribute("successMessage", "Tạo bài viết thành công!");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
         return "redirect:/manager/articles";
     }
 
@@ -108,9 +122,18 @@ public class ManagerArticleController {
     @PostMapping("/edit/{id}")
     public String editArticleSubmit(
             @PathVariable Long id,
-            @ModelAttribute("articleRequest") CreateArticleRequest request,
+            @Valid @ModelAttribute("articleRequest") CreateArticleRequest request,
+            BindingResult bindingResult,
+            Model model,
             RedirectAttributes redirectAttributes) {
         
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("articleId", id);
+            List<User> doctors = userRepository.findByRoleName("DOCTOR");
+            model.addAttribute("doctors", doctors);
+            return "manager/articles/form";
+        }
+
         articleService.updateArticle(id, request);
         redirectAttributes.addFlashAttribute("successMessage", "Cập nhật bài viết thành công!");
         return "redirect:/manager/articles";

@@ -1,11 +1,13 @@
 package vn.edu.fpt.SE2034_SWP391_G5.controller.manager;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.InvoiceRowResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.InvoiceSummaryResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.enums.PaymentStatus;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.InvoiceRepository;
@@ -25,20 +27,29 @@ public class ManagerInvoiceController {
     public ModelAndView overview(@RequestParam(required = false) LocalDate startDate,
                                  @RequestParam(required = false) LocalDate endDate,
                                  @RequestParam(required = false) Integer month,
-                                 @RequestParam(required = false) Integer year) {
+                                 @RequestParam(required = false) Integer year,
+                                 @RequestParam(defaultValue = "0") Integer page,
+                                 @RequestParam(defaultValue = "7") Integer size) {
 
         ModelAndView mv = new ModelAndView("manager/invoices/overview");
 
-        InvoiceSummaryResponse paidInvoice = invoiceService.getInvoiceSummary(PaymentStatus.PAID.toString(),month,year,startDate,endDate);
-        InvoiceSummaryResponse pendingInvoice= invoiceService.getInvoiceSummary(PaymentStatus.PENDING.toString(),month,year,startDate,endDate);
+        InvoiceSummaryResponse paidInvoice = invoiceService.getInvoiceSummary(PaymentStatus.PAID.toString(), month, year, startDate, endDate);
+        InvoiceSummaryResponse pendingInvoice = invoiceService.getInvoiceSummary(PaymentStatus.PENDING.toString(), month, year, startDate, endDate);
+        Page<InvoiceRowResponse> invoiceRowResponses = invoiceService.invoiceRowResponses(month, year, startDate, endDate, page, size);
 
-        mv.addObject("paidInvoice",paidInvoice);
-        mv.addObject("pendingInvoice",pendingInvoice);
+//        paging
+        mv.addObject("currentPage",page);
+        mv.addObject("totalPages",invoiceRowResponses.getTotalPages());
+        mv.addObject("invoiceRowResponses",invoiceRowResponses.getContent());
+        mv.addObject("numberOfInvoices",invoiceRowResponses.getTotalElements());
+
+        mv.addObject("paidInvoice", paidInvoice);
+        mv.addObject("pendingInvoice", pendingInvoice);
         mv.addObject("startDate", startDate);
         mv.addObject("endDate", endDate);
         mv.addObject("month", month);
         mv.addObject("year", year);
-        mv.addObject("yearSelect",LocalDate.now().getYear());
+        mv.addObject("yearSelect", LocalDate.now().getYear());
         return mv;
 
     }

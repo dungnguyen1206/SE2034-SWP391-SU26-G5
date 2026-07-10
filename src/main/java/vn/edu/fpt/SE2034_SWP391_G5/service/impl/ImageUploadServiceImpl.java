@@ -27,5 +27,17 @@ public class ImageUploadServiceImpl implements ImageUploadService {
             throw new RuntimeException(e.getMessage());
         }
 
+
+
+    }
+
+    @Override
+    public void deleteImage(String imageUrl) {
+        try {
+            cloudinary.uploader().destroy(imageUrl,ObjectUtils.emptyMap());
+        }
+        catch (Exception e){
+            throw  new  RuntimeException("Xóa ảnh thất bại" + e.getMessage());
+        }
     }
 }

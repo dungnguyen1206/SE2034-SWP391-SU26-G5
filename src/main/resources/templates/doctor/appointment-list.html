@@ -12,10 +12,6 @@
     <link rel="stylesheet" href="../../static/css/doctor/patient-detail.css"
         th:href="@{/css/doctor/patient-detail.css}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <!-- Flatpickr CSS & JS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/vn.js"></script>
 </head>
 
 <body>
@@ -78,32 +74,35 @@
                     <p th:text="${currentDate}"></p>
                 </div>
                 <div class="date-filter-box">
-                    <form id="dateFilterForm" method="GET" th:action="@{/doctor/appointment-list}">
+                    <form id="dateFilterForm" method="GET" th:action="@{/doctor/appointment-list}" style="display: flex; gap: 8px; align-items: center;">
                         <input type="hidden" name="status" th:value="${currentStatus}" />
                         <label for="dateFilter" class="date-filter-label">Chọn ngày khám:</label>
-                        <input type="text" id="dateFilter" name="date" th:value="${selectedDate}"
-                            class="date-picker-input" />
+                        <input type="date" id="dateFilter" name="date" th:value="${selectedDate}"
+                            class="date-picker-input" style="width: auto;" />
+                        <button type="submit" style="padding: 8px 16px; background-color: #020617; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: background-color 0.2s;">
+                            Lọc
+                        </button>
                     </form>
                 </div>
             </div>
 
             <div class="filter-tabs">
-                <button th:classappend="${currentStatus == 'ALL'} ? 'active' : ''"
-                    th:onclick="|location.href='@{/doctor/appointment-list(status='ALL', date=${selectedDate})}'|">
+                <a th:href="@{/doctor/appointment-list(status='ALL', date=${selectedDate})}"
+                    th:classappend="${currentStatus == 'ALL'} ? 'active' : ''">
                     Tất cả (<span th:text="${countAll}"></span>)
-                </button>
-                <button th:classappend="${currentStatus == 'EXAMINING'} ? 'active' : ''"
-                    th:onclick="|location.href='@{/doctor/appointment-list(status='EXAMINING', date=${selectedDate})}'|">
+                </a>
+                <a th:href="@{/doctor/appointment-list(status='EXAMINING', date=${selectedDate})}"
+                    th:classappend="${currentStatus == 'EXAMINING'} ? 'active' : ''">
                     Đang khám (<span th:text="${countExamining}"></span>)
-                </button>
-                <button th:classappend="${currentStatus == 'WAITING'} ? 'active' : ''"
-                    th:onclick="|location.href='@{/doctor/appointment-list(status='WAITING', date=${selectedDate})}'|">
+                </a>
+                <a th:href="@{/doctor/appointment-list(status='WAITING', date=${selectedDate})}"
+                    th:classappend="${currentStatus == 'WAITING'} ? 'active' : ''">
                     Đang đợi (<span th:text="${countWaiting}"></span>)
-                </button>
-                <button th:classappend="${currentStatus == 'COMPLETED'} ? 'active' : ''"
-                    th:onclick="|location.href='@{/doctor/appointment-list(status='COMPLETED', date=${selectedDate})}'|">
+                </a>
+                <a th:href="@{/doctor/appointment-list(status='COMPLETED', date=${selectedDate})}"
+                    th:classappend="${currentStatus == 'COMPLETED'} ? 'active' : ''">
                     Hoàn thành (<span th:text="${countCompleted}"></span>)
-                </button>
+                </a>
             </div>
 
             <div class="patient-table">
@@ -179,15 +178,13 @@
                     </p>
 
                     <div class="pagination" th:if="${totalPages > 1}">
-                        <button
-                            th:onclick="|location.href='@{/doctor/appointment-list(status=${currentStatus}, page=${currentPage - 1}, date=${selectedDate})}'|"
-                            th:disabled="${currentPage == 0}">‹ Trước</button>
-                        <button th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                            th:classappend="${currentPage == i} ? 'active' : ''" th:text="${i + 1}"
-                            th:onclick="|location.href='@{/doctor/appointment-list(status=${currentStatus}, page=${i}, date=${selectedDate})}'|">1</button>
-                        <button
-                            th:onclick="|location.href='@{/doctor/appointment-list(status=${currentStatus}, page=${currentPage + 1}, date=${selectedDate})}'|"
-                            th:disabled="${currentPage == totalPages - 1}">Sau ›</button>
+                        <a th:href="@{/doctor/appointment-list(status=${currentStatus}, page=${currentPage - 1}, date=${selectedDate})}"
+                           th:classappend="${currentPage == 0} ? 'disabled' : ''">‹ Trước</a>
+                        <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                           th:href="@{/doctor/appointment-list(status=${currentStatus}, page=${i}, date=${selectedDate})}"
+                           th:classappend="${currentPage == i} ? 'active' : ''" th:text="${i + 1}">1</a>
+                        <a th:href="@{/doctor/appointment-list(status=${currentStatus}, page=${currentPage + 1}, date=${selectedDate})}"
+                           th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''">Sau ›</a>
                     </div>
                 </div>
                 <div class="table-footer" th:if="${totalElements == 0}" style="justify-content: center;">
@@ -198,21 +195,6 @@
         </main>
 
     </div>
-
-    <!-- Script for Flatpickr -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            flatpickr("#dateFilter", {
-                dateFormat: "Y-m-d",
-                altInput: true,
-                altFormat: "d/m/Y",
-                locale: "vn",
-                onChange: function (selectedDates, dateStr, instance) {
-                    document.getElementById('dateFilterForm').submit();
-                }
-            });
-        });
-    </script>
 
 </body>
 

@@ -2,10 +2,11 @@
  Dashboard
 */
 
-.manager-main {
+
+.manager-dashboard{
     flex: 1;
-    padding: 32px;
     background: #f4f6f9;
+
 }
 .dashboard-header {
     display: flex;

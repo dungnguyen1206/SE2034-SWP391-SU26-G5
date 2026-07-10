@@ -7,17 +7,19 @@
     box-sizing: border-box;
 }
 
-body {
+html, body {
     margin: 0;
     font-family: Arial, sans-serif;
     background: #f4f6f9;
     color: #0f172a;
+    height: 100%;
 }
 
 .manager-layout {
     display: flex;
     min-height: 100vh;
     background: #f4f6f9;
+    align-items: stretch;
 }
 
 /*
@@ -131,18 +133,43 @@ body {
 }
 
 /*
-    Footer sideBar
-
+    Topbar (Header)
 */
-.manager-sidebar-footer {
-    padding: 20px 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+.manager-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: #ffffff;
+    border: 1px solid #d8d8d8;
+    border-radius: 10px;
+}
+
+.manager-topbar {
+    height: 88px; /* hoặc giá trị bạn đo được từ header hiện tại */
+    display: flex;
+    align-items: center;
+}
+
+.manager-topbar-title h3 {
+    margin: 0;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.manager-topbar-title p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.manager-topbar-user {
     display: flex;
     align-items: center;
     gap: 12px;
 }
 
-.manager-user-avatar {
+.manager-topbar-avatar {
     width: 36px;
     height: 36px;
     border-radius: 50%;
@@ -153,27 +180,27 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
-.manager-user-info {
+.manager-topbar-info {
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    flex: 1;
+    line-height: 1.3;
 }
 
-.manager-sidebar-footer strong {
+.manager-topbar-info strong {
     font-size: 14px;
-    color: #fff;
+    color: #0f172a;
 }
 
-.manager-sidebar-footer span {
+.manager-topbar-info span {
     font-size: 12px;
-    color: #bfdbfe;
+    color: #64748b;
 }
 
-.manager-logout-link a {
-    color: #bfdbfe;
+.manager-topbar-logout {
+    color: #64748b;
     font-size: 18px;
     padding: 8px;
     border-radius: 8px;
@@ -182,7 +209,22 @@ body {
     transition: background 0.2s ease, color 0.2s ease;
 }
 
-.manager-logout-link a:hover {
-    color: #fff;
-    background: rgba(255, 255, 255, 0.08);
+.manager-topbar-logout:hover {
+    color: #dc2626;
+    background: #fef2f2;
+}
+
+/*
+    Main content area
+*/
+.manager-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: 32px;
+}
+
+.manager-content {
+    margin: 16px 0;
 }

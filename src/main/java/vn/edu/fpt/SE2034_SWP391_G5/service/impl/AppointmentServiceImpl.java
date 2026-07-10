@@ -532,6 +532,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         return statusCount;
     }
 
+    //LinhNH
     public List<AppointmentResponse> findAppointmentsByBookingDate(LocalDate today) {
         List<Appointment> appointments = appointmentRepository.findAppointmentsByBookingDate(today);
         List<AppointmentResponse> responses = new ArrayList<>();
@@ -626,6 +627,13 @@ public class AppointmentServiceImpl implements AppointmentService {
         TimeSlot slot = timeSlotRepository.findByIdWithSchedule(request.getSlotId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khung giờ"));
 
+        // Chỉ cho phép đặt lịch khi tuần làm việc đã được FINALIZED
+        DoctorSchedule schedule = slot.getSchedule();
+        if (schedule == null || schedule.getWeekSchedule() == null
+                || !"FINALIZED".equals(schedule.getWeekSchedule().getStatus())) {
+            throw new BadRequestException("Lịch khám này chưa được công bố, vui lòng chọn lịch khác");
+        }
+
         if (!"AVAILABLE".equals(slot.getStatus()) || slot.getBookedCapacity() >= slot.getMaxCapacity()) {
             throw new BadRequestException("Khung giờ này đã đầy, vui lòng chọn khung giờ khác");
         }
@@ -716,6 +724,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointmentRepository.save(appointment);
     }
 
+    //LinhNH
     private AppointmentResponse toResponse(Appointment a) {
         TimeSlot slot = a.getSlot();
         DoctorSchedule schedule = slot != null ? slot.getSchedule() : null;
@@ -890,6 +899,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         return sb.toString();
     }
 
+    //LinhNH
     @Override
     public Page<AppointmentResponse> getAppointmentsForDoctor(Long doctorId, LocalDate bookingDate, String status,
                                                               Pageable pageable) {
@@ -905,6 +915,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .map(this::toResponse);
     }
 
+    //LinhNH
     @Override
     public long countAppointmentsForDoctor(Long doctorId, LocalDate bookingDate, String status) {
         if (status == null || status.trim().isEmpty() || "ALL".equalsIgnoreCase(status)) {
@@ -918,6 +929,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointmentRepository.countByDoctorIdAndBookingDateAndStatus(doctorId, bookingDate, status.toUpperCase());
     }
 
+    //LinhNH
     @Override
     @Transactional
     public void updateAppointmentStatus(Long appointmentId, String newStatus) {
@@ -930,6 +942,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointmentRepository.save(appointment);
     }
 
+    //LinhNH
     @Override
     public List<AppointmentResponse> getRecentCompletedAppointmentsForDoctor(Long doctorId, int limit) {
         Pageable pageable = PageRequest.of(0, limit);

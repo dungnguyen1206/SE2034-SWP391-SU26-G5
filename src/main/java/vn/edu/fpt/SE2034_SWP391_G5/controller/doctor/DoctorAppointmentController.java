@@ -111,6 +111,8 @@ public class DoctorAppointmentController {
     @GetMapping("/appointments/{id}/detail")
     public String appointmentDetail(
             @PathVariable Long id,
+            @RequestParam(value = "tab", required = false, defaultValue = "info") String tab,
+            @RequestParam(value = "action", required = false) String action,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
         Long doctorId = userDetails.getUser().getId();
@@ -125,6 +127,8 @@ public class DoctorAppointmentController {
         model.addAttribute("medicalRecord", medicalRecordOpt.orElse(null));
         
         model.addAttribute("appointment", appointment);
+        model.addAttribute("tab", tab);
+        model.addAttribute("action", action);
         return "doctor/patient-detail";
     }
 
@@ -140,8 +144,9 @@ public class DoctorAppointmentController {
             redirectAttributes.addFlashAttribute("successMessage", "Tạo hồ sơ bệnh án thành công");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/doctor/appointments/" + id + "/detail?tab=info&action=create";
         }
-        return "redirect:/doctor/appointments/" + id + "/detail";
+        return "redirect:/doctor/appointments/" + id + "/detail?tab=info";
     }
 
     @PostMapping("/appointments/{id}/records/update")
@@ -156,8 +161,9 @@ public class DoctorAppointmentController {
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật hồ sơ bệnh án thành công");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/doctor/appointments/" + id + "/detail?tab=info&action=edit";
         }
-        return "redirect:/doctor/appointments/" + id + "/detail";
+        return "redirect:/doctor/appointments/" + id + "/detail?tab=info";
     }
 }
 
