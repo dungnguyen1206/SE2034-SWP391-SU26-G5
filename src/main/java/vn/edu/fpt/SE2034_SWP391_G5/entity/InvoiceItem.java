@@ -40,6 +40,6 @@ public class InvoiceItem {
     private BigDecimal lineTotal;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "medical_service_order_id", nullable = false)
+    @JoinColumn(name = "medical_service_order_id")
     private MedicalServiceOrder medicalServiceOrder;
 }

@@ -24,7 +24,7 @@
                         <i class="bi bi-arrow-left me-2"></i> Quay lại
                     </a>
                     
-                    <div th:if="${invoice.paymentStatus == 'PAID'}">
+                    <div th:if="${invoice.unpaidServices == null || invoice.unpaidServices.empty}">
                         <button class="btn btn-primary rounded-pill shadow-sm px-4" onclick="window.print()">
                             <i class="bi bi-printer me-2"></i> In hóa đơn
                         </button>
@@ -44,9 +44,60 @@
                 <div class="row gx-4">
                     <!-- Invoice Details Left -->
                     <div class="col-lg-8">
-                        <div class="card shadow-sm border-0 rounded-4 mb-4">
+                        
+                        <!-- Lịch sử thanh toán -->
+                        <div class="card shadow-sm border-0 rounded-4 mb-4" th:if="${invoice.paidInvoices != null && !invoice.paidInvoices.empty}">
                             <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
-                                <h5 class="fw-bold text-dark mb-0"><i class="bi bi-receipt me-2 text-primary"></i>Thông tin dịch vụ</h5>
+                                <h5 class="fw-bold text-success mb-0"><i class="bi bi-check-circle me-2"></i>Lịch sử đã thanh toán</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <div th:each="paidInv : ${invoice.paidInvoices}" class="mb-4 pb-3 border-bottom">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span class="fw-bold text-dark" th:text="${paidInv.invoiceCode}"></span>
+                                        <span class="text-muted small" th:text="${paidInv.paidAt != null ? #temporals.format(paidInv.paidAt, 'HH:mm - dd/MM/yyyy') : '-'}"></span>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm table-borderless align-middle mb-0">
+                                            <thead class="border-bottom border-light text-muted small">
+                                                <tr>
+                                                    <th>Dịch vụ</th>
+                                                    <th class="text-center">SL</th>
+                                                    <th class="text-end">Đơn giá</th>
+                                                    <th class="text-end">Thành tiền</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr th:each="item : ${paidInv.items}">
+                                                    <td><span class="text-dark" th:text="${item.itemName}"></span></td>
+                                                    <td class="text-center" th:text="${item.quantity}"></td>
+                                                    <td class="text-end" th:text="${item.priceApplied != null ? #numbers.formatDecimal(item.priceApplied, 0, 'COMMA', 0, 'POINT') : '0'} + ' đ'"></td>
+                                                    <td class="text-end fw-medium text-dark" th:text="${item.lineTotal != null ? #numbers.formatDecimal(item.lineTotal, 0, 'COMMA', 0, 'POINT') : '0'} + ' đ'"></td>
+                                                </tr>
+                                            </tbody>
+                                            <tfoot class="border-top border-light">
+                                                <tr>
+                                                    <td colspan="3" class="text-end pt-2">
+                                                        <span class="text-muted small fw-semibold">TỔNG ĐÃ THU:</span>
+                                                    </td>
+                                                    <td class="text-end pt-2">
+                                                        <span class="text-success fw-bold" th:text="${paidInv.totalAmount != null ? #numbers.formatDecimal(paidInv.totalAmount, 0, 'COMMA', 0, 'POINT') : '0'} + ' đ'"></span>
+                                                    </td>
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                                <div class="text-end mt-2">
+                                    <span class="fs-5 text-muted fw-semibold me-3">TỔNG CỘNG ĐÃ THANH TOÁN:</span>
+                                    <span class="fs-4 text-success fw-bold" th:text="${invoice.totalPaidAmount != null ? #numbers.formatDecimal(invoice.totalPaidAmount, 0, 'COMMA', 0, 'POINT') : '0'} + ' đ'"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Các khoản chưa thanh toán -->
+                        <div class="card shadow-sm border-0 rounded-4 mb-4" th:if="${invoice.unpaidServices != null && !invoice.unpaidServices.empty}">
+                            <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
+                                <h5 class="fw-bold text-danger mb-0"><i class="bi bi-exclamation-circle me-2"></i>Các khoản cần thu</h5>
                             </div>
                             <div class="card-body p-4">
                                 <div class="table-responsive">
@@ -54,34 +105,38 @@
                                         <thead class="border-bottom border-light">
                                             <tr>
                                                 <th class="text-muted fw-semibold">Tên dịch vụ</th>
-                                                <th class="text-muted fw-semibold text-center">Số lượng</th>
-                                                <th class="text-muted fw-semibold text-end">Đơn giá</th>
+                                                <th class="text-muted fw-semibold text-center">Phân loại</th>
                                                 <th class="text-muted fw-semibold text-end">Thành tiền</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr th:each="item : ${invoice.items}">
-                                                <td><span class="fw-medium text-dark" th:text="${item.itemName}"></span></td>
-                                                <td class="text-center" th:text="${item.quantity}"></td>
-                                                <td class="text-end" th:text="${#numbers.formatDecimal(item.priceApplied, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
-                                                <td class="text-end fw-bold text-dark" th:text="${#numbers.formatDecimal(item.lineTotal, 0, 'COMMA', 0, 'POINT')} + ' đ'"></td>
+                                            <tr th:each="item : ${invoice.unpaidServices}">
+                                                <td><span class="fw-medium text-dark" th:text="${item.serviceName}"></span></td>
+                                                <td class="text-center">
+                                                    <span th:if="${item.type == 'APPOINTMENT'}" class="badge bg-primary-subtle text-primary">Khám ban đầu</span>
+                                                    <span th:if="${item.type == 'ADDITIONAL'}" class="badge bg-warning-subtle text-warning">Dịch vụ phát sinh</span>
+                                                </td>
+                                                <td class="text-end fw-bold text-dark" th:text="${item.price != null ? #numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT') : '0'} + ' đ'"></td>
                                             </tr>
                                         </tbody>
                                         <tfoot class="border-top border-light">
                                             <tr>
-                                                <td colspan="3" class="text-end pt-4 pb-2">
-                                                    <span class="fs-5 text-muted fw-semibold">TỔNG CỘNG:</span>
+                                                <td colspan="2" class="text-end pt-4 pb-2">
+                                                    <span class="fs-5 text-danger fw-semibold">TỔNG CẦN THU:</span>
                                                 </td>
                                                 <td class="text-end pt-4 pb-2">
-                                                    <span class="fs-4 text-primary fw-bold" th:text="${#numbers.formatDecimal(invoice.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                                                    <span class="fs-4 text-danger fw-bold" th:text="${invoice.totalUnpaidAmount != null ? #numbers.formatDecimal(invoice.totalUnpaidAmount, 0, 'COMMA', 0, 'POINT') : '0'} + ' đ'"></span>
                                                 </td>
                                             </tr>
                                         </tfoot>
                                     </table>
                                 </div>
                             </div>
-                <div class="row g-4">
-                    <!-- Left side: Patient & Appointment Info -->
+                        </div>
+
+                    </div>
+
+                    <!-- Right side: Patient & Appointment Info -->
                     <div class="col-lg-4">
                         <div class="card shadow-sm border-0 rounded-4 mb-4 bg-light">
                             <div class="card-body p-4">
@@ -95,6 +150,10 @@
                                 <hr class="border-secondary opacity-25 my-3">
                                 
                                 <h6 class="text-muted fw-bold mb-3 text-uppercase invoice-section-title">Lịch khám</h6>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Mã lịch:</span>
+                                    <span class="fw-bold text-primary" th:text="${invoice.appointmentCode}"></span>
+                                </div>
                                 <div class="d-flex justify-content-between mb-2">
                                     <span class="text-muted">Bác sĩ:</span>
                                     <span class="fw-medium text-dark" th:text="${invoice.doctorFullName}"></span>
@@ -110,31 +169,26 @@
                             </div>
                         </div>
 
-                        <!-- Paid status -->
-                        <div class="card shadow-sm border-0 rounded-4 bg-success bg-opacity-10" th:if="${invoice.paymentStatus == 'PAID'}">
+                        <!-- Paid status (Everything Paid) -->
+                        <div class="card shadow-sm border-0 rounded-4 bg-success bg-opacity-10" th:if="${invoice.unpaidServices == null || invoice.unpaidServices.empty}">
                             <div class="card-body p-4 text-center">
                                 <div class="mb-3">
-                                    <i class="bi bi-check-circle-fill text-success invoice-success-icon"></i>
+                                    <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
                                 </div>
-                                <h4 class="fw-bold text-success mb-2">ĐÃ THANH TOÁN</h4>
+                                <h4 class="fw-bold text-success mb-2">HOÀN THÀNH</h4>
                                 <div class="text-dark mb-1">
-                                    <span class="text-muted">Phương thức:</span> 
-                                    <span class="fw-bold" th:text="${invoice.paymentMethod == 'CASH' ? 'Tiền mặt' : 'Chuyển khoản'}"></span>
-                                </div>
-                                <div class="text-dark">
-                                    <span class="text-muted">Thời gian:</span> 
-                                    <span class="fw-medium" th:text="${#temporals.format(invoice.paidAt, 'HH:mm - dd/MM/yyyy')}"></span>
+                                    <span class="text-muted">Đã thanh toán đủ toàn bộ dịch vụ</span> 
                                 </div>
                             </div>
                         </div>
 
                         <!-- Payment form -->
-                        <div class="card shadow-sm border-0 rounded-4" th:if="${invoice.paymentStatus == 'UNPAID'}">
+                        <div class="card shadow-sm border-0 rounded-4" th:if="${invoice.unpaidServices != null && !invoice.unpaidServices.empty}">
                             <div class="card-header bg-white border-bottom-0 pt-4 pb-2 px-4">
                                 <h5 class="fw-bold text-dark mb-0">Xử lý thanh toán</h5>
                             </div>
                             <div class="card-body p-4">
-                                <form th:action="@{/receptionist/invoice/{id}/pay(id=${invoice.id})}" method="post">
+                                <form th:action="@{/receptionist/invoice/{id}/pay(id=${invoice.appointmentId})}" method="post">
                                     <div class="mb-4">
                                         <label class="form-label text-muted fw-semibold mb-3">Phương thức thanh toán</label>
                                         
@@ -162,25 +216,6 @@
                                 </form>
                             </div>
                         </div>
-
-                        <!-- Paid status -->
-                        <div class="card shadow-sm border-0 rounded-4 bg-success bg-opacity-10" th:if="${invoice.paymentStatus == 'PAID'}">
-                            <div class="card-body p-4 text-center">
-                                <div class="mb-3">
-                                    <i class="bi bi-check-circle-fill text-success" style="font-size: 3rem;"></i>
-                                </div>
-                                <h4 class="fw-bold text-success mb-2">ĐÃ THANH TOÁN</h4>
-                                <div class="text-dark mb-1">
-                                    <span class="text-muted">Phương thức:</span> 
-                                    <span class="fw-bold" th:text="${invoice.paymentMethod == 'CASH' ? 'Tiền mặt' : 'Chuyển khoản'}"></span>
-                                </div>
-                                <div class="text-dark">
-                                    <span class="text-muted">Thời gian:</span> 
-                                    <span class="fw-medium" th:text="${#temporals.format(invoice.paidAt, 'HH:mm - dd/MM/yyyy')}"></span>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
 

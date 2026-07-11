@@ -30,5 +30,6 @@ public class QueueResponse {
         private String patientName;
         private LocalTime checkInTime;
         private String status;
+        private boolean isLate;
     }
 }
