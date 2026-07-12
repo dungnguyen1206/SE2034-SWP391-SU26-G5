@@ -19,6 +19,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.regex.Pattern;
 
+/**
+ * Service implementation for managing articles.
+ * Handles article creation, retrieval, and updates.
+ */
 @Service
 public class ArticleServiceImpl implements ArticleService {
 
@@ -58,6 +62,10 @@ public class ArticleServiceImpl implements ArticleService {
         return article;
     }
 
+    /**
+     * Creates a new article with the provided request data.
+     * Generates a unique slug, sets the author, and handles thumbnail uploading.
+     */
     @Override
     public void createArticle(CreateArticleRequest request, User currentUser) {
         if (currentUser == null) {

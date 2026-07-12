@@ -23,6 +23,9 @@ import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Service implementation for managing users and roles.
+ */
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -31,6 +34,10 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
 
+    /**
+     * Retrieves a paginated list of users based on filter criteria.
+     * Maps user entities to user account responses for admin display.
+     */
     @Override
     public Page<UserAccountResponse> getAccountList(String keyword, String roleName, boolean searchFirstName, boolean searchMiddleName, boolean searchLastName, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
@@ -62,23 +69,25 @@ public class UserServiceImpl implements UserService {
         });
     }
 
+    /**
+     * Updates roles for a specific user.
+     * Completely replaces the user's existing roles with the provided role names.
+     */
     @Override
     @Transactional
     public void updateUserRoles(Long userId, List<String> roleNames) {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
-            throw new RuntimeException("User not found");
+            throw new vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException("User not found");
         }
         
-        // Remove existing roles
         userRoleRepository.deleteByUserId(userId);
         
-        // Add new roles
         if (roleNames != null && !roleNames.isEmpty()) {
             for (String roleName : roleNames) {
                 Role role = roleRepository.findByName(roleName).orElse(null);
                 if (role == null) {
-                    throw new RuntimeException("Role not found: " + roleName);
+                    throw new vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException("Role not found: " + roleName);
                 }
                 
                 UserRole userRole = new UserRole();
@@ -93,11 +102,15 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    /**
+     * Toggles a user's status between ACTIVE and INACTIVE.
+     * Prevents locking ADMIN accounts.
+     */
     @Override
     public void toggleUserStatus(Long userId, String status) {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
-            throw new RuntimeException("User not found");
+            throw new vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException("User not found");
         }
         
         if ("INACTIVE".equals(status)) {
@@ -111,7 +124,7 @@ public class UserServiceImpl implements UserService {
                 }
             }
             if (isAdmin) {
-                throw new RuntimeException("Không được phép khóa tài khoản quản trị viên (ADMIN).");
+                throw new vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException("Không được phép khóa tài khoản quản trị viên (ADMIN).");
             }
         }
         

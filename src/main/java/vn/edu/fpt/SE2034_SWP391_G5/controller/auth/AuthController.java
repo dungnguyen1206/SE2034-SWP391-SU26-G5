@@ -9,9 +9,15 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.RegisterPatientRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AuthService;
+import vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException;
+import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Controller handling authentication-related web pages and form submissions.
+ * Includes login, registration, OTP verification, and password resets.
+ */
 @Controller
 @RequestMapping("")
 @RequiredArgsConstructor
@@ -19,20 +25,17 @@ public class AuthController {
 
     private final AuthService authService;
 
-    // Show login page
     @GetMapping("/login")
     public String showLoginForm() {
         return "auth/login";
     }
 
-    // Show registration page
     @GetMapping("/register")
     public String showRegisterForm(Model model) {
         model.addAttribute("registerRequest", new RegisterPatientRequest());
         return "auth/register";
     }
 
-    // Handle registration form submission
     @PostMapping("/register")
     public String processRegistration(
             @Valid @ModelAttribute("registerRequest") RegisterPatientRequest registerRequest,
@@ -41,7 +44,6 @@ public class AuthController {
             HttpSession session,
             @RequestParam(value = "otpChannel", defaultValue = "email") String otpChannel) {
 
-        // Check for basic validation errors
         if (bindingResult.hasErrors()) {
             model.addAttribute("error", "Vui lòng nhập đầy đủ và đúng định dạng các trường bắt buộc.");
             return "auth/register";
@@ -50,13 +52,12 @@ public class AuthController {
         try {
             authService.processRegistration(registerRequest, session, otpChannel);
             return "redirect:/verify-otp";
-        } catch (RuntimeException e) {
+        } catch (BadRequestException | ResourceNotFoundException e) {
             model.addAttribute("error", e.getMessage());
             return "auth/register";
         }
     }
 
-    // Show OTP verification page
     @GetMapping("/verify-otp")
     public String showVerifyOtpForm(HttpSession session, Model model) {
         RegisterPatientRequest pending = (RegisterPatientRequest) session.getAttribute("pendingRegister");
@@ -69,7 +70,6 @@ public class AuthController {
         return "auth/verify-otp";
     }
 
-    // Handle OTP verification submission
     @PostMapping("/verify-otp")
     public String verifyOtp(
             @RequestParam("otp") String otp,
@@ -79,19 +79,17 @@ public class AuthController {
         try {
             authService.verifyOtp(otp, session);
             return "redirect:/login?success=true";
-        } catch (RuntimeException e) {
+        } catch (BadRequestException | ResourceNotFoundException e) {
             model.addAttribute("error", e.getMessage());
             return "auth/verify-otp";
         }
     }
 
-    // Show forgot password page
     @GetMapping("/forgot-password")
     public String showForgotPasswordForm() {
         return "auth/forgot-password";
     }
 
-    // Handle forgot password submission and send OTP
     @PostMapping("/forgot-password")
     public String processForgotPassword(
             @RequestParam(value = "email", required = false) String email,
@@ -103,7 +101,7 @@ public class AuthController {
         try {
             authService.processForgotPassword(email, phone, session, otpChannel);
             return "redirect:/reset-password";
-        } catch (RuntimeException e) {
+        } catch (BadRequestException | ResourceNotFoundException e) {
             model.addAttribute("error", e.getMessage());
             return "auth/forgot-password";
         }
@@ -134,9 +132,10 @@ public class AuthController {
         try {
             authService.processResetPassword(otp, newPassword, confirmNewPassword, session);
             return "redirect:/login?resetSuccess=true";
-        } catch (RuntimeException e) {
+        } catch (BadRequestException | ResourceNotFoundException e) {
             model.addAttribute("error", e.getMessage());
             return "auth/reset-password";
         }
     }
 }
+
