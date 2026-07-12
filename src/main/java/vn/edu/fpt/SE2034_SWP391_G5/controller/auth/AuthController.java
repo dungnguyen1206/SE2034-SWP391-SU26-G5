@@ -10,12 +10,14 @@ import org.springframework.web.bind.annotation.*;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.RegisterPatientRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AuthService;
 
+import lombok.RequiredArgsConstructor;
+
 @Controller
 @RequestMapping("")
+@RequiredArgsConstructor
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
 
     // Show login page
     @GetMapping("/login")

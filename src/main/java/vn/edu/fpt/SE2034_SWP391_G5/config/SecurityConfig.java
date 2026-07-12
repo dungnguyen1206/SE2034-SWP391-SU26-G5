@@ -12,19 +12,16 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetailsService;
 
+import lombok.RequiredArgsConstructor;
+
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Autowired
-    private CustomUserDetailsService userDetailsService;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    // Tiêm Handler cấu hình chuyển hướng vào đây
-    @Autowired
-    private AuthenticationSuccessHandler successHandler;
+    private final CustomUserDetailsService userDetailsService;
+    private final PasswordEncoder passwordEncoder;
+    private final AuthenticationSuccessHandler successHandler;
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -39,9 +36,7 @@ public class SecurityConfig {
         http
             .authenticationProvider(authenticationProvider())
             .authorizeHttpRequests(auth -> auth
-                // Trang công khai - không cần đăng nhập
-                // Trước: chỉ có "/", "/register", "/verify-otp", "/login", "/forgot-password", "/reset-password"
-                // Thêm: "/home", "/home/**" để guest xem được trang chủ
+
                 .requestMatchers(
                     "/", "/home", "/home/**",
                     "/register", "/verify-otp",

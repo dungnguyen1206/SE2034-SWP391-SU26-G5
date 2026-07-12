@@ -7,7 +7,8 @@ import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CustomUserDetails implements UserDetails {
 
@@ -26,9 +27,11 @@ public class CustomUserDetails implements UserDetails {
         if (user.getUserRoles() == null) {
             return Collections.emptyList();
         }
-        return user.getUserRoles().stream()
-                .map(userRole -> new SimpleGrantedAuthority("ROLE_" + userRole.getRole().getName()))
-                .collect(Collectors.toList());
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        for (vn.edu.fpt.SE2034_SWP391_G5.entity.UserRole userRole : user.getUserRoles()) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + userRole.getRole().getName()));
+        }
+        return authorities;
     }
 
     @Override

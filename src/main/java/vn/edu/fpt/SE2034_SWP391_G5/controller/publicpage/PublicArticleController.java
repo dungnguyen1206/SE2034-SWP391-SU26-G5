@@ -8,22 +8,30 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Article;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.ArticleComment;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 import vn.edu.fpt.SE2034_SWP391_G5.service.ArticleService;
 
+import java.security.Principal;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
+
 @Controller
 @RequestMapping("/articles")
+@RequiredArgsConstructor
 public class PublicArticleController {
 
     private static final int PAGE_SIZE = 9; // 3 columns grid, 3 rows is nice
 
-    @Autowired
-    private ArticleService articleService;
+    private final ArticleService articleService;
 
     // The categories currently hardcoded in manager form
     private final List<String> CATEGORIES = Arrays.asList("Tim mạch", "Nhi khoa", "Da liễu", "Sức khỏe", "Dinh dưỡng");
@@ -48,15 +56,46 @@ public class PublicArticleController {
     }
 
     @GetMapping("/{id}")
-    public String detailArticle(@PathVariable Long id, Model model) {
+    public String detailArticle(@PathVariable Long id, Model model, Principal principal) {
         Article article = articleService.getArticleById(id);
         if (article == null || !"PUBLISHED".equals(article.getStatus())) {
             return "redirect:/articles"; // Or a 404 page
         }
+
+        // Increment view count
+        articleService.incrementViewCount(id);
         
-        // TODO: Implement view count increment
-        
+        // Load comments (only top-level, replies are loaded via entity relationship)
+        List<ArticleComment> comments = articleService.getCommentsByArticleId(id);
+        long commentCount = articleService.getCommentCountByArticleId(id);
+
+        // Load related articles (same category, excluding current article)
+        List<Article> relatedArticles = articleService.getRelatedArticles(article.getCategory(), article.getId());
+
+        // Check if user is logged in
+        boolean isLoggedIn = principal != null;
+
         model.addAttribute("article", article);
+        model.addAttribute("comments", comments);
+        model.addAttribute("commentCount", commentCount);
+        model.addAttribute("relatedArticles", relatedArticles);
+        model.addAttribute("isLoggedIn", isLoggedIn);
+
         return "public/articles/detail";
+    }
+
+    @PostMapping("/{id}/comment")
+    public String postComment(@PathVariable Long id,
+                              @RequestParam String content,
+                              @RequestParam(required = false) Long parentId,
+                              Principal principal) {
+        // Must be logged in
+        if (principal == null) {
+            return "redirect:/login";
+        }
+
+        articleService.addComment(id, content, parentId, principal.getName());
+
+        return "redirect:/articles/" + id;
     }
 }

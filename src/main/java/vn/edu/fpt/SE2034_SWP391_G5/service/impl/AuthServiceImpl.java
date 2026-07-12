@@ -16,28 +16,23 @@ import vn.edu.fpt.SE2034_SWP391_G5.service.AuthService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.EmailService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.SmsService;
 
+import vn.edu.fpt.SE2034_SWP391_G5.util.CodeGenerator;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private UserRoleRepository userRoleRepository;
-
-    @Autowired
-    private EmailService emailService;
-
-    @Autowired
-    private SmsService smsService;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final UserRoleRepository userRoleRepository;
+    private final EmailService emailService;
+    private final SmsService smsService;
+    private final PasswordEncoder passwordEncoder;
 
     // Process user registration request, validate data and send OTP
     @Override
@@ -68,7 +63,7 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Vui lòng nhập Email để nhận mã OTP.");
         }
 
-        String otp = String.format("%06d", (int) (Math.random() * 1000000));
+        String otp = CodeGenerator.generateOtp();
         LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(5);
 
         session.setAttribute("pendingRegister", registerRequest);
@@ -93,6 +88,7 @@ public class AuthServiceImpl implements AuthService {
 
     // Verify OTP for user registration and save new user to database
     @Override
+    @Transactional
     public void verifyOtp(String otp, HttpSession session) {
         RegisterPatientRequest pendingRegister = (RegisterPatientRequest) session.getAttribute("pendingRegister");
         String registerOtp = (String) session.getAttribute("registerOtp");
@@ -133,8 +129,10 @@ public class AuthServiceImpl implements AuthService {
 
         userRepository.save(user);
 
-        Role patientRole = roleRepository.findByName("PATIENT")
-                .orElseThrow(() -> new RuntimeException("Lỗi hệ thống: Vai trò PATIENT không tồn tại."));
+        Role patientRole = roleRepository.findByName("PATIENT").orElse(null);
+        if (patientRole == null) {
+            throw new RuntimeException("Lỗi hệ thống: Vai trò PATIENT không tồn tại.");
+        }
 
         UserRole userRole = new UserRole();
         UserRoleId userRoleId = new UserRoleId(user.getId(), patientRole.getId());
@@ -168,7 +166,7 @@ public class AuthServiceImpl implements AuthService {
             session.setAttribute("resetIdentifier", email);
         }
 
-        String otp = String.format("%06d", (int) (Math.random() * 1000000));
+        String otp = CodeGenerator.generateOtp();
         LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(5);
 
         session.setAttribute("resetOtp", otp);
@@ -238,6 +236,8 @@ public class AuthServiceImpl implements AuthService {
             user.setPasswordHash(passwordEncoder.encode(newPassword));
             user.setUpdatedAt(LocalDateTime.now());
             userRepository.save(user);
+        } else {
+            throw new RuntimeException("Lỗi hệ thống: Không tìm thấy người dùng.");
         }
 
         session.removeAttribute("resetIdentifier");

@@ -33,4 +33,6 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
                                        @Param("category") String category,
                                        @Param("status") String status,
                                        Pageable pageable);
+
+    List<Article> findTop3ByCategoryAndIdNotAndStatusOrderByCreatedAtDesc(String category, Long id, String status);
 }

@@ -11,6 +11,8 @@ import vn.edu.fpt.SE2034_SWP391_G5.repository.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.context.annotation.Profile;
+
 /**
  * Tạo tài khoản dev khi app khởi động — chỉ tạo nếu chưa tồn tại.
  *
@@ -24,6 +26,7 @@ import java.util.List;
  */
 @Slf4j
 @Component
+@Profile("dev")
 @RequiredArgsConstructor
 public class DevDataInitializer implements CommandLineRunner {
 

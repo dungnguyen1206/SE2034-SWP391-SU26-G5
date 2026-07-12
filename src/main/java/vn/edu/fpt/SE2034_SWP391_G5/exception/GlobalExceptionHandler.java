@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
     private String refererChecking (HttpServletRequest request) {
         String referer = request.getHeader("Referer");
         String currentUrl = request.getRequestURL().toString();
-        if (referer != null && referer.equals(currentUrl) || referer.contains("/error")) {
+        if (referer != null && (referer.equals(currentUrl) || referer.contains("/error"))) {
             referer = null;
         }
         if(referer == null) {
@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
                 referer = "/doctor/dashboard";
             }
             else if (request.isUserInRole("ROLE_RECEPTIONIST")) {
-                referer = "/receiptionist/dashboard";
+                referer = "/receptionist/dashboard";
             }
             else{
                 referer = "/patient/dashboard";
@@ -61,6 +61,7 @@ public class GlobalExceptionHandler {
         model.addAttribute("errorCode", 400);
 
         String referer = refererChecking(request);
+        model.addAttribute("referer", referer);
         return "error/400";
     }
 
@@ -105,15 +106,15 @@ public class GlobalExceptionHandler {
      */
 
     @ExceptionHandler(DataConflictException.class)
-    private String handleDataConflict(Exception ex, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+    public String handleDataConflict(Exception ex, HttpServletRequest request, RedirectAttributes redirectAttributes) {
         redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-        return "/manager/invoices/overview";
+        return "redirect:/manager/invoices/overview";
     }
 
     @ExceptionHandler(InvoiceNotFoundException.class)
-    private String handleInvoiceNotFound(Exception ex, HttpServletRequest request, RedirectAttributes redirectAttributes) {
+    public String handleInvoiceNotFound(Exception ex, HttpServletRequest request, RedirectAttributes redirectAttributes) {
         redirectAttributes.addFlashAttribute("errorMessage", ex.getMessage());
-        return "/manager/invoices/overview";
+        return "redirect:/manager/invoices/overview";
     }
 
 

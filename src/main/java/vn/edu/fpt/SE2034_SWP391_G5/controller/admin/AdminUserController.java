@@ -14,13 +14,14 @@ import vn.edu.fpt.SE2034_SWP391_G5.dto.response.UserAccountResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.service.UserService;
 
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Controller
 @RequestMapping("/admin")
+@RequiredArgsConstructor
 public class AdminUserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
     @GetMapping("/account-list")
     public String accountList(@RequestParam(required = false) String keyword,
@@ -69,7 +70,7 @@ public class AdminUserController {
     @PostMapping("/account-list/{id}/lock")
     public String lockAccount(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-            userService.toggleUserStatus(id, "LOCKED");
+            userService.toggleUserStatus(id, "INACTIVE");
             redirectAttributes.addFlashAttribute("successMessage", "Khóa tài khoản thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
