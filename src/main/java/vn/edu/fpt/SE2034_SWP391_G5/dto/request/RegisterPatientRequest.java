@@ -26,8 +26,6 @@ public class RegisterPatientRequest {
     @NotBlank(message = "Họ không được để trống")
     private String lastName;
 
-    @NotBlank(message = "Email không được để trống")
-    @Email(message = "Định dạng email không hợp lệ")
     private String email;
 
     @NotBlank(message = "Số điện thoại không được để trống")

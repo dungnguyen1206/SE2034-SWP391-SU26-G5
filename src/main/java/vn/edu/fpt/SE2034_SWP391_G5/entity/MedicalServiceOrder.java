@@ -34,14 +34,16 @@ public class MedicalServiceOrder implements Serializable {
 
     private String status;
 
-    @Column(columnDefinition = "NVARCHAR(255)")
+    @Column(name = "notes", columnDefinition = "NVARCHAR(500)")
     private String note;
 
-    @Column(name = "price_reference")
+    @Column(name = "price_applied")
     private BigDecimal priceReference;
 
+    @Column(name = "created_at")
     private LocalDateTime createAt;
 
+    @Column(name = "updated_at")
     private LocalDateTime updateAt;
 
     @OneToOne(mappedBy = "medicalServiceOrder")

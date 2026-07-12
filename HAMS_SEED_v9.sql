@@ -434,13 +434,14 @@ GO
 
 
 -- [10] Doctor Schedules
--- Tự động sinh lịch khám cho TẤT CẢ các bác sĩ từ 7 ngày trước đến 7 ngày sau (tổng 15 ngày)
-DECLARE @StartDate DATE = CAST(DATEADD(day, -7, GETDATE()) AS DATE);
-DECLARE @EndDate DATE = CAST(DATEADD(day, 7, GETDATE()) AS DATE);
+-- Tự động sinh lịch khám cho TẤT CẢ các bác sĩ từ 30 ngày trước đến 90 ngày sau (tổng 121 ngày)
+DECLARE @StartDate DATE = CAST(DATEADD(day, -30, GETDATE()) AS DATE);
+DECLARE @EndDate DATE = CAST(DATEADD(day, 90, GETDATE()) AS DATE);
 DECLARE @CurrDate DATE = @StartDate;
 
 WHILE @CurrDate <= @EndDate
 BEGIN
+    BEGIN TRAN;
     DECLARE @WeekId BIGINT = (SELECT id FROM week_schedules WHERE @CurrDate BETWEEN week_start_date AND week_end_date);
     
     -- Xếp ca sáng
@@ -469,11 +470,13 @@ BEGIN
     FROM users u WHERE u.username LIKE 'dr.%';
 
     SET @CurrDate = DATEADD(day, 1, @CurrDate);
+    COMMIT TRAN;
 END
 GO
 
 -- [11] Time Slots
 -- Tự động sinh slot cho TẤT CẢ các ca trực vừa tạo
+BEGIN TRAN;
 INSERT INTO time_slots (schedule_id, start_time, end_time, booked_capacity, max_capacity, status)
 SELECT 
     ds.id, 
@@ -503,30 +506,37 @@ CROSS JOIN (
     UNION ALL SELECT '16:00', '16:30', 'AFTERNOON'
 ) t
 WHERE ds.shift = t.shift;
+COMMIT TRAN;
 GO
 
--- [12] Appointments (Sinh data mẫu cho 15 ngày từ -7 đến +7, mỗi ngày 100 cuộc hẹn, tổng cộng 1500 cuộc hẹn)
-DECLARE @DayOffset INT = -7;
+-- [12] Appointments (Sinh data mẫu cho 121 ngày từ -30 đến +90, mỗi ngày 200 cuộc hẹn, tổng cộng 24200 cuộc hẹn)
+DECLARE @DayOffset INT = -30;
 DECLARE @ApptIndex INT = 1;
 
-WHILE @DayOffset <= 7
+WHILE @DayOffset <= 90
 BEGIN
+    BEGIN TRAN;
     DECLARE @TargetDate DATE = CAST(DATEADD(day, @DayOffset, GETDATE()) AS DATE);
     DECLARE @DailyAppts INT = 1;
     
-    WHILE @DailyAppts <= 100
+    -- Lưu tạm danh sách slot của ngày hôm nay vào bảng tạm (tăng tốc độ random)
+    SELECT ts.id as slot_id, ds.doctor_id 
+    INTO #TempDailySlots
+    FROM time_slots ts
+    JOIN doctor_schedules ds ON ts.schedule_id = ds.id
+    WHERE ds.work_date = @TargetDate;
+
+    WHILE @DailyAppts <= 200
     BEGIN
         DECLARE @SelectedSlotId BIGINT;
         DECLARE @SelectedDoctorId BIGINT;
         DECLARE @SelectedServiceId BIGINT;
         
-        -- Chọn 1 slot trống ngẫu nhiên của ngày đang duyệt
+        -- Chọn 1 slot ngẫu nhiên từ bảng tạm (nhanh hơn rất nhiều so với JOIN bảng thật mỗi vòng lặp)
         SELECT TOP 1 
-            @SelectedSlotId = ts.id,
-            @SelectedDoctorId = ds.doctor_id
-        FROM time_slots ts
-        JOIN doctor_schedules ds ON ts.schedule_id = ds.id
-        WHERE ds.work_date = @TargetDate AND ts.booked_capacity < ts.max_capacity
+            @SelectedSlotId = slot_id,
+            @SelectedDoctorId = doctor_id
+        FROM #TempDailySlots
         ORDER BY NEWID();
         
         -- Lấy dịch vụ tương ứng của khoa bác sĩ
@@ -545,22 +555,24 @@ BEGIN
         
         IF @DayOffset < 0
         BEGIN
-            -- Quá khứ: COMPLETED (60%), CANCELLED (20%), NO_SHOW (20%)
-            IF @Rand < 60 SET @ApptStatus = 'COMPLETED';
-            ELSE IF @Rand < 80 SET @ApptStatus = 'CANCELLED';
+            -- Quá khứ: COMPLETED (70%), CANCELLED (20%), NO_SHOW (10%)
+            IF @Rand < 70 SET @ApptStatus = 'COMPLETED';
+            ELSE IF @Rand < 90 SET @ApptStatus = 'CANCELLED';
             ELSE SET @ApptStatus = 'NO_SHOW';
         END
         ELSE IF @DayOffset = 0
         BEGIN
-            -- Hôm nay: CONFIRMED (33%), WAITING (33%), EXAMINING (34%)
-            IF @Rand < 33 SET @ApptStatus = 'CONFIRMED';
-            ELSE IF @Rand < 66 SET @ApptStatus = 'WAITING';
-            ELSE SET @ApptStatus = 'EXAMINING';
+            -- Hôm nay: CONFIRMED (20%), WAITING (20%), EXAMINING (20%), COMPLETED (30%), CANCELLED (10%)
+            IF @Rand < 20 SET @ApptStatus = 'CONFIRMED';
+            ELSE IF @Rand < 40 SET @ApptStatus = 'WAITING';
+            ELSE IF @Rand < 60 SET @ApptStatus = 'EXAMINING';
+            ELSE IF @Rand < 90 SET @ApptStatus = 'COMPLETED';
+            ELSE SET @ApptStatus = 'CANCELLED';
         END
         ELSE
         BEGIN
-            -- Tương lai: CONFIRMED (80%), CANCELLED (20%)
-            IF @Rand < 80 SET @ApptStatus = 'CONFIRMED';
+            -- Tương lai: CONFIRMED (85%), CANCELLED (15%)
+            IF @Rand < 85 SET @ApptStatus = 'CONFIRMED';
             ELSE SET @ApptStatus = 'CANCELLED';
         END
         
@@ -625,6 +637,9 @@ BEGIN
         SET @DailyAppts = @DailyAppts + 1;
         SET @ApptIndex = @ApptIndex + 1;
     END
+    
+    DROP TABLE #TempDailySlots;
+    COMMIT TRAN;
     
     SET @DayOffset = @DayOffset + 1;
 END

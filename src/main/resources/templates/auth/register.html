@@ -76,6 +76,25 @@
                         <input type="password" id="confirmPassword" th:field="*{confirmPassword}" class="auth-input" placeholder="Nhập lại mật khẩu">
                     </div>
                     
+                    <!-- OTP Channel Selector -->
+                    <div class="otp-channel-group">
+                        <label class="input-label">Nhận mã OTP qua</label>
+                        <div class="otp-channel-options">
+                            <div class="otp-channel-option">
+                                <input type="radio" id="channelEmail" name="otpChannel" value="email" checked onchange="toggleEmailRequired()">
+                                <label for="channelEmail">
+                                    <i class="fa-solid fa-envelope"></i> Email
+                                </label>
+                            </div>
+                            <div class="otp-channel-option">
+                                <input type="radio" id="channelSms" name="otpChannel" value="sms" onchange="toggleEmailRequired()">
+                                <label for="channelSms">
+                                    <i class="fa-solid fa-comment-sms"></i> SMS
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <!-- Form Actions: Register Button -->
                     <div class="auth-footer-actions">
                         <button type="submit" class="auth-btn" style="width: 100%;">Đăng ký</button>
@@ -102,5 +121,23 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function toggleEmailRequired() {
+            var emailRadio = document.getElementById('channelEmail');
+            var emailInput = document.getElementById('email');
+            
+            if (emailRadio.checked) {
+                emailInput.setAttribute('required', 'required');
+            } else {
+                emailInput.removeAttribute('required');
+            }
+        }
+        
+        // Initialize state on load
+        document.addEventListener("DOMContentLoaded", function() {
+            toggleEmailRequired();
+        });
+    </script>
 </body>
 </html>

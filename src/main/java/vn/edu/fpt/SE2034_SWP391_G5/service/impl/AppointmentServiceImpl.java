@@ -184,11 +184,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         LocalDateTime now = LocalDateTime.now();
         LocalTime currentTime = now.toLocalTime();
         LocalTime slotEndTime = slot.getEndTime();
-        LocalTime lateLimitTime = slotEndTime.plusMinutes(15);
+        LocalTime lateLimitTime = slotEndTime.plusMinutes(30);
 
         if (currentTime.isAfter(lateLimitTime)) {
             markAppointmentNoShow(appointment, now);
-            throw new BadRequestException("Bệnh nhân đã trễ quá 15 phút. Vui lòng đặt lịch lại.");
+            throw new BadRequestException("Bệnh nhân đã trễ quá 30 phút. Vui lòng đặt lịch lại.");
         }
 
         if (currentTime.isAfter(slotEndTime)) {
@@ -350,76 +350,98 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointmentRepository.save(appointment);
     }
 
-    private Long calculateQueueNumber(Appointment appointment) {
+    @Override
+    public Long calculateQueueNumber(Appointment appointment) {
         TimeSlot originalSlot = appointment.getSlot();
 
-        if (originalSlot == null || originalSlot.getSchedule() == null) {
+        if (originalSlot == null || originalSlot.getSchedule() == null || appointment.getCheckInTime() == null) {
+            return 0L;
+        }
+
+        Integer roomId = getRoomId(appointment);
+        if (roomId == null) {
             return 0L;
         }
 
         List<TimeSlot> slots = getSlotsInSameRoomAndDate(appointment);
-        TimeSlot effectiveSlot = getEffectiveSlot(appointment, slots, appointment.getCheckInTime());
+        TimeSlot effectiveSlot = getEffectiveSlotByCheckInTime(appointment, slots);
 
         if (effectiveSlot == null) {
             return 0L;
         }
 
         Long baseNumber = calculateBaseNumberBeforeSlot(slots, effectiveSlot);
-        Long orderInSlot = calculateOrderInEffectiveSlot(appointment, slots, effectiveSlot);
+        Long orderInSlot = calculateOrderInEffectiveSlotFixed(appointment, slots, effectiveSlot);
 
         return baseNumber + orderInSlot;
     }
 
-    private Long calculateBaseNumberBeforeSlot(List<TimeSlot> slots, TimeSlot effectiveSlot) {
-        long baseNumber = 0L;
+    private TimeSlot getEffectiveSlotByCheckInTime(Appointment appt, List<TimeSlot> slots) {
+        TimeSlot original = appt.getSlot();
+        if (original == null || appt.getCheckInTime() == null) return null;
+        LocalTime checkIn = appt.getCheckInTime().toLocalTime();
 
-        for (TimeSlot slot : slots) {
-            if (slot.getId().equals(effectiveSlot.getId())) {
-                break;
-            }
-
-            if (slot.getMaxCapacity() != null) {
-                baseNumber += slot.getMaxCapacity();
-            }
+        if (checkIn.isBefore(original.getStartTime()) || !checkIn.isAfter(original.getEndTime())) {
+            return original;
         }
 
+        for (TimeSlot slot : slots) {
+            if (!checkIn.isBefore(slot.getStartTime()) && checkIn.isBefore(slot.getEndTime().plusMinutes(1))) {
+                return slot;
+            }
+        }
+        return original;
+    }
+
+    private Long calculateBaseNumberBeforeSlot(List<TimeSlot> slots, TimeSlot effectiveSlot) {
+        long baseNumber = 0L;
+        Set<LocalTime> processedTimes = new HashSet<>();
+        
+        for (TimeSlot slot : slots) {
+            if (slot.getStartTime().equals(effectiveSlot.getStartTime())) {
+                break;
+            }
+            if (processedTimes.add(slot.getStartTime())) {
+                if (slot.getMaxCapacity() != null) {
+                    baseNumber += slot.getMaxCapacity();
+                }
+            }
+        }
         return baseNumber;
     }
 
-    private Long calculateOrderInEffectiveSlot(Appointment targetAppointment, List<TimeSlot> slots, TimeSlot effectiveSlot) {
+    private Long calculateOrderInEffectiveSlotFixed(Appointment targetAppointment, List<TimeSlot> slots, TimeSlot effectiveSlot) {
         Integer roomId = getRoomId(targetAppointment);
-
-        if(roomId == null){
-            return 0L;
-        }
+        if (roomId == null) return 0L;
 
         List<Appointment> checkedInAppointments = appointmentRepository
-                .findCheckedInAppointmentsByBookingDateAndScheduleId(
-                        targetAppointment.getBookingDate(),
-                        roomId);
+                .findCheckedInAppointmentsByBookingDateAndScheduleId(targetAppointment.getBookingDate(), roomId);
 
-        long order = 0L;
+        long order = 1L;
 
-        for (Appointment appointment : checkedInAppointments) {
-            if (appointment.getCheckInTime() == null) {
+        for (Appointment other : checkedInAppointments) {
+            if (other.getId().equals(targetAppointment.getId()) || other.getCheckInTime() == null) {
                 continue;
             }
 
-            TimeSlot appointmentEffectiveSlot = getEffectiveSlot(appointment, slots, appointment.getCheckInTime());
-
-            if (appointmentEffectiveSlot == null) {
+            TimeSlot otherEffectiveSlot = getEffectiveSlotByCheckInTime(other, slots);
+            if (otherEffectiveSlot == null || !otherEffectiveSlot.getStartTime().equals(effectiveSlot.getStartTime())) {
                 continue;
             }
 
-            if (!appointmentEffectiveSlot.getId().equals(effectiveSlot.getId())) {
+            boolean targetIsLate = !targetAppointment.getSlot().getStartTime().equals(effectiveSlot.getStartTime());
+            boolean otherIsLate = !other.getSlot().getStartTime().equals(effectiveSlot.getStartTime());
+
+            if (targetIsLate && !otherIsLate) {
+                order++;
+                continue;
+            } else if (!targetIsLate && otherIsLate) {
                 continue;
             }
 
-            boolean checkedInBefore = appointment.getCheckInTime().isBefore(targetAppointment.getCheckInTime());
-
-            boolean checkedInSameTimeButIdSmaller = appointment.getCheckInTime()
-                    .isEqual(targetAppointment.getCheckInTime())
-                    && appointment.getId() <= targetAppointment.getId();
+            boolean checkedInBefore = other.getCheckInTime().isBefore(targetAppointment.getCheckInTime());
+            boolean checkedInSameTimeButIdSmaller = other.getCheckInTime().isEqual(targetAppointment.getCheckInTime())
+                    && other.getId() < targetAppointment.getId();
 
             if (checkedInBefore || checkedInSameTimeButIdSmaller) {
                 order++;
@@ -1079,12 +1101,17 @@ public class AppointmentServiceImpl implements AppointmentService {
 
                 Long realQueueNumber = calculateQueueNumber(a);
 
+                List<TimeSlot> slots = getSlotsInSameRoomAndDate(a);
+                TimeSlot effectiveSlot = getEffectiveSlotByCheckInTime(a, slots);
+                boolean isLate = effectiveSlot != null && a.getSlot() != null && !effectiveSlot.getStartTime().equals(a.getSlot().getStartTime());
+
                 QueueResponse.PatientInfo patientInfo = QueueResponse.PatientInfo.builder()
                         .appointmentCode(a.getAppointmentCode())
                         .patientName(patientName)
                         .checkInTime(a.getCheckInTime() != null ? a.getCheckInTime().toLocalTime() : null)
                         .status(a.getStatus())
                         .stt(realQueueNumber != null ? realQueueNumber.intValue() : 0)
+                        .isLate(isLate)
                         .build();
 
                 if ("EXAMINING".equalsIgnoreCase(a.getStatus())) {
@@ -1093,6 +1120,13 @@ public class AppointmentServiceImpl implements AppointmentService {
                     waitingPatients.add(patientInfo);
                 }
             }
+
+            // Sort waiting patients: normal first (by STT), late last (by STT)
+            waitingPatients.sort((p1, p2) -> {
+                if (p1.isLate() && !p2.isLate()) return 1;
+                if (!p1.isLate() && p2.isLate()) return -1;
+                return Integer.compare(p1.getStt(), p2.getStt());
+            });
 
             builder.examiningPatient(examiningPatient);
             builder.waitingPatients(waitingPatients);

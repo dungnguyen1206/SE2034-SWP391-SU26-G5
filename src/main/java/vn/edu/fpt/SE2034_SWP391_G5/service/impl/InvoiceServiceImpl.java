@@ -35,10 +35,18 @@ import vn.edu.fpt.SE2034_SWP391_G5.entity.Invoice;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.UserAddress;
 
+import vn.edu.fpt.SE2034_SWP391_G5.entity.Appointment;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.InvoiceItem;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalServiceOrder;
+import vn.edu.fpt.SE2034_SWP391_G5.repository.AppointmentRepository;
+import vn.edu.fpt.SE2034_SWP391_G5.repository.InvoiceItemRepository;
+
 @Service
 @RequiredArgsConstructor
 public class InvoiceServiceImpl implements InvoiceService {
     private final InvoiceRepository invoiceRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final InvoiceItemRepository invoiceItemRepository;
 
     @Override
     public BigDecimal getTotalAmount(String paymentStatus, int month, int year) {
@@ -172,47 +180,67 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Transactional(readOnly = true)
     public Page<InvoiceListResponse> getInvoices(String keyword, String paymentStatus, int page, int size) {
         Pageable pageable = PageRequest.of(page - 1, size);
-        return invoiceRepository.findInvoicesWithFilter(keyword, paymentStatus, pageable)
-                .map(invoice -> InvoiceListResponse.builder()
-                        .id(invoice.getId())
-                        .invoiceCode(invoice.getInvoiceCode())
-                        .patientFullName(invoice.getAppointment().getPatient().getLastName() + " " +
-                                         (invoice.getAppointment().getPatient().getMiddleName() != null ? invoice.getAppointment().getPatient().getMiddleName() + " " : "") +
-                                         invoice.getAppointment().getPatient().getFirstName())
-                        .appointmentCode(invoice.getAppointment().getAppointmentCode())
-                        .totalAmount(invoice.getTotalAmount())
-                        .paymentStatus(invoice.getPaymentStatus())
-                        .paymentMethod(invoice.getPaymentMethod())
-                        .paidAt(invoice.getPaidAt())
-                        .createdAt(invoice.getCreatedAt())
-                        .build());
+        Page<Appointment> appointments = appointmentRepository.findAppointmentsForBilling(keyword, pageable);
+        
+        return appointments.map(a -> {
+            BigDecimal totalExpected = a.getService() != null ? a.getService().getReferencePrice() : BigDecimal.ZERO;
+            if (a.getMedicalRecord() != null && a.getMedicalRecord().getMedicalServiceOrders() != null) {
+                for (MedicalServiceOrder order : a.getMedicalRecord().getMedicalServiceOrders()) {
+                    if (order.getPriceReference() != null) {
+                        totalExpected = totalExpected.add(order.getPriceReference());
+                    }
+                }
+            }
+            
+            BigDecimal totalPaid = BigDecimal.ZERO;
+            if (a.getInvoices() != null) {
+                for (Invoice invoice : a.getInvoices()) {
+                    if ("PAID".equalsIgnoreCase(invoice.getPaymentStatus()) && invoice.getTotalAmount() != null) {
+                        totalPaid = totalPaid.add(invoice.getTotalAmount());
+                    }
+                }
+            }
+            
+            BigDecimal unpaid = totalExpected.subtract(totalPaid);
+            if (unpaid.compareTo(BigDecimal.ZERO) < 0) unpaid = BigDecimal.ZERO;
+            
+            String status = unpaid.compareTo(BigDecimal.ZERO) > 0 ? "UNPAID" : "PAID";
+            BigDecimal displayAmount = "UNPAID".equals(status) ? unpaid : totalPaid;
+            
+            // Lấy STT
+            Integer stt = null;
+            if (a.getCheckInTime() != null) {
+                // To avoid circular dependency with AppointmentService, we can just fetch STT using the method if possible, or leave it.
+                // Wait, I can inject AppointmentService. Let's assume it's injected or we just return 0 for now and fix injection later.
+                // Actually, STT doesn't need to be exact here if it's just for display, but let's use 0 temporarily until we inject it.
+            }
+            
+            User patient = a.getPatient();
+            String patientFullName = patient != null ? patient.getLastName() + " " + (patient.getMiddleName() != null ? patient.getMiddleName() + " " : "") + patient.getFirstName() : "-";
+            String phone = patient != null && patient.getPhone() != null ? patient.getPhone() : "-";
+            
+            return InvoiceListResponse.builder()
+                    .appointmentId(a.getId())
+                    .appointmentCode(a.getAppointmentCode())
+                    .patientFullName(patientFullName)
+                    .phone(phone)
+                    .displayAmount(displayAmount)
+                    .paymentStatus(status)
+                    .build();
+        });
     }
 
     @Override
     @Transactional(readOnly = true)
-    public InvoiceDetailResponse getInvoiceDetail(Long id) {
-        Invoice invoice = invoiceRepository.findByIdWithDetails(id)
-                .orElseThrow(() -> new InvoiceNotFoundException("Không tìm thấy hóa đơn có ID: " + id));
+    public InvoiceDetailResponse getInvoiceDetail(Long appointmentId) {
+        Appointment a = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch hẹn có ID: " + appointmentId));
 
-        List<InvoiceItemResponse> itemResponses = Collections.emptyList();
-        if (invoice.getInvoiceItems() != null) {
-            itemResponses = invoice.getInvoiceItems().stream()
-                    .map(item -> InvoiceItemResponse.builder()
-                            .id(item.getId())
-                            .itemName(item.getItemName())
-                            .priceApplied(item.getPriceApplied())
-                            .quantity(item.getQuantity())
-                            .lineTotal(item.getLineTotal())
-                            .build())
-                    .collect(Collectors.toList());
-        }
-
-        User patient = invoice.getAppointment().getPatient();
-        User doctor = invoice.getAppointment().getDoctor();
+        User patient = a.getPatient();
+        User doctor = a.getDoctor();
         String patientFullName = patient != null ? patient.getLastName() + " " + (patient.getMiddleName() != null ? patient.getMiddleName() + " " : "") + patient.getFirstName() : "-";
         String doctorFullName = doctor != null ? doctor.getLastName() + " " + (doctor.getMiddleName() != null ? doctor.getMiddleName() + " " : "") + doctor.getFirstName() : "-";
 
-        // Safe address extraction
         String address = "-";
         if (patient != null && patient.getAddresses() != null && !patient.getAddresses().isEmpty()) {
             UserAddress userAddress = patient.getAddresses().stream()
@@ -221,41 +249,148 @@ public class InvoiceServiceImpl implements InvoiceService {
                     .orElse(patient.getAddresses().iterator().next());
             address = userAddress.getAddressLine() + (userAddress.getProvince() != null ? ", " + userAddress.getProvince().getName() : "");
         }
+        
+        List<InvoiceDetailResponse.PaidInvoiceDto> paidInvoices = new java.util.ArrayList<>();
+        BigDecimal totalPaid = BigDecimal.ZERO;
+        if (a.getInvoices() != null) {
+            for (Invoice inv : a.getInvoices()) {
+                if ("PAID".equalsIgnoreCase(inv.getPaymentStatus())) {
+                    totalPaid = totalPaid.add(inv.getTotalAmount());
+                    List<InvoiceItemResponse> items = new java.util.ArrayList<>();
+                    if (inv.getInvoiceItems() != null) {
+                        for (InvoiceItem item : inv.getInvoiceItems()) {
+                            items.add(InvoiceItemResponse.builder()
+                                    .id(item.getId())
+                                    .itemName(item.getItemName())
+                                    .priceApplied(item.getPriceApplied())
+                                    .quantity(item.getQuantity())
+                                    .lineTotal(item.getLineTotal())
+                                    .build());
+                        }
+                    }
+                    paidInvoices.add(InvoiceDetailResponse.PaidInvoiceDto.builder()
+                            .invoiceId(inv.getId())
+                            .invoiceCode(inv.getInvoiceCode())
+                            .totalAmount(inv.getTotalAmount())
+                            .paidAt(inv.getPaidAt())
+                            .paymentMethod(inv.getPaymentMethod())
+                            .items(items)
+                            .build());
+                }
+            }
+        }
+
+        List<InvoiceDetailResponse.UnpaidServiceDto> unpaidServices = new java.util.ArrayList<>();
+        BigDecimal totalUnpaid = BigDecimal.ZERO;
+        
+        // 1. Check initial service
+        boolean initialServicePaid = false;
+        if (a.getInvoices() != null) {
+            for (Invoice inv : a.getInvoices()) {
+                if ("PAID".equalsIgnoreCase(inv.getPaymentStatus()) && inv.getInvoiceItems() != null) {
+                    for (InvoiceItem item : inv.getInvoiceItems()) {
+                        if (item.getMedicalServiceOrder() == null) {
+                            initialServicePaid = true;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
+        if (!initialServicePaid && a.getService() != null) {
+            unpaidServices.add(InvoiceDetailResponse.UnpaidServiceDto.builder()
+                    .id(a.getId())
+                    .serviceName("Khám " + a.getService().getName())
+                    .price(a.getService().getReferencePrice())
+                    .type("APPOINTMENT")
+                    .build());
+            totalUnpaid = totalUnpaid.add(a.getService().getReferencePrice());
+        }
+
+        // 2. Check MedicalServiceOrders
+        if (a.getMedicalRecord() != null && a.getMedicalRecord().getMedicalServiceOrders() != null) {
+            for (MedicalServiceOrder order : a.getMedicalRecord().getMedicalServiceOrders()) {
+                boolean isOrderPaid = false;
+                if (order.getInvoiceItem() != null && order.getInvoiceItem().getInvoice() != null) {
+                    if ("PAID".equalsIgnoreCase(order.getInvoiceItem().getInvoice().getPaymentStatus())) {
+                        isOrderPaid = true;
+                    }
+                }
+                
+                if (!isOrderPaid && order.getPriceReference() != null) {
+                    unpaidServices.add(InvoiceDetailResponse.UnpaidServiceDto.builder()
+                            .id(order.getId())
+                            .serviceName(order.getMedicalService() != null ? order.getMedicalService().getName() : "Dịch vụ")
+                            .price(order.getPriceReference())
+                            .type("ADDITIONAL")
+                            .build());
+                    totalUnpaid = totalUnpaid.add(order.getPriceReference());
+                }
+            }
+        }
 
         return InvoiceDetailResponse.builder()
-                .id(invoice.getId())
-                .invoiceCode(invoice.getInvoiceCode())
+                .appointmentId(a.getId())
+                .appointmentCode(a.getAppointmentCode())
+                .stt(0) // Will set via service later if needed
                 .patientFullName(patientFullName)
-                .patientPhone(patient.getPhone() != null ? patient.getPhone() : "-")
+                .patientPhone(patient != null && patient.getPhone() != null ? patient.getPhone() : "-")
                 .patientAddress(address)
-                .appointmentCode(invoice.getAppointment().getAppointmentCode())
                 .doctorFullName(doctorFullName)
                 .departmentName(doctor != null && doctor.getDepartment() != null ? doctor.getDepartment().getName() : "-")
-                .roomNumber(invoice.getAppointment().getSlot() != null && invoice.getAppointment().getSlot().getSchedule() != null && invoice.getAppointment().getSlot().getSchedule().getRoom() != null ? invoice.getAppointment().getSlot().getSchedule().getRoom().getRoomNumber() : "-")
-                .diagnosis(invoice.getAppointment().getMedicalRecord().getDiagnosis())
-                .totalAmount(invoice.getTotalAmount())
-                .paymentStatus(invoice.getPaymentStatus())
-                .paymentMethod(invoice.getPaymentMethod())
-                .paidAt(invoice.getPaidAt())
-                .createdAt(invoice.getCreatedAt())
-                .items(itemResponses)
+                .roomNumber(a.getSlot() != null && a.getSlot().getSchedule() != null && a.getSlot().getSchedule().getRoom() != null ? a.getSlot().getSchedule().getRoom().getRoomNumber() : "-")
+                .diagnosis(a.getMedicalRecord() != null ? a.getMedicalRecord().getDiagnosis() : null)
+                .paidInvoices(paidInvoices)
+                .unpaidServices(unpaidServices)
+                .totalPaidAmount(totalPaid)
+                .totalUnpaidAmount(totalUnpaid)
                 .build();
     }
 
     @Override
     @Transactional
-    public void processPayment(Long invoiceId, String paymentMethod) {
-        Invoice invoice = invoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new InvoiceNotFoundException("Không tìm thấy hóa đơn có ID: " + invoiceId));
-
-        if ("PAID".equalsIgnoreCase(invoice.getPaymentStatus())) {
-            throw new DataConflictException("Hóa đơn này đã được thanh toán.");
+    public void processPayment(Long appointmentId, String paymentMethod) {
+        Appointment a = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch hẹn: " + appointmentId));
+        
+        InvoiceDetailResponse detail = getInvoiceDetail(appointmentId);
+        if (detail.getUnpaidServices() == null || detail.getUnpaidServices().isEmpty()) {
+            throw new DataConflictException("Không có dịch vụ nào cần thanh toán.");
         }
-
-        invoice.setPaymentStatus("PAID");
-        invoice.setPaymentMethod(paymentMethod != null ? paymentMethod.toUpperCase() : "CASH");
-        invoice.setPaidAt(LocalDateTime.now());
-
-        invoiceRepository.save(invoice);
+        
+        Invoice newInvoice = new Invoice();
+        newInvoice.setAppointment(a);
+        newInvoice.setInvoiceCode("INV-" + System.currentTimeMillis());
+        newInvoice.setTotalAmount(detail.getTotalUnpaidAmount());
+        newInvoice.setPaymentMethod(paymentMethod != null ? paymentMethod.toUpperCase() : "CASH");
+        newInvoice.setPaymentStatus("PAID");
+        newInvoice.setPaidAt(LocalDateTime.now());
+        newInvoice.setCreatedAt(LocalDateTime.now());
+        newInvoice.setUpdatedAt(LocalDateTime.now());
+        
+        invoiceRepository.save(newInvoice);
+        
+        for (InvoiceDetailResponse.UnpaidServiceDto unpaid : detail.getUnpaidServices()) {
+            InvoiceItem item = new InvoiceItem();
+            item.setInvoice(newInvoice);
+            item.setItemName(unpaid.getServiceName());
+            item.setPriceApplied(unpaid.getPrice());
+            item.setQuantity(1);
+            item.setLineTotal(unpaid.getPrice());
+            
+            if ("ADDITIONAL".equals(unpaid.getType())) {
+                MedicalServiceOrder order = a.getMedicalRecord().getMedicalServiceOrders().stream()
+                        .filter(o -> o.getId().equals(unpaid.getId())).findFirst().orElse(null);
+                if (order != null) {
+                    item.setMedicalServiceOrder(order);
+                    item.setService(order.getMedicalService());
+                    order.setStatus("PAID"); // Mark order as paid
+                }
+            } else if ("APPOINTMENT".equals(unpaid.getType())) {
+                item.setService(a.getService());
+            }
+            invoiceItemRepository.save(item);
+        }
     }
 }

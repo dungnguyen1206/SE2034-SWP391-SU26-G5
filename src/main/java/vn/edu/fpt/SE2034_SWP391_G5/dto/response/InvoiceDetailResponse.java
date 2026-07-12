@@ -12,8 +12,9 @@ import java.util.List;
 @Setter
 @Builder
 public class InvoiceDetailResponse {
-    private Long id;
-    private String invoiceCode;
+    private Long appointmentId;
+    private String appointmentCode;
+    private Integer stt;
     
     // Patient info
     private String patientFullName;
@@ -21,7 +22,6 @@ public class InvoiceDetailResponse {
     private String patientAddress;
     
     // Appointment info
-    private String appointmentCode;
     private String doctorFullName;
     private String departmentName;
     private String roomNumber;
@@ -29,13 +29,32 @@ public class InvoiceDetailResponse {
     // Medical Record info
     private String diagnosis;
     
-    // Invoice details
-    private BigDecimal totalAmount;
-    private String paymentStatus;
-    private String paymentMethod;
-    private LocalDateTime paidAt;
-    private LocalDateTime createdAt;
+    // History & Pending
+    private List<PaidInvoiceDto> paidInvoices;
+    private List<UnpaidServiceDto> unpaidServices;
     
-    // Items
-    private List<InvoiceItemResponse> items;
+    private BigDecimal totalPaidAmount;
+    private BigDecimal totalUnpaidAmount;
+
+    @Getter
+    @Setter
+    @Builder
+    public static class PaidInvoiceDto {
+        private Long invoiceId;
+        private String invoiceCode;
+        private BigDecimal totalAmount;
+        private LocalDateTime paidAt;
+        private String paymentMethod;
+        private List<InvoiceItemResponse> items;
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    public static class UnpaidServiceDto {
+        private Long id; // MedicalServiceOrder ID or Appointment ID
+        private String serviceName;
+        private BigDecimal price;
+        private String type; // "APPOINTMENT" or "ADDITIONAL"
+    }
 }

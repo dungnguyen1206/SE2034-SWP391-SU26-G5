@@ -12,6 +12,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.service.ReceptionistWalkInService;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -31,6 +32,23 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
 
     @Override
     public Object searchPatientByPhone(String phone) {
+        if (phone == null || phone.trim().isEmpty()) {
+            return Map.of("error", "Vui lòng nhập số điện thoại.");
+        }
+        phone = phone.trim();
+        
+        if (!phone.matches("\\d+")) {
+            return Map.of("error", "Số điện thoại chỉ được chứa chữ số, không chứa chữ cái hoặc ký tự đặc biệt.");
+        }
+        
+        if (!phone.startsWith("0")) {
+            return Map.of("error", "Số điện thoại phải bắt đầu bằng số 0.");
+        }
+        
+        if (phone.length() != 10) {
+            return Map.of("error", "Số điện thoại phải bao gồm đúng 10 chữ số (bạn đang nhập " + phone.length() + " số).");
+        }
+
         Optional<User> patientOpt = userRepository.findByPhone(phone);
         if (patientOpt.isPresent()) {
             User p = patientOpt.get();
@@ -50,10 +68,70 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
     }
 
     @Override
+    public List<Map<String, Object>> getAvailableSlots(Integer departmentId, LocalDate date) {
+        List<TimeSlot> slots = timeSlotRepository.findSlotsByDepartmentAndDate(departmentId, date);
+
+        LocalTime currentTime = LocalDate.now().equals(date) ? LocalTime.now() : LocalTime.MIN;
+
+        // Group slots by startTime to merge multiple doctors' slots at the same time
+        Map<LocalTime, List<TimeSlot>> slotsByTime = new TreeMap<>();
+        for (TimeSlot ts : slots) {
+            slotsByTime.computeIfAbsent(ts.getStartTime(), k -> new ArrayList<>()).add(ts);
+        }
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (Map.Entry<LocalTime, List<TimeSlot>> entry : slotsByTime.entrySet()) {
+            LocalTime startTime = entry.getKey();
+            List<TimeSlot> timeSlots = entry.getValue();
+            
+            // Find an available slot at this time
+            TimeSlot availableSlot = null;
+            for (TimeSlot ts : timeSlots) {
+                if (ts.getBookedCapacity() < ts.getMaxCapacity()) {
+                    availableSlot = ts;
+                    break;
+                }
+            }
+            
+            // If no slot is available, pick the first one to display
+            TimeSlot displaySlot = availableSlot != null ? availableSlot : timeSlots.get(0);
+            
+            boolean isFull = availableSlot == null;
+            boolean isPast = startTime.isBefore(currentTime) || startTime.equals(currentTime);
+            boolean isAvailable = !isFull && !isPast;
+            
+            result.add(Map.<String, Object>of(
+                    "id", displaySlot.getId(),
+                    "time", displaySlot.getStartTime().toString() + " - " + displaySlot.getEndTime().toString(),
+                    "available", isAvailable
+            ));
+        }
+        return result;
+    }
+
+    @Override
     @Transactional
     public void createWalkInAppointment(WalkInBookingRequest request) {
+        String phone = request.getPhone();
+        if (phone == null || phone.trim().isEmpty()) {
+            throw new RuntimeException("Vui lòng nhập số điện thoại.");
+        }
+        phone = phone.trim();
+        
+        if (!phone.matches("\\d+")) {
+            throw new RuntimeException("Số điện thoại chỉ được chứa chữ số, không chứa chữ cái hoặc ký tự đặc biệt.");
+        }
+        
+        if (!phone.startsWith("0")) {
+            throw new RuntimeException("Số điện thoại phải bắt đầu bằng số 0.");
+        }
+        
+        if (phone.length() != 10) {
+            throw new RuntimeException("Số điện thoại phải bao gồm đúng 10 chữ số (bạn đang nhập " + phone.length() + " số).");
+        }
+
         // 1. Get or Create Patient
-        User patient = userRepository.findByPhone(request.getPhone()).orElse(null);
+        User patient = userRepository.findByPhone(phone).orElse(null);
         if (patient == null) {
             patient = new User();
             patient.setUsername(request.getPhone());
@@ -61,7 +139,6 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
             patient.setFirstName(request.getFirstName());
             patient.setLastName(request.getLastName());
             patient.setGender(request.getGender());
-            // Random password or something default
             patient.setPasswordHash(passwordEncoder.encode("Walkin@123"));
             patient.setStatus("ACTIVE");
             patient.setEmailVerified(true);
@@ -76,52 +153,48 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
             userRole.setRole(patientRole);
             userRoleRepository.save(userRole);
             
-            // TODO: send SMS logic goes here (mocked for now)
             System.out.println("Gửi SMS đến " + request.getPhone() + " với mật khẩu: Walkin@123");
         }
 
         // 2. Get Department's initial Medical Service
-        // Usually the one with lowest price or a specific name like "Khám bệnh"
         List<MedicalService> services = medicalServiceRepository.findByDepartmentIdAndStatus(request.getDepartmentId(), "ACTIVE");
         if (services.isEmpty()) {
             throw new RuntimeException("Không tìm thấy dịch vụ khám cho khoa này.");
         }
-        // Just pick the first one, or the one with "Khám" in name if possible
         MedicalService initialService = services.stream()
                 .filter(s -> s.getName().toLowerCase().contains("khám"))
                 .findFirst()
                 .orElse(services.get(0));
 
-        // 3. Auto Assign Doctor and Slot for TODAY
-        LocalDate today = LocalDate.now();
-        // find all active doctors in this department
-        List<User> doctors = userRepository.findActiveDoctorsByDepartmentId(request.getDepartmentId());
-        if (doctors.isEmpty()) {
-            throw new RuntimeException("Không có bác sĩ nào trong khoa này.");
+        // 3. Validate and Get Slot
+        TimeSlot selectedSlot = timeSlotRepository.findByIdWithSchedule(request.getTimeSlotId())
+                .orElseThrow(() -> new RuntimeException("Khung giờ không tồn tại."));
+
+        if (!selectedSlot.getSchedule().getWorkDate().equals(request.getBookingDate())) {
+            throw new RuntimeException("Khung giờ không khớp với ngày khám.");
         }
 
-        User selectedDoctor = null;
-        TimeSlot selectedSlot = null;
-        long minAppointments = Long.MAX_VALUE;
-
-        for (User doctor : doctors) {
-            // Count today's appointments
-            long count = appointmentRepository.countByDoctorIdAndBookingDate(doctor.getId(), today);
-            
-            // Find available slots for this doctor today
-            // We need a custom query or just fetch schedule
-            List<TimeSlot> availableSlots = timeSlotRepository.findAvailableSlotsByDoctorAndDate(doctor.getId(), today);
-            
-            if (!availableSlots.isEmpty() && count < minAppointments) {
-                minAppointments = count;
-                selectedDoctor = doctor;
-                selectedSlot = availableSlots.get(0); // pick earliest
-            }
+        if (LocalDate.now().equals(request.getBookingDate()) && selectedSlot.getStartTime().isBefore(LocalTime.now())) {
+            throw new RuntimeException("Không thể đặt lịch vào khung giờ trong quá khứ.");
         }
 
-        if (selectedDoctor == null || selectedSlot == null) {
-            throw new RuntimeException("Hệ thống không tìm thấy lịch trống cho bác sĩ nào trong ngày hôm nay ở khoa này.");
+        if (selectedSlot.getBookedCapacity() >= selectedSlot.getMaxCapacity()) {
+            throw new RuntimeException("Khung giờ này đã đầy, vui lòng chọn khung giờ khác.");
         }
+
+        // Check if patient already booked this exact slot
+        boolean alreadyBooked = appointmentRepository.existsBySlotIdAndPatientIdAndStatusNotIn(
+                selectedSlot.getId(), patient.getId(), Arrays.asList("CANCELLED", "NO_SHOW")
+        );
+        if (alreadyBooked) {
+            throw new RuntimeException("Bệnh nhân này đã có lịch khám tại khung giờ này. Vui lòng chọn khung giờ khác.");
+        }
+
+        // Increase booked capacity
+        selectedSlot.setBookedCapacity(selectedSlot.getBookedCapacity() + 1);
+        timeSlotRepository.save(selectedSlot);
+
+        User selectedDoctor = selectedSlot.getSchedule().getDoctor();
 
         // 4. Create Appointment
         Appointment appointment = new Appointment();
@@ -130,16 +203,16 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
         appointment.setDoctor(selectedDoctor);
         appointment.setService(initialService);
         appointment.setSlot(selectedSlot);
-        appointment.setBookingDate(today);
-        appointment.setStatus("WAITING"); // Walk-in is ready to examine
-        appointment.setCheckInTime(LocalDateTime.now());
+        appointment.setBookingDate(request.getBookingDate());
+        appointment.setStatus("CONFIRMED"); // Offline booking always starts as CONFIRMED
+        appointment.setCheckInTime(null); // Must be checked-in manually
         appointment.setCreatedAt(LocalDateTime.now());
         appointment.setUpdatedAt(LocalDateTime.now());
         appointment = appointmentRepository.save(appointment);
 
         // 5. Create Invoice
         Invoice invoice = new Invoice();
-        String invCode = "INV-" + today.format(DateTimeFormatter.ofPattern("yyyyMM")) + String.format("%04d", new Random().nextInt(10000));
+        String invCode = "INV-" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM")) + String.format("%04d", new Random().nextInt(10000));
         invoice.setInvoiceCode(invCode);
         invoice.setAppointment(appointment);
         invoice.setTotalAmount(initialService.getReferencePrice());

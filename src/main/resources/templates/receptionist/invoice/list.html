@@ -64,9 +64,10 @@
                             <table class="table table-hover align-middle mb-0">
                                 <thead class="table-light">
                                     <tr>
-                                        <th class="ps-4">Mã Hóa Đơn</th>
-                                        <th>Bệnh Nhân</th>
+                                        <th class="ps-4">STT</th>
                                         <th>Mã Lịch Hẹn</th>
+                                        <th>Bệnh Nhân</th>
+                                        <th>SĐT</th>
                                         <th>Tổng Tiền</th>
                                         <th>Trạng Thái</th>
                                         <th class="text-end pe-4">Thao tác</th>
@@ -74,19 +75,20 @@
                                 </thead>
                                 <tbody>
                                     <tr th:if="${invoicePage.empty}">
-                                        <td colspan="6" class="text-center py-5 text-muted">
+                                        <td colspan="7" class="text-center py-5 text-muted">
                                             <div class="mb-3"><i class="bi bi-receipt fs-1 text-secondary"></i></div>
-                                            Không tìm thấy hóa đơn nào
+                                            Không tìm thấy dữ liệu
                                         </td>
                                     </tr>
-                                    <tr th:each="inv : ${invoicePage.content}">
-                                        <td class="ps-4"><span class="fw-bold" th:text="${inv.invoiceCode}"></span></td>
+                                    <tr th:each="inv, iterStat : ${invoicePage.content}">
+                                        <td class="ps-4 fw-bold text-muted" th:text="${(invoicePage.number * invoicePage.size) + iterStat.count}"></td>
+                                        <td><span class="fw-bold text-primary" th:text="${inv.appointmentCode}"></span></td>
                                         <td>
                                             <div class="fw-semibold text-dark" th:text="${inv.patientFullName}"></div>
                                         </td>
-                                        <td th:text="${inv.appointmentCode}"></td>
+                                        <td th:text="${inv.phone}"></td>
                                         <td>
-                                            <span class="text-primary fw-bold" th:text="${#numbers.formatDecimal(inv.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span>
+                                            <span class="text-primary fw-bold" th:text="${inv.displayAmount != null ? #numbers.formatDecimal(inv.displayAmount, 0, 'COMMA', 0, 'POINT') : '0'} + ' đ'"></span>
                                         </td>
                                         <td>
                                             <span th:if="${inv.paymentStatus == 'UNPAID'}" class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill">
@@ -97,10 +99,10 @@
                                             </span>
                                         </td>
                                         <td class="text-end pe-4">
-                                            <a th:if="${inv.paymentStatus == 'UNPAID'}" th:href="@{/receptionist/invoice/{id}(id=${inv.id})}" class="btn btn-sm btn-success px-3 rounded-pill shadow-sm">
+                                            <a th:if="${inv.paymentStatus == 'UNPAID'}" th:href="@{/receptionist/invoice/{id}(id=${inv.appointmentId})}" class="btn btn-sm btn-success px-3 rounded-pill shadow-sm">
                                                 <i class="bi bi-credit-card me-1"></i> Thanh toán
                                             </a>
-                                            <a th:if="${inv.paymentStatus == 'PAID'}" th:href="@{/receptionist/invoice/{id}(id=${inv.id})}" class="btn btn-sm btn-outline-primary px-3 rounded-pill shadow-sm">
+                                            <a th:if="${inv.paymentStatus == 'PAID'}" th:href="@{/receptionist/invoice/{id}(id=${inv.appointmentId})}" class="btn btn-sm btn-outline-primary px-3 rounded-pill shadow-sm">
                                                 <i class="bi bi-eye me-1"></i> Chi tiết
                                             </a>
                                         </td>

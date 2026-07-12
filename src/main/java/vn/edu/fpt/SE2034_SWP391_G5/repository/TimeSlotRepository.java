@@ -51,4 +51,29 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
             @Param("doctorId") Long doctorId,
             @Param("workDate") LocalDate workDate
     );
+
+    @Query("SELECT ts FROM TimeSlot ts " +
+            "JOIN FETCH ts.schedule sch " +
+            "JOIN FETCH sch.doctor d " +
+            "WHERE d.department.id = :departmentId " +
+            "AND sch.workDate = :workDate " +
+            "AND ts.bookedCapacity < ts.maxCapacity " +
+            "AND ts.startTime > :currentTime " +
+            "ORDER BY ts.startTime ASC")
+    List<TimeSlot> findAvailableSlotsByDepartmentAndDate(
+            @Param("departmentId") Integer departmentId,
+            @Param("workDate") LocalDate workDate,
+            @Param("currentTime") java.time.LocalTime currentTime
+    );
+
+    @Query("SELECT ts FROM TimeSlot ts " +
+            "JOIN FETCH ts.schedule sch " +
+            "JOIN FETCH sch.doctor d " +
+            "WHERE d.department.id = :departmentId " +
+            "AND sch.workDate = :workDate " +
+            "ORDER BY ts.startTime ASC")
+    List<TimeSlot> findSlotsByDepartmentAndDate(
+            @Param("departmentId") Integer departmentId,
+            @Param("workDate") LocalDate workDate
+    );
 }

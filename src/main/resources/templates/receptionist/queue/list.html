@@ -25,12 +25,11 @@
 
                         <div class="d-flex gap-3 align-items-center">
                             <div class="text-muted small d-none d-md-block me-2">
-                        <span class="spinner-grow spinner-grow-sm text-success" role="status" aria-hidden="true"
-                              style="width: 10px; height: 10px;"></span>
+                        <span class="spinner-grow spinner-grow-sm text-success refresh-spinner" role="status" aria-hidden="true"></span>
                                 Đang làm mới tự động...
                             </div>
 
-                            <div class="input-group" style="width: 300px;">
+                            <div class="input-group search-container">
                         <span class="input-group-text bg-white border-end-0"><i
                                 class="bi bi-search text-muted"></i></span>
                                 <input type="text" id="searchInput" class="form-control border-start-0 shadow-sm"
@@ -48,7 +47,7 @@
                                     <div class="d-flex justify-content-between align-items-center mb-3">
                                         <div class="d-flex align-items-center gap-2">
                                             <span class="room-badge" th:text="${room.roomNumber}">P101</span>
-                                            <span class="text-muted fw-semibold" style="font-size: 0.9rem;"
+                                            <span class="text-muted fw-semibold room-dept-name"
                                                   th:text="${room.departmentName}">Nội tổng quát</span>
                                         </div>
                                         <span class="badge rounded-pill bg-warning text-dark px-3 py-2 border border-warning"
@@ -73,7 +72,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="examining-box shadow-sm" th:if="${room.examiningPatient == null}" style="background-color: #f8fafc; border-left-color: #cbd5e1;">
+                                    <div class="examining-box shadow-sm empty-examining-box" th:if="${room.examiningPatient == null}">
                                         <div class="text-center py-3 text-secondary">
                                             <small class="fw-bold"><i class="bi bi-person-x me-1 fs-6"></i>Chưa có bệnh nhân đang khám</small>
                                         </div>
@@ -93,7 +92,7 @@
                                             </div>
                                             <div class="text-end">
                                                 <span class="badge badge-waiting rounded-pill mb-1 d-block">Chờ khám</span>
-                                                <small class="text-secondary" style="font-size: 0.75rem;"
+                                                <small class="text-secondary checkin-time-text"
                                                        th:text="'Check-in: ' + (${patient.checkInTime != null} ? ${#temporals.format(patient.checkInTime, 'HH:mm')} : '--:--')">Check-in:
                                                     08:15</small>
                                             </div>
