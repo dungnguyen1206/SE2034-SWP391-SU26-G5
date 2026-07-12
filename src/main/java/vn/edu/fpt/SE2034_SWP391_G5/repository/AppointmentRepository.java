@@ -255,6 +255,34 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     @Query("SELECT a FROM Appointment a WHERE a.slot.schedule.id = :scheduleId AND a.status IN ('WAITING', 'CONFIRMED')")
     List<Appointment> findActiveAppointmentsByScheduleId(@Param("scheduleId") Long scheduleId);
-}
 
-    
+    @Query("SELECT a FROM Appointment a WHERE a.slot.schedule.id = :scheduleId AND a.status IN ('WAITING', 'CONFIRMED')")
+    List<Appointment> findPendingAppointmentsByScheduleId(@Param("scheduleId") Long scheduleId);
+
+    @Query("SELECT a FROM Appointment a " +
+            "JOIN FETCH a.slot sl " +
+            "WHERE a.bookingDate = :bookingDate " +
+            "AND a.status = 'CONFIRMED'")
+    List<Appointment> findConfirmedAppointmentsByBookingDate(@Param("bookingDate") LocalDate bookingDate);
+
+    @Query(
+            value = "SELECT DISTINCT a FROM Appointment a " +
+                    "LEFT JOIN FETCH a.patient p " +
+                    "WHERE a.bookingDate = CURRENT_DATE " +
+                    "AND a.status != 'CANCELLED' " +
+                    "AND (:search IS NULL OR :search = '' " +
+                    "OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR p.phone LIKE CONCAT('%', :search, '%')) " +
+                    "ORDER BY a.createdAt DESC",
+            countQuery = "SELECT COUNT(DISTINCT a) FROM Appointment a " +
+                    "JOIN a.patient p " +
+                    "WHERE a.bookingDate = CURRENT_DATE " +
+                    "AND a.status != 'CANCELLED' " +
+                    "AND (:search IS NULL OR :search = '' " +
+                    "OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR p.phone LIKE CONCAT('%', :search, '%'))"
+    )
+    Page<Appointment> findAppointmentsForBilling(@Param("search") String search, Pageable pageable);
+}

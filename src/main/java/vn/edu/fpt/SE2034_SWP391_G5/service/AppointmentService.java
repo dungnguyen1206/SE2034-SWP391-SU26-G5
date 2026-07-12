@@ -66,5 +66,5 @@ public interface AppointmentService {
 
     List<QueueResponse> getTodayQueueBoard();
 
-
+    Long calculateQueueNumber(vn.edu.fpt.SE2034_SWP391_G5.entity.Appointment appointment);
 }

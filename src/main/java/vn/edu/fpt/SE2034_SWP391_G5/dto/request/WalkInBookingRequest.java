@@ -15,4 +15,10 @@ public class WalkInBookingRequest {
     
     @NotNull(message = "Vui lòng chọn khoa")
     private Integer departmentId;
+
+    @NotNull(message = "Vui lòng chọn ngày khám")
+    private java.time.LocalDate bookingDate;
+
+    @NotNull(message = "Vui lòng chọn khung giờ khám")
+    private Long timeSlotId;
 }

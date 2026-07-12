@@ -12,7 +12,7 @@
 .stat-card {
     background-color: #ffffff;
     border: 1px solid #edf2f7;
-    border-radius: 18px;
+    border-radius: 0;
     padding: 20px 18px;
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
 }
@@ -98,7 +98,7 @@
 .appointment-card {
     margin: 0 28px 28px;
     background-color: #ffffff;
-    border-radius: 20px;
+    border-radius: 0;
     border: 1px solid #e5e7eb;
     box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
     overflow: hidden;
@@ -127,7 +127,7 @@
     flex: 1;
     height: 46px;
     border: 1px solid #dbe3ef;
-    border-radius: 14px;
+    border-radius: 0;
     background-color: #ffffff;
     display: flex;
     align-items: center;
@@ -167,7 +167,7 @@
     width: 190px;
     height: 46px;
     border: 1px solid #dbe3ef;
-    border-radius: 14px;
+    border-radius: 0;
     background-color: #ffffff;
     color: #334155;
     font-size: 14px;
@@ -181,7 +181,7 @@
     width: 160px;
     height: 46px;
     border: 1px solid #dbe3ef;
-    border-radius: 14px;
+    border-radius: 0;
     background-color: #ffffff;
     color: #334155;
     font-size: 14px;
@@ -206,7 +206,7 @@
 .btn-reset {
     height: 46px;
     padding: 0 16px;
-    border-radius: 14px;
+    border-radius: 0;
     border: none;
     font-size: 14px;
     font-weight: 800;
@@ -238,6 +238,24 @@
     background-color: #e2e8f0;
 }
 
+.btn-walk-in {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-walk-in:hover {
+    background: #218838;
+}
+
 
 /* =========================
    TABLE WRAPPER
@@ -245,7 +263,6 @@
 
 .table-wrapper {
     width: 100%;
-    max-height: 520px;
     overflow: auto;
     position: relative;
 }
@@ -414,7 +431,7 @@
     min-width: 54px;
     height: 30px;
     padding: 0 10px;
-    border-radius: 999px;
+    border-radius: 0;
     background-color: #eef2ff;
     color: #3730a3;
     font-size: 13px;
@@ -432,7 +449,7 @@
     justify-content: center;
     min-height: 30px;
     padding: 6px 12px;
-    border-radius: 999px;
+    border-radius: 0;
     font-size: 13px;
     font-weight: 800;
     white-space: nowrap;
@@ -493,7 +510,7 @@
 .btn-checkin {
     min-height: 36px;
     padding: 8px 13px;
-    border-radius: 12px;
+    border-radius: 0;
     border: none;
     display: inline-flex;
     align-items: center;
@@ -576,7 +593,7 @@
     min-width: 38px;
     height: 38px;
     padding: 0 12px;
-    border-radius: 10px;
+    border-radius: 0;
     border: 1px solid #dbe3ef;
     background-color: #ffffff;
     color: #334155;

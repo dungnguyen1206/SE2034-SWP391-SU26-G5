@@ -79,7 +79,7 @@ public class MedicalRecord {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "medicalRecord", fetch = FetchType.LAZY)
     private Set<MedicalServiceOrder> medicalServiceOrders;
 
 

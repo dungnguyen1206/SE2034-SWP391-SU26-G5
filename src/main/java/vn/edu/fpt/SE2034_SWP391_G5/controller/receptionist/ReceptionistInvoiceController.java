@@ -50,15 +50,20 @@ public class ReceptionistInvoiceController {
     public String invoiceDetail(
             @PathVariable Long id,
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            Model model) {
+            Model model, RedirectAttributes redirectAttributes) {
 
-        InvoiceDetailResponse invoice = invoiceService.getInvoiceDetail(id);
-        
-        model.addAttribute("invoice", invoice);
-        model.addAttribute("receptionist", receptionistService.getReceptionistByUsername(userDetails.getUser().getEmail()));
-        model.addAttribute("activeMenu", "invoice");
-        
-        return "receptionist/invoice/detail";
+        try {
+            InvoiceDetailResponse invoice = invoiceService.getInvoiceDetail(id);
+            
+            model.addAttribute("invoice", invoice);
+            model.addAttribute("receptionist", receptionistService.getReceptionistByUsername(userDetails.getUser().getEmail()));
+            model.addAttribute("activeMenu", "invoice");
+            
+            return "receptionist/invoice/detail";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage() + " | Cause: " + (e.getCause() != null ? e.getCause().getMessage() : "null"));
+            return "redirect:/receptionist/invoice";
+        }
     }
 
     @PostMapping("/{id}/pay")
