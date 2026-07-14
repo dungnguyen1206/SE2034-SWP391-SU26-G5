@@ -1,10 +1,134 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${department.name} + ' - HAMS'">Chi tiết chuyên khoa</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI',sans-serif; background:#f8fafc; }
+        
+        .guest-navbar {
+            position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid #e2e8f0;
+            padding:0 48px;height:64px;display:flex;align-items:center;justify-content:space-between;
+            box-shadow:0 1px 8px rgba(0,0,0,.06);
+        }
+        .guest-brand { display:flex;align-items:center;gap:10px;font-size:22px;font-weight:800;color:#0f4c81;text-decoration:none; }
+        .guest-brand i { font-size:26px;color:#2563eb; }
+        .guest-nav { display:flex;gap:32px;list-style:none; }
+        .guest-nav a { color:#475569;text-decoration:none;font-size:14px;font-weight:500; }
+        .guest-nav a.active { color:#2563eb;font-weight:700; }
+        .guest-actions { display:flex;gap:10px; }
+        .btn-go { padding:8px 18px;border:1.5px solid #2563eb;border-radius:8px;color:#2563eb;font-size:14px;font-weight:600;text-decoration:none; }
+        .btn-gf { padding:8px 18px;background:#2563eb;border-radius:8px;color:#fff;font-size:14px;font-weight:600;text-decoration:none; }
+        .bc { background:#fff;border-bottom:1px solid #f1f5f9;padding:12px 48px;display:flex;align-items:center;gap:8px;font-size:13px;color:#64748b; }
+        .bc a { color:#2563eb;text-decoration:none; }
+        .doc-av { width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#dbeafe,#bfdbfe);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#1d4ed8;flex-shrink:0;overflow:hidden; }
+        .doc-av img { width:100%;height:100%;object-fit:cover;border-radius:50%; }
+        .container { max-width:1100px;margin:0 auto;padding:32px 48px 64px; }
+    </style>
 </head>
 <body>
+
+<nav class="guest-navbar">
+    <a href="/home" class="guest-brand"><i class="bi bi-hospital"></i> HAMS</a>
+    <ul class="guest-nav">
+        <li><a href="/home">Trang chủ</a></li>
+        <li><a href="/public/departments" class="active">Chuyên khoa</a></li>
+    </ul>
+    <div class="guest-actions" sec:authorize="!isAuthenticated()">
+        <a href="/login" class="btn-go">Đăng nhập</a>
+        <a href="/register" class="btn-gf">Đăng ký</a>
+    </div>
+    <div class="guest-actions" sec:authorize="isAuthenticated()">
+        <span style="color:#64748b;font-size:14px;" sec:authentication="name"></span>
+        <form th:action="@{/logout}" method="post" style="margin:0;">
+            <button type="submit" class="btn-go" style="border:none;cursor:pointer;">Đăng xuất</button>
+        </form>
+    </div>
+</nav>
+
+<div class="bc">
+    <a href="/home"><i class="bi bi-house"></i> Trang chủ</a>
+    <i class="bi bi-chevron-right" style="font-size:11px;"></i>
+    <a href="/public/departments">Chuyên khoa</a>
+    <i class="bi bi-chevron-right" style="font-size:11px;"></i>
+    <span th:text="${department.name}">Chi tiết</span>
+</div>
+
+<div class="container">
+    <div style="background:#fff;border-radius:16px;border:1px solid #e2e8f0;overflow:hidden;margin-bottom:28px;">
+        <div style="height:180px;background:linear-gradient(135deg,#0f4c81,#2563eb);display:flex;align-items:center;justify-content:center;overflow:hidden;">
+            <img th:if="${department.imageUrl != null}" th:src="${department.imageUrl}" th:alt="${department.name}"
+                 style="width:100%;height:100%;object-fit:cover;">
+            <i th:if="${department.imageUrl == null}" class="bi bi-hospital" style="font-size:80px;color:rgba(255,255,255,.25);"></i>
+        </div>
+        <div style="padding:24px 28px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+            <div>
+                <h1 style="font-size:22px;font-weight:800;color:#0f172a;margin-bottom:8px;" th:text="${department.name}">Khoa</h1>
+                <p th:if="${department.description != null}" style="font-size:14px;color:#475569;line-height:1.7;max-width:600px;" th:text="${department.description}"></p>
+                <p th:if="${department.description == null}" style="color:#94a3b8;">Chưa có mô tả</p>
+            </div>
+            <a sec:authorize="hasAuthority('ROLE_PATIENT')"
+               th:href="@{/patient/appointments/book/step2(departmentId=${department.id})}"
+               style="padding:12px 24px;background:#2563eb;border-radius:10px;color:#fff;font-size:14px;font-weight:700;
+                      text-decoration:none;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0;">
+                <i class="bi bi-calendar-plus"></i> Đặt lịch khoa này
+            </a>
+            <a sec:authorize="!hasAuthority('ROLE_PATIENT')" href="/login"
+               style="padding:12px 24px;background:#2563eb;border-radius:10px;color:#fff;font-size:14px;font-weight:700;
+                      text-decoration:none;display:inline-flex;align-items:center;gap:8px;white-space:nowrap;flex-shrink:0;">
+                <i class="bi bi-calendar-plus"></i> Đăng nhập để đặt lịch
+            </a>
+        </div>
+    </div>
+
+    <div style="font-size:17px;font-weight:700;color:#0f172a;display:flex;align-items:center;gap:8px;margin-bottom:18px;">
+        <i class="bi bi-people-fill" style="color:#2563eb;"></i>
+        Đội ngũ bác sĩ
+        <span style="font-size:13px;font-weight:400;color:#94a3b8;" th:text="'(' + ${#lists.size(doctors)} + ' bác sĩ)'"></span>
+    </div>
+
+    <div th:if="${#lists.isEmpty(doctors)}"
+         style="background:#fff;border-radius:14px;border:1px solid #e2e8f0;padding:48px;text-align:center;color:#94a3b8;">
+        <i class="bi bi-person-x" style="font-size:40px;display:block;margin-bottom:12px;"></i>
+        <p>Chưa có bác sĩ trong khoa này</p>
+    </div>
+
+    <div th:unless="${#lists.isEmpty(doctors)}"
+         style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;">
+        <div th:each="doc : ${doctors}"
+             style="background:#fff;border-radius:14px;border:1px solid #e2e8f0;padding:20px;display:flex;flex-direction:column;gap:14px;">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <div class="doc-av">
+                    <span th:text="${doc.firstName != null ? doc.firstName.substring(0,1).toUpperCase() : 'BS'}"></span>
+                </div>
+                <div>
+                    <div style="font-size:14px;font-weight:700;color:#0f172a;">
+                        <span th:if="${doc.degree != null}" th:text="${doc.degree + '. '}"></span>
+                        <span th:text="${doc.fullName}"></span>
+                    </div>
+                    <div th:if="${doc.experienceYears != null and doc.experienceYears > 0}"
+                         style="font-size:12px;color:#64748b;" th:text="${doc.experienceYears} + ' năm kinh nghiệm'"></div>
+                </div>
+            </div>
+            <a sec:authorize="hasAuthority('ROLE_PATIENT')"
+               th:href="@{/patient/appointments/book/step2(departmentId=${department.id}, doctorId=${doc.id})}"
+               style="padding:8px;text-align:center;border-radius:8px;background:#2563eb;color:#fff;font-size:12px;
+                      font-weight:600;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:4px;margin-top:auto;">
+                <i class="bi bi-calendar-plus"></i> Đặt lịch
+            </a>
+            <a sec:authorize="!hasAuthority('ROLE_PATIENT')" href="/login"
+               style="padding:8px;text-align:center;border-radius:8px;background:#2563eb;color:#fff;font-size:12px;
+                      font-weight:600;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:4px;margin-top:auto;">
+                <i class="bi bi-calendar-plus"></i> Đăng nhập
+            </a>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
