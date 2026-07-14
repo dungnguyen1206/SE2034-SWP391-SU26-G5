@@ -138,4 +138,25 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // Helper method để lấy tên đầy đủ
+    public String getFullName() {
+        StringBuilder fullName = new StringBuilder();
+        
+        if (firstName != null && !firstName.isEmpty()) {
+            fullName.append(firstName);
+        }
+        
+        if (middleName != null && !middleName.isEmpty()) {
+            if (fullName.length() > 0) fullName.append(" ");
+            fullName.append(middleName);
+        }
+        
+        if (lastName != null && !lastName.isEmpty()) {
+            if (fullName.length() > 0) fullName.append(" ");
+            fullName.append(lastName);
+        }
+        
+        return fullName.length() > 0 ? fullName.toString() : "Người dùng";
+    }
+
 }
