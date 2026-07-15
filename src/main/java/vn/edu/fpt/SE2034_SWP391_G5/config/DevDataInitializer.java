@@ -23,8 +23,6 @@ import org.springframework.context.annotation.Profile;
  *   manager456/ 123456   → MANAGER
  *   doctor123 / 123456   → DOCTOR
  *   doctor456 / 123456   → DOCTOR
- *   patient123/ 123456   → PATIENT
- *   patient456/ 123456   → PATIENT
  */
 @Slf4j
 @Component
@@ -48,8 +46,6 @@ public class DevDataInitializer implements CommandLineRunner {
         seed("manager456", "manager456@hams.vn", N("Manager"), N("Two"),   "MANAGER", null);
         seed("doctor123",  "doctor123@hams.vn",  N("Doctor"),  N("One"),   "DOCTOR",  firstDept());
         seed("doctor456",  "doctor456@hams.vn",  N("Doctor"),  N("Two"),   "DOCTOR",  firstDept());
-        seed("patient123", "patient123@hams.vn", N("Patient"), N("One"),   "PATIENT", null);
-        seed("patient456", "patient456@hams.vn", N("Patient"), N("Two"),   "PATIENT", null);
     }
 
     // ── helpers ──────────────────────────────────────────────────────────────
@@ -95,13 +91,6 @@ public class DevDataInitializer implements CommandLineRunner {
             user.setLicenseIssueDate(null);
             user.setLicenseNumber("DEV-" + username.toUpperCase());
             if (department != null) user.setDepartment(department);
-        }
-
-        if ("PATIENT".equals(roleName)) {
-            // Thêm thông tin cho bệnh nhân
-            user.setDateOfBirth(java.time.LocalDate.of(1995, 1, 1));
-            user.setBloodType("O+");
-            user.setGender("MALE");
         }
 
         user = userRepository.save(user);

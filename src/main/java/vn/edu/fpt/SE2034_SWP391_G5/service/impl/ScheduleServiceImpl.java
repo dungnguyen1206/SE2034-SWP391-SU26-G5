@@ -66,7 +66,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         // Filter: only display if week_schedule status is PUBLISHED
         schedules = schedules.stream()
-                .filter(ds -> ds.getWeekSchedule() != null && "PUBLISHED".equalsIgnoreCase(ds.getWeekSchedule().getStatus()))
+                .filter(ds -> ds.getWeekSchedule() != null && !"DRAFT".equalsIgnoreCase(ds.getWeekSchedule().getStatus()))
                 .collect(Collectors.toList());
 
         // Group by date
