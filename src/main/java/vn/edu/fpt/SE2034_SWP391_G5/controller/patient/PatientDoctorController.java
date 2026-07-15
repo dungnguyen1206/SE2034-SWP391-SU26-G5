@@ -50,4 +50,22 @@ public class PatientDoctorController {
         model.addAttribute("doctor", doctor);
         return "patient/doctors/detail";
     }
+
+    // ---- Danh sách khoa (public) ----
+    @GetMapping("/departments")
+    public String listDepartments(Model model) {
+        List<Department> departments = departmentService.getAllActiveDepartments();
+        model.addAttribute("departments", departments);
+        return "patient/departments/list";
+    }
+
+    // ---- Chi tiết khoa (public) ----
+    @GetMapping("/departments/{id}")
+    public String departmentDetail(@PathVariable Integer id, Model model) {
+        Department department = departmentService.getDepartmentById(id);
+        List<DoctorResponse> doctors = doctorService.getDoctorsByDepartment(id);
+        model.addAttribute("department", department);
+        model.addAttribute("doctors", doctors);
+        return "patient/departments/detail";
+    }
 }

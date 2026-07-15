@@ -37,7 +37,6 @@ public class SecurityConfig {
             .authenticationProvider(authenticationProvider())
             .authorizeHttpRequests(auth -> auth
 
-                // Trang công khai - không cần đăng nhập
                 .requestMatchers(
                     "/", "/home", "/home/**",
                     "/register", "/verify-otp",
@@ -50,15 +49,12 @@ public class SecurityConfig {
                     "/doctors", "/doctors/**",
                     // Xem bài viết - public
                     "/articles", "/articles/**"
-                    // Public pages - bất kỳ ai cũng xem được
-                    "/public/**",
-                    "/doctors", "/doctors/**"  // Public doctor list & detail
                 ).permitAll()
                 .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                 .requestMatchers("/manager/**").hasAuthority("ROLE_MANAGER")
                 .requestMatchers("/doctor/**").hasAuthority("ROLE_DOCTOR")
                 .requestMatchers("/receptionist/**").hasAuthority("ROLE_RECEPTIONIST")
-                // Patient pages - CHỈ cho ROLE_PATIENT
+                // Đặt lịch và các tính năng cá nhân vẫn yêu cầu login
                 .requestMatchers("/patient/**").hasAuthority("ROLE_PATIENT")
                 // Thông báo dùng chung cho tất cả các role đã đăng nhập
                 .requestMatchers("/notifications/**").authenticated()
@@ -75,7 +71,7 @@ public class SecurityConfig {
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")
-                .logoutSuccessUrl("/home")
+                .logoutSuccessUrl("/login?logout=true")
                 .invalidateHttpSession(true)
                 .clearAuthentication(true)
                 .deleteCookies("JSESSIONID")

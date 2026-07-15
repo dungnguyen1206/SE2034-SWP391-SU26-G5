@@ -592,37 +592,21 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         return schedules.stream()
                 .filter(schedule -> {
-                    // Nếu không phải hôm nay, cho phép hiển thị
                     if (!schedule.getWorkDate().isEqual(today)) {
                         return true;
                     }
 
-                    // Nếu là hôm nay, filter theo ca và thời gian hiện tại
                     if ("MORNING".equals(schedule.getShift())) {
-                        // Ca sáng: chỉ hiển thị nếu chưa quá 12:00
                         return now.isBefore(java.time.LocalTime.of(12, 0));
-                    } else if ("AFTERNOON".equals(schedule.getShift())) {
-                        // Ca chiều: chỉ hiển thị nếu đã qua 12:00 và chưa quá 17:00
-                        return now.isAfter(java.time.LocalTime.of(12, 0)) 
-                               && now.isBefore(java.time.LocalTime.of(17, 0));
+                    } else {
+                        return now.isBefore(java.time.LocalTime.of(17, 0));
                     }
-                    
-                    // Mặc định không hiển thị nếu shift không hợp lệ
-                    return false;
                 })
                 .map(schedule -> {
                     List<TimeSlot> slots = timeSlotRepository
                             .findByScheduleIdOrderByStartTimeAsc(schedule.getId());
 
                     List<ScheduleSlotResponse.SlotInfo> slotInfos = slots.stream()
-                            // Filter: Nếu là hôm nay, chỉ hiển thị slot chưa bắt đầu (startTime > now)
-                            .filter(slot -> {
-                                if (!schedule.getWorkDate().isEqual(today)) {
-                                    return true; // Không phải hôm nay thì cho phép tất cả slot
-                                }
-                                // Nếu là hôm nay, chỉ lấy slot có startTime > giờ hiện tại
-                                return slot.getStartTime().isAfter(now);
-                            })
                             .map(slot -> ScheduleSlotResponse.SlotInfo.builder()
                                     .slotId(slot.getId())
                                     .startTime(slot.getStartTime())
