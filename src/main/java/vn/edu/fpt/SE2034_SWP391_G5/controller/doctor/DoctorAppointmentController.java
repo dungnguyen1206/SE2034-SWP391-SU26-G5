@@ -290,6 +290,14 @@ public class DoctorAppointmentController {
             throw new org.springframework.security.access.AccessDeniedException("Chỉ định dịch vụ này không thuộc về lịch hẹn");
         }
         
+        // Ensure the service order is paid (status is not PENDING_PAYMENT and not CANCELLED)
+        if ("PENDING_PAYMENT".equals(order.getStatus())) {
+            throw new org.springframework.security.access.AccessDeniedException("Dịch vụ chưa được thanh toán, không thể cập nhật kết quả");
+        }
+        if ("CANCELLED".equals(order.getStatus())) {
+            throw new org.springframework.security.access.AccessDeniedException("Dịch vụ đã bị hủy, không thể cập nhật kết quả");
+        }
+
         // Update result, note and status
         order.setNote(note);
         order.setResult(result);
