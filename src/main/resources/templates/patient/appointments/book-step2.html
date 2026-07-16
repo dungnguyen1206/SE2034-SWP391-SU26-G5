@@ -187,15 +187,23 @@
                                     <input type="hidden" th:field="*{departmentId}">
                                     <input type="hidden" th:field="*{slotId}" id="selectedSlotId">
 
-                                    <!-- Dịch vụ -->
+                                    <!-- Dịch vụ - Đã ẩn vì tự động dùng "Khám lâm sàng tổng quát" -->
+                                    <!-- 
                                     <div class="book-form-field">
                                         <label>Dịch vụ khám <span style="color:#dc2626;">*</span></label>
                                         <select th:field="*{serviceId}" required>
                                             <option value="">-- Chọn dịch vụ --</option>
                                             <option th:each="svc : ${services}" th:value="${svc.id}"
+                                                th:selected="${svc.name == 'Khám lâm sàng' or svc.name == 'Kham lam sang'}"
                                                 th:text="${svc.name} + ' — ' + ${#numbers.formatDecimal(svc.referencePrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
                                             </option>
                                         </select>
+                                    </div>
+                                    -->
+                                    
+                                    <!-- Thông báo dịch vụ mặc định -->
+                                    <div class="alert-info" style="padding: 12px; background: #e0f2fe; border-left: 4px solid #0ea5e9; margin-bottom: 20px; border-radius: 4px;">
+                                        <strong>ℹ️ Dịch vụ:</strong> Khám lâm sàng tổng quát (tự động áp dụng)
                                     </div>
 
                                     <!-- Triệu chứng -->

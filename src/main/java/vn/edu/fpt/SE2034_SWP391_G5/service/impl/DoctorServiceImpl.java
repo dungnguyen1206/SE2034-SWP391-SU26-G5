@@ -56,6 +56,13 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public  DoctorResponse toResponse(User u) {
+        // Tính experienceYears từ licenseIssueDate
+        Integer experienceYears = 0;
+        if (u.getLicenseIssueDate() != null) {
+            experienceYears = LocalDate.now().getYear() - u.getLicenseIssueDate().getYear();
+            experienceYears = Math.max(0, experienceYears); // Đảm bảo không âm
+        }
+        
         return DoctorResponse.builder()
                 .id(u.getId())
                 .fullName(buildFullName(u.getFirstName(), u.getMiddleName(), u.getLastName()))
@@ -66,8 +73,7 @@ public class DoctorServiceImpl implements DoctorService {
                 .licenseNumber(u.getLicenseNumber())
                 .bio(u.getBio())
                 .avatar(u.getAvatar())
-                .experienceYears(u.getLicenseIssueDate() != null ? Period.between(u.getLicenseIssueDate(), LocalDate.now()).getYears() : 0)
-                .licenseIssueDate(u.getLicenseIssueDate())
+                .experienceYears(experienceYears)
                 .departmentName(u.getDepartment() != null ? u.getDepartment().getName() : null)
                 .departmentId(u.getDepartment() != null ? u.getDepartment().getId() : null)
                 .doctorStatus(u.getDoctorStatus())
@@ -75,11 +81,11 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
-    public String buildFullName(String lastName, String middleName, String firstName) {
+    public String buildFullName(String firstName, String middleName, String lastName) {
         StringBuilder sb = new StringBuilder();
-        if (lastName != null) sb.append(lastName).append(" ");
+        if (firstName != null) sb.append(firstName).append(" ");
         if (middleName != null) sb.append(middleName).append(" ");
-        if (firstName != null) sb.append(firstName);
+        if (lastName != null) sb.append(lastName);
         return sb.toString().trim();
     }
 

@@ -40,7 +40,7 @@ public class ReceptionistInvoiceController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("paymentStatus", paymentStatus);
         
-        model.addAttribute("receptionist", receptionistService.getReceptionistByUsername(userDetails.getUser().getEmail()));
+        model.addAttribute("receptionist", receptionistService.getReceptionistById(userDetails.getUser().getId()));
         model.addAttribute("activeMenu", "invoice");
         
         return "receptionist/invoice/list";
@@ -56,7 +56,7 @@ public class ReceptionistInvoiceController {
             InvoiceDetailResponse invoice = invoiceService.getInvoiceDetail(id);
             
             model.addAttribute("invoice", invoice);
-            model.addAttribute("receptionist", receptionistService.getReceptionistByUsername(userDetails.getUser().getEmail()));
+            model.addAttribute("receptionist", receptionistService.getReceptionistById(userDetails.getUser().getId()));
             model.addAttribute("activeMenu", "invoice");
             
             return "receptionist/invoice/detail";

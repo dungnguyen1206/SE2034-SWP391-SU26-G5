@@ -35,7 +35,7 @@ public class ReceptionistCheckInController {
         model.addAttribute("ticket", ticket);
         model.addAttribute("checkedIn", checkedIn);
         model.addAttribute("canCheckIn", canCheckIn);
-        model.addAttribute("receptionist", receptionistService.getReceptionistByUsername(userDetails.getUser().getEmail()));
+        model.addAttribute("receptionist", receptionistService.getReceptionistById(userDetails.getUser().getId()));
 
         return "receptionist/appointment/check-in-ticket";
     }

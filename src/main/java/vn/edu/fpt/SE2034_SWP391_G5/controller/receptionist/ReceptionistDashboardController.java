@@ -23,7 +23,7 @@ public class ReceptionistDashboardController {
                                 @RequestParam(required = false) String search,
                                 @RequestParam(defaultValue = "0") int page,
                                 Model model) {
-        model.addAttribute("receptionist", receptionistService.getReceptionistByUsername(userDetails.getUser().getEmail()));
+        model.addAttribute("receptionist", receptionistService.getReceptionistById(userDetails.getUser().getId()));
         model.addAttribute("stats", receptionistService.getTodayDashboardStatistics());
         model.addAttribute("todayAppointments", receptionistService.getTodayAppointmentsForDashboard(search, org.springframework.data.domain.PageRequest.of(page, 20)));
         model.addAttribute("search", search);

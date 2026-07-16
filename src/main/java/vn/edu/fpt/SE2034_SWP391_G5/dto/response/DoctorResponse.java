@@ -25,8 +25,8 @@ public class DoctorResponse {
     private String licenseNumber;
     private String bio;
     private String avatar;
-    private Integer experienceYears;
-    private LocalDate licenseIssueDate;
+    private Integer experienceYears; // Sẽ lấy từ field khác hoặc tính theo cách khác
+    // private LocalDate licenseIssueDate; // Đã xóa
     private String departmentName;
     private Integer departmentId;
     private String doctorStatus;

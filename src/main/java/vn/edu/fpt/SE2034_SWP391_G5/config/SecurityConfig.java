@@ -49,17 +49,17 @@ public class SecurityConfig {
                     // Xem danh sách + chi tiết bác sĩ — public
                     "/doctors", "/doctors/**",
                     // Xem bài viết - public
-                    "/articles", "/articles/**"
+                    "/articles", "/articles/**",
                     // Public pages - bất kỳ ai cũng xem được
                     "/public/**",
                     "/doctors", "/doctors/**"  // Public doctor list & detail
                 ).permitAll()
-                .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
-                .requestMatchers("/manager/**").hasAuthority("ROLE_MANAGER")
-                .requestMatchers("/doctor/**").hasAuthority("ROLE_DOCTOR")
-                .requestMatchers("/receptionist/**").hasAuthority("ROLE_RECEPTIONIST")
-                // Patient pages - CHỈ cho ROLE_PATIENT
-                .requestMatchers("/patient/**").hasAuthority("ROLE_PATIENT")
+                .requestMatchers("/admin/**").hasAuthority("ADMIN")
+                .requestMatchers("/manager/**").hasAuthority("MANAGER")
+                .requestMatchers("/doctor/**").hasAuthority("DOCTOR")
+                .requestMatchers("/receptionist/**").hasAuthority("RECEPTIONIST")
+                // Patient pages - CHỈ cho PATIENT
+                .requestMatchers("/patient/**").hasAuthority("PATIENT")
                 // Thông báo dùng chung cho tất cả các role đã đăng nhập
                 .requestMatchers("/notifications/**").authenticated()
                 .anyRequest().authenticated()

@@ -24,7 +24,7 @@ public class ReceptionistQueueController {
         List<QueueResponse> queueRooms = appointmentService.getTodayQueueBoard();
         model.addAttribute("queueRooms", queueRooms);
         model.addAttribute("activeMenu", "queue");
-        model.addAttribute("receptionist", receptionistService.getReceptionistByUsername(userDetails.getUser().getEmail()));
+        model.addAttribute("receptionist", receptionistService.getReceptionistById(userDetails.getUser().getId()));
         return "receptionist/queue/list";
     }
 }

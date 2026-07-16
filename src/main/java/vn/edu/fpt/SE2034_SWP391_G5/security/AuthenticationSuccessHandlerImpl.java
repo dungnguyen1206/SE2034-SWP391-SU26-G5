@@ -17,26 +17,45 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-
+        
+        // Ưu tiên role theo thứ tự: ADMIN > MANAGER > DOCTOR > RECEPTIONIST > PATIENT
         for (GrantedAuthority authority : authorities) {
             String role = authority.getAuthority();
-
-            switch (role) {
-                case "ROLE_PATIENT":
-                    response.sendRedirect("/patient/dashboard");
-                    return;
-                case "ROLE_DOCTOR":
-                    response.sendRedirect("/doctor/dashboard");
-                    return;
-                case "ROLE_RECEPTIONIST":
-                    response.sendRedirect("/receptionist/dashboard");
-                    return;
-                case "ROLE_MANAGER":
-                    response.sendRedirect("/manager/dashboard");
-                    return;
-                case "ROLE_ADMIN":
-                    response.sendRedirect("/admin/account-list");
-                    return;
+            if ("ADMIN".equals(role)) {
+                response.sendRedirect("/admin/account-list");
+                return;
+            }
+        }
+        
+        for (GrantedAuthority authority : authorities) {
+            String role = authority.getAuthority();
+            if ("MANAGER".equals(role)) {
+                response.sendRedirect("/manager/dashboard");
+                return;
+            }
+        }
+        
+        for (GrantedAuthority authority : authorities) {
+            String role = authority.getAuthority();
+            if ("DOCTOR".equals(role)) {
+                response.sendRedirect("/doctor/dashboard");
+                return;
+            }
+        }
+        
+        for (GrantedAuthority authority : authorities) {
+            String role = authority.getAuthority();
+            if ("RECEPTIONIST".equals(role)) {
+                response.sendRedirect("/receptionist/dashboard");
+                return;
+            }
+        }
+        
+        for (GrantedAuthority authority : authorities) {
+            String role = authority.getAuthority();
+            if ("PATIENT".equals(role)) {
+                response.sendRedirect("/patient/dashboard");
+                return;
             }
         }
 

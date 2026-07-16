@@ -71,12 +71,14 @@ public class PatientAppointmentController {
                             Model model) {
         Department department = departmentService.getDepartmentById(departmentId);
         List<DoctorResponse> doctors = doctorService.getDoctorsByDepartment(departmentId);
-        List<MedicalService> services = medicalServiceRepository
-                .findByDepartmentIdAndStatus(departmentId, "ACTIVE");
+        
+        // Không cần lấy danh sách services nữa vì sẽ dùng service mặc định
+        // List<MedicalService> services = medicalServiceRepository
+        //         .findByDepartmentIdAndStatus(departmentId, "ACTIVE");
 
         model.addAttribute("department", department);
         model.addAttribute("doctors", doctors);
-        model.addAttribute("services", services);
+        // model.addAttribute("services", services); // Không cần nữa
         model.addAttribute("selectedDoctorId", doctorId);
         // Trước: model.addAttribute("bookRequest", new CreateAppointmentRequest());
         //        → doctorId và departmentId null → hidden fields render value="" → POST gửi null
@@ -135,6 +137,23 @@ public class PatientAppointmentController {
             redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng điền đầy đủ thông tin");
             return "redirect:" + step2Url;
         }
+        
+        // Tự động gán dịch vụ "Khám lâm sàng" cho department này
+        if (request.getServiceId() == null) {
+            try {
+                MedicalService defaultService = medicalServiceRepository
+                        .findFirstByDepartmentIdAndNameContainingIgnoreCaseAndStatus(
+                                request.getDepartmentId(), "tổng quát", "ACTIVE")
+                        .orElseThrow(() -> new RuntimeException(
+                                "Không tìm thấy dịch vụ khám tổng quát cho khoa này"));
+                request.setServiceId(defaultService.getId());
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMessage", 
+                        "Lỗi hệ thống: " + e.getMessage());
+                return "redirect:" + step2Url;
+            }
+        }
+        
         try {
             AppointmentResponse result = appointmentService.bookAppointment(
                     userDetails.getUser().getId(), request);

@@ -102,11 +102,16 @@
                                 <span class="status-badge"
                                     th:classappend="${appt.status == 'WAITING'} ? 'status-pending' :
                                                   (${appt.status == 'CONFIRMED'} ? 'status-confirmed' :
+                                                  (${appt.status == 'EXAMINING'} ? 'status-confirmed' :
                                                   (${appt.status == 'COMPLETED'} ? 'status-completed' :
-                                                  (${appt.status == 'CANCELLED'} ? 'status-cancelled' : 'status-pending')))" th:text="${appt.status == 'WAITING'} ? 'Đã đặt lịch' :
-                                           (${appt.status == 'CONFIRMED'} ? 'Đã đặt lịch' :
+                                                  (${appt.status == 'CANCELLED'} ? 'status-cancelled' :
+                                                  (${appt.status == 'NO_SHOW'} ? 'status-cancelled' : 'status-pending')))))"
+                                    th:text="${appt.status == 'WAITING'} ? 'Chờ xác nhận' :
+                                           (${appt.status == 'CONFIRMED'} ? 'Đã xác nhận' :
+                                           (${appt.status == 'EXAMINING'} ? 'Đang khám' :
                                            (${appt.status == 'COMPLETED'} ? 'Hoàn thành' :
-                                           (${appt.status == 'CANCELLED'} ? 'Đã hủy' : ${appt.status})))">
+                                           (${appt.status == 'CANCELLED'} ? 'Đã hủy' :
+                                           (${appt.status == 'NO_SHOW'} ? 'Vắng mặt' : ${appt.status})))))">
                                 </span>
                             </td>
                             <td>

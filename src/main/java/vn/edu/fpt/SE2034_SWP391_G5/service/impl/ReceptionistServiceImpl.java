@@ -44,6 +44,28 @@ public class ReceptionistServiceImpl implements ReceptionistService {
     }
 
     @Override
+    public ReceptionistResponse getReceptionistById(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy nhân viên tiếp tân với ID: " + userId));
+        
+        String fullName = getUserFullName(user);
+        String avatarText = getAvatarText(user);
+        
+        return new ReceptionistResponse(user.getId(), fullName, avatarText);
+    }
+
+    private String getAvatarText(User user) {
+        String avatarText = "";
+        if (user.getLastName() != null && !user.getLastName().isEmpty()) {
+            avatarText += user.getLastName().substring(0, 1).toUpperCase();
+        }
+        if (user.getFirstName() != null && !user.getFirstName().isEmpty()) {
+            avatarText += user.getFirstName().substring(0, 1).toUpperCase();
+        }
+        return avatarText;
+    }
+
+    @Override
     public ReceptionistDashboardResponse getTodayDashboardStatistics() {
         LocalDate today = LocalDate.now();
         return ReceptionistDashboardResponse.builder()

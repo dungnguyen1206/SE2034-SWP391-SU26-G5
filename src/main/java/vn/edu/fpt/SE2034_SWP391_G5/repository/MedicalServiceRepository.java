@@ -17,6 +17,10 @@ public interface MedicalServiceRepository extends JpaRepository<MedicalService, 
 
     List<MedicalService> findByDepartmentIdAndStatus(Integer departmentId, String status);
     List<MedicalService> findByStatus(String status);
+    
+    // Tìm dịch vụ khám lâm sàng mặc định cho department
+    Optional<MedicalService> findFirstByDepartmentIdAndNameContainingIgnoreCaseAndStatus(
+            Integer departmentId, String name, String status);
 
     @Query("select ms from MedicalService ms left join fetch ms.department d" +
             " where (:filterKey is null or ms.name like :filterKey )" +

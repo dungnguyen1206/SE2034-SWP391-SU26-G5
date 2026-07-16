@@ -29,7 +29,7 @@ public class CustomUserDetails implements UserDetails {
         }
         List<GrantedAuthority> authorities = new ArrayList<>();
         for (vn.edu.fpt.SE2034_SWP391_G5.entity.UserRole userRole : user.getUserRoles()) {
-            authorities.add(new SimpleGrantedAuthority("ROLE_" + userRole.getRole().getName()));
+            authorities.add(new SimpleGrantedAuthority(userRole.getRole().getName()));
         }
         return authorities;
     }

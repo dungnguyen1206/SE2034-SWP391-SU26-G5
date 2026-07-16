@@ -84,7 +84,7 @@ public class DevDataInitializer implements CommandLineRunner {
                 .status("ACTIVE")
                 .emailVerified(true)
                 .emailVerifiedAt(LocalDateTime.now())
-                .licenseIssueDate(null)
+                // .licenseIssueDate(null) // Đã xóa
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
@@ -92,7 +92,7 @@ public class DevDataInitializer implements CommandLineRunner {
         if ("DOCTOR".equals(roleName)) {
             user.setDoctorStatus("ACTIVE");
             user.setDegree("MD");
-            user.setLicenseIssueDate(null);
+            // user.setLicenseIssueDate(null); // Đã xóa
             user.setLicenseNumber("DEV-" + username.toUpperCase());
             if (department != null) user.setDepartment(department);
         }

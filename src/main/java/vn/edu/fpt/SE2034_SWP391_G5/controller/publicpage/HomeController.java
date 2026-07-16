@@ -6,14 +6,18 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.Article;
+import vn.edu.fpt.SE2034_SWP391_G5.service.ArticleService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DepartmentService;
+
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
 public class HomeController {
 
     private final DepartmentService departmentService;
+    private final ArticleService articleService;
 
     @GetMapping({"/", "/home"})
     public String getHomePage(Model model, Authentication authentication) {
@@ -21,7 +25,7 @@ public class HomeController {
         if (authentication != null && authentication.isAuthenticated()) {
             for (GrantedAuthority authority : authentication.getAuthorities()) {
                 String role = authority.getAuthority();
-
+                
                 // Staff roles nên redirect về dashboard của họ
                 switch (role) {
                     case "ROLE_ADMIN":
@@ -39,8 +43,22 @@ public class HomeController {
                 }
             }
         }
-
+        
         model.addAttribute("departments", departmentService.getAllActiveDepartments());
+        
+        // Load articles đã publish (lấy 3 bài mới nhất)
+        try {
+            List<Article> articles = articleService.getArticlesByFilters(null, null, "PUBLISHED");
+            // Lấy tối đa 3 bài mới nhất
+            if (articles.size() > 3) {
+                articles = articles.subList(0, 3);
+            }
+            model.addAttribute("articles", articles);
+        } catch (Exception e) {
+            // Nếu có lỗi (ví dụ database không kết nối), truyền list rỗng
+            model.addAttribute("articles", List.of());
+        }
+        
         return "public/home";
     }
 }

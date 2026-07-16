@@ -54,7 +54,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
                 "JOIN u.userRoles ur JOIN ur.role r " +
                 "WHERE r.name = 'DOCTOR' " +
                 "AND u.department.id = :departmentId " +
-                "AND u.doctorStatus = 'ACTIVE'")
+                "AND u.doctorStatus = 'ACTIVE' " +
+                "AND u.status = 'ACTIVE'")
         List<User> findActiveDoctorsByDepartmentId(@Param("departmentId") Integer departmentId);
 
         Optional<User> findByEmail(String email);

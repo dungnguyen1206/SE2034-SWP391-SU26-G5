@@ -117,16 +117,7 @@ public class ReceptionistAppointmentController {
     }
 
     private void addReceptionistInfo(Model model, CustomUserDetails userDetails) {
-        User user = userDetails.getUser();
-        String fullName = (user.getLastName() + " " + (user.getMiddleName() != null ? user.getMiddleName() + " " : "") + user.getFirstName()).trim().replaceAll("\\s+", " ");
-        String avatarText = "";
-        if (user.getLastName() != null && !user.getLastName().isEmpty()) {
-            avatarText += user.getLastName().substring(0, 1).toUpperCase();
-        }
-        if (user.getFirstName() != null && !user.getFirstName().isEmpty()) {
-            avatarText += user.getFirstName().substring(0, 1).toUpperCase();
-        }
-        model.addAttribute("receptionist", new ReceptionistResponse(user.getId(), fullName, avatarText));
+        model.addAttribute("receptionist", receptionistService.getReceptionistById(userDetails.getUser().getId()));
     }
 
     private void addPageInfo(Model model, String search, String status, LocalDate fromDate, LocalDate toDate) {
@@ -213,4 +204,4 @@ public class ReceptionistAppointmentController {
             return "redirect:/receptionist/appointment/walk-in";
         }
     }
-}
+}
