@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+    <!-- Tab Pane 2: Dịch vụ khám -->
+    <div th:fragment="services-tab" class="tab-pane" th:classappend="${tab == 'services' ? 'active' : ''}">
+        <!-- Clinical / Lab Services Prescribed -->
+        <div class="detail-content-card">
+            <div class="card-header-row" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <h3 class="card-title" style="font-size: 16px; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px; margin: 0;">
+                    <i class="fa-solid fa-vials" style="color: #9333ea;"></i> Dịch vụ khám
+                </h3>
+                <a th:if="${medicalRecord != null}"
+                   th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab='services', action='selectServices')}"
+                   class="btn-create-record" style="background-color: #2563eb;">
+                    <i class="fa-solid fa-plus"></i> Chọn dịch vụ khám
+                </a>
+                <button th:if="${medicalRecord == null}"
+                        onclick="alert('Vui lòng tạo hồ sơ bệnh án trước khi chọn dịch vụ khám!')"
+                        class="btn-create-record"
+                        style="background-color: #cbd5e1; color: #64748b; cursor: not-allowed; border: none;">
+                    <i class="fa-solid fa-plus"></i> Chọn dịch vụ khám
+                </button>
+            </div>
+            <hr class="card-divider">
+
+            <!-- Empty State if no medical record or no service orders -->
+            <div th:if="${medicalRecord == null or #lists.isEmpty(medicalRecord.medicalServiceOrders)}"
+                 class="empty-record-state" style="padding: 40px 20px;">
+                <i class="fa-solid fa-laptop-medical" style="color: #cbd5e1; font-size: 40px; margin-bottom: 12px;"></i>
+                <p>Không có dịch vụ khám nào được chỉ định cho lịch hẹn này.</p>
+            </div>
+
+            <!-- Table of clinical service orders if present -->
+            <div th:if="${medicalRecord != null and not #lists.isEmpty(medicalRecord.medicalServiceOrders)}"
+                 style="overflow-x: auto; margin-top: 15px;">
+                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #e2e8f0; color: #64748b; font-weight: 600;">
+                            <th style="padding: 12px 8px; width: 60px;">STT</th>
+                            <th style="padding: 12px 8px;">Tên dịch vụ khám</th>
+                            <th style="padding: 12px 8px; width: 120px;">Giá tiền</th>
+                            <th style="padding: 12px 8px; width: 150px;">Trạng thái</th>
+                            <th style="padding: 12px 8px;">Ghi chú / Chỉ định</th>
+                            <th style="padding: 12px 8px;">Kết quả</th>
+                            <th style="padding: 12px 8px; width: 130px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="order, iter : ${medicalRecord.medicalServiceOrders}"
+                            style="border-bottom: 1px solid #f1f5f9; color: #334155;">
+                            <td style="padding: 12px 8px; font-weight: 500;" th:text="${iter.count}">1</td>
+                            <td style="padding: 12px 8px; font-weight: 600; color: #0f172a;" th:text="${order.medicalService.name}">Xét nghiệm máu</td>
+                            <td style="padding: 12px 8px; font-weight: 600; color: #059669;"
+                                th:text="${order.priceReference != null ? #numbers.formatDecimal(order.priceReference, 0, 'COMMA', 0, 'POINT') + ' đ' : '-'}">300.000 đ</td>
+                            <td style="padding: 12px 8px;">
+                                <span th:if="${order.status == 'PENDING_PAYMENT'}"
+                                      style="background-color: #fee2e2; color: #991b1b; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-block;">Chờ thanh toán</span>
+                                <span th:if="${order.status == 'PENDING' or order.status == 'PAID'}"
+                                      style="background-color: #fef3c7; color: #d97706; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-block;">Chờ thực hiện</span>
+                                <span th:if="${order.status == 'COMPLETED'}"
+                                      style="background-color: #d1fae5; color: #059669; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-block;">Đã hoàn thành</span>
+                                <span th:if="${order.status == 'CANCELLED'}"
+                                      style="background-color: #f1f5f9; color: #64748b; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-block;">Đã hủy</span>
+                                <span th:if="${order.status != 'PENDING_PAYMENT' and order.status != 'PENDING' and order.status != 'PAID' and order.status != 'COMPLETED' and order.status != 'CANCELLED'}"
+                                      style="background-color: #f1f5f9; color: #64748b; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; display: inline-block;"
+                                      th:text="${order.status}">Khác</span>
+                            </td>
+                            <td style="padding: 12px 8px; color: #64748b;"
+                                th:text="${order.note != null and !order.note.isEmpty() ? order.note : '-'}">-</td>
+                            <td style="padding: 12px 8px; font-weight: 500;"
+                                th:text="${order.result != null and !order.result.isEmpty() ? order.result : (order.status == 'COMPLETED' ? 'Đã có kết quả' : 'Chưa có kết quả')}">-</td>
+                            <td style="padding: 12px 8px;">
+                                <button type="button"
+                                        th:if="${order.status != 'PENDING_PAYMENT' and order.status != 'CANCELLED'}"
+                                        th:onclick="openEditResultModal([[${order.id}]], [[${order.medicalService.name}]], [[${order.result != null ? order.result : ''}]], [[${order.note != null ? order.note : ''}]])"
+                                        class="btn-create-record"
+                                        style="background-color: #2563eb; color: white; padding: 6px 12px; font-size: 12px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; border: none; cursor: pointer;">
+                                    <i class="fa-solid fa-pen-to-square"></i> Nhập KQ
+                                </button>
+                                <span th:if="${order.status == 'PENDING_PAYMENT'}"
+                                      style="color: #ef4444; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; font-weight: 600;">
+                                    <i class="fa-solid fa-lock"></i> Chưa thanh toán
+                                </span>
+                                <span th:if="${order.status == 'CANCELLED'}"
+                                      style="color: #94a3b8; font-size: 13px; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class="fa-solid fa-ban"></i> Đã hủy
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
