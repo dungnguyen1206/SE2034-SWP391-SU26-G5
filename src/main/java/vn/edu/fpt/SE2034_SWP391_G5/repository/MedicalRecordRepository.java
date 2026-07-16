@@ -15,7 +15,11 @@ public interface MedicalRecordRepository extends JpaRepository<MedicalRecord, Lo
 
     List<MedicalRecord> findByPatientIdOrderByExaminationDateDesc(Long patientId);
 
-    Optional<MedicalRecord> findByAppointmentId(Long appointmentId);
+    @Query("SELECT mr FROM MedicalRecord mr " +
+           "LEFT JOIN FETCH mr.medicalServiceOrders mso " +
+           "LEFT JOIN FETCH mso.medicalService " +
+           "WHERE mr.appointment.id = :appointmentId")
+    Optional<MedicalRecord> findByAppointmentId(@Param("appointmentId") Long appointmentId);
 
     @Query("SELECT COUNT(mr) FROM MedicalRecord mr WHERE mr.doctor.id = :doctorId " +
            "AND mr.examinationDate >= :start AND mr.examinationDate < :end " +

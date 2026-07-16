@@ -141,34 +141,6 @@
         .empty-state { text-align: center; padding: 48px; color: #94a3b8; }
         .empty-state i { font-size: 40px; margin-bottom: 12px; display: block; }
 
-        /* PATIENT NOTICE BANNER */
-        .patient-notice {
-            background: linear-gradient(135deg, #eff6ff, #dbeafe);
-            border-bottom: 1px solid #bfdbfe;
-            padding: 12px 48px;
-            display: flex; align-items: center; justify-content: center; gap: 12px;
-        }
-        .patient-notice-icon { 
-            font-size: 20px; color: #2563eb;
-            animation: pulse-icon 2s ease-in-out infinite;
-        }
-        @keyframes pulse-icon {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-        .patient-notice-text {
-            font-size: 14px; color: #1e40af; font-weight: 500;
-        }
-        .patient-notice-link {
-            color: #2563eb; font-weight: 700; text-decoration: none;
-            padding: 6px 16px; background: #fff; border-radius: 8px;
-            border: 1.5px solid #2563eb;
-            transition: all .2s;
-        }
-        .patient-notice-link:hover {
-            background: #2563eb; color: #fff;
-        }
-
         @media (max-width: 768px) {
             .navbar { padding: 0 20px; }
             .navbar-nav { display: none; }
@@ -190,7 +162,7 @@
     </a>
     <ul class="navbar-nav">
         <li><a href="/home" class="active">Trang chủ</a></li>
-        <li><a href="/public/departments">Chuyên khoa</a></li>
+        <li><a href="/patient/departments">Chuyên khoa</a></li>
         <li><a href="/doctors">Bác sĩ</a></li>
         <li><a href="/articles">Bài viết chuyên môn</a></li>
     </ul>
@@ -219,25 +191,12 @@
                 <i class="bi bi-speedometer2"></i> Quản trị
             </a>
             
-            <form method="post" action="/logout" style="display: inline; margin: 0;">
-                <button type="submit" class="btn-filled" style="background: #ef4444; border: none; cursor: pointer;">
-                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
-                </button>
-            </form>
+            <a href="/logout" class="btn-filled" style="background: #ef4444; border-color: #ef4444; text-decoration: none;">
+                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+            </a>
         </div>
     </div>
 </nav>
-
-<!-- PATIENT WELCOME BANNER (chỉ hiện khi patient đã login) -->
-<div class="patient-notice" th:if="${isPatient}" style="display: flex;">
-    <i class="bi bi-info-circle patient-notice-icon"></i>
-    <span class="patient-notice-text">
-        Chào mừng bạn trở lại! Đây là trang công khai.
-    </span>
-    <a href="/patient/dashboard" class="patient-notice-link">
-        <i class="bi bi-speedometer2"></i> Về Dashboard của bạn
-    </a>
-</div>
 
 <!-- HERO -->
 <section class="hero">
@@ -247,7 +206,7 @@
         <p>HAMS kết nối bạn với đội ngũ bác sĩ chuyên nghiệp. Đặt lịch khám nhanh chóng, tiện lợi, không cần xếp hàng.</p>
         <div class="hero-btns">
             <a href="/login" class="btn-hero-white"><i class="bi bi-calendar-plus"></i> Đặt lịch khám</a>
-            <a href="/public/departments" class="btn-hero-ghost"><i class="bi bi-grid"></i> Xem chuyên khoa</a>
+            <a href="/patient/departments" class="btn-hero-ghost"><i class="bi bi-grid"></i> Xem chuyên khoa</a>
         </div>
         <div class="hero-stat-row">
             <div>
@@ -279,7 +238,7 @@
                 <div class="dept-desc" th:if="${dept.description != null}" th:text="${dept.description}"></div>
                 <div class="dept-actions">
                     <!-- Xem chi tiết: public, không cần login -->
-                    <a th:href="@{/public/departments/{id}(id=${dept.id})}" class="btn-detail">
+                    <a th:href="@{/patient/departments/{id}(id=${dept.id})}" class="btn-detail">
                         <i class="bi bi-info-circle"></i> Chi tiết
                     </a>
                     <!-- Đặt lịch: yêu cầu login, Spring Security tự redirect về /login -->
@@ -363,9 +322,9 @@
         <div class="footer-col">
             <div class="footer-col-title">Chuyên khoa</div>
             <ul>
-                <li><a href="/public/departments">Tất cả chuyên khoa</a></li>
+                <li><a href="/patient/departments">Tất cả chuyên khoa</a></li>
                 <li th:each="dept, stat : ${departments}" th:if="${stat.index < 4}">
-                    <a th:href="@{/public/departments/{id}(id=${dept.id})}" th:text="${dept.name}"></a>
+                    <a th:href="@{/patient/departments/{id}(id=${dept.id})}" th:text="${dept.name}"></a>
                 </li>
             </ul>
         </div>

@@ -592,34 +592,24 @@ public class AppointmentServiceImpl implements AppointmentService {
         LocalDate today = LocalDate.now();
         java.time.LocalTime now = java.time.LocalTime.now();
 
-        System.out.println("DEBUG: getAvailableSchedules called for doctor " + doctorId + 
-                         ", found " + schedules.size() + " schedules from database");
-
         return schedules.stream()
-                // Remove the overly restrictive date/time filtering - let patients see all available schedules
+                .filter(schedule -> {
+                    if (!schedule.getWorkDate().isEqual(today)) {
+                        return true;
+                    }
+
+                    if ("MORNING".equals(schedule.getShift())) {
+                        return now.isBefore(java.time.LocalTime.of(12, 0));
+                    } else {
+                        return now.isBefore(java.time.LocalTime.of(17, 0));
+                    }
+                })
                 .map(schedule -> {
                     List<TimeSlot> slots = timeSlotRepository
                             .findByScheduleIdOrderByStartTimeAsc(schedule.getId());
 
                     List<ScheduleSlotResponse.SlotInfo> slotInfos = slots.stream()
-                            // Only filter slots for today - if not today, show all slots
-                            .filter(slot -> {
-                                if (!schedule.getWorkDate().isEqual(today)) {
-                                    return true; // Not today - show all slots
-                                }
-                                // If today, only show slots that haven't started yet
-                                return slot.getStartTime().isAfter(now);
-                            })
-                            .map(slot -> {
-                                // Debug logging
-                                System.out.println("DEBUG: Processing slot - " + 
-                                                 "Schedule: " + schedule.getId() + 
-                                                 ", Slot: " + slot.getId() + 
-                                                 ", Time: " + slot.getStartTime() + "-" + slot.getEndTime() + 
-                                                 ", Status: " + slot.getStatus() + 
-                                                 ", Booked: " + slot.getBookedCapacity() + "/" + slot.getMaxCapacity());
-                                
-                                return ScheduleSlotResponse.SlotInfo.builder()
+                            .map(slot -> ScheduleSlotResponse.SlotInfo.builder()
                                     .slotId(slot.getId())
                                     .startTime(slot.getStartTime())
                                     .endTime(slot.getEndTime())
@@ -628,8 +618,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                                     .status(slot.getStatus())
                                     .available("AVAILABLE".equals(slot.getStatus())
                                             && slot.getBookedCapacity() < slot.getMaxCapacity())
-                                    .build();
-                            })
+                                    .build())
                             .toList();
 
                     String shiftLabel = "MORNING".equals(schedule.getShift()) ? "Ca sáng" : "Ca chiều";
@@ -662,14 +651,11 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khung giờ"));
 
         // Chỉ cho phép đặt lịch khi tuần làm việc đã được FINALIZED
-        // TEMPORARILY DISABLED FOR TESTING
         DoctorSchedule schedule = slot.getSchedule();
-        /*
         if (schedule == null || schedule.getWeekSchedule() == null
                 || !"FINALIZED".equals(schedule.getWeekSchedule().getStatus())) {
             throw new BadRequestException("Lịch khám này chưa được công bố, vui lòng chọn lịch khác");
         }
-        */
 
         if (!"AVAILABLE".equals(slot.getStatus()) || slot.getBookedCapacity() >= slot.getMaxCapacity()) {
             throw new BadRequestException("Khung giờ này đã đầy, vui lòng chọn khung giờ khác");
