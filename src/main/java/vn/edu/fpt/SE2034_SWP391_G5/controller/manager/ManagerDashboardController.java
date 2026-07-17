@@ -10,6 +10,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentStatusCountResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorOnDutyResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Appointment;
+import vn.edu.fpt.SE2034_SWP391_G5.enums.AppointmentStatus;
 import vn.edu.fpt.SE2034_SWP391_G5.service.*;
 import vn.edu.fpt.SE2034_SWP391_G5.service.impl.*;
 
@@ -67,6 +68,7 @@ public class ManagerDashboardController {
         model.addAttribute("examiningAppointment", appointmentStatusCountResponseMap.get("EXAMINING"));
         model.addAttribute("completedAppointment", appointmentStatusCountResponseMap.get("COMPLETED"));
         model.addAttribute("cancelledAppointment", appointmentStatusCountResponseMap.get("CANCELLED"));
+        model.addAttribute("noShowAppointment", appointmentStatusCountResponseMap.get(AppointmentStatus.NO_SHOW.toString()));
         model.addAttribute("todayAppointmentsList", todayAppointmentsList.getContent());
         model.addAttribute("doctorOnDutyResponses", doctorOnDutyResponses.getContent());
         model.addAttribute("currentPageAppointment", pageAppointment);
