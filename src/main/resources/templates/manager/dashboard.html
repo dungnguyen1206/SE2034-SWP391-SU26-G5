@@ -26,27 +26,25 @@
                     <div class="dashboard-stat-card">
                         <div class="dashboard-stat-label">Tổng lịch hẹn</div>
                         <div class="dashboard-stat-value" th:text="${totalAppointment}">1,284</div>
-                        <div class="dashboard-stat-note">+64 trong tháng này</div>
+
                     </div>
 
                     <div class="dashboard-stat-card">
                         <div class="dashboard-stat-label">Tổng bệnh nhân</div>
                         <div class="dashboard-stat-value" th:text="${totalPatient}">892</div>
-                        <div class="dashboard-stat-note">+28 trong tháng này</div>
+
                     </div>
 
                     <div class="dashboard-stat-card">
                         <div class="dashboard-stat-label">Bác sĩ đang hoạt động</div>
                         <div class="dashboard-stat-value" th:text="${doctorActive}">18</div>
-                        <div class="dashboard-stat-note" th:text="${doctorInactive + ' Bác sĩ đang nghỉ'}">2 Bác sĩ đang
-                            nghỉ
-                        </div>
+
                     </div>
 
                     <div class="dashboard-stat-card">
                         <div class="dashboard-stat-label">Doanh thu tháng này</div>
                         <div class="dashboard-stat-value" th:text="${totalAmount} + 'VND'">128,4 triệu VND</div>
-                        <div class="dashboard-stat-note">+12% so với tháng trước</div>
+
                     </div>
 
                 </div>
