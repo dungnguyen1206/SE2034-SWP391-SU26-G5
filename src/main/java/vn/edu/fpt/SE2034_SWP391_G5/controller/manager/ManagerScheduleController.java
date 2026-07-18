@@ -16,16 +16,12 @@ import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorScheduleResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorScheduleRowResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.RoomResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Department;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.Room;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.WeekSchedule;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.DepartmentRepository;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.WeekScheduleRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller

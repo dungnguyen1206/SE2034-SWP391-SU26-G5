@@ -69,6 +69,62 @@
 
         <input id="createShiftToggle" class="schedule-panel-toggle" type="checkbox">
 
+        <!-- IMPORT EXCEL - SUCCESS MESSAGE -->
+        <section class="schedule-import-alert success"
+                 th:if="${importSuccessMessage != null}">
+            <i class="bi bi-check-circle-fill"></i>
+            <span th:text="${importSuccessMessage}"></span>
+        </section>
+
+        <!-- IMPORT EXCEL - GENERAL ERROR -->
+        <section class="schedule-import-alert error"
+                 th:if="${importErrorMessage != null}">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span th:text="${importErrorMessage}"></span>
+        </section>
+
+        <!-- IMPORT EXCEL - ROW ERRORS -->
+        <section class="schedule-import-error-card"
+                 th:if="${scheduleImportResult != null
+                  and scheduleImportResult.errors != null
+                  and !scheduleImportResult.errors.isEmpty()}">
+
+            <header>
+                <div>
+                    <strong>Chi tiết lỗi trong file Excel</strong>
+                    <p>
+                        Tổng:
+                        <span th:text="${scheduleImportResult.totalRows}"></span>
+                        dòng —
+                        Hợp lệ:
+                        <span th:text="${scheduleImportResult.validRows}"></span>
+                        dòng
+                    </p>
+                </div>
+            </header>
+
+            <div class="schedule-import-error-list">
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Dòng</th>
+                        <th>Cột</th>
+                        <th>Nội dung lỗi</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="importError : ${scheduleImportResult.errors}">
+                        <td th:text="${importError.rowNumber}"></td>
+                        <td th:text="${importError.field}"></td>
+                        <td th:text="${importError.errorMessage}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+
         <div class="schedule-workspace">
             <div class="schedule-main-column">
 
@@ -120,16 +176,54 @@
                         </form>
                     </div>
 
-                    <label th:unless="${presentWeek.status == 'FINALIZED' or presentWeek.status == 'EXPIRED'}"
-                           class="schedule-primary-button"
-                           for="createShiftToggle">
-                        <i class="bi bi-plus-lg"></i> Tạo ca làm việc
-                    </label>
+                    <div class="schedule-toolbar-actions">
 
-                    <span th:if="${presentWeek.status == 'FINALIZED' or presentWeek.status == 'EXPIRED'}"
-                          class="schedule-primary-button disabled-btn">
-                           <i class="bi bi-plus-lg"></i> Tạo ca làm việc
-                          </span>
+                        <!-- IMPORT: chỉ được sử dụng khi tuần đang DRAFT -->
+                        <form th:if="${presentWeek.status == 'DRAFT'}"
+                              th:action="@{/manager/schedules/import}"
+                              method="post"
+                              enctype="multipart/form-data"
+                              class="schedule-import-form"
+                              id="scheduleImportForm">
+
+                            <input type="hidden"
+                                   name="weekScheduleId"
+                                   th:value="${presentWeek.id}">
+
+                            <input type="file"
+                                   name="file"
+                                   id="scheduleImportFile"
+                                   class="schedule-import-file-input"
+                                   accept=".xlsx"
+                                   required>
+
+                            <label for="scheduleImportFile"
+                                   class="schedule-import-file-label">
+                                <i class="bi bi-file-earmark-excel"></i>
+                                <span id="scheduleImportFileName">Chọn file Excel</span>
+                            </label>
+
+                            <button type="submit"
+                                    class="schedule-import-submit"
+                                    id="scheduleImportSubmit">
+                                <i class="bi bi-upload"></i>
+                                Import
+                            </button>
+                        </form>
+
+                        <!-- CREATE SCHEDULE -->
+                        <label th:unless="${presentWeek.status == 'FINALIZED'
+                       or presentWeek.status == 'EXPIRED'}"
+                               class="schedule-primary-button"
+                               for="createShiftToggle">
+                            <i class="bi bi-plus-lg"></i>
+                            Tạo ca làm việc
+                        </label>
+
+                        <span th:if="${presentWeek.status == 'FINALIZED' or presentWeek.status == 'EXPIRED'}"
+                              class="schedule-primary-button disabled-btn">
+                            <i class="bi bi-plus-lg"></i>Tạo ca làm việc</span>
+                    </div>
                 </section>
 
                 <!--SCHEDULE MANAGEMENT - TABLE-->
@@ -169,7 +263,8 @@
                                          class="shift-card "
                                          th:classappend="${cell.shift == 'MORNING' ? 'morning' : (cell.shift == 'AFTERNOON' ? 'afternoon' : 'full-day')}">
                                     <div class="shift-card-header" style="display: flex;">
-                                        <strong th:text="${cell.shift == 'MORNING' ? 'Ca sáng' : (cell.shift =='AFTERNOON' ? 'Ca chiều' : 'Cả ngày')}">Ca sáng</strong>
+                                        <strong th:text="${cell.shift == 'MORNING' ? 'Ca sáng' : (cell.shift =='AFTERNOON' ? 'Ca chiều' : 'Cả ngày')}">Ca
+                                            sáng</strong>
                                         <a th:if="${presentWeek.status != 'EXPIRED' and !date.isBefore(#temporals.createToday())}"
                                            th:href="@{/manager/schedules/update(weekScheduleId=${presentWeek.id},doctorScheduleId=${cell.id},departmentId=${departmentId},doctorName=${row.doctor.fullName},doctorNameFilter=${doctorName},shift=${shift},page=${doctorScheduleRowResponsePage.number},size=${doctorScheduleRowResponsePage.size},departmentName=${row.doctor.departmentName})}">
                                             <i class="bi bi-pencil" style="color: #00a651"></i>
@@ -223,8 +318,36 @@
     </main>
 </div>
 <script th:inline="javascript">
+    const scheduleImportFile =
+        document.getElementById('scheduleImportFile');
 
+    const scheduleImportFileName =
+        document.getElementById('scheduleImportFileName');
 
+    const scheduleImportForm =
+        document.getElementById('scheduleImportForm');
+
+    const scheduleImportSubmit =
+        document.getElementById('scheduleImportSubmit');
+
+    if (scheduleImportFile && scheduleImportFileName) {
+        scheduleImportFile.addEventListener('change', function () {
+            const selectedFile = this.files[0];
+
+            scheduleImportFileName.textContent =
+                selectedFile
+                    ? selectedFile.name
+                    : 'Chọn file Excel';
+        });
+    }
+
+    if (scheduleImportForm && scheduleImportSubmit) {
+        scheduleImportForm.addEventListener('submit', function () {
+            scheduleImportSubmit.disabled = true;
+            scheduleImportSubmit.innerHTML =
+                '<i class="bi bi-hourglass-split"></i> Đang import...';
+        });
+    }
 </script>
 </body>
 </html>

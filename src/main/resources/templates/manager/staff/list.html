@@ -119,7 +119,7 @@
 
                     </td>
                     <td th:text="${staff.getCreatedBy()}">Hoàng Thị Mai</td>
-                    <td th:text="${staff.getCreatedDate()}">15/03/2021</td>
+                    <td th:text="${#temporals.format(staff.getCreatedDate(),'HH:mm dd/MM/yyyy')}">15/03/2021</td>
                     <td>
                         <div class="staff-actions">
                             <a th:href="@{/manager/staff/{staffId}(staffId=${staff.getId()}, staffRole=${staff.getRole()})}"
