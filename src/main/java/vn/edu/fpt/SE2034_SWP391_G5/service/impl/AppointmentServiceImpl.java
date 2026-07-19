@@ -482,12 +482,13 @@ public class AppointmentServiceImpl implements AppointmentService {
                         .roomNumber(roomNumber)
                         .departmentName(deptName)
                         .doctorFullName(docName)
+                        .examiningPatients(new ArrayList<>())
                         .waitingPatients(new ArrayList<>())
                         .totalWaiting(0);
                 roomBuilders.put(roomNumber, builder);
             }
 
-            QueueResponse.PatientInfo examiningPatient = null;
+            List<QueueResponse.PatientInfo> examiningPatients = new ArrayList<>();
             List<QueueResponse.PatientInfo> waitingPatients = new ArrayList<>();
 
             for (Appointment a : roomAppointments) {
@@ -512,7 +513,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                         .build();
 
                 if ("EXAMINING".equalsIgnoreCase(a.getStatus())) {
-                    examiningPatient = patientInfo;
+                    examiningPatients.add(patientInfo);
                 } else if ("WAITING".equalsIgnoreCase(a.getStatus())) {
                     waitingPatients.add(patientInfo);
                 }
@@ -525,7 +526,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 return Integer.compare(p1.getStt(), p2.getStt());
             });
 
-            builder.examiningPatient(examiningPatient);
+            builder.examiningPatients(examiningPatients);
             builder.waitingPatients(waitingPatients);
             builder.totalWaiting(waitingPatients.size());
         }

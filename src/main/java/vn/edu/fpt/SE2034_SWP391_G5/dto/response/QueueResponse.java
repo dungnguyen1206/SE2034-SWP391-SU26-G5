@@ -17,7 +17,7 @@ public class QueueResponse {
     private String departmentName;
     private String doctorFullName;
     private int totalWaiting;
-    private PatientInfo examiningPatient;
+    private List<PatientInfo> examiningPatients;
     private List<PatientInfo> waitingPatients;
 
     @Data
