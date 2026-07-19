@@ -40,11 +40,14 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("toDate") LocalDate toDate
     );
 
-    // Đếm số bệnh nhân đang khám trong ngày hiện tại.
-    @Query("SELECT COUNT(a) FROM Appointment a " +
-            "WHERE a.bookingDate = :today " +
-            "AND a.status = 'EXAMINING'")
-    long countTodayExaminingAppointments(@Param("today") LocalDate today);
+    @Query("SELECT new vn.edu.fpt.SE2034_SWP391_G5.dto.response.ReceptionistDashboardResponse(" +
+           "COUNT(a), " +
+           "SUM(CASE WHEN a.checkInTime IS NOT NULL THEN 1L ELSE 0L END), " +
+           "SUM(CASE WHEN a.status = 'WAITING' THEN 1L ELSE 0L END), " +
+           "SUM(CASE WHEN a.status = 'EXAMINING' THEN 1L ELSE 0L END), " +
+           "0L, 0L) " +
+           "FROM Appointment a WHERE a.bookingDate = :today")
+    vn.edu.fpt.SE2034_SWP391_G5.dto.response.ReceptionistDashboardResponse getTodayAppointmentDashboardCounts(@Param("today") LocalDate today);
 
     // Lấy danh sách lịch hẹn hôm nay trên Dashboard.
     // Có hỗ trợ tìm kiếm theo họ, tên đệm, tên hoặc số điện thoại bệnh nhân.

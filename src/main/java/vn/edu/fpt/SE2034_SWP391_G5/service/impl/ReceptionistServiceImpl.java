@@ -29,13 +29,24 @@ public class ReceptionistServiceImpl implements ReceptionistService {
     @Override
     public ReceptionistDashboardResponse getTodayDashboardStatistics() {
         LocalDate today = LocalDate.now();
+        
+        ReceptionistDashboardResponse apptStats = appointmentRepository.getTodayAppointmentDashboardCounts(today);
+        if (apptStats == null) {
+            apptStats = new ReceptionistDashboardResponse();
+        }
+        
+        ReceptionistDashboardResponse invStats = invoiceRepository.getTodayInvoiceDashboardCounts(today);
+        if (invStats == null) {
+            invStats = new ReceptionistDashboardResponse();
+        }
+        
         return ReceptionistDashboardResponse.builder()
-                .totalAppointmentsToday(appointmentRepository.countTodayAppointments(today))
-                .checkedInToday(appointmentRepository.countTodayCheckedInAppointments(today))
-                .waitingQueue(appointmentRepository.countTodayWaitingAppointments(today))
-                .examiningQueue(appointmentRepository.countTodayExaminingAppointments(today))
-                .paidInvoices(invoiceRepository.countTodayPaidInvoices(today))
-                .unpaidInvoices(invoiceRepository.countTodayUnpaidInvoices(today))
+                .totalAppointmentsToday(apptStats.getTotalAppointmentsToday())
+                .checkedInToday(apptStats.getCheckedInToday())
+                .waitingQueue(apptStats.getWaitingQueue())
+                .examiningQueue(apptStats.getExaminingQueue())
+                .paidInvoices(invStats.getPaidInvoices())
+                .unpaidInvoices(invStats.getUnpaidInvoices())
                 .build();
     }
 

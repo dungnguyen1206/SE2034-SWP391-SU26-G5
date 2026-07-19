@@ -38,6 +38,13 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
             "WHERE a.bookingDate = :today " +
             "AND i.paymentStatus = 'UNPAID'")
     long countTodayUnpaidInvoices(@Param("today") LocalDate today);
+
+    @Query("SELECT new vn.edu.fpt.SE2034_SWP391_G5.dto.response.ReceptionistDashboardResponse(" +
+           "0L, 0L, 0L, 0L, " +
+           "SUM(CASE WHEN i.paymentStatus = 'PAID' THEN 1L ELSE 0L END), " +
+           "SUM(CASE WHEN i.paymentStatus = 'UNPAID' THEN 1L ELSE 0L END)) " +
+           "FROM Invoice i JOIN i.appointment a WHERE a.bookingDate = :today")
+    vn.edu.fpt.SE2034_SWP391_G5.dto.response.ReceptionistDashboardResponse getTodayInvoiceDashboardCounts(@Param("today") LocalDate today);
     // ======================== END DASHBOARD RECEPTIONIST ========================
 
     @Query("Select coalesce(sum(i.totalAmount),0) From Invoice i where i.paymentStatus =:paymentStatus AND month(i.paidAt)=:month AND year(i.paidAt)= :year")
