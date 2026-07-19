@@ -16,6 +16,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendOtpEmail(String toEmail, String otp) {
+        if (toEmail == null || toEmail.endsWith("@walkin.local")) return;
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
         message.setSubject("Mã xác thực OTP đăng ký tài khoản HAMS");
@@ -25,15 +26,24 @@ public class EmailServiceImpl implements EmailService {
                 + "Mã này có hiệu lực trong vòng 5 phút. Vui lòng không chia sẻ mã này cho bất kỳ ai.\n\n"
                 + "Trân trọng,\n"
                 + "Hệ thống quản lý HAMS");
-        mailSender.send(message);
+        try {
+            mailSender.send(message);
+        } catch (Exception e) {
+            System.err.println("Lỗi gửi email: " + e.getMessage());
+        }
     }
 
     @Override
     public void sendSimpleEmail(String toEmail, String subject, String content) {
+        if (toEmail == null || toEmail.endsWith("@walkin.local")) return;
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo(toEmail);
         message.setSubject(subject);
         message.setText(content);
-        mailSender.send(message);
+        try {
+            mailSender.send(message);
+        } catch (Exception e) {
+            System.err.println("Lỗi gửi email: " + e.getMessage());
+        }
     }
 }

@@ -82,6 +82,16 @@ public class PatientServiceImpl implements PatientService {
         user.setBloodType(request.getBloodType());
         user.setUpdatedAt(LocalDateTime.now());
         user.setAvatar(request.getAvatar());
+
+        if (request.getEmail() != null && !request.getEmail().trim().isEmpty() && !request.getEmail().equals(user.getEmail())) {
+            if (userRepository.existsByEmail(request.getEmail())) {
+                throw new vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException("Email đã được sử dụng bởi tài khoản khác.");
+            }
+            user.setEmail(request.getEmail());
+            // Need to re-verify if they use a real email
+            user.setEmailVerified(false);
+        }
+
         userRepository.save(user);
 
         if (request.getAddressLine() != null && request.getProvinceId() != null) {

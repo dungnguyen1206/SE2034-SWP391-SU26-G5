@@ -25,24 +25,7 @@ public class ReceptionistServiceImpl implements ReceptionistService {
     private final AppointmentRepository appointmentRepository;
     private final InvoiceRepository invoiceRepository;
 
-    //find all active receptionist
-    public List<User> findByRoleNameAndStatus(String roleName, String status) {
-        return userRepository.countByRoleNameAndStatus(roleName, status);
-    }
-
-    @Override
-    public ReceptionistResponse getReceptionistByUsername(String email) {
-        List<Object[]> result = userRepository.findReceptionistInfoByEmail(email);
-        if (result == null || result.isEmpty()) {
-            throw new RuntimeException("Không tìm thấy nhân viên tiếp tân với email: " + email);
-        }
-        Object[] row = result.get(0);
-        Long id = ((Number) row[0]).longValue();
-        String fullName = (String) row[1];
-        String avatarText = (String) row[2];
-        return new ReceptionistResponse(id, fullName, avatarText);
-    }
-
+    // ======================== DASHBOARD RECEPTIONIST ========================
     @Override
     public ReceptionistResponse getReceptionistById(Long userId) {
         User user = userRepository.findById(userId)
@@ -68,13 +51,24 @@ public class ReceptionistServiceImpl implements ReceptionistService {
     @Override
     public ReceptionistDashboardResponse getTodayDashboardStatistics() {
         LocalDate today = LocalDate.now();
+        
+        ReceptionistDashboardResponse apptStats = appointmentRepository.getTodayAppointmentDashboardCounts(today);
+        if (apptStats == null) {
+            apptStats = new ReceptionistDashboardResponse();
+        }
+        
+        ReceptionistDashboardResponse invStats = invoiceRepository.getTodayInvoiceDashboardCounts(today);
+        if (invStats == null) {
+            invStats = new ReceptionistDashboardResponse();
+        }
+        
         return ReceptionistDashboardResponse.builder()
-                .totalAppointmentsToday(appointmentRepository.countTodayAppointments(today))
-                .checkedInToday(appointmentRepository.countTodayCheckedInAppointments(today))
-                .waitingQueue(appointmentRepository.countTodayWaitingAppointments(today))
-                .examiningQueue(appointmentRepository.countTodayExaminingAppointments(today))
-                .paidInvoices(invoiceRepository.countTodayPaidInvoices(today))
-                .unpaidInvoices(invoiceRepository.countTodayUnpaidInvoices(today))
+                .totalAppointmentsToday(apptStats.getTotalAppointmentsToday())
+                .checkedInToday(apptStats.getCheckedInToday())
+                .waitingQueue(apptStats.getWaitingQueue())
+                .examiningQueue(apptStats.getExaminingQueue())
+                .paidInvoices(invStats.getPaidInvoices())
+                .unpaidInvoices(invStats.getUnpaidInvoices())
                 .build();
     }
 
@@ -103,6 +97,26 @@ public class ReceptionistServiceImpl implements ReceptionistService {
                 .bookingDate(appointment.getBookingDate())
                 .build();
     }
+    // ======================== END DASHBOARD RECEPTIONIST ========================
+
+    //find all active receptionist
+    public List<User> findByRoleNameAndStatus(String roleName, String status) {
+        return userRepository.countByRoleNameAndStatus(roleName, status);
+    }
+
+    @Override
+    public ReceptionistResponse getReceptionistByUsername(String email) {
+        List<Object[]> result = userRepository.findReceptionistInfoByEmail(email);
+        if (result == null || result.isEmpty()) {
+            throw new RuntimeException("Không tìm thấy nhân viên tiếp tân với email: " + email);
+        }
+        Object[] row = result.get(0);
+        Long id = ((Number) row[0]).longValue();
+        String fullName = (String) row[1];
+        String avatarText = (String) row[2];
+        return new ReceptionistResponse(id, fullName, avatarText);
+    }
+
 
     // Chuẩn hóa ô tìm kiếm.
     // Nếu người dùng không nhập gì thì trả về null để query bỏ qua điều kiện search.

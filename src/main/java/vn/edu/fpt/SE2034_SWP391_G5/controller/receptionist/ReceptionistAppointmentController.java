@@ -35,6 +35,7 @@ public class ReceptionistAppointmentController {
     private final ReceptionistService receptionistService;
     private final ReceptionistWalkInService walkInService;
     private final DepartmentService departmentService;
+    private final vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalServiceRepository medicalServiceRepository;
 
     @GetMapping("/receptionist/appointment")
     // Hiển thị toàn bộ danh sách lịch hẹn theo ngày
@@ -117,7 +118,16 @@ public class ReceptionistAppointmentController {
     }
 
     private void addReceptionistInfo(Model model, CustomUserDetails userDetails) {
-        model.addAttribute("receptionist", receptionistService.getReceptionistById(userDetails.getUser().getId()));
+        User user = userDetails.getUser();
+        String fullName = (user.getLastName() + " " + (user.getMiddleName() != null ? user.getMiddleName() + " " : "") + user.getFirstName()).trim().replaceAll("\\s+", " ");
+        String avatarText = "";
+        if (user.getLastName() != null && !user.getLastName().isEmpty()) {
+            avatarText += user.getLastName().substring(0, 1).toUpperCase();
+        }
+        if (user.getFirstName() != null && !user.getFirstName().isEmpty()) {
+            avatarText += user.getFirstName().substring(0, 1).toUpperCase();
+        }
+        model.addAttribute("receptionist", new ReceptionistResponse(user.getId(), fullName, avatarText));
     }
 
     private void addPageInfo(Model model, String search, String status, LocalDate fromDate, LocalDate toDate) {
@@ -179,6 +189,16 @@ public class ReceptionistAppointmentController {
                     
                     if (departmentId != null) {
                         model.addAttribute("slots", walkInService.getAvailableSlots(departmentId, bookingDate));
+                        
+                        java.util.List<vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalService> services = medicalServiceRepository.findByDepartmentIdAndStatus(departmentId, "ACTIVE");
+                        if (!services.isEmpty()) {
+                            vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalService initialService = services.stream()
+                                    .filter(s -> s.getName().toLowerCase().contains("khám"))
+                                    .findFirst()
+                                    .orElse(services.get(0));
+                            model.addAttribute("serviceName", initialService.getName());
+                            model.addAttribute("servicePrice", initialService.getReferencePrice());
+                        }
                     }
                 }
             }
@@ -190,9 +210,9 @@ public class ReceptionistAppointmentController {
     @PostMapping("/receptionist/appointment/walk-in/book")
     public String bookWalkIn(@ModelAttribute WalkInBookingRequest request, RedirectAttributes redirectAttributes) {
         try {
-            walkInService.createWalkInAppointment(request);
+            Long appointmentId = walkInService.createWalkInAppointment(request);
             redirectAttributes.addFlashAttribute("successMessage", "Đã tạo lịch khám trực tiếp và hóa đơn thành công!");
-            return "redirect:/receptionist/appointment";
+            return "redirect:/receptionist/appointment/" + appointmentId + "/check-in-ticket";
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             

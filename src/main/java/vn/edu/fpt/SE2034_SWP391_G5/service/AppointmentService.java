@@ -16,7 +16,7 @@ public interface AppointmentService {
 
     Page<AppointmentResponse> findAppointmentsByBookingDate(LocalDate today, Integer pageNumber, Integer pageSize);
 
-    //------------------------------ Hoàng Linh ---------------------------------------------------------------
+    // ======================== LIST APPOINTMENT RECEPTIONIST ========================
     // Lấy danh sách lịch hẹn để hiển thị lên màn hình Appointment List
     Page<AppointmentResponse> getAppointmentListForReceptionist(LocalDate fromDate, LocalDate toDate, int page, int size);
 
@@ -24,14 +24,25 @@ public interface AppointmentService {
 
     Map<String, Long> getAppointmentStatusCountsInDateRangeForReceptionist(LocalDate fromDate, LocalDate toDate);
 
+    List<AppointmentDateGroupResponse> groupAppointmentsByDate(List<AppointmentResponse> appointments);
+
+    // ======================== END LIST APPOINTMENT RECEPTIONIST ========================
+
+    // ======================== VIEW DETAIL APPOINTMENT RECEPTIONIST ========================
+    AppointmentResponse getAppointmentDetailForReceptionist(Long appointmentId);
+    // ======================== END VIEW DETAIL APPOINTMENT RECEPTIONIST ========================
+
+    // ======================== CHECK-IN RECEPTIONIST ========================
     AppointmentPrintResponse getCheckInTicket(Long appointmentId);
 
     void confirmCheckInAppointment(Long appointmentId);
 
-    AppointmentResponse getAppointmentDetailForReceptionist(Long appointmentId);
+    Long calculateQueueNumber(vn.edu.fpt.SE2034_SWP391_G5.entity.Appointment appointment);
+    // ======================== END CHECK-IN RECEPTIONIST ========================
 
-    List<AppointmentDateGroupResponse> groupAppointmentsByDate(List<AppointmentResponse> appointments);
-    //------------------------------------------------------------------------------------------------------------
+    // ======================== QUEUE BOARD RECEPTIONIST ========================
+    List<QueueResponse> getTodayQueueBoard();
+    // ======================== END QUEUE BOARD RECEPTIONIST ========================
 
     // Lấy lịch + slot của bác sĩ để hiển thị trên form đặt lịch
     List<ScheduleSlotResponse> getAvailableSchedules(Long doctorId);
@@ -64,7 +75,5 @@ public interface AppointmentService {
     // Lấy danh sách bệnh nhân đã khám xong gần đây nhất
     List<AppointmentResponse> getRecentCompletedAppointmentsForDoctor(Long doctorId, int limit);
 
-    List<QueueResponse> getTodayQueueBoard();
 
-    Long calculateQueueNumber(vn.edu.fpt.SE2034_SWP391_G5.entity.Appointment appointment);
 }

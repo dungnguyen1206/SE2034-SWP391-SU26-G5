@@ -24,6 +24,7 @@ public class ReceptionistInvoiceController {
 
     private final InvoiceService invoiceService;
     private final ReceptionistService receptionistService;
+    private final vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService appointmentService;
 
     @GetMapping
     public String listInvoices(
@@ -34,9 +35,11 @@ public class ReceptionistInvoiceController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
 
-        Page<InvoiceListResponse> invoicePage = invoiceService.getInvoices(keyword, paymentStatus, page, size);
+        vn.edu.fpt.SE2034_SWP391_G5.dto.response.InvoicePageWithStatsResponse response = invoiceService.getInvoices(keyword, paymentStatus, page, size);
         
-        model.addAttribute("invoicePage", invoicePage);
+        model.addAttribute("invoicePage", response.getPage());
+        model.addAttribute("totalPaidCount", response.getTotalPaidCount());
+        model.addAttribute("totalUnpaidCount", response.getTotalUnpaidCount());
         model.addAttribute("keyword", keyword);
         model.addAttribute("paymentStatus", paymentStatus);
         
@@ -49,6 +52,7 @@ public class ReceptionistInvoiceController {
     @GetMapping("/{id}")
     public String invoiceDetail(
             @PathVariable Long id,
+            @RequestParam(required = false) String from,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model, RedirectAttributes redirectAttributes) {
 
@@ -56,7 +60,8 @@ public class ReceptionistInvoiceController {
             InvoiceDetailResponse invoice = invoiceService.getInvoiceDetail(id);
             
             model.addAttribute("invoice", invoice);
-            model.addAttribute("receptionist", receptionistService.getReceptionistById(userDetails.getUser().getId()));
+            model.addAttribute("from", from);
+            model.addAttribute("receptionist", receptionistService.getReceptionistByUsername(userDetails.getUser().getEmail()));
             model.addAttribute("activeMenu", "invoice");
             
             return "receptionist/invoice/detail";
@@ -70,11 +75,17 @@ public class ReceptionistInvoiceController {
     public String processPayment(
             @PathVariable Long id,
             @RequestParam String paymentMethod,
+            @RequestParam(required = false) String from,
             RedirectAttributes redirectAttributes) {
 
         try {
             invoiceService.processPayment(id, paymentMethod);
             redirectAttributes.addFlashAttribute("successMessage", "Thanh toán thành công!");
+            
+            if ("checkin".equals(from)) {
+                appointmentService.confirmCheckInAppointment(id);
+                return "redirect:/receptionist/appointment/" + id + "/check-in-ticket";
+            }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
