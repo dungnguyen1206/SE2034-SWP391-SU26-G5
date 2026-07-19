@@ -2,142 +2,155 @@
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Hóa đơn</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="/css/receptionist/common/sidebar.css" rel="stylesheet">
-    <link href="/css/receptionist/common/header.css" rel="stylesheet">
-    <link href="/css/receptionist/invoice/list.css" rel="stylesheet">
+    <title>Quản Lý Hóa Đơn</title>
+
+    <link rel="stylesheet" th:href="@{/css/receptionist/common/sidebar.css}">
+    <link rel="stylesheet" th:href="@{/css/receptionist/common/header.css}">
+    <link rel="stylesheet" th:href="@{/css/receptionist/invoice/list.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 </head>
+
 <body>
-    <div class="layout">
-        <div th:replace="~{receptionist/common/sidebar :: sidebar('invoice')}"></div>
+<div class="layout">
 
-        <main class="main">
-            <div th:replace="~{receptionist/common/header :: header('Quản lý Hóa đơn')}"></div>
+    <!-- Sidebar -->
+    <div th:replace="~{receptionist/common/sidebar :: sidebar('invoice')}"></div>
 
-            <div class="container-fluid py-4 px-4">
-                
-                <!-- Notification -->
-                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="bi bi-check-circle-fill me-2"></i><span th:text="${successMessage}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="bi bi-exclamation-triangle-fill me-2"></i><span th:text="${errorMessage}"></span>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
+    <main class="main">
 
-                <!-- Filters -->
-                <div class="card filter-card mb-4">
-                    <div class="card-body">
-                        <form th:action="@{/receptionist/invoice}" method="get" class="row g-3 align-items-end">
-                            <div class="col-md-5">
-                                <label class="form-label">Tìm kiếm</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
-                                    <input type="text" class="form-control border-start-0 ps-0" name="keyword" th:value="${keyword}" placeholder="Mã HĐ, Tên bệnh nhân...">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label">Trạng thái</label>
-                                <select class="form-select" name="paymentStatus">
-                                    <option value="" th:selected="${paymentStatus == ''}">Tất cả</option>
-                                    <option value="UNPAID" th:selected="${paymentStatus == 'UNPAID'}">Chưa thanh toán</option>
-                                    <option value="PAID" th:selected="${paymentStatus == 'PAID'}">Đã thanh toán</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <button type="submit" class="btn btn-primary w-100">
-                                    <i class="bi bi-funnel"></i> Lọc kết quả
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+        <!-- Header -->
+        <div th:replace="~{receptionist/common/header :: header('Quản lý Hóa đơn')}"></div>
+
+        <section class="appointment-card" style="margin-top: 28px;">
+
+            <!-- Search And Filter -->
+            <form class="appointment-toolbar" th:action="@{/receptionist/invoice}" method="get">
+                <div class="search-box">
+                    <span class="search-icon"> ⌕ </span>
+                    <input type="text" name="keyword" placeholder="Mã HĐ, Tên bệnh nhân..." th:value="${keyword}">
                 </div>
 
-                <!-- Data Table -->
-                <div class="card table-card shadow-sm border-0 rounded-4">
-                    <div class="card-body p-0">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th class="ps-4">STT</th>
-                                        <th>Mã Lịch Hẹn</th>
-                                        <th>Bệnh Nhân</th>
-                                        <th>SĐT</th>
-                                        <th>Tổng Tiền</th>
-                                        <th>Trạng Thái</th>
-                                        <th class="text-end pe-4">Thao tác</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr th:if="${invoicePage.empty}">
-                                        <td colspan="7" class="text-center py-5 text-muted">
-                                            <div class="mb-3"><i class="bi bi-receipt fs-1 text-secondary"></i></div>
-                                            Không tìm thấy dữ liệu
-                                        </td>
-                                    </tr>
-                                    <tr th:each="inv, iterStat : ${invoicePage.content}">
-                                        <td class="ps-4 fw-bold text-muted" th:text="${(invoicePage.number * invoicePage.size) + iterStat.count}"></td>
-                                        <td><span class="fw-bold text-primary" th:text="${inv.appointmentCode}"></span></td>
-                                        <td>
-                                            <div class="fw-semibold text-dark" th:text="${inv.patientFullName}"></div>
-                                        </td>
-                                        <td th:text="${inv.phone}"></td>
-                                        <td>
-                                            <span class="text-primary fw-bold" th:text="${inv.displayAmount != null ? #numbers.formatDecimal(inv.displayAmount, 0, 'COMMA', 0, 'POINT') : '0'} + ' đ'"></span>
-                                        </td>
-                                        <td>
-                                            <span th:if="${inv.paymentStatus == 'UNPAID'}" class="badge bg-danger-subtle text-danger px-3 py-2 rounded-pill">
-                                                <i class="bi bi-hourglass-split me-1"></i>Chưa thanh toán
-                                            </span>
-                                            <span th:if="${inv.paymentStatus == 'PAID'}" class="badge bg-success-subtle text-success px-3 py-2 rounded-pill">
-                                                <i class="bi bi-check-circle me-1"></i>Đã thanh toán
-                                            </span>
-                                        </td>
-                                        <td class="text-end pe-4">
-                                            <a th:if="${inv.paymentStatus == 'UNPAID'}" th:href="@{/receptionist/invoice/{id}(id=${inv.appointmentId})}" class="btn btn-sm btn-success px-3 rounded-pill shadow-sm">
-                                                <i class="bi bi-credit-card me-1"></i> Thanh toán
-                                            </a>
-                                            <a th:if="${inv.paymentStatus == 'PAID'}" th:href="@{/receptionist/invoice/{id}(id=${inv.appointmentId})}" class="btn btn-sm btn-outline-primary px-3 rounded-pill shadow-sm">
-                                                <i class="bi bi-eye me-1"></i> Chi tiết
-                                            </a>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    <!-- Pagination -->
-                    <div class="card-footer bg-white border-top-0 py-3" th:if="${invoicePage.totalPages > 1}">
-                        <nav aria-label="Page navigation">
-                            <ul class="pagination justify-content-center mb-0">
-                                <li class="page-item" th:classappend="${invoicePage.first ? 'disabled' : ''}">
-                                    <a class="page-link border-0" th:href="@{/receptionist/invoice(page=${invoicePage.number}, size=${invoicePage.size}, keyword=${keyword}, paymentStatus=${paymentStatus})}">
-                                        <i class="bi bi-chevron-left"></i>
-                                    </a>
-                                </li>
-                                <li class="page-item" th:each="i : ${#numbers.sequence(1, invoicePage.totalPages)}" th:classappend="${invoicePage.number + 1 == i ? 'active' : ''}">
-                                    <a class="page-link rounded-circle mx-1 border-0" th:href="@{/receptionist/invoice(page=${i}, size=${invoicePage.size}, keyword=${keyword}, paymentStatus=${paymentStatus})}" th:text="${i}"></a>
-                                </li>
-                                <li class="page-item" th:classappend="${invoicePage.last ? 'disabled' : ''}">
-                                    <a class="page-link border-0" th:href="@{/receptionist/invoice(page=${invoicePage.number + 2}, size=${invoicePage.size}, keyword=${keyword}, paymentStatus=${paymentStatus})}">
-                                        <i class="bi bi-chevron-right"></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
-                </div>
+                <select class="status-filter" name="paymentStatus">
+                    <option value="" th:selected="${paymentStatus == ''}">Tất cả trạng thái</option>
+                    <option value="UNPAID" th:selected="${paymentStatus == 'UNPAID'}">Chưa thanh toán</option>
+                    <option value="PAID" th:selected="${paymentStatus == 'PAID'}">Đã thanh toán</option>
+                </select>
 
+                <button type="submit" class="btn-search">Tìm Kiếm</button>
+                <a th:href="@{/receptionist/invoice}" class="btn-reset">Làm Mới</a>
+            </form>
+
+            <div class="table-wrapper">
+                <table class="appointment-table">
+                    <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Mã Lịch Hẹn</th>
+                        <th>Bệnh nhân</th>
+                        <th>SĐT</th>
+                        <th>Tổng Tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                    </thead>
+
+                    <tbody th:if="${invoicePage != null && !invoicePage.empty}">
+                    <tr th:each="inv, iterStat : ${invoicePage.content}">
+                        <td th:text="${iterStat.count + (invoicePage.number * invoicePage.size)}"></td>
+                        <td>
+                            <span class="appointment-code" th:text="${inv.appointmentCode}"></span>
+                        </td>
+                        <td th:text="${inv.patientFullName}"></td>
+                        <td th:text="${inv.phone != null ? inv.phone : '-'}"></td>
+                        <td>
+                            <strong style="color: #2563eb;" th:text="${inv.displayAmount != null ? #numbers.formatDecimal(inv.displayAmount, 0, 'COMMA', 0, 'POINT') : '0'} + ' đ'"></strong>
+                        </td>
+                        <td>
+                            <span th:if="${inv.paymentStatus == 'UNPAID'}" class="status-badge status-cancelled">
+                                Chưa thanh toán
+                            </span>
+                            <span th:if="${inv.paymentStatus == 'PAID'}" class="status-badge status-completed">
+                                Đã thanh toán
+                            </span>
+                        </td>
+                        <td class="action-cell">
+                            <a th:if="${inv.paymentStatus == 'UNPAID'}"
+                               class="btn-checkin"
+                               th:href="@{/receptionist/invoice/{id}(id=${inv.appointmentId})}">Thanh toán</a>
+                            <a th:if="${inv.paymentStatus == 'PAID'}"
+                               class="btn-detail"
+                               th:href="@{/receptionist/invoice/{id}(id=${inv.appointmentId})}">Chi tiết</a>
+                        </td>
+                    </tr>
+                    </tbody>
+
+                    <!-- Không có dữ liệu -->
+                    <tbody th:if="${invoicePage == null || invoicePage.empty}">
+                    <tr>
+                        <td colspan="7" class="empty-row">Không có hóa đơn nào</td>
+                    </tr>
+                    </tbody>
+                </table>
             </div>
-        </main>
-    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            <!-- Pagination -->
+            <div class="pagination-footer"
+                 th:if="${invoicePage != null and invoicePage.totalPages > 1}"
+                 th:with="maxPages=5,
+                          halfMax=${maxPages / 2},
+                          startPage=${invoicePage.number - halfMax < 0 ? 0 : 
+                                     (invoicePage.number + halfMax >= invoicePage.totalPages ? 
+                                      (invoicePage.totalPages - maxPages < 0 ? 0 : invoicePage.totalPages - maxPages) : 
+                                      invoicePage.number - halfMax)},
+                          endPage=${startPage + maxPages - 1 >= invoicePage.totalPages ? invoicePage.totalPages - 1 : startPage + maxPages - 1}">
+
+                <div class="pagination-info">
+                    <span th:text="'Trang ' + ${invoicePage.number + 1} + ' / ' + ${invoicePage.totalPages}">
+                        Trang 1 / 1
+                    </span>
+
+                    <span th:text="'Tổng: ' + ${invoicePage.totalElements} + ' hóa đơn'">
+                        Tổng: 0 hóa đơn
+                    </span>
+                </div>
+
+                <div class="pagination">
+
+                    <a class="page-btn"
+                       th:classappend="${invoicePage.first} ? ' disabled'"
+                       th:href="@{/receptionist/invoice(
+                            page=${invoicePage.number - 1},
+                            keyword=${keyword},
+                            paymentStatus=${paymentStatus}
+                       )}">
+                        Trước
+                    </a>
+
+                    <a class="page-number"
+                       th:each="pageNumber : ${#numbers.sequence(startPage, endPage)}"
+                       th:classappend="${pageNumber == invoicePage.number} ? ' active'"
+                       th:href="@{/receptionist/invoice(
+                            page=${pageNumber},
+                            keyword=${keyword},
+                            paymentStatus=${paymentStatus}
+                       )}"
+                       th:text="${pageNumber + 1}">
+                    </a>
+
+                    <a class="page-btn"
+                       th:classappend="${invoicePage.last} ? ' disabled'"
+                       th:href="@{/receptionist/invoice(
+                            page=${invoicePage.number + 1},
+                            keyword=${keyword},
+                            paymentStatus=${paymentStatus}
+                       )}">
+                        Sau
+                    </a>
+
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
 </body>
 </html>
