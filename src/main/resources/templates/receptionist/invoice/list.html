@@ -23,6 +23,24 @@
 
         <section class="appointment-card" style="margin-top: 28px;">
 
+            <!-- Statistics -->
+            <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                <div style="flex: 1; display: flex; align-items: center; padding: 20px; border-radius: 12px; background-color: #e8f5e9; border: 1px solid #c8e6c9; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <i class="bi bi-check-circle-fill" style="font-size: 2.5rem; color: #4caf50; margin-right: 15px;"></i>
+                    <div>
+                        <div style="color: #2e7d32; font-weight: bold; font-size: 0.9rem; margin-bottom: 5px; text-transform: uppercase;">Tổng Đã Thanh Toán</div>
+                        <div style="font-size: 1.8rem; font-weight: bold; color: #333; line-height: 1;" th:text="${totalPaidCount}">0</div>
+                    </div>
+                </div>
+                <div style="flex: 1; display: flex; align-items: center; padding: 20px; border-radius: 12px; background-color: #ffebee; border: 1px solid #ffcdd2; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                    <i class="bi bi-exclamation-circle-fill" style="font-size: 2.5rem; color: #f44336; margin-right: 15px;"></i>
+                    <div>
+                        <div style="color: #c62828; font-weight: bold; font-size: 0.9rem; margin-bottom: 5px; text-transform: uppercase;">Tổng Chưa Thanh Toán</div>
+                        <div style="font-size: 1.8rem; font-weight: bold; color: #333; line-height: 1;" th:text="${totalUnpaidCount}">0</div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Search And Filter -->
             <form class="appointment-toolbar" th:action="@{/receptionist/invoice}" method="get">
                 <div class="search-box">

@@ -28,6 +28,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.transaction.annotation.Transactional;
 
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.InvoicePageWithStatsResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.InvoiceListResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.InvoiceDetailResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.InvoiceItemResponse;
@@ -179,10 +180,13 @@ public class InvoiceServiceImpl implements InvoiceService {
     // ======================== LIST INVOICE RECEPTIONIST ========================
     @Override
     @Transactional(readOnly = true)
-    public Page<InvoiceListResponse> getInvoices(String keyword, String paymentStatus, int page, int size) {
+    public InvoicePageWithStatsResponse getInvoices(String keyword, String paymentStatus, int page, int size) {
         List<Appointment> allAppointments = appointmentRepository.findAllAppointmentsForBilling(keyword);
         
         List<InvoiceListResponse> allResponses = new java.util.ArrayList<>();
+        
+        long totalPaidCount = 0;
+        long totalUnpaidCount = 0;
         
         for (Appointment a : allAppointments) {
             BigDecimal totalExpected = a.getService() != null ? a.getService().getReferencePrice() : BigDecimal.ZERO;
@@ -207,6 +211,13 @@ public class InvoiceServiceImpl implements InvoiceService {
             if (unpaid.compareTo(BigDecimal.ZERO) < 0) unpaid = BigDecimal.ZERO;
             
             String status = unpaid.compareTo(BigDecimal.ZERO) > 0 ? "UNPAID" : "PAID";
+            
+            // Calculate stats before filtering by status
+            if ("PAID".equals(status)) {
+                totalPaidCount++;
+            } else {
+                totalUnpaidCount++;
+            }
             
             // Filter by paymentStatus if provided
             if (paymentStatus != null && !paymentStatus.trim().isEmpty() && !paymentStatus.equalsIgnoreCase(status)) {
@@ -246,7 +257,13 @@ public class InvoiceServiceImpl implements InvoiceService {
             pagedResponses = allResponses.subList(start, end);
         }
         
-        return new org.springframework.data.domain.PageImpl<>(pagedResponses, pageable, allResponses.size());
+        Page<InvoiceListResponse> pagedResult = new org.springframework.data.domain.PageImpl<>(pagedResponses, pageable, allResponses.size());
+        
+        return InvoicePageWithStatsResponse.builder()
+                .page(pagedResult)
+                .totalPaidCount(totalPaidCount)
+                .totalUnpaidCount(totalUnpaidCount)
+                .build();
     }
     // ======================== END LIST INVOICE RECEPTIONIST ========================
 

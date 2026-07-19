@@ -35,9 +35,11 @@ public class ReceptionistInvoiceController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
 
-        Page<InvoiceListResponse> invoicePage = invoiceService.getInvoices(keyword, paymentStatus, page, size);
+        vn.edu.fpt.SE2034_SWP391_G5.dto.response.InvoicePageWithStatsResponse response = invoiceService.getInvoices(keyword, paymentStatus, page, size);
         
-        model.addAttribute("invoicePage", invoicePage);
+        model.addAttribute("invoicePage", response.getPage());
+        model.addAttribute("totalPaidCount", response.getTotalPaidCount());
+        model.addAttribute("totalUnpaidCount", response.getTotalUnpaidCount());
         model.addAttribute("keyword", keyword);
         model.addAttribute("paymentStatus", paymentStatus);
         
