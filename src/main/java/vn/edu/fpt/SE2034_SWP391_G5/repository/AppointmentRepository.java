@@ -30,6 +30,16 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "AND a.status = 'WAITING'")
     long countTodayWaitingAppointments(@Param("today") LocalDate today);
 
+    // Lấy tổng số lượng theo từng trạng thái bằng 1 câu truy vấn duy nhất
+    @Query("SELECT new vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentStatusCountResponse(a.status, COUNT(a)) " +
+           "FROM Appointment a " +
+           "WHERE a.bookingDate BETWEEN :fromDate AND :toDate " +
+           "GROUP BY a.status")
+    List<AppointmentStatusCountResponse> countAppointmentsByStatusInDateRangeGroupByStatus(
+            @Param("fromDate") LocalDate fromDate, 
+            @Param("toDate") LocalDate toDate
+    );
+
     // Đếm số bệnh nhân đang khám trong ngày hiện tại.
     @Query("SELECT COUNT(a) FROM Appointment a " +
             "WHERE a.bookingDate = :today " +
@@ -269,6 +279,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     @Query(
             value = "SELECT DISTINCT a FROM Appointment a " +
                     "LEFT JOIN FETCH a.patient p " +
+                    "LEFT JOIN FETCH a.service s " +
+                    "LEFT JOIN FETCH a.medicalRecord mr " +
+                    "LEFT JOIN FETCH a.invoices inv " +
                     "WHERE a.bookingDate = CURRENT_DATE " +
                     "AND a.status != 'CANCELLED' " +
                     "AND (:search IS NULL OR :search = '' " +

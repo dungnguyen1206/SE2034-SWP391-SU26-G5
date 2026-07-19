@@ -80,12 +80,23 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public Map<String, Long> getAppointmentStatusCountsInDateRangeForReceptionist(LocalDate fromDate, LocalDate toDate) {
         Map<String, Long> statusCounts = new HashMap<>();
-        statusCounts.put("CONFIRMED", appointmentRepository.countConfirmedAppointmentsInDateRange(fromDate, toDate));
-        statusCounts.put("WAITING", appointmentRepository.countWaitingAppointmentsInDateRange(fromDate, toDate));
-        statusCounts.put("EXAMINING", appointmentRepository.countExaminingAppointmentsInDateRange(fromDate, toDate));
-        statusCounts.put("COMPLETED", appointmentRepository.countCompletedAppointmentsInDateRange(fromDate, toDate));
-        statusCounts.put("CANCELLED", appointmentRepository.countCancelledAppointmentsInDateRange(fromDate, toDate));
-        statusCounts.put("NO_SHOW", appointmentRepository.countNoShowAppointmentsInDateRange(fromDate, toDate));
+        // Khởi tạo các trạng thái mặc định bằng 0
+        statusCounts.put("CONFIRMED", 0L);
+        statusCounts.put("WAITING", 0L);
+        statusCounts.put("EXAMINING", 0L);
+        statusCounts.put("COMPLETED", 0L);
+        statusCounts.put("CANCELLED", 0L);
+        statusCounts.put("NO_SHOW", 0L);
+
+        // Gọi 1 câu lệnh duy nhất thay vì 6 câu riêng lẻ
+        List<AppointmentStatusCountResponse> counts = appointmentRepository.countAppointmentsByStatusInDateRangeGroupByStatus(fromDate, toDate);
+        
+        for (AppointmentStatusCountResponse response : counts) {
+            if (response.getStatus() != null) {
+                statusCounts.put(response.getStatus(), response.getCount());
+            }
+        }
+        
         return statusCounts;
     }
 
