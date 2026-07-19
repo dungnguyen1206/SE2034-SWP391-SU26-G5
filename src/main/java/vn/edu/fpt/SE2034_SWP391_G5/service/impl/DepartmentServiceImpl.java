@@ -5,7 +5,12 @@ import org.springframework.stereotype.Service;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Department;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.DepartmentRepository;
-import org.springframework.cache.annotation.Cacheable;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.Department;
+import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
+import vn.edu.fpt.SE2034_SWP391_G5.repository.DepartmentRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DepartmentService;
 
 import java.util.List;
@@ -19,7 +24,6 @@ public class DepartmentServiceImpl implements DepartmentService {
     }
 
     @Override
-    @Cacheable("departments")
     public List<Department> getAllActiveDepartments() {
         return departmentRepository.findAll().stream()
                 .filter(d -> "ACTIVE".equals(d.getStatus()))

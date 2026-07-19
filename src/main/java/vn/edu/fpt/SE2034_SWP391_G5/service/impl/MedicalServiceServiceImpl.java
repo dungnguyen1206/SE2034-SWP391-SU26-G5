@@ -14,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalServiceRepository;
 
 
-import org.springframework.cache.annotation.Cacheable;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -26,7 +25,6 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
 
 
     @Override
-    @Cacheable("medicalServices")
     public List<MedicalService> getMedicalServicelistByDepartment(Integer departmentId) {
         // Trước: luôn gọi findByDepartmentIdAndStatus dù departmentId null → query WHERE department_id = NULL → trống
         if (departmentId == null) {
