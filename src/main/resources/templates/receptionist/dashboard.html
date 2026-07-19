@@ -209,19 +209,29 @@
                                                   (todayAppointments.totalPages - maxPages < 0 ? 0 : todayAppointments.totalPages - maxPages) : 
                                                   todayAppointments.number - halfMax)},
                                       endPage=${startPage + maxPages - 1 >= todayAppointments.totalPages ? todayAppointments.totalPages - 1 : startPage + maxPages - 1}">
-                            <ul class="pagination-list">
-                                <li class="pagination-item" th:classappend="${todayAppointments.first} ? 'disabled'">
-                                    <a class="pagination-link" th:href="@{/receptionist/dashboard(page=${todayAppointments.number - 1}, search=${search})}">&laquo; Trước</a>
-                                </li>
-                                <li class="pagination-item" th:each="i : ${#numbers.sequence(startPage, endPage)}">
-                                    <a class="pagination-link" th:classappend="${todayAppointments.number == i} ? 'active'"
-                                       th:href="@{/receptionist/dashboard(page=${i}, search=${search})}" 
-                                       th:text="${i + 1}"></a>
-                                </li>
-                                <li class="pagination-item" th:classappend="${todayAppointments.last} ? 'disabled'">
-                                    <a class="pagination-link" th:href="@{/receptionist/dashboard(page=${todayAppointments.number + 1}, search=${search})}">Sau &raquo;</a>
-                                </li>
-                            </ul>
+                            
+                            <div class="pagination-info">
+                                <span th:text="'Trang ' + ${todayAppointments.number + 1} + ' / ' + ${todayAppointments.totalPages}">
+                                    Trang 1 / 1
+                                </span>
+
+                                <span th:text="'Tổng: ' + ${todayAppointments.totalElements} + ' lịch hẹn'">
+                                    Tổng: 0 lịch hẹn
+                                </span>
+                            </div>
+
+                            <div class="pagination">
+                                <a class="page-btn" th:classappend="${todayAppointments.first} ? 'disabled'"
+                                   th:href="@{/receptionist/dashboard(page=${todayAppointments.number - 1}, search=${search})}">Trước</a>
+                                
+                                <a class="page-number" th:each="i : ${#numbers.sequence(startPage, endPage)}"
+                                   th:classappend="${todayAppointments.number == i} ? 'active'"
+                                   th:href="@{/receptionist/dashboard(page=${i}, search=${search})}" 
+                                   th:text="${i + 1}"></a>
+                                
+                                <a class="page-btn" th:classappend="${todayAppointments.last} ? 'disabled'"
+                                   th:href="@{/receptionist/dashboard(page=${todayAppointments.number + 1}, search=${search})}">Sau</a>
+                            </div>
                         </div>
                     </section>
                 </section>
