@@ -32,7 +32,7 @@
 
         <label th:class="${formMode == 'PATIENT'} ? 'profile-form-field' : 'staff-form-field'">
             <span>Email <strong>*</strong></span>
-            <input type="email" th:field="*{email}" placeholder="VD: user@hms.vn" readonly>
+            <input type="email" th:field="*{email}" placeholder="VD: user@hms.vn" th:readonly="${formMode != 'PATIENT'}">
             <div class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
         </label>
         <label th:class="${formMode == 'PATIENT'} ? 'profile-form-field' : 'staff-form-field'">

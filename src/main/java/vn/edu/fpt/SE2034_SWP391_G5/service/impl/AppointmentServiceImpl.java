@@ -1,7 +1,9 @@
 package vn.edu.fpt.SE2034_SWP391_G5.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateAppointmentRequest;
@@ -9,10 +11,10 @@ import vn.edu.fpt.SE2034_SWP391_G5.dto.response.*;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.*;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
-import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
-import vn.edu.fpt.SE2034_SWP391_G5.service.NotificationService;
-import vn.edu.fpt.SE2034_SWP391_G5.service.EmailService;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.*;
+import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
+import vn.edu.fpt.SE2034_SWP391_G5.service.EmailService;
+import vn.edu.fpt.SE2034_SWP391_G5.service.NotificationService;
 import vn.edu.fpt.SE2034_SWP391_G5.util.CodeGenerator;
 
 import java.time.LocalDate;
@@ -33,9 +35,9 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final NotificationService notificationService;
     private final EmailService emailService;
 
+    // ======================== LIST APPOINTMENT RECEPTIONIST ========================
     @Override
-    public Page<AppointmentResponse> getAppointmentListForReceptionist(LocalDate fromDate, LocalDate toDate, int page,
-                                                                       int size) {
+    public Page<AppointmentResponse> getAppointmentListForReceptionist(LocalDate fromDate, LocalDate toDate, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Appointment> appointmentPage = appointmentRepository.findAppointmentListForReceptionistList(fromDate,
                 toDate, pageable);
@@ -68,8 +70,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         return (lastName + " " + middleName + " " + firstName).trim().replaceAll("\\s+", " ");
     }
 
-    public Page<AppointmentResponse> searchAppointmentListForReceptionist(String search, String status,
-                                                                          LocalDate fromDate, LocalDate toDate, int page, int size) {
+    public Page<AppointmentResponse> searchAppointmentListForReceptionist(String search, String status, LocalDate fromDate, LocalDate toDate, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Appointment> appointmentPage = appointmentRepository.searchAppointmentListForReceptionist(search, status,
                 fromDate, toDate, pageable);
@@ -77,8 +78,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     }
 
     @Override
-    public Map<String, Long> getAppointmentStatusCountsInDateRangeForReceptionist(LocalDate fromDate,
-                                                                                  LocalDate toDate) {
+    public Map<String, Long> getAppointmentStatusCountsInDateRangeForReceptionist(LocalDate fromDate, LocalDate toDate) {
         Map<String, Long> statusCounts = new HashMap<>();
         statusCounts.put("CONFIRMED", appointmentRepository.countConfirmedAppointmentsInDateRange(fromDate, toDate));
         statusCounts.put("WAITING", appointmentRepository.countWaitingAppointmentsInDateRange(fromDate, toDate));
@@ -89,62 +89,55 @@ public class AppointmentServiceImpl implements AppointmentService {
         return statusCounts;
     }
 
-    private Map<String, Long> createDefaultAppointmentStatusCounts() {
-        Map<String, Long> statusCounts = new HashMap<>();
+    @Override
+    public List<AppointmentDateGroupResponse> groupAppointmentsByDate(List<AppointmentResponse> appointments) {
+        Map<LocalDate, List<AppointmentResponse>> groupedMap = new LinkedHashMap<>();
 
-        statusCounts.put("CONFIRMED", 0L);
-        statusCounts.put("WAITING", 0L);
-        statusCounts.put("EXAMINING", 0L);
-        statusCounts.put("COMPLETED", 0L);
-        statusCounts.put("CANCELLED", 0L);
-        statusCounts.put("NO_SHOW", 0L);
-
-        return statusCounts;
-    }
-
-    // ---------------------------------------------------------------------------
-    public long countByStatus(List<AppointmentResponse> appointments, String status) {
-        long count = 0;
         for (AppointmentResponse appointment : appointments) {
-            if (status.equals(appointment.getStatus())) {
-                count++;
+            LocalDate bookingDate = appointment.getBookingDate();
+            if (bookingDate == null) {
+                continue;
             }
+            if (!groupedMap.containsKey(bookingDate)) {
+                groupedMap.put(bookingDate, new ArrayList<>());
+            }
+            groupedMap.get(bookingDate).add(appointment);
         }
-        return count;
-    }
 
-    public List<AppointmentResponse> filterAppointments(List<AppointmentResponse> appointments, String search, String status) {
-        List<AppointmentResponse> result = new ArrayList<>();
+        List<AppointmentDateGroupResponse> result = new ArrayList<>();
+        LocalDate today = LocalDate.now();
 
-        String keyword = search != null ? search.trim().toLowerCase() : "";
-        String selectedStatus = status != null ? status.trim() : "";
+        for (Map.Entry<LocalDate, List<AppointmentResponse>> entry : groupedMap.entrySet()) {
+            LocalDate bookingDate = entry.getKey();
+            List<AppointmentResponse> appointmentList = entry.getValue();
 
-        for (AppointmentResponse appointment : appointments) {
-            boolean matchesSearch = true;
-            boolean matchesStatus = true;
-
-            if (!keyword.isEmpty()) {
-                matchesSearch =
-                        containsIgnoreCase(appointment.getAppointmentCode(), keyword)
-                                || containsIgnoreCase(appointment.getPatientFullName(), keyword)
-                                || containsIgnoreCase(appointment.getPatientPhone(), keyword)
-                                || containsIgnoreCase(appointment.getDoctorFullName(), keyword)
-                                || containsIgnoreCase(appointment.getDepartmentName(), keyword)
-                                || containsIgnoreCase(appointment.getRoomNumber(), keyword);
-            }
-
-            if (!selectedStatus.isEmpty()) {
-                matchesStatus = selectedStatus.equals(appointment.getStatus());
-            }
-
-            if (matchesSearch && matchesStatus) {
-                result.add(appointment);
-            }
+            result.add(new AppointmentDateGroupResponse(
+                    bookingDate,
+                    today.equals(bookingDate),
+                    appointmentList.size(),
+                    appointmentList));
         }
 
         return result;
     }
+    // ======================== END LIST APPOINTMENT RECEPTIONIST ========================
 
+    // ======================== VIEW DETAIL APPOINTMENT RECEPTIONIST ========================
+    @Override
+    public AppointmentResponse getAppointmentDetailForReceptionist(Long appointmentId) {
+        Appointment appointment = appointmentRepository.findAppointmentDetailById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lịch hẹn"));
+
+        AppointmentResponse response = toResponse(appointment);
+        response.setPatientAddress(buildPatientAddress(appointment.getPatient()));
+
+        return response;
+    }
+    // ======================== END VIEW DETAIL APPOINTMENT RECEPTIONIST ========================
+
+
+
+    // ======================== CHECK-IN RECEPTIONIST ========================
     @Override
     public AppointmentPrintResponse getCheckInTicket(Long appointmentId) {
         Appointment appointment = appointmentRepository.findCheckInTicketById(appointmentId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thông tin lịch hẹn"));
@@ -164,8 +157,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     @Transactional(noRollbackFor = BadRequestException.class)
     public void confirmCheckInAppointment(Long appointmentId) {
-        Appointment appointment = appointmentRepository.findCheckInTicketById(appointmentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lịch hẹn"));
+        Appointment appointment = appointmentRepository.findCheckInTicketById(appointmentId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lịch hẹn"));
 
         if (!"CONFIRMED".equals(appointment.getStatus())) {
             throw new BadRequestException("Chỉ lịch hẹn đã xác nhận mới được check-in");
@@ -207,142 +199,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointmentRepository.save(appointment);
     }
 
-    @Override
-    public AppointmentResponse getAppointmentDetailForReceptionist(Long appointmentId) {
-        Appointment appointment = appointmentRepository.findAppointmentDetailById(appointmentId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lịch hẹn"));
 
-        AppointmentResponse response = toResponse(appointment);
-        response.setPatientAddress(buildPatientAddress(appointment.getPatient()));
-
-        return response;
-    }
-
-    @Override
-    public List<AppointmentDateGroupResponse> groupAppointmentsByDate(List<AppointmentResponse> appointments) {
-        Map<LocalDate, List<AppointmentResponse>> groupedMap = new LinkedHashMap<>();
-
-        for (AppointmentResponse appointment : appointments) {
-            LocalDate bookingDate = appointment.getBookingDate();
-            if (bookingDate == null) {
-                continue;
-            }
-            if (!groupedMap.containsKey(bookingDate)) {
-                groupedMap.put(bookingDate, new ArrayList<>());
-            }
-            groupedMap.get(bookingDate).add(appointment);
-        }
-
-        List<AppointmentDateGroupResponse> result = new ArrayList<>();
-        LocalDate today = LocalDate.now();
-
-        for (Map.Entry<LocalDate, List<AppointmentResponse>> entry : groupedMap.entrySet()) {
-            LocalDate bookingDate = entry.getKey();
-            List<AppointmentResponse> appointmentList = entry.getValue();
-
-            result.add(new AppointmentDateGroupResponse(
-                    bookingDate,
-                    today.equals(bookingDate),
-                    appointmentList.size(),
-                    appointmentList));
-        }
-
-        return result;
-    }
-
-    public Page<AppointmentResponse> getPagedAppointmentsForReceptionist(
-
-            String search,
-            String status,
-            LocalDate fromDate,
-            LocalDate toDate,
-            int page,
-            int size
-    ) {
-//        List<AppointmentResponse> allAppointments = getAppointmentListForReceptionist();
-//
-//        List<AppointmentResponse> filteredAppointments =
-//                filterAppointmentsBySearchStatusAndDate(
-//                        allAppointments,
-//                        search,
-//                        status,
-//                        fromDate,
-//                        toDate
-//                );
-//
-//        Pageable pageable = PageRequest.of(page, size);
-//
-//        int start = (int) pageable.getOffset();
-//        int end = Math.min(start + pageable.getPageSize(), filteredAppointments.size());
-//
-//        List<AppointmentResponse> pageContent;
-//
-//        if (start >= filteredAppointments.size()) {
-//            pageContent = new ArrayList<>();
-//        } else {
-//            pageContent = filteredAppointments.subList(start, end);
-//        }
-//
-        //  return new PageImpl<>(pageContent, pageable, filteredAppointments.size());
-        return null;
-    }
-
-    private List<AppointmentResponse> filterAppointmentsBySearchStatusAndDate(List<AppointmentResponse> appointments, String search, String status, LocalDate fromDate, LocalDate toDate) {
-        List<AppointmentResponse> result = new ArrayList<>();
-
-        String keyword = "";
-        if (search != null) {
-            keyword = search.trim().toLowerCase();
-        }
-
-        String selectedStatus = "";
-        if (status != null) {
-            selectedStatus = status.trim();
-        }
-
-        for (AppointmentResponse appointment : appointments) {
-            boolean matchesSearch = true;
-            boolean matchesStatus = true;
-            boolean matchesDate = true;
-
-            if (!keyword.isEmpty()) {
-                matchesSearch =
-                        containsIgnoreCase(appointment.getAppointmentCode(), keyword)
-                                || containsIgnoreCase(appointment.getPatientFullName(), keyword)
-                                || containsIgnoreCase(appointment.getPatientPhone(), keyword)
-                                || containsIgnoreCase(appointment.getDoctorFullName(), keyword)
-                                || containsIgnoreCase(appointment.getDepartmentName(), keyword)
-                                || containsIgnoreCase(appointment.getRoomNumber(), keyword);
-            }
-
-            if (!selectedStatus.isEmpty()) {
-                matchesStatus = selectedStatus.equals(appointment.getStatus());
-            }
-
-            if (fromDate != null) {
-                if (appointment.getBookingDate() == null) {
-                    matchesDate = false;
-                } else {
-                    matchesDate = !appointment.getBookingDate().isBefore(fromDate);
-                }
-            }
-
-            if (toDate != null) {
-                if (appointment.getBookingDate() == null) {
-                    matchesDate = false;
-                } else {
-                    matchesDate = matchesDate
-                            && !appointment.getBookingDate().isAfter(toDate);
-                }
-            }
-
-            if (matchesSearch && matchesStatus && matchesDate) {
-                result.add(appointment);
-            }
-        }
-
-        return result;
-    }
 
     private void markAppointmentNoShow(Appointment appointment, LocalDateTime now) {
         appointment.setStatus("NO_SHOW");
@@ -396,7 +253,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private Long calculateBaseNumberBeforeSlot(List<TimeSlot> slots, TimeSlot effectiveSlot) {
         long baseNumber = 0L;
         Set<LocalTime> processedTimes = new HashSet<>();
-        
+
         for (TimeSlot slot : slots) {
             if (slot.getStartTime().equals(effectiveSlot.getStartTime())) {
                 break;
@@ -414,8 +271,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         Integer roomId = getRoomId(targetAppointment);
         if (roomId == null) return 0L;
 
-        List<Appointment> checkedInAppointments = appointmentRepository
-                .findCheckedInAppointmentsByBookingDateAndScheduleId(targetAppointment.getBookingDate(), roomId);
+        List<Appointment> checkedInAppointments = appointmentRepository.findCheckedInAppointmentsByBookingDateAndScheduleId(targetAppointment.getBookingDate(), roomId);
 
         long order = 1L;
 
@@ -522,18 +378,168 @@ public class AppointmentServiceImpl implements AppointmentService {
                 return null;
             }
         }
-
         return null;
     }
 
+    private AppointmentPrintResponse toPrintResponse(Appointment appointment) {
+        TimeSlot slot = appointment.getSlot();
+        DoctorSchedule schedule = slot != null ? slot.getSchedule() : null;
+        User patient = appointment.getPatient();
+        User doctor = appointment.getDoctor();
+        MedicalService service = appointment.getService();
 
-    private boolean containsIgnoreCase(String value, String keyword) {
-        return value != null && value.toLowerCase().contains(keyword);
+        String patientFullName = patient != null
+                ? buildFullName(patient.getLastName(), patient.getMiddleName(), patient.getFirstName())
+                : "";
+
+        String doctorFullName = doctor != null
+                ? buildFullName(doctor.getLastName(), doctor.getMiddleName(), doctor.getFirstName())
+                : "";
+
+        String departmentName = "";
+        if (service != null && service.getDepartment() != null) {
+            departmentName = service.getDepartment().getName();
+        }
+
+        String roomNumber = "";
+        if (schedule != null && schedule.getRoom() != null) {
+            roomNumber = schedule.getRoom().getRoomNumber();
+        }
+
+        return new AppointmentPrintResponse(
+                appointment.getId(),
+                appointment.getAppointmentCode(),
+                patientFullName,
+                patient != null ? patient.getPhone() : "",
+                doctorFullName,
+                departmentName,
+                roomNumber,
+                appointment.getBookingDate(),
+                slot != null ? slot.getStartTime() : null,
+                slot != null ? slot.getEndTime() : null,
+                appointment.getCheckInTime(),
+                appointment.getStatus());
     }
+    // ======================== END CHECK-IN RECEPTIONIST ========================
 
-    // ------------------------------------- End Hoang Linh
-    // -----------------------------------------------
+    // ======================== QUEUE BOARD RECEPTIONIST ========================
+    @Override
+    public List<QueueResponse> getTodayQueueBoard() {
+        LocalDate today = LocalDate.now();
+        List<Appointment> todayAppointments = appointmentRepository.findQueueAppointmentsToday(today);
+        List<DoctorSchedule> todaySchedules = doctorScheduleRepository.findActiveSchedulesByDate(today);
 
+        Map<String, QueueResponse.QueueResponseBuilder> roomBuilders = new LinkedHashMap<>();
+
+        // 1. Initialize all rooms that have an active schedule today
+        for (DoctorSchedule ds : todaySchedules) {
+            if (ds.getRoom() != null && ds.getDoctor() != null) {
+                String roomNumber = ds.getRoom().getRoomNumber();
+                if (!roomBuilders.containsKey(roomNumber)) {
+                    String deptName = "-";
+                    if (ds.getDoctor().getDepartment() != null && ds.getDoctor().getDepartment().getName() != null) {
+                        deptName = ds.getDoctor().getDepartment().getName();
+                    }
+                    String doctorName = buildFullName(ds.getDoctor().getLastName(), ds.getDoctor().getMiddleName(), ds.getDoctor().getFirstName());
+
+                    roomBuilders.put(roomNumber, QueueResponse.builder()
+                            .roomNumber(roomNumber)
+                            .departmentName(deptName)
+                            .doctorFullName(doctorName)
+                            .waitingPatients(new ArrayList<>())
+                            .totalWaiting(0)
+                    );
+                }
+            }
+        }
+
+        // 2. Group appointments by room number
+        Map<String, List<Appointment>> groupedAppointments = new LinkedHashMap<>();
+        for (Appointment a : todayAppointments) {
+            String roomNumber = null;
+            if (a.getSlot() != null && a.getSlot().getSchedule() != null && a.getSlot().getSchedule().getRoom() != null) {
+                roomNumber = a.getSlot().getSchedule().getRoom().getRoomNumber();
+            }
+            if (roomNumber != null) {
+                groupedAppointments.computeIfAbsent(roomNumber, k -> new ArrayList<>()).add(a);
+            }
+        }
+
+        // 3. Populate appointments into roomBuilders
+        for (Map.Entry<String, List<Appointment>> entry : groupedAppointments.entrySet()) {
+            String roomNumber = entry.getKey();
+            List<Appointment> roomAppointments = entry.getValue();
+
+            QueueResponse.QueueResponseBuilder builder = roomBuilders.get(roomNumber);
+            if (builder == null) {
+                Appointment a = roomAppointments.get(0);
+                String deptName = (a.getService() != null && a.getService().getDepartment() != null && a.getService().getDepartment().getName() != null)
+                        ? a.getService().getDepartment().getName() : "-";
+                String docName = (a.getDoctor() != null)
+                        ? buildFullName(a.getDoctor().getLastName(), a.getDoctor().getMiddleName(), a.getDoctor().getFirstName()) : "-";
+
+                builder = QueueResponse.builder()
+                        .roomNumber(roomNumber)
+                        .departmentName(deptName)
+                        .doctorFullName(docName)
+                        .waitingPatients(new ArrayList<>())
+                        .totalWaiting(0);
+                roomBuilders.put(roomNumber, builder);
+            }
+
+            QueueResponse.PatientInfo examiningPatient = null;
+            List<QueueResponse.PatientInfo> waitingPatients = new ArrayList<>();
+
+            for (Appointment a : roomAppointments) {
+                String patientName = "-";
+                if (a.getPatient() != null) {
+                    patientName = buildFullName(a.getPatient().getLastName(), a.getPatient().getMiddleName(), a.getPatient().getFirstName());
+                }
+
+                Long realQueueNumber = calculateQueueNumber(a);
+
+                List<TimeSlot> slots = getSlotsInSameRoomAndDate(a);
+                TimeSlot effectiveSlot = getEffectiveSlotByCheckInTime(a, slots);
+                boolean isLate = effectiveSlot != null && a.getSlot() != null && !effectiveSlot.getStartTime().equals(a.getSlot().getStartTime());
+
+                QueueResponse.PatientInfo patientInfo = QueueResponse.PatientInfo.builder()
+                        .appointmentCode(a.getAppointmentCode())
+                        .patientName(patientName)
+                        .checkInTime(a.getCheckInTime() != null ? a.getCheckInTime().toLocalTime() : null)
+                        .status(a.getStatus())
+                        .stt(realQueueNumber != null ? realQueueNumber.intValue() : 0)
+                        .isLate(isLate)
+                        .build();
+
+                if ("EXAMINING".equalsIgnoreCase(a.getStatus())) {
+                    examiningPatient = patientInfo;
+                } else if ("WAITING".equalsIgnoreCase(a.getStatus())) {
+                    waitingPatients.add(patientInfo);
+                }
+            }
+
+            // Sort waiting patients: normal first (by STT), late last (by STT)
+            waitingPatients.sort((p1, p2) -> {
+                if (p1.isLate() && !p2.isLate()) return 1;
+                if (!p1.isLate() && p2.isLate()) return -1;
+                return Integer.compare(p1.getStt(), p2.getStt());
+            });
+
+            builder.examiningPatient(examiningPatient);
+            builder.waitingPatients(waitingPatients);
+            builder.totalWaiting(waitingPatients.size());
+        }
+
+        List<QueueResponse> queueBoards = new ArrayList<>();
+        for (QueueResponse.QueueResponseBuilder builder : roomBuilders.values()) {
+            queueBoards.add(builder.build());
+        }
+
+        return queueBoards;
+    }
+    // ======================== END QUEUE BOARD RECEPTIONIST ========================
+
+    // ================= END RECEPTIONIST =================
     public long getAllAppointment() {
         return appointmentRepository.count();
     }
@@ -559,10 +565,11 @@ public class AppointmentServiceImpl implements AppointmentService {
     public Page<AppointmentResponse> findAppointmentsByBookingDate(LocalDate today, Integer page, Integer size) {
 
         Pageable pageable = PageRequest.of(page, size);
-        Page<Appointment> appointments = appointmentRepository.findAppointmentsByBookingDate(today,pageable);
+        Page<Appointment> appointments = appointmentRepository.findAppointmentsByBookingDate(today, pageable);
 
         return appointments.map(this::toAppointmentResponse);
     }
+
     private AppointmentResponse toAppointmentResponse(Appointment a) {
         AppointmentResponse response = new AppointmentResponse();
         response.setAppointmentCode(a.getAppointmentCode());
@@ -766,10 +773,10 @@ public class AppointmentServiceImpl implements AppointmentService {
         try {
             if (appointment.getPatient() != null && appointment.getPatient().getEmail() != null && !appointment.getPatient().getEmail().isBlank()) {
                 String serviceName = (appointment.getService() != null) ? appointment.getService().getName() : "Dịch vụ khám";
-                String slotTimeStr = (slot != null && slot.getStartTime() != null && slot.getEndTime() != null) 
-                        ? (slot.getStartTime() + " - " + slot.getEndTime()) 
+                String slotTimeStr = (slot != null && slot.getStartTime() != null && slot.getEndTime() != null)
+                        ? (slot.getStartTime() + " - " + slot.getEndTime())
                         : "";
-                
+
                 String doctorName = appointment.getDoctor() != null
                         ? (appointment.getDoctor().getLastName() + " " + (appointment.getDoctor().getMiddleName() != null ? appointment.getDoctor().getMiddleName() + " " : "") + appointment.getDoctor().getFirstName())
                         : "Bác sĩ HAMS";
@@ -815,7 +822,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         Integer patientAge = null;
         if (patient != null && patient.getDateOfBirth() != null) {
-            patientAge = patient.getDateOfBirth() != null ? Period.between(patient.getDateOfBirth(), LocalDate.now()).getYears() : 0;   
+            patientAge = patient.getDateOfBirth() != null ? Period.between(patient.getDateOfBirth(), LocalDate.now()).getYears() : 0;
         }
 
         String patientGender = patient != null ? patient.getGender() : null;
@@ -869,45 +876,6 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .build();
     }
 
-    private AppointmentPrintResponse toPrintResponse(Appointment appointment) {
-        TimeSlot slot = appointment.getSlot();
-        DoctorSchedule schedule = slot != null ? slot.getSchedule() : null;
-        User patient = appointment.getPatient();
-        User doctor = appointment.getDoctor();
-        MedicalService service = appointment.getService();
-
-        String patientFullName = patient != null
-                ? buildFullName(patient.getLastName(), patient.getMiddleName(), patient.getFirstName())
-                : "";
-
-        String doctorFullName = doctor != null
-                ? buildFullName(doctor.getLastName(), doctor.getMiddleName(), doctor.getFirstName())
-                : "";
-
-        String departmentName = "";
-        if (service != null && service.getDepartment() != null) {
-            departmentName = service.getDepartment().getName();
-        }
-
-        String roomNumber = "";
-        if (schedule != null && schedule.getRoom() != null) {
-            roomNumber = schedule.getRoom().getRoomNumber();
-        }
-
-        return new AppointmentPrintResponse(
-                appointment.getId(),
-                appointment.getAppointmentCode(),
-                patientFullName,
-                patient != null ? patient.getPhone() : "",
-                doctorFullName,
-                departmentName,
-                roomNumber,
-                appointment.getBookingDate(),
-                slot != null ? slot.getStartTime() : null,
-                slot != null ? slot.getEndTime() : null,
-                appointment.getCheckInTime(),
-                appointment.getStatus());
-    }
 
     private String buildFullName(String lastName, String middleName, String firstName) {
         StringBuilder sb = new StringBuilder();
@@ -1008,7 +976,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Transactional
     public void updateAppointmentStatus(Long appointmentId, String newStatus) {
         Appointment appointment = appointmentRepository.findById(appointmentId).orElseThrow(() -> new ResourceNotFoundException(
-                        "Không tìm thấy lịch hẹn với ID: " + appointmentId));
+                "Không tìm thấy lịch hẹn với ID: " + appointmentId));
 
         appointment.setStatus(newStatus.toUpperCase());
         appointment.setUpdatedAt(LocalDateTime.now());
@@ -1026,118 +994,5 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .toList();
     }
 
-    @Override
-    public List<QueueResponse> getTodayQueueBoard() {
-        LocalDate today = LocalDate.now();
-        List<Appointment> todayAppointments = appointmentRepository.findQueueAppointmentsToday(today);
-        List<DoctorSchedule> todaySchedules = doctorScheduleRepository.findActiveSchedulesByDate(today);
 
-        Map<String, QueueResponse.QueueResponseBuilder> roomBuilders = new LinkedHashMap<>();
-
-        // 1. Initialize all rooms that have an active schedule today
-        for (DoctorSchedule ds : todaySchedules) {
-            if (ds.getRoom() != null && ds.getDoctor() != null) {
-                String roomNumber = ds.getRoom().getRoomNumber();
-                if (!roomBuilders.containsKey(roomNumber)) {
-                    String deptName = "-";
-                    if (ds.getDoctor().getDepartment() != null && ds.getDoctor().getDepartment().getName() != null) {
-                        deptName = ds.getDoctor().getDepartment().getName();
-                    }
-                    String doctorName = buildFullName(ds.getDoctor().getLastName(), ds.getDoctor().getMiddleName(), ds.getDoctor().getFirstName());
-
-                    roomBuilders.put(roomNumber, QueueResponse.builder()
-                            .roomNumber(roomNumber)
-                            .departmentName(deptName)
-                            .doctorFullName(doctorName)
-                            .waitingPatients(new ArrayList<>())
-                            .totalWaiting(0)
-                    );
-                }
-            }
-        }
-
-        // 2. Group appointments by room number
-        Map<String, List<Appointment>> groupedAppointments = new LinkedHashMap<>();
-        for (Appointment a : todayAppointments) {
-            String roomNumber = null;
-            if (a.getSlot() != null && a.getSlot().getSchedule() != null && a.getSlot().getSchedule().getRoom() != null) {
-                roomNumber = a.getSlot().getSchedule().getRoom().getRoomNumber();
-            }
-            if (roomNumber != null) {
-                groupedAppointments.computeIfAbsent(roomNumber, k -> new ArrayList<>()).add(a);
-            }
-        }
-
-        // 3. Populate appointments into roomBuilders
-        for (Map.Entry<String, List<Appointment>> entry : groupedAppointments.entrySet()) {
-            String roomNumber = entry.getKey();
-            List<Appointment> roomAppointments = entry.getValue();
-
-            QueueResponse.QueueResponseBuilder builder = roomBuilders.get(roomNumber);
-            if (builder == null) {
-                Appointment a = roomAppointments.get(0);
-                String deptName = (a.getService() != null && a.getService().getDepartment() != null && a.getService().getDepartment().getName() != null)
-                        ? a.getService().getDepartment().getName() : "-";
-                String docName = (a.getDoctor() != null)
-                        ? buildFullName(a.getDoctor().getLastName(), a.getDoctor().getMiddleName(), a.getDoctor().getFirstName()) : "-";
-
-                builder = QueueResponse.builder()
-                        .roomNumber(roomNumber)
-                        .departmentName(deptName)
-                        .doctorFullName(docName)
-                        .waitingPatients(new ArrayList<>())
-                        .totalWaiting(0);
-                roomBuilders.put(roomNumber, builder);
-            }
-
-            QueueResponse.PatientInfo examiningPatient = null;
-            List<QueueResponse.PatientInfo> waitingPatients = new ArrayList<>();
-
-            for (Appointment a : roomAppointments) {
-                String patientName = "-";
-                if (a.getPatient() != null) {
-                    patientName = buildFullName(a.getPatient().getLastName(), a.getPatient().getMiddleName(), a.getPatient().getFirstName());
-                }
-
-                Long realQueueNumber = calculateQueueNumber(a);
-
-                List<TimeSlot> slots = getSlotsInSameRoomAndDate(a);
-                TimeSlot effectiveSlot = getEffectiveSlotByCheckInTime(a, slots);
-                boolean isLate = effectiveSlot != null && a.getSlot() != null && !effectiveSlot.getStartTime().equals(a.getSlot().getStartTime());
-
-                QueueResponse.PatientInfo patientInfo = QueueResponse.PatientInfo.builder()
-                        .appointmentCode(a.getAppointmentCode())
-                        .patientName(patientName)
-                        .checkInTime(a.getCheckInTime() != null ? a.getCheckInTime().toLocalTime() : null)
-                        .status(a.getStatus())
-                        .stt(realQueueNumber != null ? realQueueNumber.intValue() : 0)
-                        .isLate(isLate)
-                        .build();
-
-                if ("EXAMINING".equalsIgnoreCase(a.getStatus())) {
-                    examiningPatient = patientInfo;
-                } else if ("WAITING".equalsIgnoreCase(a.getStatus())) {
-                    waitingPatients.add(patientInfo);
-                }
-            }
-
-            // Sort waiting patients: normal first (by STT), late last (by STT)
-            waitingPatients.sort((p1, p2) -> {
-                if (p1.isLate() && !p2.isLate()) return 1;
-                if (!p1.isLate() && p2.isLate()) return -1;
-                return Integer.compare(p1.getStt(), p2.getStt());
-            });
-
-            builder.examiningPatient(examiningPatient);
-            builder.waitingPatients(waitingPatients);
-            builder.totalWaiting(waitingPatients.size());
-        }
-
-        List<QueueResponse> queueBoards = new ArrayList<>();
-        for (QueueResponse.QueueResponseBuilder builder : roomBuilders.values()) {
-            queueBoards.add(builder.build());
-        }
-
-        return queueBoards;
-    }
 }

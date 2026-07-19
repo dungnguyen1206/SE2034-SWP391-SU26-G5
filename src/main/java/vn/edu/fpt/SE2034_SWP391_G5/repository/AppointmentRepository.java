@@ -15,23 +15,7 @@ import java.util.Optional;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
-    @Query("SELECT new vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentStatusCountResponse(a.status, count (a)) " +
-            " from Appointment a WHere a.bookingDate= :date group by a.status")
-    List<AppointmentStatusCountResponse> findTodayAppointmentsByStatus(@Param("date") LocalDate date);
-
-    @Query("SELECT a from Appointment a " +
-            "JOIN fetch a.patient p " +
-            "JOIN fetch a.doctor d " +
-            "JOIN fetch a.service s " +
-            "join fetch a.slot sl " + 
-            "join fetch sl.schedule ds " +
-            "join fetch ds.room r " +
-            "WHERE a.bookingDate =:today " +
-            "order by sl.startTime asc")
-    Page<Appointment> findAppointmentsByBookingDate(@Param("today") LocalDate today, Pageable pageable);
-
-    //-------------------------------------- Receptionist -----------------------------------------------
-    // -------------------------- Dashboard ----------------------------------------
+    // ======================== DASHBOARD RECEPTIONIST ========================
     // Đếm tổng lịch hẹn trong ngày hiện tại.
     @Query("SELECT COUNT(a) FROM Appointment a WHERE a.bookingDate = :today")
     long countTodayAppointments(@Param("today") LocalDate today);
@@ -52,7 +36,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "AND a.status = 'EXAMINING'")
     long countTodayExaminingAppointments(@Param("today") LocalDate today);
 
-
     // Lấy danh sách lịch hẹn hôm nay trên Dashboard.
     // Có hỗ trợ tìm kiếm theo họ, tên đệm, tên hoặc số điện thoại bệnh nhân.
     // Chỉ query lịch hẹn của ngày hiện tại, không lấy toàn bộ danh sách.
@@ -68,17 +51,19 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "WHERE a.bookingDate = :today " +
             "AND (:search IS NULL OR :search = '' " +
             "OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :search, '%')) " +
-            "OR LOWER(p.middleName) LIKE LOWER(CONCAT('%', :search, '%')) " +
             "OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "OR LOWER(CONCAT(p.lastName, ' ', p.firstName)) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "OR LOWER(CONCAT(p.lastName, ' ', p.middleName, ' ', p.firstName)) LIKE LOWER(CONCAT('%', :search, '%')) " +
             "OR p.phone LIKE CONCAT('%', :search, '%')) " +
-            "ORDER BY sl.startTime ASC",
+            "ORDER BY sl.startTime DESC, a.createdAt DESC",
             countQuery = "SELECT COUNT(a) FROM Appointment a " +
             "JOIN a.patient p " +
             "WHERE a.bookingDate = :today " +
             "AND (:search IS NULL OR :search = '' " +
             "OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :search, '%')) " +
-            "OR LOWER(p.middleName) LIKE LOWER(CONCAT('%', :search, '%')) " +
             "OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "OR LOWER(CONCAT(p.lastName, ' ', p.firstName)) LIKE LOWER(CONCAT('%', :search, '%')) " +
+            "OR LOWER(CONCAT(p.lastName, ' ', p.middleName, ' ', p.firstName)) LIKE LOWER(CONCAT('%', :search, '%')) " +
             "OR p.phone LIKE CONCAT('%', :search, '%'))"
     )
     Page<Appointment> findTodayAppointmentsForDashboard(
@@ -86,9 +71,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("search") String search,
             Pageable pageable
     );
+    // ======================== END DASHBOARD RECEPTIONIST ========================
 
-    // ------------------------------------------------------------------------------------------------------------
-
+    // ======================== LIST APPOINTMENT RECEPTIONIST ========================
     // Lấy danh sách lịch hẹn theo ngày hiển thị lên màn hình Appointment List of Receptionist
     @Query(
             value = "SELECT a FROM Appointment a " +
@@ -100,7 +85,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                     "JOIN FETCH sl.schedule sch " +
                     "JOIN FETCH sch.room r " +
                     "WHERE a.bookingDate BETWEEN :fromDate AND :toDate " +
-                    "ORDER BY a.bookingDate DESC, sl.startTime ASC",
+                    "ORDER BY a.bookingDate DESC, sl.startTime DESC, a.createdAt DESC",
             countQuery = "SELECT COUNT(a) FROM Appointment a " +
                     "WHERE a.bookingDate BETWEEN :fromDate AND :toDate"
     )
@@ -120,18 +105,20 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                     "AND (:status IS NULL OR :status = '' OR a.status = :status) " +
                     "AND (:search IS NULL OR :search = '' " +
                     "OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :search, '%')) " +
-                    "OR LOWER(p.middleName) LIKE LOWER(CONCAT('%', :search, '%')) " +
                     "OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR LOWER(CONCAT(p.lastName, ' ', p.firstName)) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR LOWER(CONCAT(p.lastName, ' ', p.middleName, ' ', p.firstName)) LIKE LOWER(CONCAT('%', :search, '%')) " +
                     "OR p.phone LIKE CONCAT('%', :search, '%')) " +
-                    "ORDER BY a.bookingDate DESC, sl.startTime ASC",
+                    "ORDER BY a.bookingDate DESC, sl.startTime DESC, a.createdAt DESC",
             countQuery = "SELECT COUNT(a) FROM Appointment a " +
                     "JOIN a.patient p " +
                     "WHERE a.bookingDate BETWEEN :fromDate AND :toDate " +
                     "AND (:status IS NULL OR :status = '' OR a.status = :status) " +
                     "AND (:search IS NULL OR :search = '' " +
                     "OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :search, '%')) " +
-                    "OR LOWER(p.middleName) LIKE LOWER(CONCAT('%', :search, '%')) " +
                     "OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR LOWER(CONCAT(p.lastName, ' ', p.firstName)) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR LOWER(CONCAT(p.lastName, ' ', p.middleName, ' ', p.firstName)) LIKE LOWER(CONCAT('%', :search, '%')) " +
                     "OR p.phone LIKE CONCAT('%', :search, '%'))"
     )
     Page<Appointment> searchAppointmentListForReceptionist(@Param("search") String search, @Param("status") String status, @Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate, Pageable pageable);
@@ -154,7 +141,41 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     @Query("SELECT COUNT(a) FROM Appointment a WHERE a.bookingDate BETWEEN :fromDate AND :toDate AND a.status = 'NO_SHOW'")
     long countNoShowAppointmentsInDateRange(@Param("fromDate") LocalDate fromDate, @Param("toDate") LocalDate toDate);
 
-    // ------------------------------------------------------------------------
+    // ======================== END LIST APPOINTMENT RECEPTIONIST ========================
+
+    // ======================== VIEW DETAIL APPOINTMENT RECEPTIONIST ========================
+    @Query("SELECT DISTINCT a FROM Appointment a " +
+            "LEFT JOIN FETCH a.patient p " +
+            "LEFT JOIN FETCH p.addresses addr " +
+            "LEFT JOIN FETCH addr.province " +
+            "LEFT JOIN FETCH a.doctor " +
+            "LEFT JOIN FETCH a.service sv " +
+            "LEFT JOIN FETCH sv.department " +
+            "LEFT JOIN FETCH a.slot sl " +
+            "LEFT JOIN FETCH sl.schedule sch " +
+            "LEFT JOIN FETCH sch.room " +
+            "WHERE a.id = :appointmentId")
+    Optional<Appointment> findAppointmentDetailById(@Param("appointmentId") Long appointmentId);
+    // ======================== END VIEW DETAIL APPOINTMENT RECEPTIONIST ========================
+
+    @Query("SELECT new vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentStatusCountResponse(a.status, count (a)) " +
+            " from Appointment a WHere a.bookingDate= :date group by a.status")
+    List<AppointmentStatusCountResponse> findTodayAppointmentsByStatus(@Param("date") LocalDate date);
+
+    @Query("SELECT a from Appointment a " +
+            "JOIN fetch a.patient p " +
+            "JOIN fetch a.doctor d " +
+            "JOIN fetch a.service s " +
+            "join fetch a.slot sl " + 
+            "join fetch sl.schedule ds " +
+            "join fetch ds.room r " +
+            "WHERE a.bookingDate =:today " +
+            "order by sl.startTime asc")
+    Page<Appointment> findAppointmentsByBookingDate(@Param("today") LocalDate today, Pageable pageable);
+
+
+
+    // ======================== CHECK-IN RECEPTIONIST ========================
     @Query("SELECT a FROM Appointment a " +
             "LEFT JOIN FETCH a.patient " +
             "LEFT JOIN FETCH a.doctor " +
@@ -179,20 +200,23 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("bookingDate") LocalDate bookingDate,
             @Param("roomId") Integer roomId
     );
+    // ======================== END CHECK-IN RECEPTIONIST ========================
 
-    @Query("SELECT DISTINCT a FROM Appointment a " +
-            "LEFT JOIN FETCH a.patient p " +
-            "LEFT JOIN FETCH p.addresses addr " +
-            "LEFT JOIN FETCH addr.province " +
-            "LEFT JOIN FETCH a.doctor " +
-            "LEFT JOIN FETCH a.service sv " +
-            "LEFT JOIN FETCH sv.department " +
-            "LEFT JOIN FETCH a.slot sl " +
-            "LEFT JOIN FETCH sl.schedule sch " +
-            "LEFT JOIN FETCH sch.room " +
-            "WHERE a.id = :appointmentId")
-    Optional<Appointment> findAppointmentDetailById(@Param("appointmentId") Long appointmentId);
+    // ======================== WALK-IN BOOKING RECEPTIONIST ========================
+    boolean existsBySlotIdAndPatientIdAndStatusNotIn(Long slotId, Long patientId, List<String> excludedStatuses);
 
+    @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END FROM Appointment a " +
+           "WHERE a.patient.id = :patientId " +
+           "AND a.bookingDate = :bookingDate " +
+           "AND a.service.department.id = :departmentId " +
+           "AND a.status NOT IN :excludedStatuses")
+    boolean existsByPatientIdAndDepartmentIdAndBookingDateAndStatusNotIn(
+            @Param("patientId") Long patientId, 
+            @Param("departmentId") Integer departmentId, 
+            @Param("bookingDate") LocalDate bookingDate, 
+            @Param("excludedStatuses") List<String> excludedStatuses);
+    // ======================== END WALK-IN BOOKING RECEPTIONIST ========================
+    // ======================== QUEUE BOARD RECEPTIONIST ========================
     @Query("SELECT a FROM Appointment a " +
             "JOIN FETCH a.patient p " +
             "JOIN FETCH a.doctor d " +
@@ -205,6 +229,49 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "AND a.status IN ('WAITING', 'EXAMINING') " +
             "ORDER BY r.roomNumber ASC, a.checkInTime ASC, a.id ASC")
     List<Appointment> findQueueAppointmentsToday(@Param("today") LocalDate today);
+    // ======================== END QUEUE BOARD RECEPTIONIST ========================
+
+    // ======================== LIST INVOICE RECEPTIONIST ========================
+    @Query(
+            value = "SELECT DISTINCT a FROM Appointment a " +
+                    "LEFT JOIN FETCH a.patient p " +
+                    "WHERE a.bookingDate = CURRENT_DATE " +
+                    "AND a.status != 'CANCELLED' " +
+                    "AND (:search IS NULL OR :search = '' " +
+                    "OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR LOWER(CONCAT(p.lastName, ' ', p.firstName)) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR LOWER(CONCAT(p.lastName, ' ', p.middleName, ' ', p.firstName)) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR p.phone LIKE CONCAT('%', :search, '%')) " +
+                    "ORDER BY a.createdAt DESC",
+            countQuery = "SELECT COUNT(DISTINCT a) FROM Appointment a " +
+                    "JOIN a.patient p " +
+                    "WHERE a.bookingDate = CURRENT_DATE " +
+                    "AND a.status != 'CANCELLED' " +
+                    "AND (:search IS NULL OR :search = '' " +
+                    "OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR LOWER(CONCAT(p.lastName, ' ', p.firstName)) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR LOWER(CONCAT(p.lastName, ' ', p.middleName, ' ', p.firstName)) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR p.phone LIKE CONCAT('%', :search, '%'))"
+    )
+    Page<Appointment> findAppointmentsForBilling(@Param("search") String search, Pageable pageable);
+    
+    @Query(
+            value = "SELECT DISTINCT a FROM Appointment a " +
+                    "LEFT JOIN FETCH a.patient p " +
+                    "WHERE a.bookingDate = CURRENT_DATE " +
+                    "AND a.status != 'CANCELLED' " +
+                    "AND (:search IS NULL OR :search = '' " +
+                    "OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR LOWER(CONCAT(p.lastName, ' ', p.firstName)) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR LOWER(CONCAT(p.lastName, ' ', p.middleName, ' ', p.firstName)) LIKE LOWER(CONCAT('%', :search, '%')) " +
+                    "OR p.phone LIKE CONCAT('%', :search, '%')) " +
+                    "ORDER BY a.createdAt DESC"
+    )
+    List<Appointment> findAllAppointmentsForBilling(@Param("search") String search);
+    // ======================== END LIST INVOICE RECEPTIONIST ========================
 
     // ------------------------------------------------------------------------------------
 
@@ -225,7 +292,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     Optional<Appointment> findByAppointmentCode(String appointmentCode);
 
-    boolean existsBySlotIdAndPatientIdAndStatusNotIn(Long slotId, Long patientId, List<String> excludedStatuses);
+
 
     @Query("SELECT COUNT(a) FROM Appointment a WHERE a.patient.id = :patientId AND a.status = :status")
     long countByPatientIdAndStatus(@Param("patientId") Long patientId, @Param("status") String status);
@@ -265,24 +332,5 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "AND a.status = 'CONFIRMED'")
     List<Appointment> findConfirmedAppointmentsByBookingDate(@Param("bookingDate") LocalDate bookingDate);
 
-    @Query(
-            value = "SELECT DISTINCT a FROM Appointment a " +
-                    "LEFT JOIN FETCH a.patient p " +
-                    "WHERE a.bookingDate = CURRENT_DATE " +
-                    "AND a.status != 'CANCELLED' " +
-                    "AND (:search IS NULL OR :search = '' " +
-                    "OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :search, '%')) " +
-                    "OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
-                    "OR p.phone LIKE CONCAT('%', :search, '%')) " +
-                    "ORDER BY a.createdAt DESC",
-            countQuery = "SELECT COUNT(DISTINCT a) FROM Appointment a " +
-                    "JOIN a.patient p " +
-                    "WHERE a.bookingDate = CURRENT_DATE " +
-                    "AND a.status != 'CANCELLED' " +
-                    "AND (:search IS NULL OR :search = '' " +
-                    "OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :search, '%')) " +
-                    "OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
-                    "OR p.phone LIKE CONCAT('%', :search, '%'))"
-    )
-    Page<Appointment> findAppointmentsForBilling(@Param("search") String search, Pageable pageable);
+
 }

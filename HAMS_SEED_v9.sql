@@ -114,7 +114,8 @@ INSERT INTO departments (name, description, image_url, status) VALUES
 (N'Nhi',            N'Khám và điều trị bệnh cho trẻ em từ sơ sinh đến 15 tuổi', '/images/departments/nhi.jpg', 'ACTIVE'),
 (N'Mắt',            N'Khám, điều trị và phẫu thuật các bệnh lý về mắt', '/images/departments/mat.jpg', 'ACTIVE'),
 (N'Tai Mũi Họng',   N'Khám và điều trị các bệnh lý tai, mũi, họng người lớn và trẻ em', '/images/departments/tai-mui-hong.jpg', 'ACTIVE');
-GO
+Go
+
 
 -- [04] Medical Services (7 khoa x 10 dịch vụ = 70 dịch vụ)
 -- === KHOA 1: TIM MẠCH ===

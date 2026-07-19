@@ -8,6 +8,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.dto.request.WalkInBookingRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.*;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.*;
 import vn.edu.fpt.SE2034_SWP391_G5.service.ReceptionistWalkInService;
+import vn.edu.fpt.SE2034_SWP391_G5.service.SmsService;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -29,7 +30,9 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
     private final AppointmentRepository appointmentRepository;
     private final InvoiceRepository invoiceRepository;
     private final InvoiceItemRepository invoiceItemRepository;
+    private final SmsService smsService;
 
+    // ======================== WALK-IN BOOKING RECEPTIONIST ========================
     @Override
     public Object searchPatientByPhone(String phone) {
         if (phone == null || phone.trim().isEmpty()) {
@@ -97,7 +100,7 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
             TimeSlot displaySlot = availableSlot != null ? availableSlot : timeSlots.get(0);
             
             boolean isFull = availableSlot == null;
-            boolean isPast = startTime.isBefore(currentTime) || startTime.equals(currentTime);
+            boolean isPast = displaySlot.getEndTime().isBefore(currentTime) || displaySlot.getEndTime().equals(currentTime);
             boolean isAvailable = !isFull && !isPast;
             
             result.add(Map.<String, Object>of(
@@ -111,7 +114,7 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
 
     @Override
     @Transactional
-    public void createWalkInAppointment(WalkInBookingRequest request) {
+    public Long createWalkInAppointment(WalkInBookingRequest request) {
         String phone = request.getPhone();
         if (phone == null || phone.trim().isEmpty()) {
             throw new RuntimeException("Vui lòng nhập số điện thoại.");
@@ -136,10 +139,15 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
             patient = new User();
             patient.setUsername(request.getPhone());
             patient.setPhone(request.getPhone());
+            patient.setEmail(request.getPhone() + "@walkin.local");
             patient.setFirstName(request.getFirstName());
             patient.setLastName(request.getLastName());
             patient.setGender(request.getGender());
-            patient.setPasswordHash(passwordEncoder.encode("Walkin@123"));
+            
+            // Generate a random, strong password
+            String generatedPassword = "Wk" + java.util.UUID.randomUUID().toString().substring(0, 5);
+            patient.setPasswordHash(passwordEncoder.encode(generatedPassword));
+            
             patient.setStatus("ACTIVE");
             patient.setEmailVerified(true);
             patient.setCreatedAt(LocalDateTime.now());
@@ -149,11 +157,22 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
             
             Role patientRole = roleRepository.findByName("PATIENT").orElseThrow(() -> new RuntimeException("Role PATIENT not found"));
             UserRole userRole = new UserRole();
+            
+            vn.edu.fpt.SE2034_SWP391_G5.entity.UserRoleId userRoleId = new vn.edu.fpt.SE2034_SWP391_G5.entity.UserRoleId(patient.getId(), patientRole.getId());
+            userRole.setId(userRoleId);
+            
             userRole.setUser(patient);
             userRole.setRole(patientRole);
+            userRole.setAssignedAt(LocalDateTime.now());
             userRoleRepository.save(userRole);
             
-            System.out.println("Gửi SMS đến " + request.getPhone() + " với mật khẩu: Walkin@123");
+            System.out.println("====== THÔNG BÁO HỆ THỐNG ======");
+            System.out.println("Tài khoản Walk-in mới được tạo!");
+            System.out.println("SĐT: " + request.getPhone());
+            System.out.println("Mật khẩu ngẫu nhiên: " + generatedPassword);
+            System.out.println("================================");
+            
+            smsService.sendWalkInAccountSms(request.getPhone(), generatedPassword);
         }
 
         // 2. Get Department's initial Medical Service
@@ -174,8 +193,13 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
             throw new RuntimeException("Khung giờ không khớp với ngày khám.");
         }
 
-        if (LocalDate.now().equals(request.getBookingDate()) && selectedSlot.getStartTime().isBefore(LocalTime.now())) {
-            throw new RuntimeException("Không thể đặt lịch vào khung giờ trong quá khứ.");
+        if (request.getBookingDate().isBefore(LocalDate.now())) {
+            throw new RuntimeException("Không thể đặt lịch khám cho ngày trong quá khứ.");
+        }
+
+        if (LocalDate.now().equals(request.getBookingDate()) && 
+            (selectedSlot.getEndTime().isBefore(LocalTime.now()) || selectedSlot.getEndTime().equals(LocalTime.now()))) {
+            throw new RuntimeException("Không thể đặt lịch vào khung giờ đã kết thúc.");
         }
 
         if (selectedSlot.getBookedCapacity() >= selectedSlot.getMaxCapacity()) {
@@ -183,11 +207,19 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
         }
 
         // Check if patient already booked this exact slot
-        boolean alreadyBooked = appointmentRepository.existsBySlotIdAndPatientIdAndStatusNotIn(
+        boolean alreadyBookedTimeSlot = appointmentRepository.existsBySlotIdAndPatientIdAndStatusNotIn(
                 selectedSlot.getId(), patient.getId(), Arrays.asList("CANCELLED", "NO_SHOW")
         );
-        if (alreadyBooked) {
+        if (alreadyBookedTimeSlot) {
             throw new RuntimeException("Bệnh nhân này đã có lịch khám tại khung giờ này. Vui lòng chọn khung giờ khác.");
+        }
+
+        // Check if patient already booked this department on this date
+        boolean alreadyBookedDept = appointmentRepository.existsByPatientIdAndDepartmentIdAndBookingDateAndStatusNotIn(
+                patient.getId(), request.getDepartmentId(), request.getBookingDate(), Arrays.asList("CANCELLED", "NO_SHOW")
+        );
+        if (alreadyBookedDept) {
+            throw new RuntimeException("Bệnh nhân này đã có lịch khám tại khoa này trong ngày hôm nay. Không thể đặt thêm lịch cùng khoa.");
         }
 
         // Increase booked capacity
@@ -204,8 +236,8 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
         appointment.setService(initialService);
         appointment.setSlot(selectedSlot);
         appointment.setBookingDate(request.getBookingDate());
-        appointment.setStatus("CONFIRMED"); // Offline booking always starts as CONFIRMED
-        appointment.setCheckInTime(null); // Must be checked-in manually
+        appointment.setStatus("WAITING"); // Offline booking auto check-in
+        appointment.setCheckInTime(LocalDateTime.now());
         appointment.setCreatedAt(LocalDateTime.now());
         appointment.setUpdatedAt(LocalDateTime.now());
         appointment = appointmentRepository.save(appointment);
@@ -232,5 +264,8 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
         item.setQuantity(1);
         item.setLineTotal(initialService.getReferencePrice());
         invoiceItemRepository.save(item);
+        
+        return appointment.getId();
     }
+    // ======================== END WALK-IN BOOKING RECEPTIONIST ========================
 }

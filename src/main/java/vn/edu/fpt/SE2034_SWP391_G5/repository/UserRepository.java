@@ -73,13 +73,25 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
         boolean existsByUsername(String username);
 
-        @Query("SELECT u.id, " +
-                "CONCAT(CONCAT(CONCAT(u.lastName, ' '), COALESCE(CONCAT(u.middleName, ' '), '')), u.firstName), "
-                +
-                "UPPER(CONCAT(SUBSTRING(u.lastName, 1, 1), SUBSTRING(u.firstName, 1, 1))) " +
-                "FROM User u " +
-                "WHERE u.email = :email")
-        List<Object[]> findReceptionistInfoByEmail(@Param("email") String email);
+    // -------------------------------------- RECEPTIONIST -----------------------------------------------
+
+    @Query("SELECT u.id, " +
+            "CONCAT(CONCAT(CONCAT(u.lastName, ' '), COALESCE(CONCAT(u.middleName, ' '), '')), u.firstName), " +
+            "UPPER(CONCAT(SUBSTRING(u.lastName, 1, 1), SUBSTRING(u.firstName, 1, 1))) " +
+            "FROM User u " +
+            "WHERE u.email = :email")
+    List<Object[]> findReceptionistInfoByEmail(@Param("email") String email);
+
+    @Query("SELECT DISTINCT u FROM User u " +
+            "JOIN FETCH u.userRoles ur " +
+            "JOIN FETCH ur.role r " +
+            "LEFT JOIN FETCH u.createdBy cb " +
+            "WHERE u.id = :receptionistId " +
+            "AND r.name = 'RECEPTIONIST'")
+    Optional<User> findReceptionistStaffDetailById(@Param("receptionistId") Long receptionistId);
+
+    // -------------------------------------- END RECEPTIONIST -------------------------------------------
+
 
         @Query("select new vn.edu.fpt.SE2034_SWP391_G5.dto.response.StaffResponse (" +
                 " u.id, " +
@@ -107,14 +119,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
                 "WHERE u.id = :doctorId " +
                 "AND r.name = 'DOCTOR'")
         Optional<User> findDoctorStaffDetailById(@Param("doctorId") Long doctorId);
-
-        @Query("SELECT DISTINCT u FROM User u " +
-                "JOIN FETCH u.userRoles ur " +
-                "JOIN FETCH ur.role r " +
-                "LEFT JOIN FETCH u.createdBy cb " +
-                "WHERE u.id = :receptionistId " +
-                "AND r.name = 'RECEPTIONIST'")
-        Optional<User> findReceptionistStaffDetailById(@Param("receptionistId") Long receptionistId);
 
         @Query("select count(*) from Appointment a join a.doctor d where d.id=:doctorId And a.status=:appointmentStatus")
         long countDoctorsAppointmentByAppointmentStatus(@Param("appointmentStatus") String appointmentStatus,

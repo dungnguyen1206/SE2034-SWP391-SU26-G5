@@ -176,13 +176,15 @@ public class InvoiceServiceImpl implements InvoiceService {
         }
     }
 
+    // ======================== LIST INVOICE RECEPTIONIST ========================
     @Override
     @Transactional(readOnly = true)
     public Page<InvoiceListResponse> getInvoices(String keyword, String paymentStatus, int page, int size) {
-        Pageable pageable = PageRequest.of(page - 1, size);
-        Page<Appointment> appointments = appointmentRepository.findAppointmentsForBilling(keyword, pageable);
+        List<Appointment> allAppointments = appointmentRepository.findAllAppointmentsForBilling(keyword);
         
-        return appointments.map(a -> {
+        List<InvoiceListResponse> allResponses = new java.util.ArrayList<>();
+        
+        for (Appointment a : allAppointments) {
             BigDecimal totalExpected = a.getService() != null ? a.getService().getReferencePrice() : BigDecimal.ZERO;
             if (a.getMedicalRecord() != null && a.getMedicalRecord().getMedicalServiceOrders() != null) {
                 for (MedicalServiceOrder order : a.getMedicalRecord().getMedicalServiceOrders()) {
@@ -205,31 +207,50 @@ public class InvoiceServiceImpl implements InvoiceService {
             if (unpaid.compareTo(BigDecimal.ZERO) < 0) unpaid = BigDecimal.ZERO;
             
             String status = unpaid.compareTo(BigDecimal.ZERO) > 0 ? "UNPAID" : "PAID";
-            BigDecimal displayAmount = "UNPAID".equals(status) ? unpaid : totalPaid;
             
-            // Lấy STT
-            Integer stt = null;
-            if (a.getCheckInTime() != null) {
-                // To avoid circular dependency with AppointmentService, we can just fetch STT using the method if possible, or leave it.
-                // Wait, I can inject AppointmentService. Let's assume it's injected or we just return 0 for now and fix injection later.
-                // Actually, STT doesn't need to be exact here if it's just for display, but let's use 0 temporarily until we inject it.
+            // Filter by paymentStatus if provided
+            if (paymentStatus != null && !paymentStatus.trim().isEmpty() && !paymentStatus.equalsIgnoreCase(status)) {
+                continue;
             }
+            
+            BigDecimal displayAmount = "UNPAID".equals(status) ? unpaid : totalPaid;
             
             User patient = a.getPatient();
             String patientFullName = patient != null ? patient.getLastName() + " " + (patient.getMiddleName() != null ? patient.getMiddleName() + " " : "") + patient.getFirstName() : "-";
             String phone = patient != null && patient.getPhone() != null ? patient.getPhone() : "-";
             
-            return InvoiceListResponse.builder()
+            allResponses.add(InvoiceListResponse.builder()
                     .appointmentId(a.getId())
                     .appointmentCode(a.getAppointmentCode())
                     .patientFullName(patientFullName)
                     .phone(phone)
                     .displayAmount(displayAmount)
                     .paymentStatus(status)
-                    .build();
+                    .build());
+        }
+        
+        allResponses.sort((r1, r2) -> {
+            int statusCompare = r1.getPaymentStatus().compareTo(r2.getPaymentStatus());
+            if (statusCompare != 0) {
+                return statusCompare;
+            }
+            return r1.getPatientFullName().compareToIgnoreCase(r2.getPatientFullName());
         });
+        
+        Pageable pageable = PageRequest.of(page - 1, size);
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), allResponses.size());
+        
+        List<InvoiceListResponse> pagedResponses = new java.util.ArrayList<>();
+        if (start <= end && start < allResponses.size()) {
+            pagedResponses = allResponses.subList(start, end);
+        }
+        
+        return new org.springframework.data.domain.PageImpl<>(pagedResponses, pageable, allResponses.size());
     }
+    // ======================== END LIST INVOICE RECEPTIONIST ========================
 
+    // ======================== VIEW INVOICE DETAIL RECEPTIONIST ========================
     @Override
     @Transactional(readOnly = true)
     public InvoiceDetailResponse getInvoiceDetail(Long appointmentId) {
@@ -393,4 +414,5 @@ public class InvoiceServiceImpl implements InvoiceService {
             invoiceItemRepository.save(item);
         }
     }
+    // ======================== END VIEW INVOICE DETAIL RECEPTIONIST ========================
 }

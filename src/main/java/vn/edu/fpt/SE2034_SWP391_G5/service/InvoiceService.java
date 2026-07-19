@@ -17,9 +17,13 @@ public interface InvoiceService {
     InvoiceSummaryResponse getInvoiceSummary(String paymentStatus, Integer month, Integer year, LocalDate startDate, LocalDate endDate);
 
     Page<InvoiceRowResponse> invoiceRowResponses (Integer month, Integer year, LocalDate startDate, LocalDate endDate, int page, int size);
+    // ======================== LIST INVOICE RECEPTIONIST ========================
     Page<InvoiceListResponse> getInvoices(String keyword, String paymentStatus, int page, int size);
+    // ======================== END LIST INVOICE RECEPTIONIST ========================
 
+    // ======================== VIEW INVOICE DETAIL RECEPTIONIST ========================
     InvoiceDetailResponse getInvoiceDetail(Long id);
 
     void processPayment(Long invoiceId, String paymentMethod);
+    // ======================== END VIEW INVOICE DETAIL RECEPTIONIST ========================
 }

@@ -24,6 +24,7 @@ public class ReceptionistInvoiceController {
 
     private final InvoiceService invoiceService;
     private final ReceptionistService receptionistService;
+    private final vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService appointmentService;
 
     @GetMapping
     public String listInvoices(
@@ -49,6 +50,7 @@ public class ReceptionistInvoiceController {
     @GetMapping("/{id}")
     public String invoiceDetail(
             @PathVariable Long id,
+            @RequestParam(required = false) String from,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model, RedirectAttributes redirectAttributes) {
 
@@ -56,6 +58,7 @@ public class ReceptionistInvoiceController {
             InvoiceDetailResponse invoice = invoiceService.getInvoiceDetail(id);
             
             model.addAttribute("invoice", invoice);
+            model.addAttribute("from", from);
             model.addAttribute("receptionist", receptionistService.getReceptionistByUsername(userDetails.getUser().getEmail()));
             model.addAttribute("activeMenu", "invoice");
             
@@ -70,11 +73,17 @@ public class ReceptionistInvoiceController {
     public String processPayment(
             @PathVariable Long id,
             @RequestParam String paymentMethod,
+            @RequestParam(required = false) String from,
             RedirectAttributes redirectAttributes) {
 
         try {
             invoiceService.processPayment(id, paymentMethod);
             redirectAttributes.addFlashAttribute("successMessage", "Thanh toán thành công!");
+            
+            if ("checkin".equals(from)) {
+                appointmentService.confirmCheckInAppointment(id);
+                return "redirect:/receptionist/appointment/" + id + "/check-in-ticket";
+            }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
