@@ -143,37 +143,6 @@
                     <p><i class="bi bi-info-circle"></i> Vui lòng ngồi chờ trước phòng khám và theo dõi số thứ tự.</p>
                 </div>
 
-                <!-- Simulated Thermal Barcode -->
-                <div class="ticket-barcode" th:if="${checkedIn}">
-                    <svg class="barcode-svg" viewBox="0 0 100 24" xmlns="http://www.w3.org/2000/svg">
-                        <rect x="5" y="2" width="2" height="16" fill="black"/>
-                        <rect x="8" y="2" width="1" height="16" fill="black"/>
-                        <rect x="11" y="2" width="3" height="16" fill="black"/>
-                        <rect x="16" y="2" width="1" height="16" fill="black"/>
-                        <rect x="18" y="2" width="2" height="16" fill="black"/>
-                        <rect x="22" y="2" width="4" height="16" fill="black"/>
-                        <rect x="28" y="2" width="1" height="16" fill="black"/>
-                        <rect x="30" y="2" width="2" height="16" fill="black"/>
-                        <rect x="34" y="2" width="3" height="16" fill="black"/>
-                        <rect x="38" y="2" width="1" height="16" fill="black"/>
-                        <rect x="40" y="2" width="2" height="16" fill="black"/>
-                        <rect x="44" y="2" width="4" height="16" fill="black"/>
-                        <rect x="50" y="2" width="1" height="16" fill="black"/>
-                        <rect x="53" y="2" width="3" height="16" fill="black"/>
-                        <rect x="58" y="2" width="1" height="16" fill="black"/>
-                        <rect x="60" y="2" width="2" height="16" fill="black"/>
-                        <rect x="64" y="2" width="4" height="16" fill="black"/>
-                        <rect x="70" y="2" width="2" height="16" fill="black"/>
-                        <rect x="73" y="2" width="1" height="16" fill="black"/>
-                        <rect x="76" y="2" width="3" height="16" fill="black"/>
-                        <rect x="81" y="2" width="1" height="16" fill="black"/>
-                        <rect x="83" y="2" width="2" height="16" fill="black"/>
-                        <rect x="87" y="2" width="4" height="16" fill="black"/>
-                        <rect x="93" y="2" width="2" height="16" fill="black"/>
-                    </svg>
-                    <p class="barcode-text" th:text="${ticket.appointmentCode}"></p>
-                </div>
-
                 <div class="confirm-actions" th:if="${!checkedIn}">
                     <a th:href="@{/receptionist/appointment}" class="btn-back">
                         Hủy
