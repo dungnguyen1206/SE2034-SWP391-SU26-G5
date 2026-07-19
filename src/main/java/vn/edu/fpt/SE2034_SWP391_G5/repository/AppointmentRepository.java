@@ -215,6 +215,15 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             @Param("departmentId") Integer departmentId, 
             @Param("bookingDate") LocalDate bookingDate, 
             @Param("excludedStatuses") List<String> excludedStatuses);
+
+    @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END FROM Appointment a " +
+           "WHERE a.patient.id = :patientId " +
+           "AND a.bookingDate = :bookingDate " +
+           "AND a.status NOT IN :excludedStatuses")
+    boolean existsByPatientIdAndBookingDateAndStatusNotIn(
+            @Param("patientId") Long patientId, 
+            @Param("bookingDate") LocalDate bookingDate, 
+            @Param("excludedStatuses") List<String> excludedStatuses);
     // ======================== END WALK-IN BOOKING RECEPTIONIST ========================
     // ======================== QUEUE BOARD RECEPTIONIST ========================
     @Query("SELECT a FROM Appointment a " +
