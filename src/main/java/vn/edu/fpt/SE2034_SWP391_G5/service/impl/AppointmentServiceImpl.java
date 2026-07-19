@@ -636,7 +636,8 @@ public class AppointmentServiceImpl implements AppointmentService {
                                     .maxCapacity(slot.getMaxCapacity())
                                     .status(slot.getStatus())
                                     .available("AVAILABLE".equals(slot.getStatus())
-                                            && slot.getBookedCapacity() < slot.getMaxCapacity())
+                                            && slot.getBookedCapacity() < slot.getMaxCapacity()
+                                            && (!schedule.getWorkDate().isEqual(today) || slot.getStartTime().isAfter(now)))
                                     .build())
                             .toList();
 
@@ -668,6 +669,14 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         TimeSlot slot = timeSlotRepository.findByIdWithSchedule(request.getSlotId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khung giờ"));
+
+        // Kiểm tra xem bệnh nhân có lịch hẹn nào chưa hoàn thành (CONFIRMED, WAITING, EXAMINING) không
+        boolean hasActiveAppointment = appointmentRepository.existsByPatientIdAndStatusIn(
+                patientId,
+                List.of("CONFIRMED", "WAITING", "EXAMINING"));
+        if (hasActiveAppointment) {
+            throw new BadRequestException("Bạn hiện đang có lịch hẹn chưa hoàn thành. Vui lòng hoàn thành lịch khám hiện tại trước khi đặt lịch hẹn mới.");
+        }
 
         // Chỉ cho phép đặt lịch khi tuần làm việc đã được FINALIZED
         DoctorSchedule schedule = slot.getSchedule();
@@ -877,6 +886,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                         : null)
                 .serviceId(a.getService() != null ? a.getService().getId() : null)
                 .serviceName(a.getService() != null ? a.getService().getName() : null)
+                .servicePrice(a.getService() != null ? a.getService().getReferencePrice() : null)
                 .bookingDate(a.getBookingDate())
                 .shift(schedule != null ? schedule.getShift() : null)
                 .slotStartTime(slot != null ? slot.getStartTime() : null)
@@ -886,7 +896,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                         : null)
                 .note(a.getNote())
                 .createdAt(a.getCreatedAt())
-                .hasMedicalRecord(a.getMedicalRecord() != null)
+                .hasMedicalRecord(a.getMedicalRecord() != null && "FINALIZED".equals(a.getMedicalRecord().getStatus()))
                 .build();
     }
 

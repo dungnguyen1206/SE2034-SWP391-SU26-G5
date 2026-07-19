@@ -319,6 +319,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
 
 
+    boolean existsByPatientIdAndStatusIn(Long patientId, List<String> statuses);
+
     @Query("SELECT COUNT(a) FROM Appointment a WHERE a.patient.id = :patientId AND a.status = :status")
     long countByPatientIdAndStatus(@Param("patientId") Long patientId, @Param("status") String status);
 

@@ -111,6 +111,11 @@
                         <span class="appt-detail-label">Dịch vụ</span>
                         <span class="appt-detail-value" th:text="${appointment.serviceName}"></span>
                     </div>
+                    <div class="appt-detail-row" th:if="${appointment.servicePrice != null}">
+                        <span class="appt-detail-label">Giá khám</span>
+                        <span class="appt-detail-value" style="font-weight:bold;color:#b91c1c;"
+                            th:text="${#numbers.formatDecimal(appointment.servicePrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
+                    </div>
                 </div>
 
                 <div class="appt-detail-section" th:if="${appointment.note != null and !appointment.note.isEmpty()}"

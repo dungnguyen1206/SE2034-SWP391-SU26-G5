@@ -46,9 +46,9 @@ public class NotificationController {
             String role = userDetails.getAuthorities().iterator().next().getAuthority();
 
             // Điều hướng về đúng trang HTML của từng Actor
-            // Role names không có prefix ROLE_ (đã đổi: MANAGER, DOCTOR, PATIENT, RECEPTIONIST)
-            if (role.equals("MANAGER") || role.equals("ROLE_MANAGER")) return "manager/notifications";
-            if (role.equals("DOCTOR") || role.equals("ROLE_DOCTOR")) {
+            // Role names có prefix ROLE_ (vd: ROLE_MANAGER, ROLE_DOCTOR...)
+            if (role.equals("ROLE_MANAGER")) return "manager/notifications";
+            if (role.equals("ROLE_DOCTOR")) {
                 try {
                     DoctorResponse doctor = doctorService.getDoctorById(userDetails.getUser().getId());
                     model.addAttribute("doctorName", doctor.getFullName() != null ? doctor.getFullName().trim() : "Bác sĩ");
@@ -60,15 +60,15 @@ public class NotificationController {
                 model.addAttribute("doctorAvatar", userDetails.getUser().getAvatar());
                 return "doctor/notifications";
             }
-            if (role.equals("PATIENT") || role.equals("ROLE_PATIENT")) {
+            if (role.equals("ROLE_PATIENT")) {
                 model.addAttribute("profile", patientService.getProfile(userDetails.getUser().getId()));
                 return "patient/notifications";
             }
-            if (role.equals("RECEPTIONIST") || role.equals("ROLE_RECEPTIONIST")) {
+            if (role.equals("ROLE_RECEPTIONIST")) {
                 model.addAttribute("receptionist", receptionistService.getReceptionistById(userDetails.getUser().getId()));
                 return "receptionist/notifications";
             }
-            if (role.equals("ADMIN") || role.equals("ROLE_ADMIN")) {
+            if (role.equals("ROLE_ADMIN")) {
                 return "redirect:/admin/dashboard";
             }
         }

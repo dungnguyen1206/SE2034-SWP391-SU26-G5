@@ -42,6 +42,7 @@ public class AppointmentResponse {
     // Service info
     private Long serviceId;
     private String serviceName;
+    private java.math.BigDecimal servicePrice;
 
     // Schedule info
     private String shift;

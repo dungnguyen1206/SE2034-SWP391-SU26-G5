@@ -20,6 +20,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DepartmentService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DoctorService;
+import vn.edu.fpt.SE2034_SWP391_G5.service.PatientService;
 
 import java.util.List;
 
@@ -32,6 +33,7 @@ public class PatientAppointmentController {
     private final DepartmentService departmentService;
     private final DoctorService doctorService;
     private final MedicalServiceRepository medicalServiceRepository;
+    private final PatientService patientService;
 
     // TODO: thay bằng @AuthenticationPrincipal khi auth sẵn sàng
     // private static final Long DEMO_PATIENT_ID = 14L;
@@ -59,7 +61,13 @@ public class PatientAppointmentController {
     }
 
     @GetMapping("/book")
-    public String selectDepartment(Model model) {
+    public String selectDepartment(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                   RedirectAttributes redirectAttributes,
+                                   Model model) {
+        if (!patientService.isProfileComplete(userDetails.getUser().getId())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng cập nhật đầy đủ thông tin cá nhân (Họ, tên, giới tính, ngày sinh, số điện thoại, tỉnh/thành phố, địa chỉ) trước khi đặt lịch.");
+            return "redirect:/patient/profile/edit";
+        }
         List<Department> departments = departmentService.getAllActiveDepartments();
         model.addAttribute("departments", departments);
         return "patient/appointments/book-step1";
@@ -68,7 +76,13 @@ public class PatientAppointmentController {
     @GetMapping("/book/step2")
     public String bookStep2(@RequestParam Integer departmentId,
                             @RequestParam(required = false) Long doctorId,
+                            @AuthenticationPrincipal CustomUserDetails userDetails,
+                            RedirectAttributes redirectAttributes,
                             Model model) {
+        if (!patientService.isProfileComplete(userDetails.getUser().getId())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng cập nhật đầy đủ thông tin cá nhân (Họ, tên, giới tính, ngày sinh, số điện thoại, tỉnh/thành phố, địa chỉ) trước khi đặt lịch.");
+            return "redirect:/patient/profile/edit";
+        }
         Department department = departmentService.getDepartmentById(departmentId);
         List<DoctorResponse> doctors = doctorService.getDoctorsByDepartment(departmentId);
         
@@ -86,6 +100,17 @@ public class PatientAppointmentController {
         bookRequest.setDoctorId(doctorId);
         bookRequest.setDepartmentId(departmentId);
         model.addAttribute("bookRequest", bookRequest);
+
+        // Lấy dịch vụ lâm sàng mặc định để hiển thị giá
+        MedicalService clinicalService = medicalServiceRepository
+                .findFirstByDepartmentIdAndNameContainingIgnoreCaseAndStatus(departmentId, "tổng quát", "ACTIVE")
+                .or(() -> medicalServiceRepository.findFirstByDepartmentIdAndNameContainingIgnoreCaseAndStatus(departmentId, "khám", "ACTIVE"))
+                .or(() -> {
+                    List<MedicalService> list = medicalServiceRepository.findByDepartmentIdAndStatus(departmentId, "ACTIVE");
+                    return list.isEmpty() ? java.util.Optional.empty() : java.util.Optional.of(list.get(0));
+                })
+                .orElse(null);
+        model.addAttribute("clinicalService", clinicalService);
 
         if (doctorId != null) {
             List<ScheduleSlotResponse> schedules = appointmentService.getAvailableSchedules(doctorId);
@@ -129,6 +154,10 @@ public class PatientAppointmentController {
                                  BindingResult bindingResult,
                                  @AuthenticationPrincipal CustomUserDetails userDetails,
                                  RedirectAttributes redirectAttributes) {
+        if (!patientService.isProfileComplete(userDetails.getUser().getId())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng cập nhật đầy đủ thông tin cá nhân (Họ, tên, giới tính, ngày sinh, số điện thoại, tỉnh/thành phố, địa chỉ) trước khi đặt lịch.");
+            return "redirect:/patient/profile/edit";
+        }
         // Trước đây redirect về step2?doctorId=... thiếu departmentId → MissingServletRequestParameterException
         String step2Url = "/patient/appointments/book/step2?departmentId=" + request.getDepartmentId()
                 + "&doctorId=" + request.getDoctorId();
@@ -142,10 +171,14 @@ public class PatientAppointmentController {
         if (request.getServiceId() == null) {
             try {
                 MedicalService defaultService = medicalServiceRepository
-                        .findFirstByDepartmentIdAndNameContainingIgnoreCaseAndStatus(
-                                request.getDepartmentId(), "tổng quát", "ACTIVE")
+                        .findFirstByDepartmentIdAndNameContainingIgnoreCaseAndStatus(request.getDepartmentId(), "tổng quát", "ACTIVE")
+                        .or(() -> medicalServiceRepository.findFirstByDepartmentIdAndNameContainingIgnoreCaseAndStatus(request.getDepartmentId(), "khám", "ACTIVE"))
+                        .or(() -> {
+                            List<MedicalService> list = medicalServiceRepository.findByDepartmentIdAndStatus(request.getDepartmentId(), "ACTIVE");
+                            return list.isEmpty() ? java.util.Optional.empty() : java.util.Optional.of(list.get(0));
+                        })
                         .orElseThrow(() -> new RuntimeException(
-                                "Không tìm thấy dịch vụ khám tổng quát cho khoa này"));
+                                "Không tìm thấy dịch vụ khám lâm sàng cho khoa này"));
                 request.setServiceId(defaultService.getId());
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute("errorMessage", 

@@ -29,7 +29,12 @@ public class CustomUserDetails implements UserDetails {
         }
         List<GrantedAuthority> authorities = new ArrayList<>();
         for (vn.edu.fpt.SE2034_SWP391_G5.entity.UserRole userRole : user.getUserRoles()) {
-            authorities.add(new SimpleGrantedAuthority(userRole.getRole().getName()));
+            String roleName = userRole.getRole().getName();
+            // Đảm bảo luôn có prefix ROLE_ để Spring Security nhận diện đúng
+            if (!roleName.startsWith("ROLE_")) {
+                roleName = "ROLE_" + roleName;
+            }
+            authorities.add(new SimpleGrantedAuthority(roleName));
         }
         return authorities;
     }

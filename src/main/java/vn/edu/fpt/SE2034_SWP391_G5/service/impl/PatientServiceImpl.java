@@ -118,20 +118,26 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<MedicalRecordResponse> getMedicalRecords(Long patientId) {
         return medicalRecordRepository.findByPatientIdOrderByExaminationDateDesc(patientId)
                 .stream()
+                .filter(r -> "FINALIZED".equals(r.getStatus()))
                 .map(this::toRecordResponse)
                 .toList();
     }
 
     @Override
+    @Transactional(readOnly = true)
     public MedicalRecordResponse getMedicalRecordDetail(Long recordId, Long patientId) {
         MedicalRecord record = medicalRecordRepository.findById(recordId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hồ sơ bệnh án"));
 
         if (!record.getPatient().getId().equals(patientId)) {
             throw new BadRequestException("Bạn không có quyền xem hồ sơ này");
+        }
+        if (!"FINALIZED".equals(record.getStatus())) {
+            throw new BadRequestException("Hồ sơ bệnh án chưa được hoàn tất");
         }
         return toRecordResponse(record);
     }
@@ -145,6 +151,19 @@ public class PatientServiceImpl implements PatientService {
                 ? r.getAppointment().getAppointmentCode() : null;
         String serviceName = r.getAppointment() != null && r.getAppointment().getService() != null
                 ? r.getAppointment().getService().getName() : null;
+
+        List<MedicalRecordResponse.ServiceOrderInfo> serviceOrders = r.getMedicalServiceOrders() != null
+                ? r.getMedicalServiceOrders().stream()
+                        .map(mso -> MedicalRecordResponse.ServiceOrderInfo.builder()
+                                .id(mso.getId())
+                                .serviceName(mso.getMedicalService() != null ? mso.getMedicalService().getName() : "")
+                                .result(mso.getResult())
+                                .status(mso.getStatus())
+                                .note(mso.getNote())
+                                .price(mso.getPriceReference())
+                                .build())
+                        .toList()
+                : List.of();
 
         return MedicalRecordResponse.builder()
                 .id(r.getId())
@@ -166,6 +185,7 @@ public class PatientServiceImpl implements PatientService {
                 .bloodGlucose(r.getBloodGlucose())
                 .weight(r.getWeight())
                 .status(r.getStatus())
+                .serviceOrders(serviceOrders)
                 .build();
     }
 
@@ -186,5 +206,23 @@ public class PatientServiceImpl implements PatientService {
         return userRepository.findByRoleName(roleName);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isProfileComplete(Long patientId) {
+        User user = userRepository.findById(patientId).orElse(null);
+        if (user == null) {
+            return false;
+        }
+        if (user.getFirstName() == null || user.getFirstName().strip().isEmpty()) return false;
+        if (user.getLastName() == null || user.getLastName().strip().isEmpty()) return false;
+        if (user.getPhone() == null || user.getPhone().strip().isEmpty()) return false;
+        if (user.getGender() == null || user.getGender().strip().isEmpty()) return false;
+        if (user.getDateOfBirth() == null) return false;
+        if (user.getEmail() == null || user.getEmail().strip().isEmpty()) return false;
 
+        if (user.getAddresses() == null || user.getAddresses().isEmpty()) return false;
+        return user.getAddresses().stream()
+                .anyMatch(addr -> addr.getAddressLine() != null && !addr.getAddressLine().strip().isEmpty()
+                        && addr.getProvince() != null);
+    }
 }
