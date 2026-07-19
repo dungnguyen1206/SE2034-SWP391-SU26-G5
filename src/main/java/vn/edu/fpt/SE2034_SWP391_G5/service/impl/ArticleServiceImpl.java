@@ -10,12 +10,19 @@ import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.ArticleRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.service.ArticleService;
-
-import java.text.Normalizer;
+import vn.edu.fpt.SE2034_SWP391_G5.service.ImageUploadService;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.ArticleComment;
+import vn.edu.fpt.SE2034_SWP391_G5.repository.ArticleCommentRepository;
+import org.springframework.web.multipart.MultipartFile;
+import vn.edu.fpt.SE2034_SWP391_G5.util.SlugUtil;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.regex.Pattern;
 
+/**
+ * Service implementation for managing articles.
+ * Handles article creation, retrieval, and updates.
+ */
 @Service
 public class ArticleServiceImpl implements ArticleService {
 
@@ -24,6 +31,12 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private ArticleCommentRepository articleCommentRepository;
+
+    @Autowired
+    private ImageUploadService imageUploadService;
 
     @Override
     public List<Article> getAllArticles() {
@@ -49,6 +62,10 @@ public class ArticleServiceImpl implements ArticleService {
         return article;
     }
 
+    /**
+     * Creates a new article with the provided request data.
+     * Generates a unique slug, sets the author, and handles thumbnail uploading.
+     */
     @Override
     public void createArticle(CreateArticleRequest request, User currentUser) {
         if (currentUser == null) {
@@ -73,7 +90,7 @@ public class ArticleServiceImpl implements ArticleService {
         
         // Generate slug
         if (request.getTitle() != null) {
-            article.setSlug(generateSlug(request.getTitle()));
+            article.setSlug(SlugUtil.generateSlug(request.getTitle()));
         }
 
         if ("PUBLISHED".equals(request.getStatus())) {
@@ -83,6 +100,12 @@ public class ArticleServiceImpl implements ArticleService {
         if (request.getDoctorId() != null) {
             User doctor = userRepository.findById(request.getDoctorId()).orElse(null);
             article.setDoctorAuthor(doctor);
+        }
+
+        MultipartFile file = request.getThumbnailFile();
+        if (file != null && !file.isEmpty()) {
+            String thumbnailUrl = imageUploadService.uploadImage(file);
+            article.setThumbnailUrl(thumbnailUrl);
         }
 
         articleRepository.save(article);
@@ -113,7 +136,7 @@ public class ArticleServiceImpl implements ArticleService {
         article.setUpdatedAt(LocalDateTime.now());
         
         if (request.getTitle() != null) {
-            article.setSlug(generateSlug(request.getTitle()));
+            article.setSlug(SlugUtil.generateSlug(request.getTitle()));
         }
 
         if (request.getDoctorId() != null) {
@@ -121,6 +144,12 @@ public class ArticleServiceImpl implements ArticleService {
             article.setDoctorAuthor(doctor);
         } else {
             article.setDoctorAuthor(null);
+        }
+
+        MultipartFile file = request.getThumbnailFile();
+        if (file != null && !file.isEmpty()) {
+            String thumbnailUrl = imageUploadService.uploadImage(file);
+            article.setThumbnailUrl(thumbnailUrl);
         }
 
         articleRepository.save(article);
@@ -135,10 +164,59 @@ public class ArticleServiceImpl implements ArticleService {
         }
     }
 
-    private String generateSlug(String input) {
-        String noWhiteSpace = Pattern.compile("[\\s]").matcher(input).replaceAll("-");
-        String normalized = Normalizer.normalize(noWhiteSpace, Normalizer.Form.NFD);
-        String slug = Pattern.compile("[\\p{InCombiningDiacriticalMarks}]").matcher(normalized).replaceAll("");
-        return slug.toLowerCase().replaceAll("[^a-z0-9-]", "").replaceAll("-+", "-");
+    @Override
+    public List<ArticleComment> getCommentsByArticleId(Long articleId) {
+        return articleCommentRepository.findByArticleIdAndParentIsNullOrderByCreatedAtDesc(articleId);
+    }
+
+    @Override
+    public long getCommentCountByArticleId(Long articleId) {
+        return articleCommentRepository.countByArticleId(articleId);
+    }
+
+    @Override
+    public List<Article> getRelatedArticles(String category, Long excludeId) {
+        return articleRepository.findTop3ByCategoryAndIdNotAndStatusOrderByCreatedAtDesc(category, excludeId, "PUBLISHED");
+    }
+
+    @Override
+    public void addComment(Long articleId, String content, Long parentId, String username) {
+        Article article = getArticleById(articleId);
+        if (article == null || !"PUBLISHED".equals(article.getStatus())) {
+            throw new IllegalArgumentException("Article not found or not published");
+        }
+
+        User user = userRepository.findByUsername(username).orElse(null);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found");
+        }
+
+        ArticleComment comment = new ArticleComment();
+        comment.setArticle(article);
+        comment.setUser(user);
+        comment.setContent(content);
+        comment.setCreatedAt(LocalDateTime.now());
+
+        if (parentId != null) {
+            ArticleComment parent = articleCommentRepository.findById(parentId).orElse(null);
+            if (parent != null) {
+                comment.setParent(parent);
+            }
+        }
+
+        articleCommentRepository.save(comment);
+    }
+
+    @Override
+    public void incrementViewCount(Long articleId) {
+        Article article = getArticleById(articleId);
+        if (article != null) {
+            if (article.getViewCount() == null) {
+                article.setViewCount(1);
+            } else {
+                article.setViewCount(article.getViewCount() + 1);
+            }
+            articleRepository.save(article);
+        }
     }
 }

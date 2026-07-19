@@ -33,11 +33,19 @@ public class ImageUploadServiceImpl implements ImageUploadService {
 
     @Override
     public void deleteImage(String imageUrl) {
-        try {
-            cloudinary.uploader().destroy(imageUrl,ObjectUtils.emptyMap());
+        // Chỉ xóa nếu là ảnh từ Cloudinary
+        if (imageUrl == null || !imageUrl.contains("cloudinary.com")) {
+            return;
         }
-        catch (Exception e){
-            throw  new  RuntimeException("Xóa ảnh thất bại" + e.getMessage());
+        try {
+            // 1. Lấy tên file sau dấu gạch chéo cuối cùng (ví dụ: "xyz123.jpg")
+            String filename = imageUrl.substring(imageUrl.lastIndexOf("/") + 1);
+            // 2. Bỏ phần mở rộng (ví dụ: ".jpg")
+            String publicId = filename.substring(0, filename.lastIndexOf("."));
+
+            cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+        } catch (Exception e) {
+            throw new RuntimeException("Xóa ảnh thất bại: " + e.getMessage());
         }
     }
 }

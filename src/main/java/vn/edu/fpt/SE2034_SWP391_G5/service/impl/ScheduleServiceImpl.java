@@ -1,6 +1,7 @@
 package vn.edu.fpt.SE2034_SWP391_G5.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +28,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.service.EmailService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.ScheduleService;
 import vn.edu.fpt.SE2034_SWP391_G5.util.DateTimeUtil;
 
+import java.sql.SQLException;
 import java.sql.Time;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -66,7 +68,7 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         // Filter: only display if week_schedule status is PUBLISHED
         schedules = schedules.stream()
-                .filter(ds -> ds.getWeekSchedule() != null && "PUBLISHED".equalsIgnoreCase(ds.getWeekSchedule().getStatus()))
+                .filter(ds -> ds.getWeekSchedule() != null && !"DRAFT".equalsIgnoreCase(ds.getWeekSchedule().getStatus()))
                 .collect(Collectors.toList());
 
         // Group by date

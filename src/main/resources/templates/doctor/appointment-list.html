@@ -18,57 +18,8 @@
 
     <div class="layout">
 
-        <aside class="sidebar">
-            <div>
-                <div class="brand">
-                    <h2>Hospital HAMS</h2>
-                    <p>Bác Sĩ</p>
-                </div>
-
-                <nav class="menu">
-                    <a th:href="@{/doctor/dashboard}">
-                        <i class="fa-solid fa-table-cells-large"></i>
-                        Trang tổng quan
-                    </a>
-
-                    <a th:href="@{/doctor/schedule}">
-                        <i class="fa-regular fa-calendar-days"></i>
-                        Lịch làm việc
-                    </a>
-
-                    <a class="active" th:href="@{/doctor/appointment-list}">
-                        <i class="fa-regular fa-calendar-check"></i>
-                        Danh sách bệnh nhân
-                    </a>
-
-                    <a th:href="@{/notifications/list}">
-                        <i class="fa-regular fa-bell"></i>
-                        Thông báo
-                        <span th:if="${unreadNotificationCount != null and unreadNotificationCount > 0}"
-                              th:text="${unreadNotificationCount}"
-                              style="background:#ef4444;color:white;border-radius:50%;padding:1px 7px;font-size:11px;font-weight:bold;margin-left:4px;">
-                        </span>
-                    </a>
-                </nav>
-            </div>
-
-            <div class="doctor-box">
-                <div class="doctor-info-box">
-                    <div class="doctor-avatar">
-                        <i class="fa-regular fa-user"></i>
-                    </div>
-                    <div>
-                        <h4 th:text="${doctorName}"></h4>
-                        <p th:text="${doctorDept}"></p>
-                    </div>
-                </div>
-                <form th:action="@{/logout}" method="post" class="logout-form">
-                    <button type="submit" class="logout-btn">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                    </button>
-                </form>
-            </div>
-        </aside>
+        <!-- Sidebar -->
+        <aside th:replace="~{doctor/fragments/sidebar :: sidebar('appointments')}"></aside>
 
         <main class="main patient-main">
 
@@ -150,10 +101,10 @@
                                     <input type="hidden" name="page" th:value="${currentPage}" />
                                     <input type="hidden" name="date" th:value="${selectedDate}" />
                                     <select name="status" class="status-select"
-                                        th:classappend="${a.status == 'WAITING' ? 'waiting' : (a.status == 'IN_PROGRESS' ? 'examining' : 'done')}"
+                                        th:classappend="${a.status == 'WAITING' ? 'waiting' : (a.status == 'EXAMINING' ? 'examining' : 'done')}"
                                         style="margin-bottom: 0;">
                                         <option value="WAITING" th:selected="${a.status == 'WAITING'}">ĐANG ĐỢI</option>
-                                        <option value="IN_PROGRESS" th:selected="${a.status == 'IN_PROGRESS'}">ĐANG KHÁM
+                                        <option value="EXAMINING" th:selected="${a.status == 'EXAMINING'}">ĐANG KHÁM
                                         </option>
                                         <option value="COMPLETED" th:selected="${a.status == 'COMPLETED'}">HOÀN THÀNH
                                         </option>

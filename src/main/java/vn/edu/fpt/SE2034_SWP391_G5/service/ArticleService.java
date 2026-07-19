@@ -15,4 +15,9 @@ public interface ArticleService {
     void createArticle(CreateArticleRequest request, User currentUser);
     void updateArticle(Long id, CreateArticleRequest request);
     void deleteArticle(Long id);
+    java.util.List<vn.edu.fpt.SE2034_SWP391_G5.entity.ArticleComment> getCommentsByArticleId(Long articleId);
+    long getCommentCountByArticleId(Long articleId);
+    java.util.List<vn.edu.fpt.SE2034_SWP391_G5.entity.Article> getRelatedArticles(String category, Long excludeId);
+    void addComment(Long articleId, String content, Long parentId, String username);
+    void incrementViewCount(Long articleId);
 }

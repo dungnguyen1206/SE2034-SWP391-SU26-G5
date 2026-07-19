@@ -16,59 +16,60 @@ import vn.edu.fpt.SE2034_SWP391_G5.service.AuthService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.EmailService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.SmsService;
 
+import vn.edu.fpt.SE2034_SWP391_G5.util.CodeGenerator;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 
+import lombok.RequiredArgsConstructor;
+import vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException;
+import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
+
+/**
+ * Implementation of AuthService handling authentication logic.
+ * Manages user registration, OTP verification, and password resets.
+ */
 @Service
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final UserRoleRepository userRoleRepository;
+    private final EmailService emailService;
+    private final SmsService smsService;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private UserRoleRepository userRoleRepository;
-
-    @Autowired
-    private EmailService emailService;
-
-    @Autowired
-    private SmsService smsService;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    // Process user registration request, validate data and send OTP
+    /**
+     * Processes user registration request.
+     * Validates input data, creates pending user session, and sends OTP for verification.
+     */
     @Override
     public void processRegistration(RegisterPatientRequest registerRequest, HttpSession session, String otpChannel) {
-        // Check if password and confirm password match
+        // Validate registration constraints
         if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
-            throw new RuntimeException("Mật khẩu xác nhận không khớp.");
+            throw new BadRequestException("Mật khẩu xác nhận không khớp.");
         }
 
-        // Check if username is already taken
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
-            throw new RuntimeException("Tên đăng nhập này đã được sử dụng.");
+            throw new BadRequestException("Tên đăng nhập này đã được sử dụng.");
         }
 
-        // Check if phone is already registered
         if (userRepository.existsByPhone(registerRequest.getPhone())) {
-            throw new RuntimeException("Số điện thoại này đã được sử dụng.");
+            throw new BadRequestException("Số điện thoại này đã được sử dụng.");
         }
 
-        // Check if email is already registered (if provided)
         if (registerRequest.getEmail() != null && !registerRequest.getEmail().trim().isEmpty()) {
             if (userRepository.existsByEmail(registerRequest.getEmail())) {
-                throw new RuntimeException("Email này đã được sử dụng.");
+                throw new BadRequestException("Email này đã được sử dụng.");
             }
         }
 
         if ("email".equals(otpChannel) && (registerRequest.getEmail() == null || registerRequest.getEmail().trim().isEmpty())) {
-            throw new RuntimeException("Vui lòng nhập Email để nhận mã OTP.");
+            throw new BadRequestException("Vui lòng nhập Email để nhận mã OTP.");
         }
 
-        String otp = String.format("%06d", (int) (Math.random() * 1000000));
+        String otp = CodeGenerator.generateOtp();
         LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(5);
 
         session.setAttribute("pendingRegister", registerRequest);
@@ -80,27 +81,30 @@ public class AuthServiceImpl implements AuthService {
             try {
                 smsService.sendOtpSms(registerRequest.getPhone(), otp);
             } catch (Exception e) {
-                throw new RuntimeException("Lỗi gửi SMS OTP: " + e.getMessage() + ". Vui lòng thử lại.");
+                throw new BadRequestException("Lỗi gửi SMS OTP: " + e.getMessage() + ". Vui lòng thử lại.");
             }
         } else {
             try {
                 emailService.sendOtpEmail(registerRequest.getEmail(), otp);
             } catch (Exception e) {
-                throw new RuntimeException("Lỗi gửi email OTP: " + e.getMessage() + ". Vui lòng thử lại.");
+                throw new BadRequestException("Lỗi gửi email OTP: " + e.getMessage() + ". Vui lòng thử lại.");
             }
         }
     }
 
-    // Verify OTP for user registration and save new user to database
+    /**
+     * Verifies OTP for user registration and saves the new user to the database.
+     */
     @Override
+    @Transactional
     public void verifyOtp(String otp, HttpSession session) {
         RegisterPatientRequest pendingRegister = (RegisterPatientRequest) session.getAttribute("pendingRegister");
         String registerOtp = (String) session.getAttribute("registerOtp");
         LocalDateTime expiryTime = (LocalDateTime) session.getAttribute("otpExpiry");
 
-        // Check if registration session data exists
+        // Validate OTP session data
         if (pendingRegister == null || registerOtp == null || expiryTime == null) {
-            throw new RuntimeException("Dữ liệu đăng ký không tồn tại hoặc đã bị xóa. Vui lòng đăng ký lại.");
+            throw new BadRequestException("Dữ liệu đăng ký không tồn tại hoặc đã bị xóa. Vui lòng đăng ký lại.");
         }
 
         // Check if OTP is expired
@@ -108,12 +112,12 @@ public class AuthServiceImpl implements AuthService {
             session.removeAttribute("pendingRegister");
             session.removeAttribute("registerOtp");
             session.removeAttribute("otpExpiry");
-            throw new RuntimeException("Mã OTP đã hết hạn. Vui lòng đăng ký lại.");
+            throw new BadRequestException("Mã OTP đã hết hạn. Vui lòng đăng ký lại.");
         }
 
         // Check if OTP matches
         if (!registerOtp.equals(otp)) {
-            throw new RuntimeException("Mã OTP không chính xác. Vui lòng kiểm tra lại.");
+            throw new BadRequestException("Mã OTP không chính xác. Vui lòng kiểm tra lại.");
         }
 
         User user = new User();
@@ -133,8 +137,10 @@ public class AuthServiceImpl implements AuthService {
 
         userRepository.save(user);
 
-        Role patientRole = roleRepository.findByName("PATIENT")
-                .orElseThrow(() -> new RuntimeException("Lỗi hệ thống: Vai trò PATIENT không tồn tại."));
+        Role patientRole = roleRepository.findByName("PATIENT").orElse(null);
+        if (patientRole == null) {
+            throw new BadRequestException("Lỗi hệ thống: Vai trò PATIENT không tồn tại.");
+        }
 
         UserRole userRole = new UserRole();
         UserRoleId userRoleId = new UserRoleId(user.getId(), patientRole.getId());
@@ -150,25 +156,28 @@ public class AuthServiceImpl implements AuthService {
         session.removeAttribute("otpExpiry");
     }
 
-    // Process forgot password request, verify email and send OTP
+    /**
+     * Processes forgot password request.
+     * Verifies user existence by email or phone and sends an OTP for reset.
+     */
     @Override
     public void processForgotPassword(String email, String phone, HttpSession session, String otpChannel) {
         User user = null;
         if ("sms".equals(otpChannel)) {
             user = userRepository.findByPhone(phone).orElse(null);
             if (user == null) {
-                throw new RuntimeException("Số điện thoại không tồn tại trong hệ thống.");
+                throw new BadRequestException("Số điện thoại không tồn tại trong hệ thống.");
             }
             session.setAttribute("resetIdentifier", phone);
         } else {
             user = userRepository.findByEmail(email).orElse(null);
             if (user == null) {
-                throw new RuntimeException("Email không tồn tại trong hệ thống.");
+                throw new BadRequestException("Email không tồn tại trong hệ thống.");
             }
             session.setAttribute("resetIdentifier", email);
         }
 
-        String otp = String.format("%06d", (int) (Math.random() * 1000000));
+        String otp = CodeGenerator.generateOtp();
         LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(5);
 
         session.setAttribute("resetOtp", otp);
@@ -179,18 +188,21 @@ public class AuthServiceImpl implements AuthService {
             try {
                 smsService.sendOtpSms(phone, otp);
             } catch (Exception e) {
-                throw new RuntimeException("Lỗi gửi SMS OTP: " + e.getMessage() + ". Vui lòng thử lại.");
+                throw new BadRequestException("Lỗi gửi SMS OTP: " + e.getMessage() + ". Vui lòng thử lại.");
             }
         } else {
             try {
                 emailService.sendOtpEmail(email, otp);
             } catch (Exception e) {
-                throw new RuntimeException("Lỗi gửi email OTP: " + e.getMessage() + ". Vui lòng thử lại.");
+                throw new BadRequestException("Lỗi gửi email OTP: " + e.getMessage() + ". Vui lòng thử lại.");
             }
         }
     }
 
-    // Process reset password request, verify OTP and update new password
+    /**
+     * Processes password reset request.
+     * Verifies the OTP and updates the user's password if valid.
+     */
     @Override
     public void processResetPassword(String otp, String newPassword, String confirmNewPassword, HttpSession session) {
         String resetIdentifier = (String) session.getAttribute("resetIdentifier");
@@ -198,28 +210,25 @@ public class AuthServiceImpl implements AuthService {
         LocalDateTime expiryTime = (LocalDateTime) session.getAttribute("resetOtpExpiry");
         String otpChannel = (String) session.getAttribute("otpChannel");
 
-        // Check if password reset session data exists
+        // Validate reset session and OTP
         if (resetIdentifier == null || resetOtp == null || expiryTime == null) {
-            throw new RuntimeException("Dữ liệu quên mật khẩu không tồn tại. Vui lòng thử lại.");
+            throw new BadRequestException("Dữ liệu quên mật khẩu không tồn tại. Vui lòng thử lại.");
         }
 
-        // Check if OTP is expired
         if (LocalDateTime.now().isAfter(expiryTime)) {
             session.removeAttribute("resetIdentifier");
             session.removeAttribute("resetOtp");
             session.removeAttribute("resetOtpExpiry");
             session.removeAttribute("otpChannel");
-            throw new RuntimeException("Mã OTP đã hết hạn. Vui lòng thử lại.");
+            throw new BadRequestException("Mã OTP đã hết hạn. Vui lòng thử lại.");
         }
 
-        // Check if OTP matches
         if (!resetOtp.equals(otp)) {
-            throw new RuntimeException("Mã OTP không chính xác.");
+            throw new BadRequestException("Mã OTP không chính xác.");
         }
 
-        // Check if passwords match
         if (!newPassword.equals(confirmNewPassword)) {
-            throw new RuntimeException("Mật khẩu xác nhận không khớp.");
+            throw new BadRequestException("Mật khẩu xác nhận không khớp.");
         }
 
         User user = null;
@@ -229,15 +238,17 @@ public class AuthServiceImpl implements AuthService {
             user = userRepository.findByEmail(resetIdentifier).orElse(null);
         }
 
-        // Check if new password is the same as old password
+        // Validate new password and update
         if (user != null && passwordEncoder.matches(newPassword, user.getPasswordHash())) {
-            throw new RuntimeException("Mật khẩu mới không được trùng với mật khẩu cũ.");
+            throw new BadRequestException("Mật khẩu mới không được trùng với mật khẩu cũ.");
         }
-        // Update password if user is found
+        
         if (user != null) {
             user.setPasswordHash(passwordEncoder.encode(newPassword));
             user.setUpdatedAt(LocalDateTime.now());
             userRepository.save(user);
+        } else {
+            throw new BadRequestException("Lỗi hệ thống: Không tìm thấy người dùng.");
         }
 
         session.removeAttribute("resetIdentifier");
@@ -246,3 +257,4 @@ public class AuthServiceImpl implements AuthService {
         session.removeAttribute("otpChannel");
     }
 }
+

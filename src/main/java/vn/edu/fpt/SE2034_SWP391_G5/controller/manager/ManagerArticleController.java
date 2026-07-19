@@ -109,6 +109,7 @@ public class ManagerArticleController {
         if (article.getDoctorAuthor() != null) {
             request.setDoctorId(article.getDoctorAuthor().getId());
         }
+        request.setCurrentThumbnailUrl(article.getThumbnailUrl());
         
         model.addAttribute("articleRequest", request);
         model.addAttribute("articleId", id);

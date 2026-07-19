@@ -168,9 +168,22 @@
                     <div class="pagination-controls">
                         <button class="pagination-btn" th:disabled="${currentPage == 1}" th:onclick="'goToPage(' + (${currentPage - 1}) + ')'"><i class="fa-solid fa-chevron-left"></i></button>
                         
-                        <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
-                            <button class="pagination-btn" th:classappend="${currentPage == i} ? 'active' : ''" th:text="${i}" th:onclick="'goToPage(' + ${i} + ')'">1</button>
+                        <!-- Always show page 1 -->
+                        <button th:if="${totalPages >= 1}" class="pagination-btn" th:classappend="${currentPage == 1} ? 'active' : ''" onclick="goToPage(1)">1</button>
+
+                        <!-- Show left ellipsis -->
+                        <span th:if="${currentPage > 3}" style="padding: 0 8px; color: var(--text-muted); align-self: center;">...</span>
+
+                        <!-- Show window -->
+                        <th:block th:if="${totalPages > 2}" th:each="i : ${#numbers.sequence(currentPage - 2 > 1 ? currentPage - 2 : 2, currentPage + 2 < totalPages ? currentPage + 2 : totalPages - 1)}">
+                            <button th:if="${i > 1 and i < totalPages}" class="pagination-btn" th:classappend="${currentPage == i} ? 'active' : ''" th:text="${i}" th:onclick="'goToPage(' + ${i} + ')'"></button>
                         </th:block>
+
+                        <!-- Show right ellipsis -->
+                        <span th:if="${currentPage < totalPages - 2}" style="padding: 0 8px; color: var(--text-muted); align-self: center;">...</span>
+
+                        <!-- Always show last page -->
+                        <button th:if="${totalPages > 1}" class="pagination-btn" th:classappend="${currentPage == totalPages} ? 'active' : ''" th:text="${totalPages}" th:onclick="'goToPage(' + ${totalPages} + ')'"></button>
                         
                         <button class="pagination-btn" th:disabled="${currentPage == totalPages}" th:onclick="'goToPage(' + (${currentPage + 1}) + ')'"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>

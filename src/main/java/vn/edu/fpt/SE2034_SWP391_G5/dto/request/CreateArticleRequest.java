@@ -1,5 +1,7 @@
 package vn.edu.fpt.SE2034_SWP391_G5.dto.request;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -26,4 +28,6 @@ public class CreateArticleRequest {
     private String category;
     private Long doctorId;
     private String status;
+    private MultipartFile thumbnailFile;
+    private String currentThumbnailUrl;
 }

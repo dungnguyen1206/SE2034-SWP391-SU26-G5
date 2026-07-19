@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+
+    <!-- Tab Pane 1: Thông tin cá nhân & Bệnh án -->
+    <div th:fragment="info-tab" class="tab-pane" th:classappend="${tab == 'info' || tab == null ? 'active' : ''}">
+        <div class="detail-content-card">
+            <div class="card-header-row">
+                <h3 class="card-title" style="font-size: 16px; font-weight: 700; color: #0f172a;">Thông tin cá nhân</h3>
+                <a th:if="${medicalRecord == null}"
+                   th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab}, action='create')}"
+                   class="btn-create-record">
+                    <i class="fa-solid fa-plus"></i> Tạo hồ sơ bệnh án
+                </a>
+            </div>
+            <hr class="card-divider">
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-icon blue">
+                        <i class="fa-regular fa-calendar-days"></i>
+                    </div>
+                    <div>
+                        <p>Ngày sinh</p>
+                        <h3 th:text="${appointment.patientDateOfBirth != null ? #temporals.format(appointment.patientDateOfBirth, 'dd/MM/yyyy') : 'Chưa cập nhật'}"></h3>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon purple">
+                        <i class="fa-solid fa-venus-mars"></i>
+                    </div>
+                    <div>
+                        <p>Giới tính</p>
+                        <h3 th:text="${appointment.patientGender == 'MALE'} ? 'Nam' : (${appointment.patientGender == 'FEMALE'} ? 'Nữ' : (${appointment.patientGender != null} ? ${appointment.patientGender} : 'Chưa cập nhật'))"></h3>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon red">
+                        <i class="fa-solid fa-droplet"></i>
+                    </div>
+                    <div>
+                        <p>Nhóm máu</p>
+                        <h3 th:text="${appointment.patientBloodType != null ? appointment.patientBloodType : 'Chưa cập nhật'}"></h3>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon green">
+                        <i class="fa-solid fa-phone"></i>
+                    </div>
+                    <div>
+                        <p>Số điện thoại</p>
+                        <h3 th:text="${appointment.patientPhone != null && !appointment.patientPhone.isEmpty() ? appointment.patientPhone : 'Chưa cập nhật'}"></h3>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon orange">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                    <div>
+                        <p>Địa chỉ</p>
+                        <h3 th:text="${appointment.patientAddress != null && !appointment.patientAddress.isEmpty() ? appointment.patientAddress : 'Chưa cập nhật'}"></h3>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon purple">
+                        <i class="fa-regular fa-clock"></i>
+                    </div>
+                    <div>
+                        <p>Giờ hẹn</p>
+                        <h3 th:text="${appointment.slotStartTime != null ? #temporals.format(appointment.slotStartTime, 'HH:mm') : ''}">09:00</h3>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon pink">
+                        <i class="fa-regular fa-file-lines"></i>
+                    </div>
+                    <div>
+                        <p>Loại khám</p>
+                        <h3 th:text="${appointment.serviceName}"></h3>
+                    </div>
+                </div>
+
+                <div class="info-item">
+                    <div class="info-icon blue">
+                        <i class="fa-regular fa-clipboard"></i>
+                    </div>
+                    <div>
+                        <p>Ghi chú lịch hẹn</p>
+                        <h3 th:text="${appointment.note != null && !appointment.note.isEmpty() ? appointment.note : 'Không có ghi chú'}"></h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Medical Record Section -->
+        <div class="detail-content-card" style="margin-top: 24px;">
+            <div class="card-header-row">
+                <h3 class="card-title" style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 0;">Hồ sơ bệnh án</h3>
+                <a th:if="${medicalRecord != null}"
+                   th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab}, action='edit')}"
+                   class="btn-create-record" style="background-color: #f59e0b;">
+                    <i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa
+                </a>
+            </div>
+            <hr class="card-divider">
+
+            <!-- If medical record exists -->
+            <div th:if="${medicalRecord != null}">
+                <!-- Vital Signs Grid -->
+                <h4 style="font-size: 14px; font-weight: 700; color: #334155; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-heart-pulse" style="color: #ef4444;"></i> Chỉ số sinh tồn
+                </h4>
+                <div class="vitals-grid">
+                    <div class="vital-item">
+                        <span class="vital-label">Huyết áp:</span>
+                        <span class="vital-value" th:text="${medicalRecord.bloodPressure != null && !medicalRecord.bloodPressure.isEmpty() ? medicalRecord.bloodPressure + ' mmHg' : 'Chưa cập nhật'}"></span>
+                    </div>
+                    <div class="vital-item">
+                        <span class="vital-label">Nhịp tim:</span>
+                        <span class="vital-value" th:text="${medicalRecord.heartRate != null ? medicalRecord.heartRate + ' bpm' : 'Chưa cập nhật'}"></span>
+                    </div>
+                    <div class="vital-item">
+                        <span class="vital-label">Đường huyết:</span>
+                        <span class="vital-value" th:text="${medicalRecord.bloodGlucose != null ? medicalRecord.bloodGlucose + ' mmol/L' : 'Chưa cập nhật'}"></span>
+                    </div>
+                    <div class="vital-item">
+                        <span class="vital-label">Cân nặng:</span>
+                        <span class="vital-value" th:text="${medicalRecord.weight != null ? medicalRecord.weight + ' kg' : 'Chưa cập nhật'}"></span>
+                    </div>
+                </div>
+
+                <hr class="card-divider" style="margin: 20px 0;">
+
+                <!-- Clinical Details -->
+                <h4 style="font-size: 14px; font-weight: 700; color: #334155; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-stethoscope" style="color: #2563eb;"></i> Thông tin khám lâm sàng
+                </h4>
+                <div class="clinical-details">
+                    <div class="clinical-item">
+                        <strong class="clinical-label">Triệu chứng:</strong>
+                        <p class="clinical-text" th:text="${medicalRecord.symptoms != null && !medicalRecord.symptoms.isEmpty() ? medicalRecord.symptoms : 'Không có'}"></p>
+                    </div>
+                    <div class="clinical-item">
+                        <strong class="clinical-label">Chẩn đoán:</strong>
+                        <p class="clinical-text" th:text="${medicalRecord.diagnosis != null && !medicalRecord.diagnosis.isEmpty() ? medicalRecord.diagnosis : 'Không có'}"></p>
+                    </div>
+                    <div class="clinical-item">
+                        <strong class="clinical-label">Kết luận:</strong>
+                        <p class="clinical-text" th:text="${medicalRecord.conclusion != null && !medicalRecord.conclusion.isEmpty() ? medicalRecord.conclusion : 'Không có'}"></p>
+                    </div>
+                    <div class="clinical-item">
+                        <strong class="clinical-label">Đơn thuốc:</strong>
+                        <p class="clinical-text prescription-box" th:text="${medicalRecord.prescriptionText != null && !medicalRecord.prescriptionText.isEmpty() ? medicalRecord.prescriptionText : 'Không có đơn thuốc'}"></p>
+                    </div>
+                    <div class="clinical-item">
+                        <strong class="clinical-label">Ghi chú:</strong>
+                        <p class="clinical-text" th:text="${medicalRecord.notes != null && !medicalRecord.notes.isEmpty() ? medicalRecord.notes : 'Không có'}"></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- If medical record does not exist -->
+            <div th:if="${medicalRecord == null}" class="empty-record-state">
+                <i class="fa-regular fa-folder-open"></i>
+                <p>Chưa có hồ sơ bệnh án cho lịch hẹn này.</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

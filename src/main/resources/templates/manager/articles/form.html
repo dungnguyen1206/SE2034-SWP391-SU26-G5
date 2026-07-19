@@ -27,7 +27,7 @@
             </div>
         </header>
 
-        <form th:action="${articleId != null ? '/manager/articles/edit/' + articleId : '/manager/articles/create'}" method="post" th:object="${articleRequest}">
+        <form th:action="${articleId != null ? '/manager/articles/edit/' + articleId : '/manager/articles/create'}" method="post" th:object="${articleRequest}" enctype="multipart/form-data">
             <div class="article-form-layout">
                 
                 <!-- Left Column -->
@@ -37,6 +37,19 @@
                         <div class="form-group">
                             <label class="form-label">Tiêu đề bài viết <span>*</span></label>
                             <input type="text" class="form-control" th:field="*{title}" placeholder="Nhập tiêu đề bài viết..." required>
+                        </div>
+                    </div>
+
+                    <div class="form-card">
+                        <div class="form-group">
+                            <label class="form-label">Ảnh bìa (Thumbnail)</label>
+                            <input type="file" class="form-control" th:field="*{thumbnailFile}" accept="image/*">
+                            <div th:if="*{currentThumbnailUrl != null}" style="margin-top: 10px;">
+                                <p style="font-size: 13px; color: #64748b; margin-bottom: 5px;">Ảnh bìa hiện tại:</p>
+                                <img th:src="*{currentThumbnailUrl}" alt="Thumbnail" style="max-width: 200px; border-radius: 4px; border: 1px solid #e2e8f0;">
+                                <!-- Hidden field to keep track of the current URL when updating -->
+                                <input type="hidden" th:field="*{currentThumbnailUrl}">
+                            </div>
                         </div>
                     </div>
 
