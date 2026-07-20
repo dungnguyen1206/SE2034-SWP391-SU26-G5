@@ -10,6 +10,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentStatusCountResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Appointment;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -320,6 +321,17 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
 
     boolean existsByPatientIdAndStatusIn(Long patientId, List<String> statuses);
+
+    @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END FROM Appointment a " +
+           "WHERE a.patient.id = :patientId " +
+           "AND a.status IN :activeStatuses " +
+           "AND (a.bookingDate < :targetDate " +
+           "     OR (a.bookingDate = :targetDate AND a.slot.startTime < :targetStartTime))")
+    boolean existsActiveAppointmentBefore(
+            @Param("patientId") Long patientId,
+            @Param("targetDate") LocalDate targetDate,
+            @Param("targetStartTime") LocalTime targetStartTime,
+            @Param("activeStatuses") List<String> activeStatuses);
 
     @Query("SELECT COUNT(a) FROM Appointment a WHERE a.patient.id = :patientId AND a.status = :status")
     long countByPatientIdAndStatus(@Param("patientId") Long patientId, @Param("status") String status);

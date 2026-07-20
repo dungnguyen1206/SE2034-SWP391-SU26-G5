@@ -221,12 +221,15 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
             throw new RuntimeException("Bệnh nhân này đã có lịch khám tại khoa này trong ngày hôm nay. Không thể đặt thêm lịch cùng khoa.");
         }
 
-        // Check if patient has any incomplete appointment on this date (across all departments)
-        boolean hasIncompleteAppointment = appointmentRepository.existsByPatientIdAndBookingDateAndStatusNotIn(
-                patient.getId(), request.getBookingDate(), Arrays.asList("COMPLETED", "CANCELLED", "NO_SHOW")
+        // Check if patient has any incomplete appointment before this slot (across all departments)
+        boolean hasIncompleteAppointment = appointmentRepository.existsActiveAppointmentBefore(
+                patient.getId(),
+                request.getBookingDate(),
+                selectedSlot.getStartTime(),
+                Arrays.asList("CONFIRMED", "WAITING", "EXAMINING")
         );
         if (hasIncompleteAppointment) {
-            throw new RuntimeException("Bệnh nhân đang có một lịch khám chưa hoàn tất. Vui lòng hoàn thành lịch khám hiện tại trước khi đặt lịch mới cho khoa khác.");
+            throw new RuntimeException("Bệnh nhân đang có một lịch khám chưa hoàn tất trước đó. Vui lòng hoàn thành lịch khám trước đó trước khi đặt lịch mới.");
         }
 
         // Increase booked capacity

@@ -670,12 +670,14 @@ public class AppointmentServiceImpl implements AppointmentService {
         TimeSlot slot = timeSlotRepository.findByIdWithSchedule(request.getSlotId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khung giờ"));
 
-        // Kiểm tra xem bệnh nhân có lịch hẹn nào chưa hoàn thành (CONFIRMED, WAITING, EXAMINING) không
-        boolean hasActiveAppointment = appointmentRepository.existsByPatientIdAndStatusIn(
+        // Kiểm tra xem bệnh nhân có lịch hẹn nào trước đó chưa hoàn thành (CONFIRMED, WAITING, EXAMINING) không
+        boolean hasActiveAppointment = appointmentRepository.existsActiveAppointmentBefore(
                 patientId,
+                slot.getSchedule().getWorkDate(),
+                slot.getStartTime(),
                 List.of("CONFIRMED", "WAITING", "EXAMINING"));
         if (hasActiveAppointment) {
-            throw new BadRequestException("Bạn hiện đang có lịch hẹn chưa hoàn thành. Vui lòng hoàn thành lịch khám hiện tại trước khi đặt lịch hẹn mới.");
+            throw new BadRequestException("Bạn có lịch hẹn trước đó chưa hoàn thành. Vui lòng hoàn thành lịch khám trước đó trước khi đặt lịch hẹn mới.");
         }
 
         // Chỉ cho phép đặt lịch khi tuần làm việc đã được FINALIZED
