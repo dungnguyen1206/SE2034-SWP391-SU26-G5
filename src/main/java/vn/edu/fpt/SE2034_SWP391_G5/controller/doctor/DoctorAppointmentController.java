@@ -27,6 +27,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalServiceRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalServiceOrderRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.service.MedicalRecordService;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateMedicalRecordRequest;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.request.UpdateMedicalRecordRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
@@ -239,7 +240,7 @@ public class DoctorAppointmentController {
     @PostMapping("/appointments/{id}/records/update")
     public String updateMedicalRecord(
             @PathVariable Long id,
-            @Valid @ModelAttribute CreateMedicalRecordRequest request,
+            @Valid @ModelAttribute UpdateMedicalRecordRequest request,
             BindingResult bindingResult,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
