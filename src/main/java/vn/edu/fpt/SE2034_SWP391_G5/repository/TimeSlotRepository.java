@@ -7,10 +7,9 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.TimeSlot;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-
-import java.time.LocalDate;
 
 
 @Repository
@@ -25,6 +24,11 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
     @Query("SELECT t FROM TimeSlot t JOIN FETCH t.schedule s WHERE t.id = :id")
     Optional<TimeSlot> findByIdWithSchedule(@Param("id") Long id);
 
+    @Modifying
+    @Query("DELETE FROM TimeSlot t where t.schedule.id=:doctorScheduleId")
+    int deleteTimeSlotByDoctorScheduleId(@Param("doctorScheduleId") Long doctorScheduleId);
+
+    //============================ Queue ===========================================
     @Query("SELECT ts FROM TimeSlot ts " +
             "JOIN FETCH ts.schedule sch " +
             "JOIN FETCH sch.room r " +
@@ -36,37 +40,7 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
             @Param("workDate") LocalDate workDate
     );
 
-    @Modifying
-    @Query("DELETE FROM TimeSlot t where t.schedule.id=:doctorScheduleId")
-    int deleteTimeSlotByDoctorScheduleId(@Param("doctorScheduleId") Long doctorScheduleId);
-
-    @Query("SELECT ts FROM TimeSlot ts " +
-            "JOIN FETCH ts.schedule sch " +
-            "WHERE sch.doctor.id = :doctorId " +
-            "AND sch.workDate = :workDate " +
-            "AND ts.id NOT IN (" +
-            "  SELECT a.slot.id FROM Appointment a WHERE a.slot IS NOT NULL AND a.status NOT IN ('CANCELLED')" +
-            ") ORDER BY ts.startTime ASC")
-    List<TimeSlot> findAvailableSlotsByDoctorAndDate(
-            @Param("doctorId") Long doctorId,
-            @Param("workDate") LocalDate workDate
-    );
-
     // ======================== WALK-IN BOOKING RECEPTIONIST ========================
-    @Query("SELECT ts FROM TimeSlot ts " +
-            "JOIN FETCH ts.schedule sch " +
-            "JOIN FETCH sch.doctor d " +
-            "WHERE d.department.id = :departmentId " +
-            "AND sch.workDate = :workDate " +
-            "AND ts.bookedCapacity < ts.maxCapacity " +
-            "AND ts.startTime > :currentTime " +
-            "ORDER BY ts.startTime ASC")
-    List<TimeSlot> findAvailableSlotsByDepartmentAndDate(
-            @Param("departmentId") Integer departmentId,
-            @Param("workDate") LocalDate workDate,
-            @Param("currentTime") java.time.LocalTime currentTime
-    );
-
     @Query("SELECT ts FROM TimeSlot ts " +
             "JOIN FETCH ts.schedule sch " +
             "JOIN FETCH sch.doctor d " +

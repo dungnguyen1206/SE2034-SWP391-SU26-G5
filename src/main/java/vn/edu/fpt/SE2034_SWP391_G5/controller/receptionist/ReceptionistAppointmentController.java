@@ -156,6 +156,7 @@ public class ReceptionistAppointmentController {
             @RequestParam(required = false) String phone,
             @RequestParam(required = false) Integer departmentId,
             @RequestParam(required = false) LocalDate bookingDate,
+            @RequestParam(required = false) Long serviceId,
             @AuthenticationPrincipal CustomUserDetails userDetails, 
             Model model) {
         
@@ -191,14 +192,8 @@ public class ReceptionistAppointmentController {
                         model.addAttribute("slots", walkInService.getAvailableSlots(departmentId, bookingDate));
                         
                         java.util.List<vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalService> services = medicalServiceRepository.findByDepartmentIdAndStatus(departmentId, "ACTIVE");
-                        if (!services.isEmpty()) {
-                            vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalService initialService = services.stream()
-                                    .filter(s -> s.getName().toLowerCase().contains("khám"))
-                                    .findFirst()
-                                    .orElse(services.get(0));
-                            model.addAttribute("serviceName", initialService.getName());
-                            model.addAttribute("servicePrice", initialService.getReferencePrice());
-                        }
+                        model.addAttribute("services", services);
+                        model.addAttribute("serviceId", serviceId);
                     }
                 }
             }
@@ -220,6 +215,7 @@ public class ReceptionistAppointmentController {
             redirectAttributes.addAttribute("phone", request.getPhone());
             redirectAttributes.addAttribute("departmentId", request.getDepartmentId());
             redirectAttributes.addAttribute("bookingDate", request.getBookingDate());
+            redirectAttributes.addAttribute("serviceId", request.getServiceId());
             
             return "redirect:/receptionist/appointment/walk-in";
         }
