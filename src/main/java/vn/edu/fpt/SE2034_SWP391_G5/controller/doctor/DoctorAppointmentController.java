@@ -27,6 +27,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalServiceRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalServiceOrderRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.service.MedicalRecordService;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateMedicalRecordRequest;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.request.UpdateMedicalRecordRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
@@ -108,11 +109,12 @@ public class DoctorAppointmentController {
             @RequestParam String status,
             @RequestParam(value = "currentStatus", defaultValue = "ALL") String currentStatus,
             @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "date", required = false) String dateStr) {
+            @RequestParam(value = "date", required = false) String dateStr,
+            RedirectAttributes redirectAttributes) {
         try {
             appointmentService.updateAppointmentStatus(id, status);
         } catch (Exception e) {
-            // Log or handle error if needed
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         
         String redirectUrl = "redirect:/doctor/appointment-list?status=" + currentStatus + "&page=" + page;
@@ -143,6 +145,10 @@ public class DoctorAppointmentController {
         List<MedicalService> activeServices = medicalServiceRepository.findByStatus("ACTIVE");
         model.addAttribute("activeServices", activeServices);
         
+        if (appointment != null && "COMPLETED".equalsIgnoreCase(appointment.getStatus())) {
+            action = null;
+        }
+        
         model.addAttribute("appointment", appointment);
         model.addAttribute("tab", tab);
         model.addAttribute("action", action);
@@ -160,6 +166,11 @@ public class DoctorAppointmentController {
         
         Long doctorId = userDetails.getUser().getId();
         AppointmentResponse appointment = appointmentService.getAppointmentDetailForReceptionist(id);
+        
+        if (appointment != null && "COMPLETED".equalsIgnoreCase(appointment.getStatus())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể chỉnh sửa dịch vụ của lịch hẹn đã hoàn thành.");
+            return "redirect:/doctor/appointments/" + id + "/detail?tab=services";
+        }
         
         // Security check
         if (appointment == null || !doctorId.equals(appointment.getDoctorId())) {
@@ -215,6 +226,12 @@ public class DoctorAppointmentController {
             BindingResult bindingResult,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
+        
+        AppointmentResponse appointment = appointmentService.getAppointmentDetailForReceptionist(id);
+        if (appointment != null && "COMPLETED".equalsIgnoreCase(appointment.getStatus())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể tạo hồ sơ bệnh án cho lịch hẹn đã hoàn thành.");
+            return "redirect:/doctor/appointments/" + id + "/detail?tab=info";
+        }
         if (bindingResult.hasErrors()) {
             String errorMsg = bindingResult.getFieldErrors().stream()
                     .map(FieldError::getDefaultMessage)
@@ -239,10 +256,16 @@ public class DoctorAppointmentController {
     @PostMapping("/appointments/{id}/records/update")
     public String updateMedicalRecord(
             @PathVariable Long id,
-            @Valid @ModelAttribute CreateMedicalRecordRequest request,
+            @Valid @ModelAttribute UpdateMedicalRecordRequest request,
             BindingResult bindingResult,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
+        
+        AppointmentResponse appointment = appointmentService.getAppointmentDetailForReceptionist(id);
+        if (appointment != null && "COMPLETED".equalsIgnoreCase(appointment.getStatus())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể chỉnh sửa hồ sơ bệnh án của lịch hẹn đã hoàn thành.");
+            return "redirect:/doctor/appointments/" + id + "/detail?tab=info";
+        }
         if (bindingResult.hasErrors()) {
             String errorMsg = bindingResult.getFieldErrors().stream()
                     .map(FieldError::getDefaultMessage)
@@ -276,6 +299,11 @@ public class DoctorAppointmentController {
         
         Long doctorId = userDetails.getUser().getId();
         AppointmentResponse appointment = appointmentService.getAppointmentDetailForReceptionist(id);
+        
+        if (appointment != null && "COMPLETED".equalsIgnoreCase(appointment.getStatus())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Không thể cập nhật kết quả dịch vụ cho lịch hẹn đã hoàn thành.");
+            return "redirect:/doctor/appointments/" + id + "/detail?tab=services";
+        }
         
         // Security check
         if (appointment == null || !doctorId.equals(appointment.getDoctorId())) {

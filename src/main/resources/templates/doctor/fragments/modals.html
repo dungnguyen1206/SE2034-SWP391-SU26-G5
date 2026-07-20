@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
@@ -117,16 +118,16 @@
                                        title="Sai định dạng (Ví dụ: 120/80)">
                             </div>
                             <div class="form-group">
-                                <label for="edit_heartRate">Nhịp tim (bpm)</label>
+                                <label for="edit_heartRate">Nhịp tim (bpm) <span style="color: #ef4444;">*</span></label>
                                 <input type="number" name="heartRate" id="edit_heartRate"
                                        th:value="${tempRecord != null ? tempRecord.heartRate : (medicalRecord.heartRate != null ? medicalRecord.heartRate : '')}"
-                                       placeholder="Ví dụ: 80" min="30" max="250">
+                                       placeholder="Ví dụ: 80" required min="30" max="250">
                             </div>
                             <div class="form-group">
-                                <label for="edit_bloodGlucose">Đường huyết (mmol/L)</label>
+                                <label for="edit_bloodGlucose">Đường huyết (mmol/L) <span style="color: #ef4444;">*</span></label>
                                 <input type="number" step="0.01" name="bloodGlucose" id="edit_bloodGlucose"
                                        th:value="${tempRecord != null ? tempRecord.bloodGlucose : (medicalRecord.bloodGlucose != null ? medicalRecord.bloodGlucose : '')}"
-                                       placeholder="Ví dụ: 5.6" min="0.1" max="50.0">
+                                       placeholder="Ví dụ: 5.6" required min="0.1" max="50.0">
                             </div>
                             <div class="form-group">
                                 <label for="edit_weight">Cân nặng (kg) <span style="color: #ef4444;">*</span></label>
@@ -149,25 +150,25 @@
                                       th:text="${tempRecord != null ? tempRecord.symptoms : (medicalRecord.symptoms != null ? medicalRecord.symptoms : '')}"></textarea>
                         </div>
                         <div class="form-group">
-                            <label for="edit_diagnosis">Chẩn đoán</label>
-                            <textarea name="diagnosis" id="edit_diagnosis" placeholder="Chẩn đoán bệnh lý chính..." rows="3"
+                            <label for="edit_diagnosis">Chẩn đoán <span style="color: #ef4444;">*</span></label>
+                            <textarea name="diagnosis" id="edit_diagnosis" placeholder="Chẩn đoán bệnh lý chính..." rows="3" required
                                       th:text="${tempRecord != null ? tempRecord.diagnosis : (medicalRecord.diagnosis != null ? medicalRecord.diagnosis : '')}"></textarea>
                         </div>
                         <div class="form-group">
-                            <label for="edit_conclusion">Kết luận</label>
+                            <label for="edit_conclusion">Kết luận <span style="color: #ef4444;">*</span></label>
                             <textarea name="conclusion" id="edit_conclusion" placeholder="Kết luận và hướng điều trị..."
-                                      rows="3"
+                                      rows="3" required
                                       th:text="${tempRecord != null ? tempRecord.conclusion : (medicalRecord.conclusion != null ? medicalRecord.conclusion : '')}"></textarea>
                         </div>
                         <div class="form-group">
-                            <label for="edit_prescriptionText">Đơn thuốc</label>
+                            <label for="edit_prescriptionText">Đơn thuốc <span style="color: #ef4444;">*</span></label>
                             <textarea name="prescriptionText" id="edit_prescriptionText"
-                                      placeholder="Kê đơn thuốc (tên thuốc, liều dùng, tần suất)..." rows="4"
+                                      placeholder="Kê đơn thuốc (tên thuốc, liều dùng, tần suất)..." rows="4" required
                                       th:text="${tempRecord != null ? tempRecord.prescriptionText : (medicalRecord.prescriptionText != null ? medicalRecord.prescriptionText : '')}"></textarea>
                         </div>
                         <div class="form-group">
-                            <label for="edit_notes">Ghi chú</label>
-                            <textarea name="notes" id="edit_notes" placeholder="Các ghi chú hoặc dặn dò thêm..." rows="2"
+                            <label for="edit_notes">Ghi chú <span style="color: #ef4444;">*</span></label>
+                            <textarea name="notes" id="edit_notes" placeholder="Các ghi chú hoặc dặn dò thêm..." rows="2" required
                                       th:text="${tempRecord != null ? tempRecord.notes : (medicalRecord.notes != null ? medicalRecord.notes : '')}"></textarea>
                         </div>
                     </div>

@@ -105,7 +105,7 @@
         <div class="detail-content-card" style="margin-top: 24px;">
             <div class="card-header-row">
                 <h3 class="card-title" style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 0;">Hồ sơ bệnh án</h3>
-                <a th:if="${medicalRecord != null}"
+                <a th:if="${medicalRecord != null and appointment.status != 'COMPLETED'}"
                    th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab}, action='edit')}"
                    class="btn-create-record" style="background-color: #f59e0b;">
                     <i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa
