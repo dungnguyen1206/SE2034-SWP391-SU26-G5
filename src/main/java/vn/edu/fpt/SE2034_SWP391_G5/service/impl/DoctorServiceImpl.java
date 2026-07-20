@@ -1,5 +1,8 @@
 package vn.edu.fpt.SE2034_SWP391_G5.service.impl;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.DoctorResponse;
@@ -89,5 +92,10 @@ public class DoctorServiceImpl implements DoctorService {
         return sb.toString().trim();
     }
 
-    
+    @Override
+    public Page<DoctorResponse> getActiveDoctorsPaginated(Integer departmentId, String search, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<User> userPage = userRepository.findActiveDoctorsPaginated(departmentId, search, pageable);
+        return userPage.map(this::toResponse);
+    }
 }
