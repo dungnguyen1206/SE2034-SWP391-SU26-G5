@@ -72,53 +72,6 @@
         .filter-tag:hover { border-color: #2563eb; color: #2563eb; }
         .filter-tag.active { background: #2563eb; border-color: #2563eb; color: #fff; }
         .result-count { font-size: 13px; color: #94a3b8; margin-top: 6px; }
-        .pagination {
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            gap: 8px;
-            margin-top: 30px;
-            margin-bottom: 20px;
-        }
-        .pagination-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 36px;
-            height: 36px;
-            padding: 0 8px;
-            border-radius: 8px;
-            border: 1.5px solid #e2e8f0;
-            background: #fff;
-            color: #475569;
-            font-size: 14px;
-            font-weight: 500;
-            text-decoration: none;
-            transition: all .2s;
-            cursor: pointer;
-        }
-        .pagination-btn:hover:not(.disabled) {
-            border-color: #2563eb;
-            color: #2563eb;
-            background: #f8fafc;
-        }
-        .pagination-btn.active {
-            background: #2563eb;
-            border-color: #2563eb;
-            color: #fff;
-        }
-        .pagination-btn.disabled {
-            color: #cbd5e1;
-            border-color: #f1f5f9;
-            background: #f8fafc;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
-        .pagination-info {
-            font-size: 13px;
-            color: #64748b;
-            margin-right: auto;
-        }
     </style>
 </head>
 <body>
@@ -137,29 +90,15 @@
             </a>
         </div>
 
-        <!-- Search bar -->
-        <div style="margin-bottom: 20px; max-width: 400px;">
-            <form th:action="@{/patient/doctors}" method="get" style="display: flex; gap: 8px;">
-                <input type="hidden" name="departmentId" th:value="${selectedDepartmentId}" />
-                <div style="position: relative; flex: 1;">
-                    <i class="bi bi-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #64748b;"></i>
-                    <input type="text" name="search" th:value="${searchQuery}" placeholder="Tìm tên bác sĩ..." 
-                           style="width: 100%; padding: 10px 12px 10px 36px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; outline: none; transition: border-color .2s;"
-                           onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#e2e8f0'"/>
-                </div>
-                <button type="submit" class="btn-primary" style="padding: 10px 16px;">Tìm kiếm</button>
-            </form>
-        </div>
-
         <!-- Filter theo khoa -->
         <div class="filter-wrap">
-            <a th:href="@{/patient/doctors(search=${searchQuery})}"
+            <a th:href="@{/patient/doctors}"
                class="filter-tag"
                th:classappend="${selectedDepartmentId == null} ? ' active'">
                 <i class="bi bi-grid-3x3-gap"></i> Tất cả
             </a>
             <a th:each="dept : ${departments}"
-               th:href="@{/patient/doctors(departmentId=${dept.id}, search=${searchQuery})}"
+               th:href="@{/patient/doctors(departmentId=${dept.id})}"
                class="filter-tag"
                th:classappend="${selectedDepartmentId != null and selectedDepartmentId == dept.id} ? ' active'"
                th:text="${dept.name}">Khoa</a>
@@ -216,29 +155,8 @@
             </div>
         </div>
 
-        <!-- Pagination -->
-        <div th:if="${totalPages > 1}" class="pagination">
-            <div class="pagination-info" th:text="'Hiển thị trang ' + (${currentPage + 1}) + ' / ' + ${totalPages} + ' (Tổng số ' + ${totalItems} + ' bác sĩ)'"></div>
-            
-            <a th:href="@{/patient/doctors(departmentId=${selectedDepartmentId}, search=${searchQuery}, page=${currentPage - 1})}"
-               class="pagination-btn" th:classappend="${currentPage == 0} ? ' disabled'">
-                <i class="bi bi-chevron-left"></i>
-            </a>
-            
-            <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-                <a th:href="@{/patient/doctors(departmentId=${selectedDepartmentId}, search=${searchQuery}, page=${i})}"
-                   class="pagination-btn" th:classappend="${currentPage == i} ? ' active'"
-                   th:text="${i + 1}">1</a>
-            </th:block>
-            
-            <a th:href="@{/patient/doctors(departmentId=${selectedDepartmentId}, search=${searchQuery}, page=${currentPage + 1})}"
-               class="pagination-btn" th:classappend="${currentPage == totalPages - 1} ? ' disabled'">
-                <i class="bi bi-chevron-right"></i>
-            </a>
-        </div>
-
         <div class="result-count" th:unless="${#lists.isEmpty(doctors)}"
-             th:text="'Tổng số: ' + ${totalItems} + ' bác sĩ'"></div>
+             th:text="${#lists.size(doctors)} + ' bác sĩ'"></div>
 
     </main>
 </div>

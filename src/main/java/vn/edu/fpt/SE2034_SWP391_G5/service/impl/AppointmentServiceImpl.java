@@ -1007,12 +1007,34 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointmentRepository.countByDoctorIdAndBookingDateAndStatus(doctorId, bookingDate, status.toUpperCase());
     }
 
-    //LinhNH
     @Override
     @Transactional
     public void updateAppointmentStatus(Long appointmentId, String newStatus) {
         Appointment appointment = appointmentRepository.findById(appointmentId).orElseThrow(() -> new ResourceNotFoundException(
                 "Không tìm thấy lịch hẹn với ID: " + appointmentId));
+
+        if ("COMPLETED".equalsIgnoreCase(appointment.getStatus())) {
+            throw new BadRequestException("Lịch hẹn đã hoàn thành, không thể thay đổi trạng thái nữa.");
+        }
+
+        if ("COMPLETED".equalsIgnoreCase(newStatus)) {
+            MedicalRecord medicalRecord = appointment.getMedicalRecord();
+            if (medicalRecord == null) {
+                throw new BadRequestException("Không thể hoàn thành lịch hẹn vì chưa tạo hồ sơ bệnh án.");
+            }
+            if (!"FINALIZED".equalsIgnoreCase(medicalRecord.getStatus())) {
+                throw new BadRequestException("Không thể hoàn thành lịch hẹn vì hồ sơ bệnh án chưa được hoàn tất.");
+            }
+            if (medicalRecord.getMedicalServiceOrders() != null) {
+                for (MedicalServiceOrder order : medicalRecord.getMedicalServiceOrders()) {
+                    String orderStatus = order.getStatus();
+                    if (orderStatus != null && !"COMPLETED".equalsIgnoreCase(orderStatus) && !"CANCELLED".equalsIgnoreCase(orderStatus)) {
+                        throw new BadRequestException("Không thể hoàn thành lịch hẹn vì vẫn còn dịch vụ chỉ định (" 
+                                + order.getMedicalService().getName() + ") chưa hoàn thành.");
+                    }
+                }
+            }
+        }
 
         appointment.setStatus(newStatus.toUpperCase());
         appointment.setUpdatedAt(LocalDateTime.now());
