@@ -11,7 +11,7 @@ public class CreateAppointmentRequest {
     @NotNull(message = "Vui lòng chọn bác sĩ")
     private Long doctorId;
 
-    @NotNull(message = "Vui lòng chọn dịch vụ")
+    // serviceId không còn bắt buộc - sẽ tự động set là "Khám lâm sàng"
     private Long serviceId;
 
     @NotNull(message = "Vui lòng chọn khung giờ")

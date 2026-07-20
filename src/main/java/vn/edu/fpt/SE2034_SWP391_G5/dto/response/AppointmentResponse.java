@@ -42,6 +42,7 @@ public class AppointmentResponse {
     // Service info
     private Long serviceId;
     private String serviceName;
+    private java.math.BigDecimal servicePrice;
 
     // Schedule info
     private String shift;
@@ -72,7 +73,7 @@ public class AppointmentResponse {
         return switch (status) {
             case "CONFIRMED" -> "Đã xác nhận";
             case "WAITING" -> "Chờ khám";
-            case "EXAMINING" -> "Đang khám";
+            case "EXAMINING", "IN_PROGRESS" -> "Đang khám";
             case "COMPLETED" -> "Đã khám xong";
             case "CANCELLED" -> "Đã hủy";
             case "NO_SHOW" -> "Vắng mặt";
@@ -87,7 +88,7 @@ public class AppointmentResponse {
         return switch (status) {
             case "CONFIRMED" -> "status-confirmed";
             case "WAITING" -> "status-waiting";
-            case "EXAMINING" -> "status-examining";
+            case "EXAMINING", "IN_PROGRESS" -> "status-examining";
             case "COMPLETED" -> "status-completed";
             case "CANCELLED" -> "status-cancelled";
             case "NO_SHOW" -> "status-no-show";

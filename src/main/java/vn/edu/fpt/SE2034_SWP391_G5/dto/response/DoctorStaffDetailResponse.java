@@ -28,7 +28,7 @@ public class DoctorStaffDetailResponse {
     private String avatar;
     private String departmentName;
     private String licenseNumber;
-    private LocalDate licenseIssueDate;
+    // private LocalDate licenseIssueDate; // Đã xóa
     private String degree;
     private Integer experienceYears;
     private String bio;

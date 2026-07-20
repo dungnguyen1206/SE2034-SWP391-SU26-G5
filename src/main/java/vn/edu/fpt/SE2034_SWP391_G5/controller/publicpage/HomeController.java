@@ -2,6 +2,8 @@ package vn.edu.fpt.SE2034_SWP391_G5.controller.publicpage;
 
 import org.springframework.ui.Model;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

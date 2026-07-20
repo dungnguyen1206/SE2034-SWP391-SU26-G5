@@ -126,29 +126,17 @@
                               th:text="${doc.firstName != null ? doc.firstName.substring(0,1).toUpperCase() : 'BS'}"></span>
                     </div>
                     <div style="min-width:0;">
-                        <div class="doc-name">
-                            <span th:if="${doc.degree != null}" th:text="${doc.degree + '. '}"></span>
-                            <span th:text="${doc.fullName}"></span>
-                        </div>
-                        <div class="doc-degree" th:if="${doc.degree != null}" th:text="${doc.degree}"></div>
+                        <div class="doc-name" th:text="${doc.fullName}"></div>
+                        <div class="doc-degree" th:if="${doc.departmentName != null}" th:text="${doc.departmentName}"></div>
                     </div>
                 </div>
 
                 <div class="doc-body">
-                    <div class="doc-info-row" th:if="${doc.departmentName != null}">
-                        <i class="bi bi-building-cross"></i>
-                        <span th:text="${doc.departmentName}"></span>
-                    </div>
                     <div class="doc-info-row"
                          th:if="${doc.experienceYears != null and doc.experienceYears > 0}">
                         <i class="bi bi-award"></i>
                         <span th:text="${doc.experienceYears} + ' năm kinh nghiệm'"></span>
                     </div>
-                    <div class="doc-info-row" th:if="${doc.licenseNumber != null}">
-                        <i class="bi bi-patch-check"></i>
-                        <span th:text="'CC: ' + ${doc.licenseNumber}"></span>
-                    </div>
-                    <p class="doc-bio" th:if="${doc.bio != null}" th:text="${doc.bio}"></p>
                 </div>
 
                 <div class="doc-footer">

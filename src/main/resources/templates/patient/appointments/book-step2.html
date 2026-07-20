@@ -187,15 +187,25 @@
                                     <input type="hidden" th:field="*{departmentId}">
                                     <input type="hidden" th:field="*{slotId}" id="selectedSlotId">
 
-                                    <!-- Dịch vụ -->
+                                    <!-- Dịch vụ - Đã ẩn vì tự động dùng "Khám lâm sàng tổng quát" -->
+                                    <!-- 
                                     <div class="book-form-field">
                                         <label>Dịch vụ khám <span style="color:#dc2626;">*</span></label>
                                         <select th:field="*{serviceId}" required>
                                             <option value="">-- Chọn dịch vụ --</option>
                                             <option th:each="svc : ${services}" th:value="${svc.id}"
+                                                th:selected="${svc.name == 'Khám lâm sàng' or svc.name == 'Kham lam sang'}"
                                                 th:text="${svc.name} + ' — ' + ${#numbers.formatDecimal(svc.referencePrice, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'">
                                             </option>
                                         </select>
+                                    </div>
+                                    -->
+                                    
+                                    <!-- Thông báo dịch vụ mặc định -->
+                                    <div class="alert-info" style="padding: 12px; background: #e0f2fe; border-left: 4px solid #0ea5e9; margin-bottom: 20px; border-radius: 4px;">
+                                        <strong> Dịch vụ:</strong> <span th:text="${clinicalService != null ? clinicalService.name : 'Khám lâm sàng tổng quát'}">Khám lâm sàng tổng quát</span>
+                                        <br/>
+                                        <strong> Giá khám:</strong> <span style="color: #0369a1; font-weight: bold;" th:text="${clinicalService != null ? #numbers.formatDecimal(clinicalService.referencePrice, 0, 'COMMA', 0, 'POINT') + ' VNĐ' : 'Chưa có giá'}">0 VNĐ</span>
                                     </div>
 
                                     <!-- Triệu chứng -->
@@ -205,7 +215,8 @@
                                             placeholder="Mô tả triệu chứng, lý do khám hoặc ghi chú cho bác sĩ..."></textarea>
                                     </div>
 
-                                    <button type="submit" class="btn-primary"
+                                    <button type="button" class="btn-primary"
+                                        onclick="showConfirmModal()"
                                         style="width:100%;justify-content:center;">
                                         <i class="bi bi-calendar-check"></i> Xác nhận đặt lịch
                                     </button>
@@ -225,6 +236,8 @@
         /*<![CDATA[*/
         const SCHEDULES = /*[[${schedules}]]*/[];
         const DOCTOR_NAME = /*[[${selectedDoctor != null ? selectedDoctor.fullName : ''}]]*/ '';
+        const CLINICAL_SERVICE_NAME = /*[[${clinicalService != null ? clinicalService.name : 'Khám lâm sàng tổng quát'}]]*/ 'Khám lâm sàng tổng quát';
+        const CLINICAL_SERVICE_PRICE = /*[[${clinicalService != null ? #numbers.formatDecimal(clinicalService.referencePrice, 0, 'COMMA', 0, 'POINT') + ' VNĐ' : 'Chưa có giá'}]]*/ '';
         /*]]>*/
     </script>
 
@@ -365,7 +378,7 @@
             <div style="font-size:18px;margin-bottom:4px;">${label}</div>
             <div style="font-size:12px;color:#64748b;">${timeRange}</div>
             <div style="font-size:12px;margin-top:4px;font-weight:600;color:${availableCount > 0 ? '#166534' : '#b91c1c'}">
-                ${availableCount > 0 ? availableCount + ' slot trống / ' + totalSlots : 'Hết slot'}
+                ${availableCount > 0 ? 'Còn slot' : 'Hết slot'}
             </div>
         `;
                 btn.onclick = () => onShiftSelect(btn, schedule);
@@ -409,10 +422,8 @@
                 btn.dataset.workDate = schedule.workDate;
                 btn.dataset.roomNumber = schedule.roomNumber || '';
 
-                const remaining = slot.maxCapacity - slot.bookedCapacity;
                 btn.innerHTML = `
             <span>${slot.startTime} – ${slot.endTime}</span>
-            <span class="slot-capacity">${slot.available ? remaining + ' chỗ' : 'Đã đầy'}</span>
         `;
                 btn.onclick = () => onSlotSelect(btn);
                 slotGrid.appendChild(btn);
@@ -437,6 +448,7 @@
         <div><i class="bi bi-person-badge" style="color:#0f4c81;margin-right:6px;"></i><strong>Bác sĩ:</strong> ${DOCTOR_NAME}</div>
         <div><i class="bi bi-calendar3" style="color:#0f4c81;margin-right:6px;"></i><strong>Ngày:</strong> ${dateFormatted}</div>
         <div><i class="bi bi-clock" style="color:#0f4c81;margin-right:6px;"></i><strong>Giờ:</strong> ${btn.dataset.startTime} – ${btn.dataset.endTime} (${btn.dataset.shiftLabel})${room}</div>
+        <div><i class="bi bi-cash-stack" style="color:#0f4c81;margin-right:6px;"></i><strong>Giá khám:</strong> <span style="color:#1d4ed8;font-weight:bold;">${CLINICAL_SERVICE_PRICE}</span></div>
     `;
 
             document.getElementById('confirmSection').style.display = 'block';
@@ -450,7 +462,39 @@
                 alert('Vui lòng chọn khung giờ khám');
             }
         });
-    </script>
+
+        // ---- Confirmation Modal ----
+        function showConfirmModal() {
+            const slotId = document.getElementById('selectedSlotId').value;
+            if (!slotId) {
+                alert('Vui lòng chọn khung giờ khám');
+                return;
+            }
+
+            // Lấy thông tin tóm tắt từ bookingSummary
+            const summaryHtml = document.getElementById('bookingSummary').innerHTML;
+            document.getElementById('confirmSummaryContent').innerHTML = summaryHtml;
+
+            // Hiện modal
+            document.getElementById('confirmModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeConfirmModal() {
+            document.getElementById('confirmModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+
+        function submitBooking() {
+            document.getElementById('confirmModal').style.display = 'none';
+            document.body.style.overflow = '';
+            document.getElementById('bookingForm').submit();
+        }
+
+        // Đóng modal khi click bên ngoài
+        document.getElementById('confirmModal').addEventListener('click', function(e) {
+            if (e.target === this) closeConfirmModal();
+        });    </script>
 
     <style>
         .shift-select-btn {
@@ -563,7 +607,131 @@
             color: #0f172a;
             transition: color 0.2s;
         }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: all 0.3s ease;
+        }
+
+        .modal-content {
+            background: #ffffff;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f172a;
+            flex: 1;
+        }
+
+        .modal-close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #94a3b8;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .modal-close-btn:hover {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .modal-body {
+            padding: 24px;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .confirm-summary-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 14px;
+            color: #334155;
+            line-height: 2;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            background: #f8fafc;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
     </style>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmModal" class="modal-overlay" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="bi bi-calendar-check-fill" style="color: #0f4c81; font-size: 24px;"></i>
+                <h3>Xác nhận lịch hẹn</h3>
+                <button type="button" class="modal-close-btn" onclick="closeConfirmModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-top: 0; margin-bottom: 16px; color: #64748b; font-size: 14px;">Vui lòng kiểm tra kỹ thông tin lịch hẹn dưới đây trước khi xác nhận:</p>
+                <div id="confirmSummaryContent" class="confirm-summary-box">
+                    <!-- Được điền tự động từ Javascript -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" style="border: 1px solid #cbd5e1; background: #fff; padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; color: #475569;" onclick="closeConfirmModal()">Quay lại</button>
+                <button type="button" class="btn-primary" style="padding: 10px 16px; border-radius: 8px; cursor: pointer; font-weight: 600;" onclick="submitBooking()">Xác nhận đặt</button>
+            </div>
+        </div>
+    </div>
 
 </body>
 

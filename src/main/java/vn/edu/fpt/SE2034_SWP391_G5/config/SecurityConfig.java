@@ -37,6 +37,7 @@ public class SecurityConfig {
             .authenticationProvider(authenticationProvider())
             .authorizeHttpRequests(auth -> auth
 
+                // Trang công khai - không cần đăng nhập
                 .requestMatchers(
                     "/", "/home", "/home/**",
                     "/register", "/verify-otp",

@@ -20,21 +20,22 @@ public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, 
         @Query(value = "SELECT ds FROM DoctorSchedule ds JOIN FETCH ds.doctor d JOIN FETCH d.department dpt WHERE ds.workDate = :date")
         public Page<DoctorSchedule> findByDate(@Param("date") LocalDate date, Pageable pageable);
 
+        // ======================== QUEUE BOARD RECEPTIONIST ========================
         @Query("SELECT ds FROM DoctorSchedule ds " +
                         "LEFT JOIN FETCH ds.doctor d " +
                         "LEFT JOIN FETCH d.department " +
                         "LEFT JOIN FETCH ds.room r " +
                         "WHERE ds.workDate = :date AND ds.status = 'ACTIVE'")
         List<DoctorSchedule> findActiveSchedulesByDate(@Param("date") LocalDate date);
+        // ======================== END QUEUE BOARD RECEPTIONIST ========================
 
         // Lấy lịch làm việc của bác sĩ từ ngày hôm nay trở đi
-        // Chỉ hiển thị lịch thuộc tuần đã FINALIZED — bệnh nhân mới được đặt
+        // TEMPORARILY REMOVED WeekSchedule constraint for debugging
         @Query("SELECT ds FROM DoctorSchedule ds " +
-                        "JOIN ds.weekSchedule ws " +
+                        "LEFT JOIN FETCH ds.weekSchedule ws " +
                         "WHERE ds.doctor.id = :doctorId " +
                         "AND ds.workDate >= :fromDate " +
                         "AND ds.status = 'ACTIVE' " +
-                        "AND ws.status = 'FINALIZED' " +
                         "ORDER BY ds.workDate ASC, ds.shift ASC")
         List<DoctorSchedule> findAvailableSchedulesByDoctorId(
                         @Param("doctorId") Long doctorId,

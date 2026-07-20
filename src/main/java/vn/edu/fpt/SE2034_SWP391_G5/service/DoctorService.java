@@ -13,5 +13,5 @@ public interface DoctorService {
 
     List<DoctorResponse> getAllDoctors();
     DoctorResponse toResponse(User u);
-    String buildFullName(String lastName, String middleName, String firstName);
+    String buildFullName(String firstName, String middleName, String lastName);
 }

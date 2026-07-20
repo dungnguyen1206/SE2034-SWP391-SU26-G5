@@ -63,4 +63,35 @@ public class SmsServiceImpl implements SmsService {
             throw new RuntimeException("Lỗi gửi SMS qua Traccar Gateway nội bộ: " + e.getMessage());
         }
     }
+
+    @Override
+    public void sendWalkInAccountSms(String phoneNumber, String password) {
+        String formattedPhone = phoneNumber;
+        if (phoneNumber.startsWith("0")) {
+            formattedPhone = "+84" + phoneNumber.substring(1);
+        } else if (!phoneNumber.startsWith("+")) {
+            formattedPhone = "+" + phoneNumber;
+        }
+
+        String message = "HAMS: Ma truy cap cua ban la " + password + ". Vui long vao he thong de doi ma.";
+
+        Map<String, String> body = new HashMap<>();
+        body.put("to", formattedPhone);
+        body.put("message", message);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("Authorization", apiKey);
+
+        HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
+
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, request, String.class);
+            log.debug("Traccar SMS Gateway response: {}", response.getBody());
+        } catch (Exception e) {
+            log.error("Failed to send SMS via Traccar Gateway", e);
+            // Optionally throw or just log since this is just an info SMS and shouldn't block booking
+            log.error("Lỗi gửi SMS mật khẩu qua Traccar Gateway nội bộ: " + e.getMessage());
+        }
+    }
 }

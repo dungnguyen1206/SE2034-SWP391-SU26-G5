@@ -69,13 +69,13 @@ public class User {
     @JoinColumn(name = "department_id")
     private Department department;
 
-    @Column(name = "license_issue_date")
-    private LocalDate licenseIssueDate;
-
     private String degree;
 
     @Column(name = "license_number")
     private String licenseNumber;
+
+    @Column(name = "license_issue_date")
+    private LocalDate licenseIssueDate;
 
     @Column(columnDefinition = "NVARCHAR(MAX)")
     private String bio;

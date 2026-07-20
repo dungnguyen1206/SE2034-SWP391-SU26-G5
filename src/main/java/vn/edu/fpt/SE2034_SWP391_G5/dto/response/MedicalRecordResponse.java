@@ -34,4 +34,20 @@ public class MedicalRecordResponse {
     private BigDecimal weight;
 
     private String status;
+
+    private java.util.List<ServiceOrderInfo> serviceOrders;
+
+    @Getter
+    @Setter
+    @Builder
+    @lombok.AllArgsConstructor
+    @lombok.NoArgsConstructor
+    public static class ServiceOrderInfo {
+        private Long id;
+        private String serviceName;
+        private String result;
+        private String status;
+        private String note;
+        private BigDecimal price;
+    }
 }

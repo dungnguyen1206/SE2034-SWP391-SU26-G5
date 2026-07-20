@@ -46,6 +46,7 @@ public class NotificationController {
             String role = userDetails.getAuthorities().iterator().next().getAuthority();
 
             // Điều hướng về đúng trang HTML của từng Actor
+            // Role names có prefix ROLE_ (vd: ROLE_MANAGER, ROLE_DOCTOR...)
             if (role.equals("ROLE_MANAGER")) return "manager/notifications";
             if (role.equals("ROLE_DOCTOR")) {
                 try {
@@ -64,8 +65,11 @@ public class NotificationController {
                 return "patient/notifications";
             }
             if (role.equals("ROLE_RECEPTIONIST")) {
-                model.addAttribute("receptionist", receptionistService.getReceptionistByUsername(userDetails.getUser().getEmail()));
+                model.addAttribute("receptionist", receptionistService.getReceptionistById(userDetails.getUser().getId()));
                 return "receptionist/notifications";
+            }
+            if (role.equals("ROLE_ADMIN")) {
+                return "redirect:/admin/dashboard";
             }
         }
         return "redirect:/login"; // Nếu lỗi thì đá về đăng nhập

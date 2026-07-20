@@ -141,6 +141,37 @@
                 </div>
             </div>
 
+            <!-- Dịch vụ chỉ định thêm -->
+            <div class="record-section" th:if="${record.serviceOrders != null and !record.serviceOrders.isEmpty()}">
+                <h4><i class="bi bi-file-earmark-medical" style="margin-right:6px;"></i>Dịch vụ chỉ định thêm</h4>
+                <table style="width:100%; border-collapse: collapse; font-size: 14px;">
+                    <thead>
+                        <tr style="border-bottom: 2px solid #e2e8f0; text-align: left;">
+                            <th style="padding: 10px 8px; color: #64748b; font-weight: 600;">Tên dịch vụ</th>
+                            <th style="padding: 10px 8px; color: #64748b; font-weight: 600;">Kết quả</th>
+                            <th style="padding: 10px 8px; color: #64748b; font-weight: 600;">Ghi chú</th>
+                            <th style="padding: 10px 8px; color: #64748b; font-weight: 600;">Trạng thái</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="order : ${record.serviceOrders}" style="border-bottom: 1px solid #f1f5f9;">
+                            <td style="padding: 12px 8px; font-weight: 600; color: #0f172a;" th:text="${order.serviceName}"></td>
+                            <td style="padding: 12px 8px; color: #334155;" th:text="${order.result != null and !order.result.isEmpty() ? order.result : 'Chưa có kết quả'}"></td>
+                            <td style="padding: 12px 8px; color: #64748b;" th:text="${order.note != null and !order.note.isEmpty() ? order.note : '-'}"></td>
+                            <td style="padding: 12px 8px;">
+                                <span class="status-badge"
+                                    th:classappend="${order.status == 'COMPLETED'} ? 'status-completed' : 
+                                                  (${order.status == 'CANCELLED'} ? 'status-cancelled' : 'status-pending')"
+                                    th:text="${order.status == 'COMPLETED'} ? 'Đã hoàn tất' : 
+                                             (${order.status == 'PENDING_PAYMENT'} ? 'Chờ thanh toán' : 
+                                             (${order.status == 'CANCELLED'} ? 'Đã hủy' : 'Đang xử lý'))">
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
             <!-- Chỉ số sinh tồn -->
             <div class="record-section"
                 th:if="${record.heartRate != null or record.bloodPressure != null or record.bloodGlucose != null or record.weight != null}">

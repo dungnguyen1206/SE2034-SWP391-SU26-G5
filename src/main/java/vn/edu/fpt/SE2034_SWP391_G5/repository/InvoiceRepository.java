@@ -21,11 +21,10 @@ import org.springframework.data.domain.Pageable;
 
 @Repository
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
-    @Query("Select coalesce(sum(i.totalAmount),0) From Invoice i where i.paymentStatus =:paymentStatus AND month(i.paidAt)=:month AND year(i.paidAt)= :year")
-    BigDecimal getTotalAmount(@Param("paymentStatus") String paymentStatus, @Param("month") int month, @Param("year") int year);
 
+    // ======================== DASHBOARD RECEPTIONIST ========================
     // Đếm hóa đơn đã thanh toán trong ngày hiện tại.
-// Dựa theo ngày khám của appointment, không dựa theo ngày tạo hóa đơn.
+    // Dựa theo ngày khám của appointment, không dựa theo ngày tạo hóa đơn.
     @Query("SELECT COUNT(i) FROM Invoice i " +
             "JOIN i.appointment a " +
             "WHERE a.bookingDate = :today " +
@@ -33,12 +32,25 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
     long countTodayPaidInvoices(@Param("today") LocalDate today);
 
     // Đếm hóa đơn chưa thanh toán trong ngày hiện tại.
-// Dựa theo ngày khám của appointment, không lấy toàn bộ hóa đơn rồi đếm bằng Java.
+    // Dựa theo ngày khám của appointment, không lấy toàn bộ hóa đơn rồi đếm bằng Java.
     @Query("SELECT COUNT(i) FROM Invoice i " +
             "JOIN i.appointment a " +
             "WHERE a.bookingDate = :today " +
             "AND i.paymentStatus = 'UNPAID'")
     long countTodayUnpaidInvoices(@Param("today") LocalDate today);
+
+    @Query("SELECT new vn.edu.fpt.SE2034_SWP391_G5.dto.response.ReceptionistDashboardResponse(" +
+           "0L, 0L, 0L, 0L, " +
+           "SUM(CASE WHEN i.paymentStatus = 'PAID' THEN 1L ELSE 0L END), " +
+           "SUM(CASE WHEN i.paymentStatus = 'UNPAID' THEN 1L ELSE 0L END)) " +
+           "FROM Invoice i JOIN i.appointment a WHERE a.bookingDate = :today")
+    vn.edu.fpt.SE2034_SWP391_G5.dto.response.ReceptionistDashboardResponse getTodayInvoiceDashboardCounts(@Param("today") LocalDate today);
+    // ======================== END DASHBOARD RECEPTIONIST ========================
+
+    @Query("Select coalesce(sum(i.totalAmount),0) From Invoice i where i.paymentStatus =:paymentStatus AND month(i.paidAt)=:month AND year(i.paidAt)= :year")
+    BigDecimal getTotalAmount(@Param("paymentStatus") String paymentStatus, @Param("month") int month, @Param("year") int year);
+
+
 
 
     @Query("SELECT new vn.edu.fpt.SE2034_SWP391_G5.dto.response.InvoiceSummaryResponse(i.paymentStatus,count(i),sum(i.totalAmount)) " +
@@ -52,31 +64,6 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
                                                                    @Param("startDate")LocalDateTime startDate,
                                                                    @Param("endDate") LocalDateTime endDate, @Param("month") Integer month, @Param("year") Integer year);
 
-
-    @Query("SELECT i FROM Invoice i " +
-           "JOIN i.appointment a " +
-           "JOIN a.patient p " +
-           "WHERE (:keyword IS NULL OR :keyword = '' " +
-           "  OR LOWER(i.invoiceCode) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-           "  OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :keyword, '%')) " +
-           "  OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :keyword, '%'))) " +
-           "AND (:paymentStatus IS NULL OR :paymentStatus = '' OR i.paymentStatus = :paymentStatus)")
-    Page<Invoice> findInvoicesWithFilter(@Param("keyword") String keyword,
-                                                                         @Param("paymentStatus") String paymentStatus,
-                                                                         Pageable pageable);
-
-    @Query("SELECT i FROM Invoice i " +
-           "LEFT JOIN FETCH i.appointment a " +
-           "LEFT JOIN FETCH a.medicalRecord mr " +
-           "LEFT JOIN FETCH a.patient p " +
-           "LEFT JOIN FETCH a.doctor d " +
-           "LEFT JOIN FETCH a.slot s " +
-           "LEFT JOIN FETCH s.schedule sc " +
-           "LEFT JOIN FETCH sc.room r " +
-           "LEFT JOIN FETCH d.department dep " +
-           "LEFT JOIN FETCH i.invoiceItems items " +
-           "WHERE i.id = :id")
-    Optional<Invoice> findByIdWithDetails(@Param("id") Long id);
 
 
 

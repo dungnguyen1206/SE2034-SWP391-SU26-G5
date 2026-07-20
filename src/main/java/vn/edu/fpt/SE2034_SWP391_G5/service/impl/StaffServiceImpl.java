@@ -90,7 +90,8 @@ public class StaffServiceImpl implements StaffService {
         doctorStaffDetailResponse.setPhone(doctor.getPhone());
         doctorStaffDetailResponse.setDepartmentName(doctor.getDepartment().getName());
         doctorStaffDetailResponse.setFullName(doctor.getFirstName() + " " + doctor.getMiddleName() + " " + doctor.getLastName());
-        doctorStaffDetailResponse.setExperienceYears(doctor.getLicenseIssueDate() != null ? Period.between(doctor.getLicenseIssueDate(), LocalDate.now()).getYears() : 0);        doctorStaffDetailResponse.setLicenseIssueDate(doctor.getLicenseIssueDate());
+        doctorStaffDetailResponse.setExperienceYears(0); // Tạm thời set 0
+        // doctorStaffDetailResponse.setLicenseIssueDate(doctor.getLicenseIssueDate()); // Đã xóa
         doctorStaffDetailResponse.setLicenseNumber(String.valueOf(doctor.getLicenseNumber()));
         doctorStaffDetailResponse.setRoleName("DOCTOR");
         doctorStaffDetailResponse.setRoleLabel("Bác sĩ");
@@ -191,7 +192,7 @@ public class StaffServiceImpl implements StaffService {
             updateUserRequest.setDoctorStatus(user.getDoctorStatus());
             updateUserRequest.setDepartmentId(user.getDepartment() != null ? user.getDepartment().getId() : null);
             updateUserRequest.setDegree(user.getDegree());
-            updateUserRequest.setLicenseIssueDate(user.getLicenseIssueDate());
+            // updateUserRequest.setLicenseIssueDate(user.getLicenseIssueDate()); // Đã xóa
             updateUserRequest.setLicenseNumber(user.getLicenseNumber());
         }
 
@@ -222,9 +223,10 @@ public class StaffServiceImpl implements StaffService {
         if (!vertifyDOB(request.getDateOfBirth(), request.getStaffRole())) {
             throw new BadRequestException("Ngày sinh phải hợp lệ theo quy định của pháp luật về độ tuổi lao động");
         }
-        else if(Period.between(request.getDateOfBirth(), request.getLicenseIssueDate()).getYears() < 25) {
-            throw new BadRequestException("Ngày sinh xung đột với ngày cấp giấy phép hành nghề !" +"   Bác sĩ chưa đủ tuổi để được cấp giấy phép hành nghề");
-        }
+        // Validation về licenseIssueDate đã bỏ vì field không còn nữa
+        // else if(Period.between(request.getDateOfBirth(), request.getLicenseIssueDate()).getYears() < 25) {
+        //     throw new BadRequestException("Ngày sinh xung đột với ngày cấp giấy phép hành nghề !" +"   Bác sĩ chưa đủ tuổi để được cấp giấy phép hành nghề");
+        // }
         staff.setDateOfBirth(request.getDateOfBirth());
 
         if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
@@ -247,11 +249,12 @@ public class StaffServiceImpl implements StaffService {
             Department department = departmentRepository.findById(request.getDepartmentId()).orElseThrow(() -> new ResourceNotFoundException("Phòng ban không hợp lệ"));
             staff.setDepartment(department);
             staff.setDegree(request.getDegree());
-            if (request.getLicenseIssueDate().getYear()  - request.getDateOfBirth().getYear() <=25 ) {
-                throw new BadRequestException("Số năm kinh nghiệm phải nhỏ hơn hoặc bằng số năm từ lúc lấy giấy phép hành nghê lần đầu tiên");
-            } else {
-                staff.setLicenseIssueDate(request.getLicenseIssueDate());
-            }
+            // Validation licenseIssueDate đã bỏ
+            // if (request.getLicenseIssueDate().getYear()  - request.getDateOfBirth().getYear() <=25 ) {
+            //     throw new BadRequestException("Số năm kinh nghiệm phải nhỏ hơn hoặc bằng số năm từ lúc lấy giấy phép hành nghê lần đầu tiên");
+            // } else {
+            //     staff.setLicenseIssueDate(request.getLicenseIssueDate());
+            // }
             staff.setLicenseNumber(request.getLicenseNumber());
             if (!staff.getLicenseNumber().equalsIgnoreCase(request.getLicenseNumber()) && userRepository.existsByLicenseNumber(request.getLicenseNumber())) {
                 throw new BadRequestException("Mã giấy phép đã tồn tại");
@@ -261,7 +264,7 @@ public class StaffServiceImpl implements StaffService {
             staff.setDepartment(null);
             staff.setDegree(null);
             staff.setLicenseNumber(null);
-            staff.setLicenseIssueDate(null);
+            // staff.setLicenseIssueDate(null); // Đã xóa
             staff.setDoctorStatus(null);
         }
         userRepository.save(staff);

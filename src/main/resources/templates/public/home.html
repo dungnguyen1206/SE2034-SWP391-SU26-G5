@@ -256,6 +256,53 @@
     </div>
 </section>
 
+<!-- ARTICLES -->
+<section class="section" style="background: #f8fafc;">
+    <div class="section-header">
+        <div class="section-tag"><i class="bi bi-newspaper"></i> Bài viết</div>
+        <h2>Tin tức & Kiến thức sức khoẻ</h2>
+        <p>Cập nhật thông tin mới nhất về y tế và chăm sóc sức khoẻ</p>
+    </div>
+
+    <div class="dept-grid" th:unless="${#lists.isEmpty(articles)}">
+        <div th:each="art : ${articles}" class="dept-card">
+            <!-- Thumbnail article -->
+            <div class="dept-img">
+                <img th:if="${art.thumbnailUrl != null}" th:src="${art.thumbnailUrl}" th:alt="${art.title}">
+                <i th:if="${art.thumbnailUrl == null}" class="bi bi-file-text"></i>
+            </div>
+            <div class="dept-body">
+                <!-- Category badge -->
+                <div style="margin-bottom: 8px;">
+                    <span th:if="${art.category != null}" style="display: inline-block; background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600;" th:text="${art.category}"></span>
+                </div>
+                <div class="dept-name" th:text="${art.title}">Tiêu đề bài viết</div>
+                <div class="dept-desc" th:if="${art.summary != null}" th:text="${art.summary}"></div>
+                <!-- Meta info -->
+                <div style="display: flex; gap: 12px; font-size: 12px; color: #94a3b8; margin-top: 8px;">
+                    <span th:if="${art.viewCount != null}">
+                        <i class="bi bi-eye"></i> <span th:text="${art.viewCount}">0</span>
+                    </span>
+                    <span th:if="${art.publishedAt != null}">
+                        <i class="bi bi-calendar3"></i> <span th:text="${#temporals.format(art.publishedAt, 'dd/MM/yyyy')}"></span>
+                    </span>
+                </div>
+                <div class="dept-actions">
+                    <!-- Xem bài viết -->
+                    <a href="#" class="btn-detail" style="flex: 1;">
+                        <i class="bi bi-book"></i> Đọc bài viết
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="empty-state" th:if="${#lists.isEmpty(articles)}">
+        <i class="bi bi-newspaper"></i>
+        <p>Chưa có bài viết nào</p>
+    </div>
+</section>
+
 <!-- CTA -->
 <section class="cta">
     <h2>Sẵn sàng đặt lịch khám?</h2>

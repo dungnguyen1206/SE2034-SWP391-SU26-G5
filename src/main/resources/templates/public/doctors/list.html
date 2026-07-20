@@ -276,6 +276,7 @@
         <li><a href="/home">Trang chủ</a></li>
         <li><a href="/patient/departments">Chuyên khoa</a></li>
         <li><a href="/doctors" class="active">Bác sĩ</a></li>
+        <li><a href="/articles">Bài viết chuyên môn</a></li>
     </ul>
     
     <div class="navbar-actions">
@@ -363,29 +364,17 @@
                           th:text="${doc.firstName != null ? doc.firstName.substring(0,1).toUpperCase() : 'BS'}"></span>
                 </div>
                 <div class="doc-title-info">
-                    <div class="doc-name">
-                        <span th:if="${doc.degree != null and !doc.degree.isEmpty()}" th:text="${doc.degree + '. '}"></span>
-                        <span th:text="${doc.fullName}"></span>
-                    </div>
-                    <div class="doc-degree" th:if="${doc.degree != null and !doc.degree.isEmpty()}" th:text="${doc.degree}"></div>
+                    <div class="doc-name" th:text="${doc.fullName}"></div>
+                    <div class="doc-degree" th:if="${doc.departmentName != null}" th:text="${doc.departmentName}"></div>
                 </div>
             </div>
             
-            <!-- Card Body: Description & Details -->
+            <!-- Card Body: chỉ hiện số năm kinh nghiệm -->
             <div class="doc-card-body">
-                <div class="doc-meta-item" th:if="${doc.departmentName != null}">
-                    <i class="bi bi-building-check"></i>
-                    <strong th:text="${doc.departmentName}"></strong>
-                </div>
                 <div class="doc-meta-item" th:if="${doc.experienceYears != null and doc.experienceYears > 0}">
                     <i class="bi bi-award"></i>
                     <span th:text="${doc.experienceYears} + ' năm kinh nghiệm'"></span>
                 </div>
-                <div class="doc-meta-item" th:if="${doc.licenseNumber != null and !doc.licenseNumber.isEmpty()}">
-                    <i class="bi bi-patch-check"></i>
-                    <span th:text="'Số CCHN: ' + ${doc.licenseNumber}"></span>
-                </div>
-                <p class="doc-bio" th:if="${doc.bio != null and !doc.bio.isEmpty()}" th:text="${doc.bio}"></p>
             </div>
             
             <!-- Card Footer: Actions -->
@@ -433,4 +422,4 @@
 </footer>
 
 </body>
-</html>
+</html>

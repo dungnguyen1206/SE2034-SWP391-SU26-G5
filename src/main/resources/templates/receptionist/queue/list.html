@@ -3,7 +3,6 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="refresh" content="30">
         <title>Hàng Đợi Khám - HAMS Hospital</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
@@ -24,11 +23,6 @@
                         <h4 class="fw-bold text-dark mb-0">Hàng Đợi Khám</h4>
 
                         <div class="d-flex gap-3 align-items-center">
-                            <div class="text-muted small d-none d-md-block me-2">
-                        <span class="spinner-grow spinner-grow-sm text-success refresh-spinner" role="status" aria-hidden="true"></span>
-                                Đang làm mới tự động...
-                            </div>
-
                             <div class="input-group search-container">
                         <span class="input-group-text bg-white border-end-0"><i
                                 class="bi bi-search text-muted"></i></span>
@@ -56,23 +50,23 @@
                                     <h5 class="fw-bold text-dark mb-3" th:text="'👨‍⚕️ BS. ' + ${room.doctorFullName}">
                                         👨‍⚕️ BS. Lê Minh Quang</h5>
 
-                                    <div class="examining-box shadow-sm" th:if="${room.examiningPatient != null}">
+                                    <div class="examining-box shadow-sm mb-2" th:each="examining, iterStat : ${room.examiningPatients}" th:if="${iterStat.index < 3}">
                                         <div class="d-flex justify-content-between align-items-start mb-2">
                                             <h6 class="fw-bold text-dark mb-0 fs-5"
-                                                th:text="${room.examiningPatient.patientName}">Đỗ Thị B Lan</h6>
+                                                th:text="${examining.patientName}">Đỗ Thị B Lan</h6>
                                             <span class="badge badge-examining rounded-pill">Đang khám</span>
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center mt-3">
                                             <small class="text-muted fw-bold"
-                                                   th:text="'Số phiếu: ' + ${room.examiningPatient.stt}">Số phiếu:
+                                                   th:text="'Số phiếu: ' + ${examining.stt}">Số phiếu:
                                                 1</small>
                                             <small class="text-muted fw-semibold"
-                                                   th:text="'Vào lúc: ' + (${room.examiningPatient.checkInTime != null} ? ${#temporals.format(room.examiningPatient.checkInTime, 'HH:mm')} : '--:--')">Vào
+                                                   th:text="'Vào lúc: ' + (${examining.checkInTime != null} ? ${#temporals.format(examining.checkInTime, 'HH:mm')} : '--:--')">Vào
                                                 lúc: 08:35</small>
                                         </div>
                                     </div>
 
-                                    <div class="examining-box shadow-sm empty-examining-box" th:if="${room.examiningPatient == null}">
+                                    <div class="examining-box shadow-sm empty-examining-box mb-2" th:if="${room.examiningPatients == null || room.examiningPatients.isEmpty()}">
                                         <div class="text-center py-3 text-secondary">
                                             <small class="fw-bold"><i class="bi bi-person-x me-1 fs-6"></i>Chưa có bệnh nhân đang khám</small>
                                         </div>
@@ -107,8 +101,7 @@
                                         <button class="btn btn-link text-decoration-none fw-semibold btn-sm"
                                                 data-bs-toggle="modal"
                                                 th:attr="data-bs-target='#viewAllModal-' + ${room.roomNumber}">
-                                            Xem tất cả (<span th:text="${room.totalWaiting}"></span> người) <i
-                                                class="bi bi-arrows-angle-expand ms-1"></i>
+                                            Xem toàn bộ hàng đợi <i class="bi bi-arrows-angle-expand ms-1"></i>
                                         </button>
                                     </div>
                                 </div>
@@ -147,8 +140,21 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr th:each="patient : ${room.waitingPatients}">
+                                            <!-- Examining Patients -->
+                                            <tr th:each="patient : ${room.examiningPatients}">
                                                 <td class="ps-4 fw-bold" th:text="${patient.stt}">1</td>
+                                                <td class="text-primary fw-semibold"
+                                                    th:text="${patient.appointmentCode}">APT-20260030
+                                                </td>
+                                                <td th:text="${patient.patientName}">Đỗ Thị B Lan</td>
+                                                <td th:text="${patient.checkInTime != null} ? ${#temporals.format(patient.checkInTime, 'HH:mm')} : '--:--'">
+                                                    08:15
+                                                </td>
+                                                <td><span class="badge badge-examining rounded-pill">Đang khám</span></td>
+                                            </tr>
+                                            <!-- Waiting Patients -->
+                                            <tr th:each="patient : ${room.waitingPatients}">
+                                                <td class="ps-4 fw-bold" th:text="${patient.stt}">2</td>
                                                 <td class="text-primary fw-semibold"
                                                     th:text="${patient.appointmentCode}">APT-20260030
                                                 </td>
@@ -158,7 +164,7 @@
                                                 </td>
                                                 <td><span class="badge badge-waiting rounded-pill">Chờ khám</span></td>
                                             </tr>
-                                            <tr th:if="${#lists.isEmpty(room.waitingPatients)}">
+                                            <tr th:if="${#lists.isEmpty(room.waitingPatients) && #lists.isEmpty(room.examiningPatients)}">
                                                 <td colspan="5" class="text-center py-4 text-muted">Chưa có bệnh nhân
                                                     nào trong hàng đợi.
                                                 </td>

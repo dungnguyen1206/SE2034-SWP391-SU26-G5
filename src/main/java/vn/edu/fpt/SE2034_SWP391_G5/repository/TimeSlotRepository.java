@@ -52,6 +52,7 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
             @Param("workDate") LocalDate workDate
     );
 
+    // ======================== WALK-IN BOOKING RECEPTIONIST ========================
     @Query("SELECT ts FROM TimeSlot ts " +
             "JOIN FETCH ts.schedule sch " +
             "JOIN FETCH sch.doctor d " +
@@ -76,4 +77,5 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
             @Param("departmentId") Integer departmentId,
             @Param("workDate") LocalDate workDate
     );
+    // ======================== END WALK-IN BOOKING RECEPTIONIST ========================
 }
