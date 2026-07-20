@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateMedicalRecordRequest;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.request.UpdateMedicalRecordRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Appointment;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalRecord;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
@@ -69,7 +70,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
 
     @Override
     @Transactional
-    public void updateMedicalRecord(Long appointmentId, CreateMedicalRecordRequest request, Long doctorId) {
+    public void updateMedicalRecord(Long appointmentId, UpdateMedicalRecordRequest request, Long doctorId) {
         MedicalRecord medicalRecord = medicalRecordRepository.findByAppointmentId(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hồ sơ bệnh án cho lịch hẹn này"));
 

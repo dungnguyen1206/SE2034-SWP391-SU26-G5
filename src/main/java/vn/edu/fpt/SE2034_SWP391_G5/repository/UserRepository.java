@@ -58,22 +58,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
                 "AND u.status = 'ACTIVE'")
         List<User> findActiveDoctorsByDepartmentId(@Param("departmentId") Integer departmentId);
 
-        @Query("SELECT DISTINCT u FROM User u " +
-                "JOIN u.userRoles ur JOIN ur.role r " +
-                "WHERE r.name = 'DOCTOR' " +
-                "AND u.doctorStatus = 'ACTIVE' " +
-                "AND u.status = 'ACTIVE' " +
-                "AND (:departmentId IS NULL OR u.department.id = :departmentId) " +
-                "AND (:search IS NULL OR :search = '' " +
-                "     OR LOWER(u.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
-                "     OR LOWER(u.lastName) LIKE LOWER(CONCAT('%', :search, '%')) " +
-                "     OR LOWER(CONCAT(u.lastName, ' ', u.firstName)) LIKE LOWER(CONCAT('%', :search, '%')) " +
-                "     OR LOWER(CONCAT(u.lastName, ' ', u.middleName, ' ', u.firstName)) LIKE LOWER(CONCAT('%', :search, '%')))")
-        Page<User> findActiveDoctorsPaginated(
-                @Param("departmentId") Integer departmentId,
-                @Param("search") String search,
-                Pageable pageable);
-
         Optional<User> findByEmail(String email);
 
         Optional<User> findByPhone(String phone);
