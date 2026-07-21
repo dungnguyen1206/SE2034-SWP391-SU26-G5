@@ -230,6 +230,22 @@ public class InvoiceServiceImpl implements InvoiceService {
             String patientFullName = patient != null ? patient.getLastName() + " " + (patient.getMiddleName() != null ? patient.getMiddleName() + " " : "") + patient.getFirstName() : "-";
             String phone = patient != null && patient.getPhone() != null ? patient.getPhone() : "-";
             
+            List<String> serviceNames = new java.util.ArrayList<>();
+            if (a.getService() != null) {
+                serviceNames.add("Khám " + a.getService().getName());
+            }
+            if (a.getMedicalRecord() != null && a.getMedicalRecord().getMedicalServiceOrders() != null) {
+                for (MedicalServiceOrder order : a.getMedicalRecord().getMedicalServiceOrders()) {
+                    if (order.getMedicalService() != null) {
+                        serviceNames.add(order.getMedicalService().getName());
+                    }
+                }
+            }
+            String services = String.join(", ", serviceNames);
+            if (services.isEmpty()) {
+                services = "-";
+            }
+            
             allResponses.add(InvoiceListResponse.builder()
                     .appointmentId(a.getId())
                     .appointmentCode(a.getAppointmentCode())
@@ -237,6 +253,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                     .phone(phone)
                     .displayAmount(displayAmount)
                     .paymentStatus(status)
+                    .services(services)
                     .build());
         }
         
@@ -271,7 +288,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     @Transactional(readOnly = true)
     public InvoiceDetailResponse getInvoiceDetail(Long appointmentId) {
-        Appointment a = appointmentRepository.findById(appointmentId)
+        Appointment a = appointmentRepository.findAppointmentDetailForInvoice(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch hẹn có ID: " + appointmentId));
 
         User patient = a.getPatient();
@@ -389,7 +406,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     @Transactional
     public void processPayment(Long appointmentId, String paymentMethod) {
-        Appointment a = appointmentRepository.findById(appointmentId)
+        Appointment a = appointmentRepository.findAppointmentDetailForInvoice(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch hẹn: " + appointmentId));
         
         InvoiceDetailResponse detail = getInvoiceDetail(appointmentId);

@@ -86,13 +86,16 @@
                             </select>
                         </div>
                         
-                        <div class="form-group" th:if="${serviceName != null}">
-                            <div class="alert alert-info py-2 mb-0">
-                                <i class="bi bi-info-circle me-2"></i>
-                                Dịch vụ: <strong th:text="${serviceName}"></strong>
-                                <span class="mx-2">|</span>
-                                Phí khám: <strong class="text-danger" th:text="${servicePrice != null ? #numbers.formatDecimal(servicePrice, 0, 'COMMA', 0, 'POINT') : '0'} + ' đ'"></strong>
-                            </div>
+                        <div class="form-group" id="serviceSection" th:if="${services != null && !services.isEmpty()}">
+                            <label>Dịch Vụ Khám <span class="required-asterisk">*</span></label>
+                            <select name="serviceId" id="serviceId" class="form-control"
+                                    onchange="submitGetForm(document.getElementById('departmentId').value, document.getElementById('bookingDate').value)" required>
+                                <option value="">-- Chọn dịch vụ --</option>
+                                <option th:each="svc : ${services}" 
+                                        th:value="${svc.id}" 
+                                        th:text="${svc.name + ' - ' + #numbers.formatDecimal(svc.referencePrice != null ? svc.referencePrice : 0, 0, 'COMMA', 0, 'POINT') + ' đ'}"
+                                        th:selected="${serviceId == svc.id}"></option>
+                            </select>
                         </div>
 
                         <div class="form-group" id="dateSection">
@@ -132,6 +135,12 @@
                 let url = '/receptionist/appointment/walk-in?phone=' + phone;
                 if (deptId) url += '&departmentId=' + deptId;
                 if (dateStr) url += '&bookingDate=' + dateStr;
+                
+                const serviceSelect = document.getElementById('serviceId');
+                if (serviceSelect && serviceSelect.value) {
+                    url += '&serviceId=' + serviceSelect.value;
+                }
+                
                 window.location.href = url;
             }
         </script>

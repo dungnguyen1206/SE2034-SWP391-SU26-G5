@@ -18,4 +18,5 @@ public class InvoiceListResponse {
     private String phone;
     private BigDecimal displayAmount; // Số tiền hiển thị (tổng đã trả hoặc tổng nợ)
     private String paymentStatus; // "PAID" (Hoàn thành) hoặc "UNPAID" (Chưa thanh toán)
+    private String services; // Các dịch vụ
 }

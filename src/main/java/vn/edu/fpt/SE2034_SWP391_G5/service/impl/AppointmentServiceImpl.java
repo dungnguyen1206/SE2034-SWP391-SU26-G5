@@ -41,7 +41,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     public Page<AppointmentResponse> getAppointmentListForReceptionist(LocalDate fromDate, LocalDate toDate, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Appointment> appointmentPage = appointmentRepository.findAppointmentListForReceptionistList(fromDate,
+        Page<Appointment> appointmentPage = appointmentRepository.searchAppointmentListForReceptionist(null, null, fromDate,
                 toDate, pageable);
         return appointmentPage.map(this::toAppointmentListResponse);
     }
@@ -234,6 +234,12 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         List<TimeSlot> slots = getSlotsInSameRoomAndDate(appointment);
+        List<Appointment> checkedInAppointments = appointmentRepository.findCheckedInAppointmentsByBookingDateAndScheduleId(appointment.getBookingDate(), roomId);
+
+        return calculateQueueNumberInternal(appointment, slots, checkedInAppointments);
+    }
+
+    private Long calculateQueueNumberInternal(Appointment appointment, List<TimeSlot> slots, List<Appointment> checkedInAppointments) {
         TimeSlot effectiveSlot = getEffectiveSlotByCheckInTime(appointment, slots);
 
         if (effectiveSlot == null) {
@@ -241,7 +247,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
 
         Long baseNumber = calculateBaseNumberBeforeSlot(slots, effectiveSlot);
-        Long orderInSlot = calculateOrderInEffectiveSlotFixed(appointment, slots, effectiveSlot);
+        Long orderInSlot = calculateOrderInEffectiveSlotFixedInternal(appointment, slots, effectiveSlot, checkedInAppointments);
 
         return baseNumber + orderInSlot;
     }
@@ -280,12 +286,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         return baseNumber;
     }
 
-    private Long calculateOrderInEffectiveSlotFixed(Appointment targetAppointment, List<TimeSlot> slots, TimeSlot effectiveSlot) {
-        Integer roomId = getRoomId(targetAppointment);
-        if (roomId == null) return 0L;
-
-        List<Appointment> checkedInAppointments = appointmentRepository.findCheckedInAppointmentsByBookingDateAndScheduleId(targetAppointment.getBookingDate(), roomId);
-
+    private Long calculateOrderInEffectiveSlotFixedInternal(Appointment targetAppointment, List<TimeSlot> slots, TimeSlot effectiveSlot, List<Appointment> checkedInAppointments) {
         long order = 1L;
 
         for (Appointment other : checkedInAppointments) {
@@ -483,6 +484,16 @@ public class AppointmentServiceImpl implements AppointmentService {
             String roomNumber = entry.getKey();
             List<Appointment> roomAppointments = entry.getValue();
 
+            // PRELOAD FOR ENTIRE ROOM TO AVOID N+1 QUERY
+            Appointment firstAppt = roomAppointments.get(0);
+            Integer roomId = getRoomId(firstAppt);
+            List<TimeSlot> roomSlots = new ArrayList<>();
+            List<Appointment> roomCheckedIn = new ArrayList<>();
+            if (roomId != null && firstAppt.getBookingDate() != null) {
+                roomSlots = timeSlotRepository.findByRoomIdAndWorkDateOrderByStartTimeAsc(roomId, firstAppt.getBookingDate());
+                roomCheckedIn = appointmentRepository.findCheckedInAppointmentsByBookingDateAndScheduleId(firstAppt.getBookingDate(), roomId);
+            }
+
             QueueResponse.QueueResponseBuilder builder = roomBuilders.get(roomNumber);
             if (builder == null) {
                 Appointment a = roomAppointments.get(0);
@@ -510,10 +521,9 @@ public class AppointmentServiceImpl implements AppointmentService {
                     patientName = buildFullName(a.getPatient().getLastName(), a.getPatient().getMiddleName(), a.getPatient().getFirstName());
                 }
 
-                Long realQueueNumber = calculateQueueNumber(a);
+                Long realQueueNumber = calculateQueueNumberInternal(a, roomSlots, roomCheckedIn);
 
-                List<TimeSlot> slots = getSlotsInSameRoomAndDate(a);
-                TimeSlot effectiveSlot = getEffectiveSlotByCheckInTime(a, slots);
+                TimeSlot effectiveSlot = getEffectiveSlotByCheckInTime(a, roomSlots);
                 boolean isLate = effectiveSlot != null && a.getSlot() != null && !effectiveSlot.getStartTime().equals(a.getSlot().getStartTime());
 
                 QueueResponse.PatientInfo patientInfo = QueueResponse.PatientInfo.builder()
