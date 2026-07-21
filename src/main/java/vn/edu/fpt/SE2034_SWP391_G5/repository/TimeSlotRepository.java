@@ -52,4 +52,16 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
             @Param("workDate") LocalDate workDate
     );
     // ======================== END WALK-IN BOOKING RECEPTIONIST ========================
+
+    @Query("SELECT COUNT(ts) FROM TimeSlot ts " +
+           "JOIN ts.schedule ds " +
+           "WHERE ds.doctor.id = :doctorId " +
+           "AND ds.workDate BETWEEN :startDate AND :endDate " +
+           "AND ds.status = 'ACTIVE' " +
+           "AND ds.weekSchedule.status <> 'DRAFT'")
+    long countSlotsByDoctorAndWeek(
+            @Param("doctorId") Long doctorId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
 }
