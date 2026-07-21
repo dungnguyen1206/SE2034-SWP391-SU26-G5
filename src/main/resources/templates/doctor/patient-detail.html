@@ -80,6 +80,8 @@
                     th:class="${tab == 'info' || tab == null ? 'active' : ''}">Thông tin cá nhân</a>
                 <a th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab='services')}"
                     th:class="${tab == 'services' ? 'active' : ''}">Dịch vụ khám</a>
+                <a th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab='history')}"
+                    th:class="${tab == 'history' ? 'active' : ''}">Lịch sử khám bệnh</a>
             </div>
 
             <!-- Tab Content Pane Container -->
@@ -90,6 +92,9 @@
 
                 <!-- Tab Pane 2: Dịch vụ khám -->
                 <div th:replace="~{doctor/fragments/services-tab :: services-tab}"></div>
+
+                <!-- Tab Pane 3: Lịch sử khám bệnh -->
+                <div th:replace="~{doctor/fragments/history-tab :: history-tab}"></div>
 
             </div>
 

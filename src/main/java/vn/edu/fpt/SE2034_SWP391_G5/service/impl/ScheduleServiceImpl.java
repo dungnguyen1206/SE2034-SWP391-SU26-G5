@@ -166,11 +166,9 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         // Calculate summary metrics
         double totalHours = 0;
-        int shiftCount = 0;
         for (DoctorScheduleWeekResponse day : weekSchedule) {
             if (day.getShifts() != null) {
                 for (DoctorScheduleWeekResponse.ShiftDetail shift : day.getShifts()) {
-                    shiftCount++;
                     if ("MORNING".equalsIgnoreCase(shift.getShift())) {
                         totalHours += 4.5;
                     } else if ("AFTERNOON".equalsIgnoreCase(shift.getShift())) {
@@ -190,7 +188,9 @@ public class ScheduleServiceImpl implements ScheduleService {
             totalHoursStr = String.format("%.1f", totalHours).replace(',', '.');
         }
 
-        String shiftCountStr = String.format("%d", shiftCount);
+        LocalDate sunday = monday.plusDays(6);
+        long slotCount = timeSlotRepository.countSlotsByDoctorAndWeek(doctorId, monday, sunday);
+        String slotCountStr = String.valueOf(slotCount);
 
         // Performance evaluation
         String performance = "N/A";
@@ -207,7 +207,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         return DoctorScheduleReportResponse.builder()
                 .weekSchedule(weekSchedule)
                 .totalHoursStr(totalHoursStr)
-                .shiftCountStr(shiftCountStr)
+                .slotCountStr(slotCountStr)
                 .performance(performance)
                 .prevWeekDate(prevWeekMonday.toString())
                 .nextWeekDate(nextWeekMonday.toString())

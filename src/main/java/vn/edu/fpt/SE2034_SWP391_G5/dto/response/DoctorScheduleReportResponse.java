@@ -16,7 +16,7 @@ import java.util.List;
 public class DoctorScheduleReportResponse {
     private List<DoctorScheduleWeekResponse> weekSchedule;
     private String totalHoursStr;
-    private String shiftCountStr;
+    private String slotCountStr;
     private String performance;
     private String prevWeekDate;
     private String nextWeekDate;

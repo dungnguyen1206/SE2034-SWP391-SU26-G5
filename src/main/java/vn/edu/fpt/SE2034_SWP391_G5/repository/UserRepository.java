@@ -143,4 +143,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
                                            @Param("searchLastName") boolean searchLastName,
                                            Pageable pageable);
 
-}
+        @Query("SELECT DISTINCT u FROM User u " +
+               "JOIN u.userRoles ur JOIN ur.role r " +
+               "WHERE r.name = 'PATIENT' " +
+               "AND (:keyword IS NULL OR :keyword = '' OR " +
+               "    LOWER(CONCAT(u.lastName, ' ', COALESCE(u.middleName, ''), ' ', u.firstName)) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+               "    u.phone LIKE CONCAT('%', :keyword, '%') OR " +
+               "    LOWER(u.email) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+               "    CAST(u.id AS string) = :keyword)")
+        Page<User> searchPatients(@Param("keyword") String keyword, Pageable pageable);
+}

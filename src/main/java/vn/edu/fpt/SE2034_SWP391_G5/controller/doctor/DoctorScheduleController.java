@@ -34,7 +34,7 @@ public class DoctorScheduleController {
 
         model.addAttribute("weekSchedule", report.getWeekSchedule());
         model.addAttribute("totalHoursStr", report.getTotalHoursStr());
-        model.addAttribute("shiftCountStr", report.getShiftCountStr());
+        model.addAttribute("slotCountStr", report.getSlotCountStr());
         model.addAttribute("performance", report.getPerformance());
         model.addAttribute("prevWeekDate", report.getPrevWeekDate());
         model.addAttribute("nextWeekDate", report.getNextWeekDate());
