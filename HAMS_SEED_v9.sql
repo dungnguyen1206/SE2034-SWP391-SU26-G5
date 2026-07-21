@@ -37,11 +37,6 @@ GO
 -- ============================================================
 -- 2. RESET IDENTITY COUNTERS
 -- ============================================================
--- SQL Server behavior: 
--- If table has NEVER had data (last_value IS NULL), RESEED 1 -> next ID is 1.
--- If table HAD data and was DELETEd, RESEED 0 -> next ID is 1.
--- (The DELETEs were already performed above in correct FK order)
-
 EXEC sp_MSForEachTable '
     IF OBJECTPROPERTY(OBJECT_ID(''?''), ''TableHasIdentity'') = 1
     BEGIN
@@ -114,8 +109,7 @@ INSERT INTO departments (name, description, image_url, status) VALUES
 (N'Nhi',            N'Khám và điều trị bệnh cho trẻ em từ sơ sinh đến 15 tuổi', '/images/departments/nhi.jpg', 'ACTIVE'),
 (N'Mắt',            N'Khám, điều trị và phẫu thuật các bệnh lý về mắt', '/images/departments/mat.jpg', 'ACTIVE'),
 (N'Tai Mũi Họng',   N'Khám và điều trị các bệnh lý tai, mũi, họng người lớn và trẻ em', '/images/departments/tai-mui-hong.jpg', 'ACTIVE');
-Go
-
+GO
 
 -- [04] Medical Services (7 khoa x 10 dịch vụ = 70 dịch vụ)
 -- === KHOA 1: TIM MẠCH ===
@@ -211,7 +205,6 @@ INSERT INTO medical_services (department_id, name, reference_price, estimated_du
 GO
 
 -- [05] Rooms (7 khoa x 10 phòng = 70 phòng, tên phòng trùng với tên dịch vụ)
--- Tạo phòng tự động theo tên dịch vụ bằng ROW_NUMBER() để đảm bảo tính nhất quán
 INSERT INTO rooms (department_id, name, room_number, status)
 SELECT 
     department_id, 
@@ -236,85 +229,47 @@ INSERT INTO users (username, email, password_hash, status, email_verified, first
 VALUES ('manager02', 'manager02@hams.vn', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Thảo', N'Phương', N'Lê', '0900000003', 'FEMALE', 1);
 GO
 
--- [06b] Users - DOCTOR (7 khoa x 10 bác sĩ = 70 bác sĩ)
--- Tạo bác sĩ tự động bằng vòng lặp T-SQL để gán tên, email, ngày cấp chứng chỉ hành nghề (licence_issue_date) và thông tin sinh học ngẫu nhiên
-DECLARE @DeptId INT = 1;
-DECLARE @DocIdx INT = 1;
-DECLARE @FirstNames TABLE (idx INT, name NVARCHAR(50));
-DECLARE @LastNames TABLE (idx INT, name NVARCHAR(50));
-DECLARE @MiddleNames TABLE (idx INT, name NVARCHAR(50));
+-- [06b] Users - DOCTOR (7 bác sĩ cho 7 khoa, bao gồm dr.timmach1 bắt buộc)
+INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, department_id, license_issue_date, degree, license_number, bio, doctor_status, created_by)
+VALUES ('dr.timmach1', 'dr.timmach1@hams.vn', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'An', N'Minh', N'Nguyễn', '0901234561', 'MALE', 1, '2015-06-13', N'Bác sĩ chuyên khoa I', 'LIC-BS-011', N'Bác sĩ tim mạch giàu kinh nghiệm', 'ACTIVE', 1);
 
-INSERT INTO @FirstNames VALUES (0, N'An'), (1, N'Bình'), (2, N'Cường'), (3, N'Dũng'), (4, N'Anh'), (5, N'Hương'), (6, N'Linh'), (7, N'Tùng'), (8, N'Tài'), (9, N'Thúy');
-INSERT INTO @LastNames VALUES (0, N'Nguyễn'), (1, N'Trần'), (2, N'Lê'), (3, N'Phạm'), (4, N'Hoàng'), (5, N'Vũ'), (6, N'Đỗ'), (7, N'Phan'), (8, N'Lý'), (9, N'Đặng');
-INSERT INTO @MiddleNames VALUES (0, N'Văn'), (1, N'Thị'), (2, N'Minh'), (3, N'Quốc'), (4, N'Hoàng'), (5, N'Thu'), (6, N'Khánh'), (7, N'Thanh'), (8, N'Quang'), (9, N'Hồng');
+INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, department_id, license_issue_date, degree, license_number, bio, doctor_status, created_by)
+VALUES ('dr.thankinh1', 'dr.thankinh1@hams.vn', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Bình', N'Thị', N'Lê', '0901234562', 'FEMALE', 2, '2016-08-20', N'Thạc sĩ Y khoa', 'LIC-BS-021', N'Chuyên gia thần kinh học', 'ACTIVE', 1);
 
-WHILE @DeptId <= 7
-BEGIN
-    SET @DocIdx = 1;
-    WHILE @DocIdx <= 10
-    BEGIN
-        DECLARE @Username VARCHAR(50) = 'dr.' + 
-            CASE @DeptId
-                WHEN 1 THEN 'timmach'
-                WHEN 2 THEN 'thankinh'
-                WHEN 3 THEN 'coxuongkhop'
-                WHEN 4 THEN 'noitieuhoa'
-                WHEN 5 THEN 'nhi'
-                WHEN 6 THEN 'mat'
-                WHEN 7 THEN 'tmh'
-            END + CAST(@DocIdx AS VARCHAR(2));
-        DECLARE @Email VARCHAR(100) = @Username + '@hams.vn';
-        DECLARE @FName NVARCHAR(50) = (SELECT name FROM @FirstNames WHERE idx = (@DocIdx - 1));
-        DECLARE @MName NVARCHAR(50) = (SELECT name FROM @MiddleNames WHERE idx = (@DeptId + @DocIdx) % 10);
-        DECLARE @LName NVARCHAR(50) = (SELECT name FROM @LastNames WHERE idx = (@DeptId - 1));
-        DECLARE @LicenseNo VARCHAR(50) = 'LIC-BS-' + RIGHT('000' + CAST((@DeptId * 10 + @DocIdx) AS VARCHAR), 3);
-        DECLARE @LicDate DATE = DATEADD(year, - (5 + ((@DeptId + @DocIdx) % 15)), '2026-06-13');
+INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, department_id, license_issue_date, degree, license_number, bio, doctor_status, created_by)
+VALUES ('dr.coxuongkhop1', 'dr.coxuongkhop1@hams.vn', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Cường', N'Văn', N'Phạm', '0901234563', 'MALE', 3, '2014-03-15', N'Tiến sĩ Y khoa', 'LIC-BS-031', N'Chuyên khoa xương khớp', 'ACTIVE', 1);
 
-        INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, department_id, license_issue_date, degree, license_number, bio, doctor_status, created_by)
-        VALUES (
-            @Username, @Email, 
-            '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', -- 123456
-            'ACTIVE', 1, @FName, @MName, @LName, 
-            '090' + CAST((1000000 + @DeptId * 100000 + @DocIdx * 1000) AS VARCHAR(15)),
-            CASE WHEN @DocIdx % 2 = 0 THEN 'MALE' ELSE 'FEMALE' END,
-            @DeptId, @LicDate, 
-            CASE WHEN @DocIdx % 3 = 0 THEN N'Tiến sĩ Y khoa' WHEN @DocIdx % 3 = 1 THEN N'Thạc sĩ Y khoa' ELSE N'Bác sĩ chuyên khoa I' END,
-            @LicenseNo, N'Bác sĩ chuyên khoa khám chữa bệnh tại khoa.', 'ACTIVE', 3
-        );
-        
-        SET @DocIdx = @DocIdx + 1;
-    END
-    SET @DeptId = @DeptId + 1;
-END
+INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, department_id, license_issue_date, degree, license_number, bio, doctor_status, created_by)
+VALUES ('dr.noitieuhoa1', 'dr.noitieuhoa1@hams.vn', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Dũng', N'Thanh', N'Hoàng', '0901234564', 'MALE', 4, '2017-10-10', N'Bác sĩ chuyên khoa I', 'LIC-BS-041', N'Chuyên điều trị dạ dày, tiêu hóa', 'ACTIVE', 1);
+
+INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, department_id, license_issue_date, degree, license_number, bio, doctor_status, created_by)
+VALUES ('dr.nhi1', 'dr.nhi1@hams.vn', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Hương', N'Thu', N'Vũ', '0901234565', 'FEMALE', 5, '2018-05-12', N'Thạc sĩ Y khoa', 'LIC-BS-051', N'Bác sĩ nhi khoa tận tâm', 'ACTIVE', 1);
+
+INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, department_id, license_issue_date, degree, license_number, bio, doctor_status, created_by)
+VALUES ('dr.mat1', 'dr.mat1@hams.vn', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Linh', N'Quang', N'Đỗ', '0901234566', 'MALE', 6, '2019-12-05', N'Bác sĩ chuyên khoa I', 'LIC-BS-061', N'Chuyên khoa mắt nhãn khoa', 'ACTIVE', 1);
+
+INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, department_id, license_issue_date, degree, license_number, bio, doctor_status, created_by)
+VALUES ('dr.tmh1', 'dr.tmh1@hams.vn', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Tùng', N'Khánh', N'Phan', '0901234567', 'MALE', 7, '2013-02-18', N'Tiến sĩ Y khoa', 'LIC-BS-071', N'Bác sĩ tai mũi họng đầu ngành', 'ACTIVE', 1);
 GO
 
--- [06c] Users - RECEPTIONIST (Sinh 10 lễ tân tự động)
-DECLARE @RecIdx INT = 1;
-WHILE @RecIdx <= 10
-BEGIN
-    DECLARE @RecUsername VARCHAR(50) = 'recept' + RIGHT('0' + CAST(@RecIdx AS VARCHAR), 2);
-    DECLARE @RecEmail VARCHAR(100) = @RecUsername + '@hams.vn';
-    
-    -- Tạm thời lấy tên từ bảng khai báo phía trên bác sĩ
-    DECLARE @RecFName NVARCHAR(50) = CASE @RecIdx 
-        WHEN 1 THEN N'Linh' WHEN 2 THEN N'Mai' WHEN 3 THEN N'Tuấn' WHEN 4 THEN N'Hương' WHEN 5 THEN N'Lan'
-        WHEN 6 THEN N'Nam' WHEN 7 THEN N'Dũng' WHEN 8 THEN N'Hoa' WHEN 9 THEN N'Hùng' ELSE N'Thảo' END;
-    DECLARE @RecMName NVARCHAR(50) = CASE WHEN @RecIdx % 2 = 0 THEN N'Thị' ELSE N'Văn' END;
-    DECLARE @RecLName NVARCHAR(50) = CASE WHEN @RecIdx % 2 = 0 THEN N'Nguyễn' ELSE N'Lê' END;
+-- [06c] Users - RECEPTIONIST (5 lễ tân)
+INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, created_by)
+VALUES ('recept01', 'recept01@hams.vn', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Linh', N'Thị', N'Nguyễn', '0912000001', 'FEMALE', 1);
 
-    INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, created_by)
-    VALUES (
-        @RecUsername, @RecEmail, 
-        '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', -- 123456
-        'ACTIVE', 1, @RecFName, @RecMName, @RecLName, 
-        '091' + CAST((2000000 + @RecIdx * 1000) AS VARCHAR(15)),
-        CASE WHEN @RecIdx % 2 = 0 THEN 'MALE' ELSE 'FEMALE' END, 3
-    );
-    SET @RecIdx = @RecIdx + 1;
-END
+INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, created_by)
+VALUES ('recept02', 'recept02@hams.vn', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Mai', N'Văn', N'Lê', '0912000002', 'MALE', 1);
+
+INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, created_by)
+VALUES ('recept03', 'recept03@hams.vn', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Tuấn', N'Thành', N'Trần', '0912000003', 'MALE', 1);
+
+INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, created_by)
+VALUES ('recept04', 'recept04@hams.vn', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Hương', N'Thị B', N'Phạm', '0912000004', 'FEMALE', 1);
+
+INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, created_by)
+VALUES ('recept05', 'recept05@hams.vn', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Lan', N'Thị', N'Lý', '0912000005', 'FEMALE', 1);
 GO
 
--- [06d] Users - PATIENT
+-- [06d] Users - PATIENT (7 bệnh nhân chính + 10 bệnh nhân test)
 INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, date_of_birth, blood_type)
 VALUES ('patient.thanh', 'nguyenminhthanh@gmail.com', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Thành', N'Minh', N'Nguyễn', '0905555551', 'MALE',   '1990-05-15', 'O+');
 
@@ -335,25 +290,28 @@ VALUES ('patient.dung', 'dungnguyen@gmail.com', '$2a$10$cyfYZQXK42uxMzPJL3eicOLB
 
 INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, date_of_birth, blood_type)
 VALUES ('patient.hoa', 'hoatran@gmail.com', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Hoa', N'Thị', N'Trần', '0905555557', 'FEMALE', '1982-10-05', 'O+');
-GO
 
--- [06e] Users - PATIENT (Tạo thêm 500 bệnh nhân test)
-DECLARE @i INT = 1;
-DECLARE @username VARCHAR(50);
-DECLARE @email VARCHAR(100);
-DECLARE @phone VARCHAR(20);
-
-WHILE @i <= 500
-BEGIN
-    SET @username = 'patient.test' + CAST(@i AS VARCHAR(10));
-    SET @email = 'patient.test' + CAST(@i AS VARCHAR(10)) + '@gmail.com';
-    SET @phone = '099' + RIGHT('0000000' + CAST(@i AS VARCHAR(10)), 7);
-    
-    INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, date_of_birth, blood_type)
-    VALUES (@username, @email, '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Test', N'Bệnh Nhân', CAST(@i AS NVARCHAR(10)), @phone, 'MALE', '1990-01-01', 'O+');
-    
-    SET @i = @i + 1;
-END
+-- Bệnh nhân test
+INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, date_of_birth, blood_type)
+VALUES ('patient.test1', 'patient.test1@gmail.com', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Khánh', N'Văn', N'Nguyễn', '0990000001', 'MALE', '1990-01-01', 'O+');
+INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, date_of_birth, blood_type)
+VALUES ('patient.test2', 'patient.test2@gmail.com', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Hà', N'Thu', N'Lê', '0990000002', 'FEMALE', '1991-02-02', 'A+');
+INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, date_of_birth, blood_type)
+VALUES ('patient.test3', 'patient.test3@gmail.com', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Phong', N'Minh', N'Trần', '0990000003', 'MALE', '1992-03-03', 'B+');
+INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, date_of_birth, blood_type)
+VALUES ('patient.test4', 'patient.test4@gmail.com', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Thúy', N'Thị', N'Phạm', '0990000004', 'FEMALE', '1993-04-04', 'AB+');
+INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, date_of_birth, blood_type)
+VALUES ('patient.test5', 'patient.test5@gmail.com', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Huy', N'Quang', N'Hoàng', '0990000005', 'MALE', '1994-05-05', 'O-');
+INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, date_of_birth, blood_type)
+VALUES ('patient.test6', 'patient.test6@gmail.com', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Hải', N'Nam', N'Vũ', '0990000006', 'MALE', '1995-06-06', 'A-');
+INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, date_of_birth, blood_type)
+VALUES ('patient.test7', 'patient.test7@gmail.com', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Phương', N'Thu', N'Lê', '0990000007', 'FEMALE', '1996-07-07', 'B-');
+INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, date_of_birth, blood_type)
+VALUES ('patient.test8', 'patient.test8@gmail.com', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Đạt', N'Quốc', N'Nguyễn', '0990000008', 'MALE', '1997-08-08', 'O+');
+INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, date_of_birth, blood_type)
+VALUES ('patient.test9', 'patient.test9@gmail.com', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Vy', N'Thị', N'Phan', '0990000009', 'FEMALE', '1998-09-09', 'AB-');
+INSERT INTO users (username, email, password_hash, status, email_verified, first_name, middle_name, last_name, phone, gender, date_of_birth, blood_type)
+VALUES ('patient.test10', 'patient.test10@gmail.com', '$2a$10$cyfYZQXK42uxMzPJL3eicOLBcgFVSgNoyKghJ0yKtHydyn2qRBqoK', 'ACTIVE', 1, N'Bảo', N'Khánh', N'Đặng', '0990000010', 'MALE', '1999-10-10', 'O+');
 GO
 
 -- [07] User Roles (Gán động theo tên Role bảo vệ tính nhất quán)
@@ -386,15 +344,12 @@ SELECT id, 21, N'88 Lê Duẩn, Hải Châu', 1 FROM users WHERE username = 'pat
 INSERT INTO user_addresses (user_id, province_id, address_line, is_default)
 SELECT id, 30, N'12 Cộng Hòa, Phường 4, Tân Bình', 1 FROM users WHERE username = 'patient.lan';
 
--- Thêm địa chỉ mặc định cho các bệnh nhân có sẵn còn lại
+-- Thêm địa chỉ mặc định cho các bệnh nhân còn lại
 INSERT INTO user_addresses (user_id, province_id, address_line, is_default)
 SELECT id, 1, N'Số 1, Phố Cổ, Hà Nội', 1 FROM users WHERE username IN ('patient.nam', 'patient.dung', 'patient.hoa');
 
--- Thêm địa chỉ tự động cho 500 bệnh nhân test (Chọn province ngẫu nhiên hoặc 1)
 INSERT INTO user_addresses (user_id, province_id, address_line, is_default)
-SELECT id, 1, N'Nhà số ' + CAST(id AS NVARCHAR(10)) + N', Đường Test', 1 
-FROM users 
-WHERE username LIKE 'patient.test%';
+SELECT id, 1, N'Địa chỉ Test Bệnh Nhân', 1 FROM users WHERE username LIKE 'patient.test%';
 GO
 
 -- [09] Week Schedules
@@ -433,50 +388,46 @@ BEGIN
 END
 GO
 
-
 -- [10] Doctor Schedules
--- Tự động sinh lịch khám cho TẤT CẢ các bác sĩ từ 30 ngày trước đến 90 ngày sau (tổng 121 ngày)
-DECLARE @StartDate DATE = CAST(DATEADD(day, -30, GETDATE()) AS DATE);
-DECLARE @EndDate DATE = CAST(DATEADD(day, 90, GETDATE()) AS DATE);
+-- Tự động sinh lịch khám cho 7 bác sĩ trong 3 tuần: Tuần trước, Tuần này và Tuần sau (tổng cộng 21 ngày)
+-- Chạy trên cả 7 ngày để đảm bảo dù chạy test ngày nào cũng có ca làm việc và đặt lịch
+DECLARE @Today DATE = CAST(GETDATE() AS DATE);
+DECLARE @Monday_ThisWeek DATE = DATEADD(wk, DATEDIFF(wk, 0, @Today), 0);
+DECLARE @StartDate DATE = DATEADD(day, -7, @Monday_ThisWeek); -- Thứ hai tuần trước
+DECLARE @EndDate DATE = DATEADD(day, 20, @Monday_ThisWeek);   -- Chủ nhật tuần sau
 DECLARE @CurrDate DATE = @StartDate;
+DECLARE @AdminId BIGINT = (SELECT id FROM users WHERE username = 'admin');
 
 WHILE @CurrDate <= @EndDate
 BEGIN
-    BEGIN TRAN;
     DECLARE @WeekId BIGINT = (SELECT id FROM week_schedules WHERE @CurrDate BETWEEN week_start_date AND week_end_date);
     
-    -- Xếp ca sáng
-    INSERT INTO doctor_schedules (week_schedule_id, doctor_id, room_id, work_date, shift, status, created_by)
-    SELECT 
-        @WeekId, 
-        u.id, 
-        -- Chọn phòng khám trùng tên với dịch vụ tim mạch/thần kinh đầu tiên của khoa
-        (SELECT TOP 1 id FROM rooms r WHERE r.department_id = u.department_id ORDER BY r.id), 
-        @CurrDate, 
-        'MORNING', 
-        'ACTIVE', 
-        (SELECT id FROM users WHERE username = 'admin')
-    FROM users u WHERE u.username LIKE 'dr.%';
-
-    -- Xếp ca chiều
-    INSERT INTO doctor_schedules (week_schedule_id, doctor_id, room_id, work_date, shift, status, created_by)
-    SELECT 
-        @WeekId, 
-        u.id, 
-        (SELECT TOP 1 id FROM rooms r WHERE r.department_id = u.department_id ORDER BY r.id), 
-        @CurrDate, 
-        'AFTERNOON', 
-        'ACTIVE', 
-        (SELECT id FROM users WHERE username = 'admin')
-    FROM users u WHERE u.username LIKE 'dr.%';
-
+    IF @WeekId IS NOT NULL
+    BEGIN
+        -- Sinh ca trực duy nhất cho mỗi bác sĩ mỗi ngày (Sáng, Chiều, hoặc Cả Ngày xen kẽ)
+        INSERT INTO doctor_schedules (week_schedule_id, doctor_id, room_id, work_date, shift, status, created_by)
+        SELECT 
+            @WeekId, 
+            u.id, 
+            (SELECT TOP 1 id FROM rooms r WHERE r.department_id = u.department_id ORDER BY r.id), 
+            @CurrDate, 
+            CASE 
+                -- Thứ 3 và Thứ 5 xếp ca Cả ngày (FULL_DAY)
+                WHEN DATEDIFF(day, 0, @CurrDate) % 7 IN (1, 3) THEN 'FULL_DAY'
+                -- Các ngày khác xếp xen kẽ MORNING / AFTERNOON theo ID bác sĩ
+                WHEN (u.id + DATEDIFF(day, 0, @CurrDate)) % 2 = 0 THEN 'MORNING'
+                ELSE 'AFTERNOON'
+            END, 
+            'ACTIVE', 
+            @AdminId
+        FROM users u WHERE u.username LIKE 'dr.%';
+    END
     SET @CurrDate = DATEADD(day, 1, @CurrDate);
-    COMMIT TRAN;
 END
 GO
 
 -- [11] Time Slots
--- Tự động sinh slot cho TẤT CẢ các ca trực vừa tạo
+-- Tự động sinh slot cho TẤT CẢ các ca trực vừa tạo (~4410 slots)
 BEGIN TRAN;
 INSERT INTO time_slots (schedule_id, start_time, end_time, booked_capacity, max_capacity, status)
 SELECT 
@@ -506,143 +457,176 @@ CROSS JOIN (
     UNION ALL SELECT '15:30', '16:00', 'AFTERNOON'
     UNION ALL SELECT '16:00', '16:30', 'AFTERNOON'
 ) t
-WHERE ds.shift = t.shift;
+WHERE ds.shift = t.shift OR (ds.shift = 'FULL_DAY' AND t.shift IN ('MORNING', 'AFTERNOON'));
 COMMIT TRAN;
 GO
 
--- [12] Appointments (Sinh data mẫu cho 121 ngày từ -30 đến +90, mỗi ngày 200 cuộc hẹn, tổng cộng 24200 cuộc hẹn)
-DECLARE @DayOffset INT = -30;
-DECLARE @ApptIndex INT = 1;
+-- ============================================================
+-- 12. APPOINTMENTS, MEDICAL RECORDS, INVOICES (Deterministic Seeding)
+-- ============================================================
+DECLARE @Today DATE = CAST(GETDATE() AS DATE);
+DECLARE @Monday_ThisWeek DATE = DATEADD(wk, DATEDIFF(wk, 0, @Today), 0);
+DECLARE @Yesterday DATE = DATEADD(day, -1, @Today);
+DECLARE @Tomorrow DATE = DATEADD(day, 1, @Today);
 
-WHILE @DayOffset <= 90
-BEGIN
-    BEGIN TRAN;
-    DECLARE @TargetDate DATE = CAST(DATEADD(day, @DayOffset, GETDATE()) AS DATE);
-    DECLARE @DailyAppts INT = 1;
-    
-    -- Lưu tạm danh sách slot của ngày hôm nay vào bảng tạm (tăng tốc độ random)
-    SELECT ts.id as slot_id, ds.doctor_id 
-    INTO #TempDailySlots
-    FROM time_slots ts
+-- Patients
+DECLARE @Patient1 BIGINT = (SELECT id FROM users WHERE username = 'patient.thanh');
+DECLARE @Patient2 BIGINT = (SELECT id FROM users WHERE username = 'patient.huong');
+DECLARE @Patient3 BIGINT = (SELECT id FROM users WHERE username = 'patient.duc');
+DECLARE @Patient4 BIGINT = (SELECT id FROM users WHERE username = 'patient.lan');
+DECLARE @Patient5 BIGINT = (SELECT id FROM users WHERE username = 'patient.nam');
+DECLARE @Patient6 BIGINT = (SELECT id FROM users WHERE username = 'patient.dung');
+DECLARE @Patient7 BIGINT = (SELECT id FROM users WHERE username = 'patient.hoa');
+
+-- Doctors
+DECLARE @DrTimMach BIGINT = (SELECT id FROM users WHERE username = 'dr.timmach1');
+DECLARE @DrThanKinh BIGINT = (SELECT id FROM users WHERE username = 'dr.thankinh1');
+DECLARE @DrNhi BIGINT = (SELECT id FROM users WHERE username = 'dr.nhi1');
+
+-- Services
+DECLARE @ServiceTimMach BIGINT = (SELECT id FROM medical_services WHERE department_id = 1 AND name = N'Khám tim mạch tổng quát');
+DECLARE @ServiceThanKinh BIGINT = (SELECT id FROM medical_services WHERE department_id = 2 AND name = N'Khám thần kinh tổng quát');
+DECLARE @ServiceNhi BIGINT = (SELECT id FROM medical_services WHERE department_id = 5 AND name = N'Khám nhi tổng quát');
+
+-- ------------------------------------------------------------
+-- DOCTOR 1: TIM MẠCH (dr.timmach1)
+-- ------------------------------------------------------------
+
+-- Hẹn 1: Hôm qua - Đã khám xong (COMPLETED), có Bệnh án & Hóa đơn đã thanh toán
+DECLARE @SlotYesterday BIGINT = (
+    SELECT TOP 1 ts.id FROM time_slots ts 
     JOIN doctor_schedules ds ON ts.schedule_id = ds.id
-    WHERE ds.work_date = @TargetDate;
-
-    WHILE @DailyAppts <= 200
-    BEGIN
-        DECLARE @SelectedSlotId BIGINT;
-        DECLARE @SelectedDoctorId BIGINT;
-        DECLARE @SelectedServiceId BIGINT;
-        
-        -- Chọn 1 slot ngẫu nhiên từ bảng tạm (nhanh hơn rất nhiều so với JOIN bảng thật mỗi vòng lặp)
-        SELECT TOP 1 
-            @SelectedSlotId = slot_id,
-            @SelectedDoctorId = doctor_id
-        FROM #TempDailySlots
-        ORDER BY NEWID();
-        
-        -- Lấy dịch vụ tương ứng của khoa bác sĩ
-        SELECT TOP 1 @SelectedServiceId = ms.id 
-        FROM medical_services ms 
-        WHERE ms.department_id = (SELECT department_id FROM users WHERE id = @SelectedDoctorId)
-        ORDER BY NEWID();
-        
-        -- Chọn bệnh nhân ngẫu nhiên
-        DECLARE @SelectedPatientId BIGINT;
-        SELECT TOP 1 @SelectedPatientId = id FROM users WHERE username LIKE 'patient.%' ORDER BY NEWID();
-        
-        -- Quyết định Status
-        DECLARE @ApptStatus VARCHAR(20);
-        DECLARE @Rand INT = ABS(CHECKSUM(NEWID())) % 100;
-        
-        IF @DayOffset < 0
-        BEGIN
-            -- Quá khứ: COMPLETED (70%), CANCELLED (20%), NO_SHOW (10%)
-            IF @Rand < 70 SET @ApptStatus = 'COMPLETED';
-            ELSE IF @Rand < 90 SET @ApptStatus = 'CANCELLED';
-            ELSE SET @ApptStatus = 'NO_SHOW';
-        END
-        ELSE IF @DayOffset = 0
-        BEGIN
-            -- Hôm nay: CONFIRMED (20%), WAITING (20%), EXAMINING (20%), COMPLETED (30%), CANCELLED (10%)
-            IF @Rand < 20 SET @ApptStatus = 'CONFIRMED';
-            ELSE IF @Rand < 40 SET @ApptStatus = 'WAITING';
-            ELSE IF @Rand < 60 SET @ApptStatus = 'EXAMINING';
-            ELSE IF @Rand < 90 SET @ApptStatus = 'COMPLETED';
-            ELSE SET @ApptStatus = 'CANCELLED';
-        END
-        ELSE
-        BEGIN
-            -- Tương lai: CONFIRMED (85%), CANCELLED (15%)
-            IF @Rand < 85 SET @ApptStatus = 'CONFIRMED';
-            ELSE SET @ApptStatus = 'CANCELLED';
-        END
-        
-        -- Phát sinh mã Appointment
-        DECLARE @ApptCode VARCHAR(20) = 'APT-' + FORMAT(GETDATE(), 'yyyyMM') + RIGHT('0000' + CAST(@ApptIndex AS VARCHAR), 4);
-        
-        -- Tính toán check_in_time ngẫu nhiên (-15 phút đến +4 phút so với giờ bắt đầu)
-        DECLARE @SlotStartTime TIME;
-        SELECT @SlotStartTime = start_time FROM time_slots WHERE id = @SelectedSlotId;
-
-        DECLARE @CheckInTime DATETIME2 = NULL;
-        IF @ApptStatus IN ('WAITING', 'EXAMINING', 'COMPLETED')
-        BEGIN
-            DECLARE @RandomMinutes INT = (ABS(CHECKSUM(NEWID())) % 20) - 15;
-            SET @CheckInTime = DATEADD(minute, @RandomMinutes, CAST(CAST(@TargetDate AS DATETIME) + CAST(@SlotStartTime AS DATETIME) AS DATETIME2));
-        END
-        
-        -- Insert Appointment
-        INSERT INTO appointments (appointment_code, patient_id, doctor_id, service_id, slot_id, booking_date, check_in_time, status, note)
-        VALUES (@ApptCode, @SelectedPatientId, @SelectedDoctorId, @SelectedServiceId, @SelectedSlotId, @TargetDate, @CheckInTime, @ApptStatus, N'Khám định kỳ tự động sinh dữ liệu test');
-        
-        DECLARE @NewApptId BIGINT = SCOPE_IDENTITY();
-        
-        -- Cập nhật Slot
-        IF @ApptStatus <> 'CANCELLED'
-        BEGIN
-            UPDATE time_slots SET booked_capacity = booked_capacity + 1 WHERE id = @SelectedSlotId;
-        END
-        
-        -- [13 & 14 & 15] Tạo Bệnh án và Hóa đơn nếu trạng thái là COMPLETED
-        IF @ApptStatus = 'COMPLETED'
-        BEGIN
-            INSERT INTO medical_records (appointment_id, patient_id, doctor_id, symptoms, diagnosis, conclusion, prescription_text, heart_rate, blood_pressure, blood_glucose, weight, status, created_by)
-            VALUES (@NewApptId, @SelectedPatientId, @SelectedDoctorId, N'Đau đầu nhẹ và mỏi cơ', N'Theo dõi sức khỏe tổng quát (Z00)', N'Chế độ ăn hợp lý, tái khám khi có bất thường', N'1. Vitamin C 500mg x 1 viên/ngày', 80, '120/80', 5.0, 60.0, 'FINALIZED', @SelectedDoctorId);
-            
-            DECLARE @NewMedRecId BIGINT = SCOPE_IDENTITY();
-            DECLARE @SvcPrice DECIMAL(12,2) = (SELECT reference_price FROM medical_services WHERE id = @SelectedServiceId);
-            
-            -- Trạng thái Invoice: PAID (80%), UNPAID (20%)
-            DECLARE @InvStatus VARCHAR(20) = CASE WHEN ABS(CHECKSUM(NEWID())) % 100 < 80 THEN 'PAID' ELSE 'UNPAID' END;
-            DECLARE @PaidAt DATETIME2 = CASE WHEN @InvStatus = 'PAID' THEN @TargetDate ELSE NULL END;
-            DECLARE @InvCode VARCHAR(20) = 'INV-' + FORMAT(GETDATE(), 'yyyyMM') + RIGHT('0000' + CAST(@ApptIndex AS VARCHAR), 4);
-            
-            -- [v9] Chèn appointment_id trực tiếp thay cho medical_record_id
-            INSERT INTO invoices (invoice_code, appointment_id, total_amount, payment_method, payment_status, paid_at)
-            VALUES (@InvCode, @NewApptId, @SvcPrice, CASE WHEN @InvStatus = 'PAID' THEN 'CASH' ELSE 'PENDING' END, @InvStatus, @PaidAt);
-            
-            DECLARE @NewInvId BIGINT = SCOPE_IDENTITY();
-            
-            -- [v9] medical_service_order_id là NULL cho dịch vụ khám ban đầu
-            INSERT INTO invoice_items (invoice_id, service_id, medical_service_order_id, item_name, price_applied, quantity, line_total)
-            VALUES (@NewInvId, @SelectedServiceId, NULL, (SELECT name FROM medical_services WHERE id = @SelectedServiceId), @SvcPrice, 1, @SvcPrice);
-        END
-        
-        -- [16] Notification cho bệnh nhân
-        IF @ApptStatus IN ('CONFIRMED', 'WAITING', 'EXAMINING', 'COMPLETED')
-        BEGIN
-            INSERT INTO notifications (user_id, title, message, notification_type, is_read, related_entity_id, related_entity_type)
-            VALUES (@SelectedPatientId, N'Cập nhật lịch khám', N'Ca khám ' + @ApptCode + N' đã chuyển trạng thái ' + @ApptStatus, 'APPOINTMENT_CONFIRMED', 0, @NewApptId, 'APPOINTMENT');
-        END
-        
-        SET @DailyAppts = @DailyAppts + 1;
-        SET @ApptIndex = @ApptIndex + 1;
-    END
+    WHERE ds.doctor_id = @DrTimMach AND ds.work_date = @Yesterday AND ts.start_time IN ('08:00', '13:00')
+);
+IF @SlotYesterday IS NOT NULL
+BEGIN
+    INSERT INTO appointments (appointment_code, patient_id, doctor_id, service_id, slot_id, booking_date, check_in_time, status, note)
+    VALUES ('APT-2607-0001', @Patient1, @DrTimMach, @ServiceTimMach, @SlotYesterday, @Yesterday, 
+            CAST(CAST(@Yesterday AS DATETIME) + CAST('07:50' AS DATETIME) AS DATETIME2), 'COMPLETED', N'Khám định kỳ huyết áp');
+    DECLARE @ApptId1 BIGINT = SCOPE_IDENTITY();
+    UPDATE time_slots SET booked_capacity = booked_capacity + 1 WHERE id = @SlotYesterday;
     
-    DROP TABLE #TempDailySlots;
-    COMMIT TRAN;
+    INSERT INTO medical_records (appointment_id, patient_id, doctor_id, symptoms, diagnosis, conclusion, prescription_text, heart_rate, blood_pressure, blood_glucose, weight, status, created_by)
+    VALUES (@ApptId1, @Patient1, @DrTimMach, N'Đau ngực nhẹ khi vận động mạnh', N'Thiếu máu cơ tim cục bộ (I24)', N'Tránh vận động quá sức, uống thuốc đúng giờ', N'1. Nitroglycerin 2.5mg x 2 viên/ngày\n2. Aspirin 81mg x 1 viên/ngày', 78, '130/80', 5.2, 65.5, 'FINALIZED', @DrTimMach);
     
-    SET @DayOffset = @DayOffset + 1;
+    INSERT INTO invoices (invoice_code, appointment_id, total_amount, payment_method, payment_status, paid_at)
+    VALUES ('INV-2607-0001', @ApptId1, 300000.00, 'CASH', 'PAID', CAST(CAST(@Yesterday AS DATETIME) + CAST('07:55' AS DATETIME) AS DATETIME2));
+    DECLARE @InvId1 BIGINT = SCOPE_IDENTITY();
+    
+    INSERT INTO invoice_items (invoice_id, service_id, medical_service_order_id, item_name, price_applied, quantity, line_total)
+    VALUES (@InvId1, @ServiceTimMach, NULL, N'Khám tim mạch tổng quát', 300000.00, 1, 300000.00);
+END
+
+-- Hẹn 2: Hôm nay - Đã xác nhận (CONFIRMED)
+DECLARE @SlotToday1 BIGINT = (
+    SELECT TOP 1 ts.id FROM time_slots ts 
+    JOIN doctor_schedules ds ON ts.schedule_id = ds.id
+    WHERE ds.doctor_id = @DrTimMach AND ds.work_date = @Today AND ts.start_time IN ('09:00', '14:00')
+);
+IF @SlotToday1 IS NOT NULL
+BEGIN
+    INSERT INTO appointments (appointment_code, patient_id, doctor_id, service_id, slot_id, booking_date, check_in_time, status, note)
+    VALUES ('APT-2607-0002', @Patient2, @DrTimMach, @ServiceTimMach, @SlotToday1, @Today, NULL, 'CONFIRMED', N'Tái khám tim mạch');
+    UPDATE time_slots SET booked_capacity = booked_capacity + 1 WHERE id = @SlotToday1;
+END
+
+-- Hẹn 3: Hôm nay - Đang khám (IN_PROGRESS)
+DECLARE @SlotToday2 BIGINT = (
+    SELECT TOP 1 ts.id FROM time_slots ts 
+    JOIN doctor_schedules ds ON ts.schedule_id = ds.id
+    WHERE ds.doctor_id = @DrTimMach AND ds.work_date = @Today AND ts.id <> @SlotToday1 AND ts.start_time IN ('10:00', '15:00')
+);
+IF @SlotToday2 IS NOT NULL
+BEGIN
+    INSERT INTO appointments (appointment_code, patient_id, doctor_id, service_id, slot_id, booking_date, check_in_time, status, note)
+    VALUES ('APT-2607-0003', @Patient3, @DrTimMach, @ServiceTimMach, @SlotToday2, @Today, 
+            CAST(CAST(@Today AS DATETIME) + CAST('09:45' AS DATETIME) AS DATETIME2), 'IN_PROGRESS', N'Theo dõi hẹp van tim');
+    UPDATE time_slots SET booked_capacity = booked_capacity + 1 WHERE id = @SlotToday2;
+END
+
+-- Hẹn 4: Hôm nay - Chờ xác nhận (PENDING)
+DECLARE @SlotToday3 BIGINT = (
+    SELECT TOP 1 ts.id FROM time_slots ts 
+    JOIN doctor_schedules ds ON ts.schedule_id = ds.id
+    WHERE ds.doctor_id = @DrTimMach AND ds.work_date = @Today AND ts.id NOT IN (@SlotToday1, @SlotToday2) AND ts.start_time IN ('11:00', '16:00')
+);
+IF @SlotToday3 IS NOT NULL
+BEGIN
+    INSERT INTO appointments (appointment_code, patient_id, doctor_id, service_id, slot_id, booking_date, check_in_time, status, note)
+    VALUES ('APT-2607-0004', @Patient4, @DrTimMach, @ServiceTimMach, @SlotToday3, @Today, NULL, 'PENDING', N'Đăng ký khám tim mạch');
+    UPDATE time_slots SET booked_capacity = booked_capacity + 1 WHERE id = @SlotToday3;
+END
+
+-- Hẹn 5: Ngày mai - Đã xác nhận (CONFIRMED)
+DECLARE @SlotTomorrow BIGINT = (
+    SELECT TOP 1 ts.id FROM time_slots ts 
+    JOIN doctor_schedules ds ON ts.schedule_id = ds.id
+    WHERE ds.doctor_id = @DrTimMach AND ds.work_date = @Tomorrow AND ts.start_time IN ('08:30', '13:30')
+);
+IF @SlotTomorrow IS NOT NULL
+BEGIN
+    INSERT INTO appointments (appointment_code, patient_id, doctor_id, service_id, slot_id, booking_date, check_in_time, status, note)
+    VALUES ('APT-2607-0005', @Patient5, @DrTimMach, @ServiceTimMach, @SlotTomorrow, @Tomorrow, NULL, 'CONFIRMED', N'Đo điện tâm đồ định kỳ');
+    UPDATE time_slots SET booked_capacity = booked_capacity + 1 WHERE id = @SlotTomorrow;
+END
+
+-- ------------------------------------------------------------
+-- DOCTOR 2: THẦN KINH (dr.thankinh1)
+-- ------------------------------------------------------------
+
+-- Hẹn 6: Hôm qua - Đã khám xong (COMPLETED)
+DECLARE @SlotYesterday2 BIGINT = (
+    SELECT TOP 1 ts.id FROM time_slots ts 
+    JOIN doctor_schedules ds ON ts.schedule_id = ds.id
+    WHERE ds.doctor_id = @DrThanKinh AND ds.work_date = @Yesterday AND ts.start_time IN ('09:00', '14:00')
+);
+IF @SlotYesterday2 IS NOT NULL
+BEGIN
+    INSERT INTO appointments (appointment_code, patient_id, doctor_id, service_id, slot_id, booking_date, check_in_time, status, note)
+    VALUES ('APT-2607-0006', @Patient6, @DrThanKinh, @ServiceThanKinh, @SlotYesterday2, @Yesterday, 
+            CAST(CAST(@Yesterday AS DATETIME) + CAST('08:50' AS DATETIME) AS DATETIME2), 'COMPLETED', N'Đau nửa đầu Migraine');
+    DECLARE @ApptId6 BIGINT = SCOPE_IDENTITY();
+    UPDATE time_slots SET booked_capacity = booked_capacity + 1 WHERE id = @SlotYesterday2;
+    
+    INSERT INTO medical_records (appointment_id, patient_id, doctor_id, symptoms, diagnosis, conclusion, prescription_text, heart_rate, blood_pressure, blood_glucose, weight, status, created_by)
+    VALUES (@ApptId6, @Patient6, @DrThanKinh, N'Đau đầu giật nửa bên kèm buồn nôn', N'Hội chứng Migraine (G43)', N'Nghỉ ngơi phòng tối, tránh tiếng ồn', N'1. Paracetamol 500mg x 3 viên/ngày\n2. Sibelium 5mg x 1 viên/ngày', 72, '115/75', 4.8, 58.0, 'FINALIZED', @DrThanKinh);
+    
+    INSERT INTO invoices (invoice_code, appointment_id, total_amount, payment_method, payment_status, paid_at)
+    VALUES ('INV-2607-0006', @ApptId6, 300000.00, 'CASH', 'PAID', CAST(CAST(@Yesterday AS DATETIME) + CAST('08:55' AS DATETIME) AS DATETIME2));
+    DECLARE @InvId6 BIGINT = SCOPE_IDENTITY();
+    
+    INSERT INTO invoice_items (invoice_id, service_id, medical_service_order_id, item_name, price_applied, quantity, line_total)
+    VALUES (@InvId6, @ServiceThanKinh, NULL, N'Khám thần kinh tổng quát', 300000.00, 1, 300000.00);
+END
+
+-- Hẹn 7: Hôm nay - Đã xác nhận (CONFIRMED)
+DECLARE @SlotToday4 BIGINT = (
+    SELECT TOP 1 ts.id FROM time_slots ts 
+    JOIN doctor_schedules ds ON ts.schedule_id = ds.id
+    WHERE ds.doctor_id = @DrThanKinh AND ds.work_date = @Today AND ts.start_time IN ('08:00', '13:00')
+);
+IF @SlotToday4 IS NOT NULL
+BEGIN
+    INSERT INTO appointments (appointment_code, patient_id, doctor_id, service_id, slot_id, booking_date, check_in_time, status, note)
+    VALUES ('APT-2607-0007', @Patient7, @DrThanKinh, @ServiceThanKinh, @SlotToday4, @Today, NULL, 'CONFIRMED', N'Rối loạn giấc ngủ');
+    UPDATE time_slots SET booked_capacity = booked_capacity + 1 WHERE id = @SlotToday4;
+END
+
+-- ------------------------------------------------------------
+-- DOCTOR 3: NHI (dr.nhi1)
+-- ------------------------------------------------------------
+
+-- Hẹn 8: Hôm nay - Đã xác nhận (CONFIRMED)
+DECLARE @SlotToday5 BIGINT = (
+    SELECT TOP 1 ts.id FROM time_slots ts 
+    JOIN doctor_schedules ds ON ts.schedule_id = ds.id
+    WHERE ds.doctor_id = @DrNhi AND ds.work_date = @Today AND ts.start_time IN ('09:30', '14:30')
+);
+IF @SlotToday5 IS NOT NULL
+BEGIN
+    INSERT INTO appointments (appointment_code, patient_id, doctor_id, service_id, slot_id, booking_date, check_in_time, status, note)
+    VALUES ('APT-2607-0008', @Patient1, @DrNhi, @ServiceNhi, @SlotToday5, @Today, NULL, 'CONFIRMED', N'Khám dinh dưỡng trẻ em');
+    UPDATE time_slots SET booked_capacity = booked_capacity + 1 WHERE id = @SlotToday5;
 END
 GO
 

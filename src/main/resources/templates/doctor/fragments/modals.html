@@ -182,6 +182,113 @@
         </div>
 
 
+        <!-- Modal Chỉnh sửa thông tin cá nhân bệnh nhân -->
+        <div id="editPatientModal" class="modal-overlay"
+             th:style="${action == 'editPatient' ? 'display: flex;' : 'display: none;'}">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h2>Chỉnh sửa thông tin cá nhân</h2>
+                    <a th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab})}"
+                       class="btn-close-modal" style="text-decoration: none;">&times;</a>
+                </div>
+                <form th:action="@{/doctor/appointments/{id}/patient/update(id=${appointment.id})}" method="POST"
+                      id="editPatientForm">
+                    <div class="modal-body">
+                        <div class="modal-vitals-grid">
+                            <!-- Ngày sinh -->
+                            <div class="form-group">
+                                <label for="patient_dob">Ngày sinh <span th:if="${appointment.patientDateOfBirth == null}" style="color: #ef4444;">*</span></label>
+                                <input type="date" name="dateOfBirth" id="patient_dob"
+                                       th:value="${appointment.patientDateOfBirth}"
+                                       th:readonly="${appointment.patientDateOfBirth != null}"
+                                       th:required="${appointment.patientDateOfBirth == null}"
+                                       style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;"
+                                       th:styleappend="${appointment.patientDateOfBirth != null ? 'background-color: #f1f5f9;' : ''}">
+                            </div>
+
+                            <!-- Giới tính -->
+                            <div class="form-group">
+                                <label for="patient_gender">Giới tính <span th:if="${appointment.patientGender == null}" style="color: #ef4444;">*</span></label>
+                                <div th:if="${appointment.patientGender != null}">
+                                    <input type="text" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; background-color: #f1f5f9; box-sizing: border-box;" th:value="${appointment.patientGender == 'MALE' ? 'Nam' : (appointment.patientGender == 'FEMALE' ? 'Nữ' : appointment.patientGender)}" readonly>
+                                    <input type="hidden" name="gender" th:value="${appointment.patientGender}">
+                                </div>
+                                <div th:if="${appointment.patientGender == null}">
+                                    <select name="gender" id="patient_gender" required style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; background-color: white;">
+                                        <option value="">-- Chọn giới tính --</option>
+                                        <option value="MALE">Nam</option>
+                                        <option value="FEMALE">Nữ</option>
+                                        <option value="OTHER">Khác</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Nhóm máu -->
+                            <div class="form-group">
+                                <label for="patient_bloodType">Nhóm máu <span th:if="${appointment.patientBloodType == null}" style="color: #ef4444;">*</span></label>
+                                <div th:if="${appointment.patientBloodType != null}">
+                                    <input type="text" style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; background-color: #f1f5f9; box-sizing: border-box;" th:value="${appointment.patientBloodType}" readonly>
+                                    <input type="hidden" name="bloodType" th:value="${appointment.patientBloodType}">
+                                </div>
+                                <div th:if="${appointment.patientBloodType == null}">
+                                    <select name="bloodType" id="patient_bloodType" required style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; background-color: white;">
+                                        <option value="">-- Chọn nhóm máu --</option>
+                                        <option value="A+">A+</option>
+                                        <option value="A-">A-</option>
+                                        <option value="B+">B+</option>
+                                        <option value="B-">B-</option>
+                                        <option value="AB+">AB+</option>
+                                        <option value="AB-">AB-</option>
+                                        <option value="O+">O+</option>
+                                        <option value="O-">O-</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Số điện thoại -->
+                            <div class="form-group">
+                                <label for="patient_phone">Số điện thoại <span th:if="${appointment.patientPhone == null or #strings.isEmpty(appointment.patientPhone)}" style="color: #ef4444;">*</span></label>
+                                <input type="text" name="phone" id="patient_phone"
+                                       th:value="${appointment.patientPhone}"
+                                       th:readonly="${appointment.patientPhone != null and !#strings.isEmpty(appointment.patientPhone)}"
+                                       th:required="${appointment.patientPhone == null or #strings.isEmpty(appointment.patientPhone)}"
+                                       style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;"
+                                       th:styleappend="${appointment.patientPhone != null and !#strings.isEmpty(appointment.patientPhone) ? 'background-color: #f1f5f9;' : ''}"
+                                       pattern="[0-9]{10}" title="Số điện thoại gồm 10 chữ số">
+                            </div>
+                        </div>
+
+                        <!-- Địa chỉ -->
+                        <div class="form-group" style="margin-top: 15px;">
+                            <label for="patient_addressLine">Địa chỉ (Số nhà, đường...) <span th:if="${appointment.patientAddress == null or #strings.isEmpty(appointment.patientAddress)}" style="color: #ef4444;">*</span></label>
+                            <input type="text" name="addressLine" id="patient_addressLine"
+                                   th:value="${appointment.patientAddress}"
+                                   th:readonly="${appointment.patientAddress != null and !#strings.isEmpty(appointment.patientAddress)}"
+                                   th:required="${appointment.patientAddress == null or #strings.isEmpty(appointment.patientAddress)}"
+                                   style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; box-sizing: border-box;"
+                                   th:styleappend="${appointment.patientAddress != null and !#strings.isEmpty(appointment.patientAddress) ? 'background-color: #f1f5f9;' : ''}"
+                                   placeholder="Ví dụ: 123 Nguyễn Huệ...">
+                        </div>
+
+                        <!-- Tỉnh/Thành phố -->
+                        <div class="form-group" style="margin-top: 15px;" th:if="${appointment.patientAddress == null or #strings.isEmpty(appointment.patientAddress)}">
+                            <label for="patient_province">Tỉnh / Thành phố <span style="color: #ef4444;">*</span></label>
+                            <select name="provinceId" id="patient_province" required style="width: 100%; padding: 8px 12px; border: 1.5px solid #cbd5e1; border-radius: 6px; box-sizing: border-box; background-color: white;">
+                                <option value="">-- Chọn Tỉnh/Thành phố --</option>
+                                <option th:each="p : ${provinces}" th:value="${p.id}" th:text="${p.name}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <a th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab})}"
+                           class="btn-cancel" style="text-decoration: none; display: inline-block;">Hủy</a>
+                        <button type="submit" class="btn-submit">Lưu thông tin</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
         <!-- Modal Chọn dịch vụ khám -->
         <div id="chooseServicesModal" class="modal-overlay"
              th:style="${action == 'selectServices' ? 'display: flex;' : 'display: none;'}">

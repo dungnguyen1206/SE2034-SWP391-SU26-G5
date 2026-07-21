@@ -10,10 +10,10 @@
         <div class="detail-content-card">
             <div class="card-header-row">
                 <h3 class="card-title" style="font-size: 16px; font-weight: 700; color: #0f172a;">Thông tin cá nhân</h3>
-                <a th:if="${medicalRecord == null}"
-                   th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab}, action='create')}"
-                   class="btn-create-record">
-                    <i class="fa-solid fa-plus"></i> Tạo hồ sơ bệnh án
+                <a th:if="${(appointment.patientDateOfBirth == null or appointment.patientGender == null or appointment.patientBloodType == null or appointment.patientPhone == null or #strings.isEmpty(appointment.patientPhone) or appointment.patientAddress == null or #strings.isEmpty(appointment.patientAddress)) and appointment.status != 'COMPLETED'}"
+                   th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab}, action='editPatient')}"
+                   class="btn-create-record" style="background-color: #3b82f6;">
+                    <i class="fa-solid fa-user-pen"></i> Chỉnh sửa thông tin
                 </a>
             </div>
             <hr class="card-divider">
@@ -105,7 +105,12 @@
         <div class="detail-content-card" style="margin-top: 24px;">
             <div class="card-header-row">
                 <h3 class="card-title" style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 0;">Hồ sơ bệnh án</h3>
-                <a th:if="${medicalRecord != null}"
+                <a th:if="${medicalRecord == null and appointment.status != 'COMPLETED'}"
+                   th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab}, action='create')}"
+                   class="btn-create-record">
+                    <i class="fa-solid fa-plus"></i> Tạo hồ sơ bệnh án
+                </a>
+                <a th:if="${medicalRecord != null and appointment.status != 'COMPLETED'}"
                    th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab}, action='edit')}"
                    class="btn-create-record" style="background-color: #f59e0b;">
                     <i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa

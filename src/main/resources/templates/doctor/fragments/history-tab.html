@@ -8,311 +8,34 @@
     <!-- Tab Pane 3: Lịch sử khám bệnh -->
     <div th:fragment="history-tab" class="tab-pane" th:classappend="${tab == 'history' ? 'active' : ''}">
         
-        <style>
-            /* Timeline Styles */
-            .timeline-container {
-                position: relative;
-                padding-left: 32px;
-                margin-top: 16px;
-            }
 
-            .timeline-container::before {
-                content: '';
-                position: absolute;
-                left: 15px;
-                top: 0;
-                bottom: 0;
-                width: 2px;
-                background-color: #cbd5e1;
-            }
-
-            .timeline-item {
-                position: relative;
-                margin-bottom: 40px;
-            }
-
-            .timeline-marker {
-                position: absolute;
-                left: -32px;
-                top: 0;
-                width: 32px;
-                height: 32px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .timeline-marker-dot {
-                width: 14px;
-                height: 14px;
-                border-radius: 50%;
-                background-color: #2563eb;
-                border: 3px solid white;
-                box-shadow: 0 0 0 2px #cbd5e1;
-            }
-
-            .timeline-content-card {
-                background-color: white;
-                border-radius: 12px;
-                padding: 24px;
-                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-                border-left: 4px solid #2563eb;
-                border: 1px solid #e2e8f0;
-                border-left: 4px solid #2563eb;
-            }
-
-            .timeline-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: flex-start;
-                border-bottom: 1px solid #f1f5f9;
-                padding-bottom: 16px;
-                margin-bottom: 20px;
-            }
-
-            .timeline-title {
-                font-size: 16px;
-                font-weight: 700;
-                color: #0f172a;
-                margin: 0;
-            }
-
-            .timeline-meta {
-                font-size: 13px;
-                color: #64748b;
-                margin: 4px 0 0 0;
-            }
-
-            .timeline-date {
-                font-size: 14px;
-                font-weight: 600;
-                color: #0f172a;
-                background-color: #f1f5f9;
-                padding: 6px 12px;
-                border-radius: 20px;
-            }
-
-            .record-section-title {
-                font-size: 13px;
-                font-weight: 700;
-                color: #475569;
-                text-transform: uppercase;
-                letter-spacing: 0.05em;
-                margin: 20px 0 10px 0;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-            }
-
-            .vitals-grid {
-                display: grid;
-                grid-template-columns: repeat(4, 1fr);
-                gap: 12px;
-                margin-bottom: 20px;
-            }
-
-            .vital-box {
-                background-color: #f8fafc;
-                border: 1px solid #e2e8f0;
-                border-radius: 8px;
-                padding: 12px;
-                text-align: center;
-            }
-
-            .vital-label {
-                font-size: 11px;
-                color: #64748b;
-                text-transform: uppercase;
-                font-weight: 600;
-            }
-
-            .vital-value {
-                font-size: 16px;
-                font-weight: 700;
-                color: #0f172a;
-                margin-top: 4px;
-            }
-
-            .text-content-box {
-                background-color: #f8fafc;
-                border-radius: 8px;
-                padding: 14px;
-                border-left: 3px solid #cbd5e1;
-                font-size: 14px;
-                color: #334155;
-                line-height: 1.5;
-                margin-bottom: 16px;
-                white-space: pre-line;
-            }
-
-            .prescription-box {
-                background-color: #eff6ff;
-                border: 1px solid #bfdbfe;
-                border-left: 4px solid #3b82f6;
-                border-radius: 8px;
-                padding: 16px;
-                font-family: monospace;
-                font-size: 13px;
-                color: #1e3a8a;
-                white-space: pre-line;
-                line-height: 1.6;
-            }
-
-            .service-order-card {
-                border: 1px solid #e2e8f0;
-                border-radius: 8px;
-                padding: 16px;
-                margin-bottom: 12px;
-                background-color: #fafafa;
-            }
-
-            .service-order-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 8px;
-            }
-
-            .service-name {
-                font-weight: 700;
-                font-size: 14px;
-                color: #1e293b;
-            }
-
-            .service-status-badge {
-                font-size: 11px;
-                font-weight: 700;
-                padding: 2px 8px;
-                border-radius: 12px;
-                text-transform: uppercase;
-            }
-
-            .status-completed {
-                background-color: #d1fae5;
-                color: #065f46;
-            }
-
-            .status-pending {
-                background-color: #fef3c7;
-                color: #92400e;
-            }
-
-            .status-cancelled {
-                background-color: #fee2e2;
-                color: #991b1b;
-            }
-
-            .service-result-content {
-                font-size: 13px;
-                color: #475569;
-                margin-top: 8px;
-                padding: 10px;
-                background-color: white;
-                border: 1px dashed #cbd5e1;
-                border-radius: 6px;
-            }
-        </style>
-
-        <div class="timeline-container" th:if="${historyList != null && !historyList.isEmpty()}">
-            
-            <div class="timeline-item" th:each="r : ${historyList}">
-                <div class="timeline-marker">
-                    <div class="timeline-marker-dot"></div>
-                </div>
-
-                <div class="timeline-content-card">
-                    <div class="timeline-header">
-                        <div>
-                            <h3 class="timeline-title" th:text="${r.serviceName != null ? r.serviceName : 'Khám bệnh tổng quát'}"></h3>
-                            <p class="timeline-meta">
-                                Bác sĩ khám: <strong th:text="${r.doctorFullName}"></strong> 
-                                • Chuyên khoa: <span th:text="${r.departmentName != null ? r.departmentName : 'Đang cập nhật'}"></span>
-                                • Mã cuộc hẹn: <strong th:text="${r.appointmentCode}"></strong>
-                            </p>
-                        </div>
-                        <div class="timeline-date" th:text="${#temporals.format(r.examinationDate, 'dd/MM/yyyy HH:mm')}"></div>
-                    </div>
-
-                    <!-- 1. Vitals -->
-                    <div class="record-section-title">
-                        <i class="fa-solid fa-heart-pulse"></i> Chỉ số sinh tồn
-                    </div>
-                    <div class="vitals-grid">
-                        <div class="vital-box">
-                            <div class="vital-label">Huyết áp</div>
-                            <div class="vital-value" th:text="${r.bloodPressure != null && r.bloodPressure != '' ? r.bloodPressure : 'N/A'}"></div>
-                        </div>
-                        <div class="vital-box">
-                            <div class="vital-label">Nhịp tim</div>
-                            <div class="vital-value" th:text="${r.heartRate != null ? r.heartRate + ' bpm' : 'N/A'}"></div>
-                        </div>
-                        <div class="vital-box">
-                            <div class="vital-label">Đường huyết</div>
-                            <div class="vital-value" th:text="${r.bloodGlucose != null ? r.bloodGlucose + ' mmol/L' : 'N/A'}"></div>
-                        </div>
-                        <div class="vital-box">
-                            <div class="vital-label">Cân nặng</div>
-                            <div class="vital-value" th:text="${r.weight != null ? r.weight + ' kg' : 'N/A'}"></div>
-                        </div>
-                    </div>
-
-                    <!-- 2. Clinical Info -->
-                    <div class="record-section-title">
-                        <i class="fa-solid fa-comment-medical"></i> Chẩn đoán lâm sàng
-                    </div>
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                        <div>
-                            <div style="font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 6px;">Triệu chứng</div>
-                            <div class="text-content-box" th:text="${r.symptoms}"></div>
-                        </div>
-                        <div>
-                            <div style="font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 6px;">Chẩn đoán</div>
-                            <div class="text-content-box" th:text="${r.diagnosis != null && r.diagnosis != '' ? r.diagnosis : 'Chưa ghi nhận'}"></div>
-                        </div>
-                    </div>
-
-                    <div style="margin-top: 8px;">
-                        <div style="font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 6px;">Kết luận và Ghi chú</div>
-                        <div class="text-content-box" th:text="${(r.conclusion != null && r.conclusion != '' ? r.conclusion : 'Chưa ghi nhận') + (r.notes != null && r.notes != '' ? ' | Ghi chú: ' + r.notes : '')}"></div>
-                    </div>
-
-                    <!-- 3. Prescribed Medication -->
-                    <div class="record-section-title" th:if="${r.prescriptionText != null && r.prescriptionText != ''}">
-                        <i class="fa-solid fa-prescription-bottle-medical"></i> Đơn thuốc đã kê
-                    </div>
-                    <div class="prescription-box" th:if="${r.prescriptionText != null && r.prescriptionText != ''}" th:text="${r.prescriptionText}"></div>
-
-                    <!-- 4. Medical Services -->
-                    <div class="record-section-title" th:if="${r.serviceOrders != null && !r.serviceOrders.isEmpty()}">
-                        <i class="fa-solid fa-microscope"></i> Dịch vụ cận lâm sàng đã thực hiện
-                    </div>
-                    <div th:if="${r.serviceOrders != null && !r.serviceOrders.isEmpty()}">
-                        <div class="service-order-card" th:each="so : ${r.serviceOrders}">
-                            <div class="service-order-header">
-                                <span class="service-name" th:text="${so.serviceName}"></span>
-                                <span class="service-status-badge" 
-                                      th:classappend="${so.status == 'COMPLETED' ? 'status-completed' : (so.status == 'CANCELLED' ? 'status-cancelled' : 'status-pending')}"
-                                      th:text="${so.status == 'COMPLETED' ? 'Đã có kết quả' : (so.status == 'CANCELLED' ? 'Đã hủy' : 'Đang xử lý/Chưa thanh toán')}">
-                                </span>
-                            </div>
-                            <div class="service-result-content" th:if="${so.status == 'COMPLETED'}">
-                                <strong>Kết quả xét nghiệm/hình ảnh:</strong>
-                                <p style="margin: 6px 0 0 0;" th:text="${so.result}"></p>
-                                <p style="margin: 6px 0 0 0; color: #64748b; font-size: 12px;" th:if="${so.note != null && so.note != ''}" th:text="'Ghi chú cận lâm sàng: ' + ${so.note}"></p>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-
+        <div class="detail-content-card" th:if="${historyList != null and !historyList.isEmpty()}" style="padding: 0; overflow: hidden;">
+            <table class="history-table">
+                <thead>
+                    <tr>
+                        <th style="width: 80px; text-align: center;">STT</th>
+                        <th>Loại khám</th>
+                        <th>Bác sĩ</th>
+                        <th>Kết quả</th>
+                        <th style="width: 180px;">Ngày khám</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="r, iterStat : ${historyList}">
+                        <td style="text-align: center;" th:text="${iterStat.count}">1</td>
+                        <td th:text="${r.serviceName != null ? r.serviceName : 'Khám bệnh tổng quát'}">Loại khám</td>
+                        <td th:text="${r.doctorFullName}">Bác sĩ</td>
+                        <td th:text="${r.conclusion != null and r.conclusion != '' ? r.conclusion : (r.diagnosis != null and r.diagnosis != '' ? r.diagnosis : 'Chưa có kết quả')}">Kết quả</td>
+                        <td th:text="${#temporals.format(r.examinationDate, 'dd/MM/yyyy HH:mm')}">Ngày khám</td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
         <!-- Empty history timeline -->
         <div class="detail-content-card" th:if="${historyList == null || historyList.isEmpty()}" style="text-align: center; padding: 40px;">
             <i class="fa-solid fa-triangle-exclamation" style="font-size: 36px; color: #94a3b8; margin-bottom: 12px;"></i>
-            <p style="color: #64748b; font-weight: 500;">Bệnh nhân này chưa có hồ sơ bệnh án nào hoàn thành trên hệ thống.</p>
+            <p style="color: #64748b; font-weight: 500;">Bệnh nhân này chưa có hồ sơ bệnh án nào hoàn thành thuộc chuyên khoa của bác sĩ.</p>
         </div>
 
     </div>
