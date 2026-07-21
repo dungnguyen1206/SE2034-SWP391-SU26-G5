@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentStatusCountResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ReceptionistDashboardResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Appointment;
 
 import java.time.LocalDate;
@@ -42,13 +43,15 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     );
 
     @Query("SELECT new vn.edu.fpt.SE2034_SWP391_G5.dto.response.ReceptionistDashboardResponse(" +
-           "COUNT(a), " +
-           "SUM(CASE WHEN a.checkInTime IS NOT NULL THEN 1L ELSE 0L END), " +
-           "SUM(CASE WHEN a.status = 'WAITING' THEN 1L ELSE 0L END), " +
-           "SUM(CASE WHEN a.status = 'EXAMINING' THEN 1L ELSE 0L END), " +
-           "0L, 0L) " +
-           "FROM Appointment a WHERE a.bookingDate = :today")
-    vn.edu.fpt.SE2034_SWP391_G5.dto.response.ReceptionistDashboardResponse getTodayAppointmentDashboardCounts(@Param("today") LocalDate today);
+            "COUNT(a), " +
+            "COALESCE(SUM(CASE WHEN a.checkInTime IS NOT NULL THEN 1L ELSE 0L END), 0L), " +
+            "COALESCE(SUM(CASE WHEN a.status = 'WAITING' THEN 1L ELSE 0L END), 0L), " +
+            "COALESCE(SUM(CASE WHEN a.status = 'EXAMINING' THEN 1L ELSE 0L END), 0L), " +
+            "0L, 0L) " +
+            "FROM Appointment a WHERE a.bookingDate = :today")
+    ReceptionistDashboardResponse getTodayAppointmentDashboardCounts(
+            @Param("today") LocalDate today
+    );
 
     // Lấy danh sách lịch hẹn hôm nay trên Dashboard.
     // Có hỗ trợ tìm kiếm theo họ, tên đệm, tên hoặc số điện thoại bệnh nhân.
