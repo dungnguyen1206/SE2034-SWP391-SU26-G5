@@ -71,6 +71,10 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
 
     @Override
     public List<Map<String, Object>> getAvailableSlots(Integer departmentId, LocalDate date) {
+        if (date == null || date.isBefore(LocalDate.now())) {
+            return List.of();
+        }
+
         List<TimeSlot> slots = timeSlotRepository.findSlotsByDepartmentAndDate(departmentId, date);
 
         LocalTime currentTime = LocalDate.now().equals(date) ? LocalTime.now() : LocalTime.MIN;
@@ -89,7 +93,8 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
             // Find an available slot at this time
             TimeSlot availableSlot = null;
             for (TimeSlot ts : timeSlots) {
-                if (ts.getBookedCapacity() < ts.getMaxCapacity()) {
+                if ("AVAILABLE".equalsIgnoreCase(ts.getStatus())
+                        && ts.getBookedCapacity() < ts.getMaxCapacity()) {
                     availableSlot = ts;
                     break;
                 }
@@ -165,12 +170,6 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
             userRole.setAssignedAt(LocalDateTime.now());
             userRoleRepository.save(userRole);
 
-            System.out.println("====== THÔNG BÁO HỆ THỐNG ======");
-            System.out.println("Tài khoản Walk-in mới được tạo!");
-            System.out.println("SĐT: " + request.getPhone());
-            System.out.println("Mật khẩu ngẫu nhiên: " + generatedPassword);
-            System.out.println("================================");
-
             smsService.sendWalkInAccountSms(request.getPhone(), generatedPassword);
         }
 
@@ -192,6 +191,27 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
             throw new RuntimeException("Khung giờ không khớp với ngày khám.");
         }
 
+        DoctorSchedule selectedSchedule = selectedSlot.getSchedule();
+        User selectedDoctor = selectedSchedule.getDoctor();
+        Integer doctorDepartmentId = selectedDoctor == null || selectedDoctor.getDepartment() == null
+                ? null : selectedDoctor.getDepartment().getId();
+        Integer serviceDepartmentId = initialService.getDepartment() == null
+                ? null : initialService.getDepartment().getId();
+
+        if (!"ACTIVE".equalsIgnoreCase(selectedSchedule.getStatus())
+                || selectedSchedule.getWeekSchedule() == null
+                || !"FINALIZED".equalsIgnoreCase(selectedSchedule.getWeekSchedule().getStatus())) {
+            throw new RuntimeException("Lịch khám này chưa được công bố hoặc đã ngừng hoạt động.");
+        }
+
+        if (selectedDoctor == null
+                || !"ACTIVE".equalsIgnoreCase(selectedDoctor.getStatus())
+                || !"ACTIVE".equalsIgnoreCase(selectedDoctor.getDoctorStatus())
+                || !Objects.equals(request.getDepartmentId(), doctorDepartmentId)
+                || !Objects.equals(request.getDepartmentId(), serviceDepartmentId)) {
+            throw new RuntimeException("Bác sĩ, dịch vụ và chuyên khoa không khớp hoặc không còn hoạt động.");
+        }
+
         if (request.getBookingDate().isBefore(LocalDate.now())) {
             throw new RuntimeException("Không thể đặt lịch khám cho ngày trong quá khứ.");
         }
@@ -201,7 +221,8 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
             throw new RuntimeException("Không thể đặt lịch vào khung giờ đã kết thúc.");
         }
 
-        if (selectedSlot.getBookedCapacity() >= selectedSlot.getMaxCapacity()) {
+        if (!"AVAILABLE".equalsIgnoreCase(selectedSlot.getStatus())
+                || selectedSlot.getBookedCapacity() >= selectedSlot.getMaxCapacity()) {
             throw new RuntimeException("Khung giờ này đã đầy, vui lòng chọn khung giờ khác.");
         }
 
@@ -225,7 +246,7 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
         boolean hasIncompleteAppointment = appointmentRepository.existsActiveAppointmentBefore(
                 patient.getId(),
                 request.getBookingDate(),
-                selectedSlot.getStartTime(),
+                selectedSlot.getEndTime(),
                 Arrays.asList("CONFIRMED", "WAITING", "EXAMINING")
         );
         if (hasIncompleteAppointment) {
@@ -234,9 +255,10 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
 
         // Increase booked capacity
         selectedSlot.setBookedCapacity(selectedSlot.getBookedCapacity() + 1);
+        if (selectedSlot.getBookedCapacity() >= selectedSlot.getMaxCapacity()) {
+            selectedSlot.setStatus("FULL");
+        }
         timeSlotRepository.save(selectedSlot);
-
-        User selectedDoctor = selectedSlot.getSchedule().getDoctor();
 
         // 4. Create Appointment
         Appointment appointment = new Appointment();

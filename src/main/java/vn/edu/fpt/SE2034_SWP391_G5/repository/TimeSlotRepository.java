@@ -1,6 +1,7 @@
 package vn.edu.fpt.SE2034_SWP391_G5.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,6 +13,8 @@ import java.util.Optional;
 
 import java.time.LocalDate;
 
+import jakarta.persistence.LockModeType;
+
 
 @Repository
 public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
@@ -22,7 +25,12 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
     List<TimeSlot> findByScheduleIdOrderByStartTimeAsc(Long scheduleId);
 
     // Fetch slot cùng với schedule (để tránh LazyInitializationException khi đặt lịch)
-    @Query("SELECT t FROM TimeSlot t JOIN FETCH t.schedule s WHERE t.id = :id")
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT t FROM TimeSlot t " +
+            "JOIN FETCH t.schedule s " +
+            "JOIN FETCH s.doctor " +
+            "LEFT JOIN FETCH s.weekSchedule " +
+            "WHERE t.id = :id")
     Optional<TimeSlot> findByIdWithSchedule(@Param("id") Long id);
 
     @Query("SELECT ts FROM TimeSlot ts " +
@@ -56,10 +64,14 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
     @Query("SELECT ts FROM TimeSlot ts " +
             "JOIN FETCH ts.schedule sch " +
             "JOIN FETCH sch.doctor d " +
+            "JOIN FETCH sch.weekSchedule ws " +
             "WHERE d.department.id = :departmentId " +
             "AND sch.workDate = :workDate " +
+            "AND sch.status = 'ACTIVE' " +
+            "AND ws.status = 'FINALIZED' " +
+            "AND ts.status = 'AVAILABLE' " +
             "AND ts.bookedCapacity < ts.maxCapacity " +
-            "AND ts.startTime > :currentTime " +
+            "AND ts.startTime > CAST(:currentTime AS LocalTime) " +
             "ORDER BY ts.startTime ASC")
     List<TimeSlot> findAvailableSlotsByDepartmentAndDate(
             @Param("departmentId") Integer departmentId,
@@ -70,8 +82,11 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
     @Query("SELECT ts FROM TimeSlot ts " +
             "JOIN FETCH ts.schedule sch " +
             "JOIN FETCH sch.doctor d " +
+            "JOIN FETCH sch.weekSchedule ws " +
             "WHERE d.department.id = :departmentId " +
             "AND sch.workDate = :workDate " +
+            "AND sch.status = 'ACTIVE' " +
+            "AND ws.status = 'FINALIZED' " +
             "ORDER BY ts.startTime ASC")
     List<TimeSlot> findSlotsByDepartmentAndDate(
             @Param("departmentId") Integer departmentId,

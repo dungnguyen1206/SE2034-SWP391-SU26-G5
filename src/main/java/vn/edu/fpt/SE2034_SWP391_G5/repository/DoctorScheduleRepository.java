@@ -29,13 +29,13 @@ public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, 
         List<DoctorSchedule> findActiveSchedulesByDate(@Param("date") LocalDate date);
         // ======================== END QUEUE BOARD RECEPTIONIST ========================
 
-        // Lấy lịch làm việc của bác sĩ từ ngày hôm nay trở đi
-        // TEMPORARILY REMOVED WeekSchedule constraint for debugging
+        // Chỉ hiển thị lịch làm việc đã được công bố từ ngày hôm nay trở đi.
         @Query("SELECT ds FROM DoctorSchedule ds " +
-                        "LEFT JOIN FETCH ds.weekSchedule ws " +
+                        "JOIN FETCH ds.weekSchedule ws " +
                         "WHERE ds.doctor.id = :doctorId " +
                         "AND ds.workDate >= :fromDate " +
                         "AND ds.status = 'ACTIVE' " +
+                        "AND ws.status = 'FINALIZED' " +
                         "ORDER BY ds.workDate ASC, ds.shift ASC")
         List<DoctorSchedule> findAvailableSchedulesByDoctorId(
                         @Param("doctorId") Long doctorId,

@@ -671,20 +671,53 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khung giờ"));
 
         // Kiểm tra xem bệnh nhân có lịch hẹn nào trước đó chưa hoàn thành (CONFIRMED, WAITING, EXAMINING) không
+        DoctorSchedule schedule = slot.getSchedule();
+        if (schedule == null || schedule.getDoctor() == null || schedule.getWorkDate() == null) {
+            throw new BadRequestException("Khung giờ không có lịch làm việc hợp lệ");
+        }
+
+        if (!Objects.equals(schedule.getDoctor().getId(), doctor.getId())) {
+            throw new BadRequestException("Khung giờ đã chọn không thuộc bác sĩ này");
+        }
+
+        if (!"ACTIVE".equalsIgnoreCase(doctor.getStatus())
+                || !"ACTIVE".equalsIgnoreCase(doctor.getDoctorStatus())) {
+            throw new BadRequestException("Bác sĩ hiện không nhận lịch khám");
+        }
+
+        Integer departmentId = request.getDepartmentId();
+        Integer doctorDepartmentId = doctor.getDepartment() == null ? null : doctor.getDepartment().getId();
+        Integer serviceDepartmentId = service.getDepartment() == null ? null : service.getDepartment().getId();
+        if (departmentId == null
+                || !Objects.equals(departmentId, doctorDepartmentId)
+                || !Objects.equals(departmentId, serviceDepartmentId)) {
+            throw new BadRequestException("Bác sĩ, dịch vụ và chuyên khoa không khớp nhau");
+        }
+
+        if (!"ACTIVE".equalsIgnoreCase(service.getStatus())) {
+            throw new BadRequestException("Dịch vụ khám hiện không hoạt động");
+        }
+
+        LocalDate today = LocalDate.now();
+        if (schedule.getWorkDate().isBefore(today)
+                || (schedule.getWorkDate().isEqual(today)
+                    && !slot.getStartTime().isAfter(LocalTime.now()))) {
+            throw new BadRequestException("Không thể đặt lịch vào ngày hoặc khung giờ đã qua");
+        }
+
+        if (schedule.getWeekSchedule() == null
+                || !"ACTIVE".equalsIgnoreCase(schedule.getStatus())
+                || !"FINALIZED".equalsIgnoreCase(schedule.getWeekSchedule().getStatus())) {
+            throw new BadRequestException("Lịch khám này chưa được công bố, vui lòng chọn lịch khác");
+        }
+
         boolean hasActiveAppointment = appointmentRepository.existsActiveAppointmentBefore(
                 patientId,
-                slot.getSchedule().getWorkDate(),
-                slot.getStartTime(),
+                schedule.getWorkDate(),
+                slot.getEndTime(),
                 List.of("CONFIRMED", "WAITING", "EXAMINING"));
         if (hasActiveAppointment) {
             throw new BadRequestException("Bạn có lịch hẹn trước đó chưa hoàn thành. Vui lòng hoàn thành lịch khám trước đó trước khi đặt lịch hẹn mới.");
-        }
-
-        // Chỉ cho phép đặt lịch khi tuần làm việc đã được FINALIZED
-        DoctorSchedule schedule = slot.getSchedule();
-        if (schedule == null || schedule.getWeekSchedule() == null
-                || !"FINALIZED".equals(schedule.getWeekSchedule().getStatus())) {
-            throw new BadRequestException("Lịch khám này chưa được công bố, vui lòng chọn lịch khác");
         }
 
         if (!"AVAILABLE".equals(slot.getStatus()) || slot.getBookedCapacity() >= slot.getMaxCapacity()) {
@@ -716,7 +749,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         appointment.setDoctor(doctor);
         appointment.setService(service);
         appointment.setSlot(slot);
-        appointment.setBookingDate(slot.getSchedule().getWorkDate());
+        appointment.setBookingDate(schedule.getWorkDate());
         appointment.setNote(request.getNote());
         appointment.setStatus("CONFIRMED");
         appointment.setCreatedAt(now);

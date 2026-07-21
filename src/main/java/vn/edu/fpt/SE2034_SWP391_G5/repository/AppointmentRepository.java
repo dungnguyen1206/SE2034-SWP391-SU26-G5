@@ -325,15 +325,19 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     boolean existsByPatientIdAndStatusIn(Long patientId, List<String> statuses);
 
-    @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END FROM Appointment a " +
-           "WHERE a.patient.id = :patientId " +
-           "AND a.status IN :activeStatuses " +
-           "AND (a.bookingDate < :targetDate " +
-           "     OR (a.bookingDate = :targetDate AND a.slot.startTime < :targetStartTime))")
+    @Query(value = "SELECT CASE WHEN COUNT_BIG(a.id) > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END " +
+            "FROM appointments a " +
+            "JOIN time_slots ts ON ts.id = a.slot_id " +
+            "WHERE a.patient_id = :patientId " +
+            "AND a.status IN (:activeStatuses) " +
+            "AND (a.booking_date < :targetDate " +
+            "     OR (a.booking_date = :targetDate " +
+            "         AND ts.start_time < CAST(:targetEndTime AS TIME)))",
+            nativeQuery = true)
     boolean existsActiveAppointmentBefore(
             @Param("patientId") Long patientId,
             @Param("targetDate") LocalDate targetDate,
-            @Param("targetStartTime") LocalTime targetStartTime,
+            @Param("targetEndTime") LocalTime targetEndTime,
             @Param("activeStatuses") List<String> activeStatuses);
 
     @Query("SELECT COUNT(a) FROM Appointment a WHERE a.patient.id = :patientId AND a.status = :status")
