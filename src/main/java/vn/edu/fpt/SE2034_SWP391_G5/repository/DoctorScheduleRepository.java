@@ -43,6 +43,22 @@ public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, 
     List<DoctorSchedule> findByDoctorIdAndWorkDateBetweenAndStatusOrderByWorkDateAscShiftAsc(
             Long doctorId, LocalDate startDate, LocalDate endDate, String status);
 
+    @Query("SELECT COALESCE(SUM(CASE " +
+           "    WHEN ds.shift = 'MORNING' THEN 4.5 " +
+           "    WHEN ds.shift = 'AFTERNOON' THEN 5.0 " +
+           "    WHEN ds.shift = 'FULL_DAY' THEN 12.0 " +
+           "    ELSE 0.0 END), 0.0) " +
+           "FROM DoctorSchedule ds " +
+           "JOIN ds.weekSchedule ws " +
+           "WHERE ds.doctor.id = :doctorId " +
+           "AND ds.workDate BETWEEN :startDate AND :endDate " +
+           "AND ds.status = 'ACTIVE' " +
+           "AND ws.status != 'DRAFT'")
+    Double calculateTotalWorkHours(
+            @Param("doctorId") Long doctorId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
+
     @Query("SELECT u from User u left join u.department d where d.id=:departmentId")
     List<User> findDoctorByDepartmentId(@Param("departmentId") Integer departmentId);
 

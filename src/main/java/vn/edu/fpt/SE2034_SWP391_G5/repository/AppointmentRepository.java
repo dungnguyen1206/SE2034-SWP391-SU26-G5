@@ -270,7 +270,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
             "WHERE a.patient.id = :patientId " +
             "AND a.status IN :activeStatuses " +
             "AND (a.bookingDate < :targetDate " +
-            "     OR (a.bookingDate = :targetDate AND a.slot.startTime < :targetStartTime))")
+            "     OR (a.bookingDate = :targetDate AND a.slot.startTime < CAST(:targetStartTime AS time)))")
     boolean existsActiveAppointmentBefore(
             @Param("patientId") Long patientId,
             @Param("targetDate") LocalDate targetDate,

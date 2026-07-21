@@ -81,6 +81,11 @@ public class ScheduleServiceImpl implements ScheduleService {
         for (int i = 0; i < 7; i++) {
             LocalDate currentDate = monday.plusDays(i);
             List<DoctorSchedule> daySchedules = schedulesByDate.getOrDefault(currentDate, new ArrayList<>());
+            daySchedules.sort((a, b) -> {
+                int aVal = "MORNING".equalsIgnoreCase(a.getShift()) ? 1 : ("AFTERNOON".equalsIgnoreCase(a.getShift()) ? 2 : 3);
+                int bVal = "MORNING".equalsIgnoreCase(b.getShift()) ? 1 : ("AFTERNOON".equalsIgnoreCase(b.getShift()) ? 2 : 3);
+                return Integer.compare(aVal, bVal);
+            });
 
             List<DoctorScheduleWeekResponse.ShiftDetail> shiftDetails = daySchedules.stream().map(ds -> {
                 String shiftType = ds.getShift(); // e.g. "MORNING"
@@ -164,21 +169,8 @@ public class ScheduleServiceImpl implements ScheduleService {
         LocalDate prevWeekMonday = monday.minusWeeks(1);
         LocalDate nextWeekMonday = monday.plusWeeks(1);
 
-        // Calculate summary metrics
-        double totalHours = 0;
-        for (DoctorScheduleWeekResponse day : weekSchedule) {
-            if (day.getShifts() != null) {
-                for (DoctorScheduleWeekResponse.ShiftDetail shift : day.getShifts()) {
-                    if ("MORNING".equalsIgnoreCase(shift.getShift())) {
-                        totalHours += 4.5;
-                    } else if ("AFTERNOON".equalsIgnoreCase(shift.getShift())) {
-                        totalHours += 5.0;
-                    } else if ("FULL_DAY".equalsIgnoreCase(shift.getShift())) {
-                        totalHours += 12.0;
-                    }
-                }
-            }
-        }
+        LocalDate sunday = monday.plusDays(6);
+        double totalHours = doctorScheduleRepository.calculateTotalWorkHours(doctorId, monday, sunday);
 
         // Formatting double hours
         String totalHoursStr;
@@ -188,7 +180,6 @@ public class ScheduleServiceImpl implements ScheduleService {
             totalHoursStr = String.format("%.1f", totalHours).replace(',', '.');
         }
 
-        LocalDate sunday = monday.plusDays(6);
         long slotCount = timeSlotRepository.countSlotsByDoctorAndWeek(doctorId, monday, sunday);
         String slotCountStr = String.valueOf(slotCount);
 
