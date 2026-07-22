@@ -23,21 +23,6 @@ import org.springframework.data.domain.Pageable;
 public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
 
     // ======================== DASHBOARD RECEPTIONIST ========================
-    // Đếm hóa đơn đã thanh toán trong ngày hiện tại.
-    // Dựa theo ngày khám của appointment, không dựa theo ngày tạo hóa đơn.
-    @Query("SELECT COUNT(i) FROM Invoice i " +
-            "JOIN i.appointment a " +
-            "WHERE a.bookingDate = :today " +
-            "AND i.paymentStatus = 'PAID'")
-    long countTodayPaidInvoices(@Param("today") LocalDate today);
-
-    // Đếm hóa đơn chưa thanh toán trong ngày hiện tại.
-    // Dựa theo ngày khám của appointment, không lấy toàn bộ hóa đơn rồi đếm bằng Java.
-    @Query("SELECT COUNT(i) FROM Invoice i " +
-            "JOIN i.appointment a " +
-            "WHERE a.bookingDate = :today " +
-            "AND i.paymentStatus = 'UNPAID'")
-    long countTodayUnpaidInvoices(@Param("today") LocalDate today);
 
     @Query("SELECT new vn.edu.fpt.SE2034_SWP391_G5.dto.response.ReceptionistDashboardResponse(" +
            "0L, 0L, 0L, 0L, " +

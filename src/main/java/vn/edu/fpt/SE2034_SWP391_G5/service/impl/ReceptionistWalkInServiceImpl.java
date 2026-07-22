@@ -13,7 +13,6 @@ import vn.edu.fpt.SE2034_SWP391_G5.service.SmsService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -27,9 +26,9 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
     private final MedicalServiceRepository medicalServiceRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final AppointmentRepository appointmentRepository;
+    private final SmsService smsService;
     private final InvoiceRepository invoiceRepository;
     private final InvoiceItemRepository invoiceItemRepository;
-    private final SmsService smsService;
 
     // ======================== WALK-IN BOOKING RECEPTIONIST ========================
     @Override
@@ -260,7 +259,7 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
         }
         timeSlotRepository.save(selectedSlot);
 
-        // 4. Create Appointment
+        // 4. Create Appointment - Chỉ cấp STT (WAITING), chưa thu tiền
         Appointment appointment = new Appointment();
         appointment.setAppointmentCode("WI-" + System.currentTimeMillis());
         appointment.setPatient(patient);
@@ -274,29 +273,25 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
         appointment.setUpdatedAt(LocalDateTime.now());
         appointment = appointmentRepository.save(appointment);
 
-        // 5. Create Invoice
-        Invoice invoice = new Invoice();
-        String invCode = "INV-" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM")) + String.format("%04d", new Random().nextInt(10000));
-        invoice.setInvoiceCode(invCode);
-        invoice.setAppointment(appointment);
-        invoice.setTotalAmount(initialService.getReferencePrice());
-        invoice.setPaymentMethod("CASH");
-        invoice.setPaymentStatus("PAID");
-        invoice.setPaidAt(LocalDateTime.now());
-        invoice.setCreatedAt(LocalDateTime.now());
-        invoice.setUpdatedAt(LocalDateTime.now());
-        invoice = invoiceRepository.save(invoice);
+        // 5. Create Invoice for initial examination fee (UNPAID)
+        Invoice initialInvoice = new Invoice();
+        initialInvoice.setAppointment(appointment);
+        initialInvoice.setInvoiceCode("INV-" + System.currentTimeMillis());
+        initialInvoice.setTotalAmount(initialService.getReferencePrice());
+        initialInvoice.setPaymentMethod("CASH"); // Default, can be changed later
+        initialInvoice.setPaymentStatus("UNPAID");
+        initialInvoice.setCreatedAt(LocalDateTime.now());
+        initialInvoice.setUpdatedAt(LocalDateTime.now());
+        invoiceRepository.save(initialInvoice);
 
-        // 6. Create InvoiceItem
         InvoiceItem item = new InvoiceItem();
-        item.setInvoice(invoice);
+        item.setInvoice(initialInvoice);
         item.setService(initialService);
-        item.setItemName(initialService.getName());
+        item.setItemName("Khám " + initialService.getName());
         item.setPriceApplied(initialService.getReferencePrice());
         item.setQuantity(1);
         item.setLineTotal(initialService.getReferencePrice());
         invoiceItemRepository.save(item);
-
         return appointment.getId();
     }
     // ======================== END WALK-IN BOOKING RECEPTIONIST ========================

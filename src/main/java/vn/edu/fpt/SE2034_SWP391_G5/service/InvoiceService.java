@@ -25,6 +25,6 @@ public interface InvoiceService {
     // ======================== VIEW INVOICE DETAIL RECEPTIONIST ========================
     InvoiceDetailResponse getInvoiceDetail(Long id);
 
-    void processPayment(Long invoiceId, String paymentMethod);
+    void processPayment(Long appointmentId, String paymentMethod, boolean includeInitialFee, List<Long> selectedOrderIds);
     // ======================== END VIEW INVOICE DETAIL RECEPTIONIST ========================
 }

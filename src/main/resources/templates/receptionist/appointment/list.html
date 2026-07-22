@@ -147,7 +147,7 @@
                                         <a class="btn-detail" th:href="@{/receptionist/appointment/{id}(id=${appointment.id})}">Chi tiết</a>
                                         <a th:if="${appointment.status == 'CONFIRMED'}"
                                            class="btn-checkin"
-                                           th:href="@{/receptionist/invoice/{id}(id=${appointment.id}, from='checkin')}">Check-in</a>
+                                           th:href="@{/receptionist/appointment/{id}/check-in-ticket(id=${appointment.id})}">Check-in</a>
                                     </td>
                                 </tr>
                             </tbody>

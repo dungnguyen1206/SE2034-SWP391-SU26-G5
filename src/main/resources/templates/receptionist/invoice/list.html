@@ -114,57 +114,59 @@
             <!-- Pagination -->
             <div class="pagination-footer"
                  th:if="${invoicePage != null and invoicePage.totalPages > 1}"
-                 th:with="maxPages=5,
-                          halfMax=${maxPages / 2},
-                          startPage=${invoicePage.number - halfMax < 0 ? 0 : 
-                                     (invoicePage.number + halfMax >= invoicePage.totalPages ? 
-                                      (invoicePage.totalPages - maxPages < 0 ? 0 : invoicePage.totalPages - maxPages) : 
-                                      invoicePage.number - halfMax)},
-                          endPage=${startPage + maxPages - 1 >= invoicePage.totalPages ? invoicePage.totalPages - 1 : startPage + maxPages - 1}">
+                 th:with="currentPage=${invoicePage.number + 1},
+                          totalPages=${invoicePage.totalPages},
+                          maxPages=5,
+                          halfMax=${2},
+                          startPage=${currentPage - halfMax < 1 ? 1 :
+                                     (currentPage + halfMax > totalPages ?
+                                      (totalPages - maxPages + 1 < 1 ? 1 : totalPages - maxPages + 1) :
+                                      currentPage - halfMax)},
+                          endPage=${startPage + maxPages - 1 > totalPages ? totalPages : startPage + maxPages - 1}">
 
                 <div class="pagination-info">
-                    <span th:text="'Trang ' + ${invoicePage.number + 1} + ' / ' + ${invoicePage.totalPages}">
+                    <span th:text="'Trang ' + ${currentPage} + ' / ' + ${totalPages}">
                         Trang 1 / 1
                     </span>
-
                     <span th:text="'Tổng: ' + ${invoicePage.totalElements} + ' hóa đơn'">
                         Tổng: 0 hóa đơn
                     </span>
                 </div>
 
                 <div class="pagination">
-
+                    <!-- Trước -->
                     <a class="page-btn"
                        th:classappend="${invoicePage.first} ? ' disabled'"
                        th:href="@{/receptionist/invoice(
-                            page=${invoicePage.number - 1},
+                            page=${currentPage - 1},
                             keyword=${keyword},
                             paymentStatus=${paymentStatus}
                        )}">
                         Trước
                     </a>
 
+                    <!-- Số trang -->
                     <a class="page-number"
                        th:each="pageNumber : ${#numbers.sequence(startPage, endPage)}"
-                       th:classappend="${pageNumber == invoicePage.number} ? ' active'"
+                       th:classappend="${pageNumber == currentPage} ? ' active'"
                        th:href="@{/receptionist/invoice(
                             page=${pageNumber},
                             keyword=${keyword},
                             paymentStatus=${paymentStatus}
                        )}"
-                       th:text="${pageNumber + 1}">
+                       th:text="${pageNumber}">
                     </a>
 
+                    <!-- Sau -->
                     <a class="page-btn"
                        th:classappend="${invoicePage.last} ? ' disabled'"
                        th:href="@{/receptionist/invoice(
-                            page=${invoicePage.number + 1},
+                            page=${currentPage + 1},
                             keyword=${keyword},
                             paymentStatus=${paymentStatus}
                        )}">
                         Sau
                     </a>
-
                 </div>
             </div>
         </section>

@@ -17,6 +17,8 @@ import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.InvoiceService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.ReceptionistService;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/receptionist/invoice")
 @RequiredArgsConstructor
@@ -61,7 +63,7 @@ public class ReceptionistInvoiceController {
             
             model.addAttribute("invoice", invoice);
             model.addAttribute("from", from);
-            model.addAttribute("receptionist", receptionistService.getReceptionistByUsername(userDetails.getUser().getEmail()));
+            model.addAttribute("receptionist", receptionistService.getReceptionistById(userDetails.getUser().getId()));
             model.addAttribute("activeMenu", "invoice");
             
             return "receptionist/invoice/detail";
@@ -74,14 +76,19 @@ public class ReceptionistInvoiceController {
     @PostMapping("/{id}/pay")
     public String processPayment(
             @PathVariable Long id,
-            @RequestParam String paymentMethod,
+            @RequestParam(required = false) String paymentMethod,
+            @RequestParam(required = false, defaultValue = "false") boolean includeInitialFee,
+            @RequestParam(required = false) List<Long> selectedOrderIds,
             @RequestParam(required = false) String from,
             RedirectAttributes redirectAttributes) {
 
         try {
-            invoiceService.processPayment(id, paymentMethod);
+            if (paymentMethod == null || paymentMethod.trim().isEmpty()) {
+                throw new RuntimeException("Vui lòng chọn Phương thức thanh toán (Tiền mặt hoặc Chuyển khoản).");
+            }
+            invoiceService.processPayment(id, paymentMethod, includeInitialFee, selectedOrderIds);
             redirectAttributes.addFlashAttribute("successMessage", "Thanh toán thành công!");
-            
+
             if ("checkin".equals(from)) {
                 appointmentService.confirmCheckInAppointment(id);
                 return "redirect:/receptionist/appointment/" + id + "/check-in-ticket";
