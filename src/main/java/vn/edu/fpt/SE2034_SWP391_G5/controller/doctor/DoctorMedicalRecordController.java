@@ -38,6 +38,16 @@ public class DoctorMedicalRecordController {
             BindingResult bindingResult,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
+        Long doctorId = userDetails.getUser().getId();
+        AppointmentResponse appointment = appointmentService.getAppointmentDetailForReceptionist(id);
+        if (appointment == null || !doctorId.equals(appointment.getDoctorId())) {
+            throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền tạo hồ sơ bệnh án cho lịch hẹn này");
+        }
+        if (!"EXAMINING".equals(appointment.getStatus()) && !"IN_PROGRESS".equals(appointment.getStatus())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Chỉ cho phép tạo hồ sơ bệnh án khi trạng thái cuộc hẹn đang ở 'Đang khám'");
+            return "redirect:/doctor/appointments/" + id + "/detail?tab=info";
+        }
+
         if (bindingResult.hasErrors()) {
             String errorMsg = bindingResult.getFieldErrors().stream()
                     .map(FieldError::getDefaultMessage)
@@ -47,7 +57,6 @@ public class DoctorMedicalRecordController {
             return "redirect:/doctor/appointments/" + id + "/detail?tab=info&action=create";
         }
 
-        Long doctorId = userDetails.getUser().getId();
         try {
             medicalRecordService.createMedicalRecord(id, request, doctorId);
             redirectAttributes.addFlashAttribute("successMessage", "Tạo hồ sơ bệnh án thành công");
@@ -66,6 +75,16 @@ public class DoctorMedicalRecordController {
             BindingResult bindingResult,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
+        Long doctorId = userDetails.getUser().getId();
+        AppointmentResponse appointment = appointmentService.getAppointmentDetailForReceptionist(id);
+        if (appointment == null || !doctorId.equals(appointment.getDoctorId())) {
+            throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền chỉnh sửa hồ sơ bệnh án cho lịch hẹn này");
+        }
+        if ("COMPLETED".equals(appointment.getStatus())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Cuộc hẹn đã hoàn thành, không thể chỉnh sửa hồ sơ bệnh án");
+            return "redirect:/doctor/appointments/" + id + "/detail?tab=info";
+        }
+
         if (bindingResult.hasErrors()) {
             String errorMsg = bindingResult.getFieldErrors().stream()
                     .map(FieldError::getDefaultMessage)
@@ -75,7 +94,6 @@ public class DoctorMedicalRecordController {
             return "redirect:/doctor/appointments/" + id + "/detail?tab=info&action=edit";
         }
 
-        Long doctorId = userDetails.getUser().getId();
         try {
             medicalRecordService.updateMedicalRecord(id, request, doctorId);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật hồ sơ bệnh án thành công");
@@ -99,6 +117,11 @@ public class DoctorMedicalRecordController {
 
         if (appointment == null || !doctorId.equals(appointment.getDoctorId())) {
             throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền cập nhật thông tin lịch hẹn này");
+        }
+
+        if ("COMPLETED".equals(appointment.getStatus())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Cuộc hẹn đã hoàn thành, không thể cập nhật thông tin bệnh nhân");
+            return "redirect:/doctor/appointments/" + id + "/detail?tab=info";
         }
 
         try {

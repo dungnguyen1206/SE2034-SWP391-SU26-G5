@@ -9,7 +9,7 @@
     <!-- Doctor Modals Fragment -->
     <div th:fragment="modals">
         <!-- Modal Tạo hồ sơ bệnh án -->
-        <div id="recordModal" class="modal-overlay" th:style="${action == 'create' ? 'display: flex;' : 'display: none;'}">
+        <div id="recordModal" class="modal-overlay" th:style="${action == 'create' and (appointment.status == 'EXAMINING' or appointment.status == 'IN_PROGRESS') ? 'display: flex;' : 'display: none;'}">
             <div class="modal-card">
                 <div class="modal-header">
                     <h2>Tạo hồ sơ bệnh án</h2>
@@ -94,7 +94,7 @@
 
         <!-- Modal Chỉnh sửa hồ sơ bệnh án -->
         <div id="editRecordModal" class="modal-overlay"
-             th:style="${action == 'edit' ? 'display: flex;' : 'display: none;'}">
+             th:style="${action == 'edit' and appointment.status != 'COMPLETED' ? 'display: flex;' : 'display: none;'}">
             <div class="modal-card">
                 <div class="modal-header">
                     <h2>Chỉnh sửa hồ sơ bệnh án</h2>
@@ -184,7 +184,7 @@
 
         <!-- Modal Chỉnh sửa thông tin cá nhân bệnh nhân -->
         <div id="editPatientModal" class="modal-overlay"
-             th:style="${action == 'editPatient' ? 'display: flex;' : 'display: none;'}">
+             th:style="${action == 'editPatient' and appointment.status != 'COMPLETED' ? 'display: flex;' : 'display: none;'}">
             <div class="modal-card">
                 <div class="modal-header">
                     <h2>Chỉnh sửa thông tin cá nhân</h2>
@@ -291,7 +291,7 @@
 
         <!-- Modal Chọn dịch vụ khám -->
         <div id="chooseServicesModal" class="modal-overlay"
-             th:style="${action == 'selectServices' ? 'display: flex;' : 'display: none;'}">
+             th:style="${action == 'selectServices' and appointment.status != 'COMPLETED' ? 'display: flex;' : 'display: none;'}">
             <div class="modal-card"
                  style="max-width: 650px; width: 90%; max-height: 90vh; display: flex; flex-direction: column;">
                 <div class="modal-header"
