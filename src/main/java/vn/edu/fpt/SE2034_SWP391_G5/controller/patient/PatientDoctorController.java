@@ -12,6 +12,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.entity.Department;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DepartmentService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DoctorService;
 
+import org.springframework.data.domain.Page;
 import java.util.List;
 
 @Controller
@@ -24,21 +25,23 @@ public class PatientDoctorController {
 
     // ---- Danh sách bác sĩ (yêu cầu login - ROLE_PATIENT) ----
     @GetMapping("/doctors")
-    public String listDoctors(@RequestParam(required = false) Integer departmentId, Model model) {
+    public String listDoctors(
+            @RequestParam(required = false) Integer departmentId,
+            @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            Model model) {
         List<Department> departments = departmentService.getAllActiveDepartments();
-        List<DoctorResponse> doctors;
+        
+        Page<DoctorResponse> doctorPage = 
+                doctorService.getActiveDoctorsPaginated(departmentId, search, page, size);
 
-        if (departmentId != null) {
-            doctors = doctorService.getDoctorsByDepartment(departmentId);
-            model.addAttribute("selectedDepartmentId", departmentId);
-        } else {
-            doctors = departments.stream()
-                    .flatMap(d -> doctorService.getDoctorsByDepartment(d.getId()).stream())
-                    .toList();
-            model.addAttribute("selectedDepartmentId", null);
-        }
-
-        model.addAttribute("doctors", doctors);
+        model.addAttribute("doctors", doctorPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", doctorPage.getTotalPages());
+        model.addAttribute("totalItems", doctorPage.getTotalElements());
+        model.addAttribute("selectedDepartmentId", departmentId);
+        model.addAttribute("searchQuery", search != null ? search : "");
         model.addAttribute("departments", departments);
         return "patient/doctors/list";
     }

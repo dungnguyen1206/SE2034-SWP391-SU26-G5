@@ -21,4 +21,7 @@ public class WalkInBookingRequest {
 
     @NotNull(message = "Vui lòng chọn khung giờ khám")
     private Long timeSlotId;
+    
+    @NotNull(message = "Vui lòng chọn dịch vụ khám")
+    private Long serviceId;
 }

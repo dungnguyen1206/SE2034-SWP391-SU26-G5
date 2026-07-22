@@ -10,28 +10,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import jakarta.validation.Valid;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
-import java.time.LocalDate;
-import java.util.Locale;
-import java.util.stream.Collectors;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalRecord;
+import vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalRecordRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalRecord;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalService;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalServiceOrder;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalRecordRepository;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalServiceRepository;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalServiceOrderRepository;
-import vn.edu.fpt.SE2034_SWP391_G5.service.MedicalRecordService;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateMedicalRecordRequest;
-import vn.edu.fpt.SE2034_SWP391_G5.dto.request.UpdateMedicalRecordRequest;
-import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
-import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
-import java.util.List;
+
+import java.time.LocalDate;
+import java.util.Locale;
 import java.util.Optional;
 
 @Controller
@@ -41,9 +27,6 @@ public class DoctorAppointmentController {
 
     private final AppointmentService appointmentService;
     private final MedicalRecordRepository medicalRecordRepository;
-    private final MedicalRecordService medicalRecordService;
-    private final MedicalServiceRepository medicalServiceRepository;
-    private final MedicalServiceOrderRepository medicalServiceOrderRepository;
 
     @GetMapping("/appointment-list")
     public String appointmentList(
@@ -111,236 +94,49 @@ public class DoctorAppointmentController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "date", required = false) String dateStr,
             RedirectAttributes redirectAttributes) {
-        try {
-            appointmentService.updateAppointmentStatus(id, status);
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-        }
-        
+
         String redirectUrl = "redirect:/doctor/appointment-list?status=" + currentStatus + "&page=" + page;
         if (dateStr != null && !dateStr.trim().isEmpty()) {
             redirectUrl += "&date=" + dateStr;
         }
+
+        // Prevent modification if already COMPLETED
+        AppointmentResponse appointment = appointmentService.getAppointmentDetailForReceptionist(id);
+        if (appointment != null && "COMPLETED".equals(appointment.getStatus())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Cuộc hẹn đã hoàn thành không thể thay đổi trạng thái.");
+            return redirectUrl;
+        }
+
+        if ("COMPLETED".equals(status)) {
+            // Check if medical record is fully completed
+            Optional<MedicalRecord> medicalRecordOpt = medicalRecordRepository.findByAppointmentId(id);
+            if (medicalRecordOpt.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Không thể chuyển trạng thái sang Hoàn thành vì hồ sơ bệnh án chưa được tạo.");
+                return redirectUrl;
+            }
+
+            MedicalRecord record = medicalRecordOpt.get();
+            if (record.getSymptoms() == null || record.getSymptoms().trim().isEmpty() ||
+                record.getDiagnosis() == null || record.getDiagnosis().trim().isEmpty() ||
+                record.getBloodPressure() == null || record.getBloodPressure().trim().isEmpty() ||
+                record.getWeight() == null ||
+                record.getConclusion() == null || record.getConclusion().trim().isEmpty() ||
+                record.getPrescriptionText() == null || record.getPrescriptionText().trim().isEmpty() ||
+                record.getNotes() == null || record.getNotes().trim().isEmpty() ||
+                record.getBloodGlucose() == null ||
+                record.getHeartRate() == null) {
+
+                redirectAttributes.addFlashAttribute("errorMessage", "Không thể chuyển trạng thái sang Hoàn thành vì hồ sơ bệnh án chưa đầy đủ thông tin.");
+                return redirectUrl;
+            }
+        }
+
+        try {
+            appointmentService.updateAppointmentStatus(id, status);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+        }
+
         return redirectUrl;
     }
-
-    @GetMapping("/appointments/{id}/detail")
-    public String appointmentDetail(
-            @PathVariable Long id,
-            @RequestParam(value = "tab", required = false, defaultValue = "info") String tab,
-            @RequestParam(value = "action", required = false) String action,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            Model model) {
-        Long doctorId = userDetails.getUser().getId();
-        AppointmentResponse appointment = appointmentService.getAppointmentDetailForReceptionist(id);
-        
-        // Security check: ensure this appointment belongs to the logged-in doctor
-        if (appointment == null || !doctorId.equals(appointment.getDoctorId())) {
-            throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền xem thông tin lịch hẹn này");
-        }
-        
-        Optional<MedicalRecord> medicalRecordOpt = medicalRecordRepository.findByAppointmentId(id);
-        model.addAttribute("medicalRecord", medicalRecordOpt.orElse(null));
-        
-        List<MedicalService> activeServices = medicalServiceRepository.findByStatus("ACTIVE");
-        model.addAttribute("activeServices", activeServices);
-        
-        if (appointment != null && "COMPLETED".equalsIgnoreCase(appointment.getStatus())) {
-            action = null;
-        }
-        
-        model.addAttribute("appointment", appointment);
-        model.addAttribute("tab", tab);
-        model.addAttribute("action", action);
-        return "doctor/patient-detail";
-    }
-
-    @PostMapping("/appointments/{id}/services/save")
-    @Transactional
-    public String saveServices(
-            @PathVariable Long id,
-            @RequestParam(value = "serviceIds", required = false) List<Long> serviceIds,
-            jakarta.servlet.http.HttpServletRequest request,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            RedirectAttributes redirectAttributes) {
-        
-        Long doctorId = userDetails.getUser().getId();
-        AppointmentResponse appointment = appointmentService.getAppointmentDetailForReceptionist(id);
-        
-        if (appointment != null && "COMPLETED".equalsIgnoreCase(appointment.getStatus())) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không thể chỉnh sửa dịch vụ của lịch hẹn đã hoàn thành.");
-            return "redirect:/doctor/appointments/" + id + "/detail?tab=services";
-        }
-        
-        // Security check
-        if (appointment == null || !doctorId.equals(appointment.getDoctorId())) {
-            throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền cập nhật dịch vụ cho lịch hẹn này");
-        }
-        
-        MedicalRecord medicalRecord = medicalRecordRepository.findByAppointmentId(id)
-                .orElse(null);
-                
-        if (medicalRecord == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không thể thêm dịch vụ. Vui lòng tạo hồ sơ bệnh án trước.");
-            return "redirect:/doctor/appointments/" + id + "/detail?tab=services";
-        }
-        
-        if (serviceIds != null && !serviceIds.isEmpty()) {
-            for (Long sId : serviceIds) {
-                // Check if this service is already ordered
-                boolean alreadyExists = medicalRecord.getMedicalServiceOrders() != null &&
-                        medicalRecord.getMedicalServiceOrders().stream()
-                                .anyMatch(o -> o.getMedicalService().getId().equals(sId));
-                                
-                if (alreadyExists) {
-                    continue;
-                }
-                
-                MedicalService service = medicalServiceRepository.findById(sId)
-                        .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dịch vụ với ID: " + sId));
-                
-                MedicalServiceOrder order = MedicalServiceOrder.builder()
-                        .medicalRecord(medicalRecord)
-                        .medicalService(service)
-                        .priceReference(service.getReferencePrice())
-                        .status("PENDING_PAYMENT")
-                        .note(null)
-                        .createAt(LocalDateTime.now())
-                        .updateAt(LocalDateTime.now())
-                        .build();
-                        
-                medicalServiceOrderRepository.save(order);
-            }
-            redirectAttributes.addFlashAttribute("successMessage", "Chỉ định dịch vụ khám thành công");
-        } else {
-            redirectAttributes.addFlashAttribute("errorMessage", "Vui lòng chọn ít nhất một dịch vụ");
-        }
-        
-        return "redirect:/doctor/appointments/" + id + "/detail?tab=services";
-    }
-
-    @PostMapping("/appointments/{id}/records/create")
-    public String createMedicalRecord(
-            @PathVariable Long id,
-            @Valid @ModelAttribute CreateMedicalRecordRequest request,
-            BindingResult bindingResult,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            RedirectAttributes redirectAttributes) {
-        
-        AppointmentResponse appointment = appointmentService.getAppointmentDetailForReceptionist(id);
-        if (appointment != null && "COMPLETED".equalsIgnoreCase(appointment.getStatus())) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không thể tạo hồ sơ bệnh án cho lịch hẹn đã hoàn thành.");
-            return "redirect:/doctor/appointments/" + id + "/detail?tab=info";
-        }
-        if (bindingResult.hasErrors()) {
-            String errorMsg = bindingResult.getFieldErrors().stream()
-                    .map(FieldError::getDefaultMessage)
-                    .collect(Collectors.joining("; "));
-            redirectAttributes.addFlashAttribute("errorMessage", errorMsg);
-            redirectAttributes.addFlashAttribute("tempRecord", request);
-            return "redirect:/doctor/appointments/" + id + "/detail?tab=info&action=create";
-        }
-
-        Long doctorId = userDetails.getUser().getId();
-        try {
-            medicalRecordService.createMedicalRecord(id, request, doctorId);
-            redirectAttributes.addFlashAttribute("successMessage", "Tạo hồ sơ bệnh án thành công");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            redirectAttributes.addFlashAttribute("tempRecord", request);
-            return "redirect:/doctor/appointments/" + id + "/detail?tab=info&action=create";
-        }
-        return "redirect:/doctor/appointments/" + id + "/detail?tab=info";
-    }
-
-    @PostMapping("/appointments/{id}/records/update")
-    public String updateMedicalRecord(
-            @PathVariable Long id,
-            @Valid @ModelAttribute UpdateMedicalRecordRequest request,
-            BindingResult bindingResult,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            RedirectAttributes redirectAttributes) {
-        
-        AppointmentResponse appointment = appointmentService.getAppointmentDetailForReceptionist(id);
-        if (appointment != null && "COMPLETED".equalsIgnoreCase(appointment.getStatus())) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không thể chỉnh sửa hồ sơ bệnh án của lịch hẹn đã hoàn thành.");
-            return "redirect:/doctor/appointments/" + id + "/detail?tab=info";
-        }
-        if (bindingResult.hasErrors()) {
-            String errorMsg = bindingResult.getFieldErrors().stream()
-                    .map(FieldError::getDefaultMessage)
-                    .collect(Collectors.joining("; "));
-            redirectAttributes.addFlashAttribute("errorMessage", errorMsg);
-            redirectAttributes.addFlashAttribute("tempRecord", request);
-            return "redirect:/doctor/appointments/" + id + "/detail?tab=info&action=edit";
-        }
-
-        Long doctorId = userDetails.getUser().getId();
-        try {
-            medicalRecordService.updateMedicalRecord(id, request, doctorId);
-            redirectAttributes.addFlashAttribute("successMessage", "Cập nhật hồ sơ bệnh án thành công");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            redirectAttributes.addFlashAttribute("tempRecord", request);
-            return "redirect:/doctor/appointments/" + id + "/detail?tab=info&action=edit";
-        }
-        return "redirect:/doctor/appointments/" + id + "/detail?tab=info";
-    }
-
-    @PostMapping("/appointments/{id}/services/{orderId}/result")
-    @Transactional
-    public String saveServiceResult(
-            @PathVariable Long id,
-            @PathVariable Long orderId,
-            @RequestParam(value = "result", required = false) String result,
-            @RequestParam(value = "note", required = false) String note,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            RedirectAttributes redirectAttributes) {
-        
-        Long doctorId = userDetails.getUser().getId();
-        AppointmentResponse appointment = appointmentService.getAppointmentDetailForReceptionist(id);
-        
-        if (appointment != null && "COMPLETED".equalsIgnoreCase(appointment.getStatus())) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Không thể cập nhật kết quả dịch vụ cho lịch hẹn đã hoàn thành.");
-            return "redirect:/doctor/appointments/" + id + "/detail?tab=services";
-        }
-        
-        // Security check
-        if (appointment == null || !doctorId.equals(appointment.getDoctorId())) {
-            throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền cập nhật kết quả cho lịch hẹn này");
-        }
-        
-        MedicalServiceOrder order = medicalServiceOrderRepository.findById(orderId)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chỉ định dịch vụ với ID: " + orderId));
-                
-        // Ensure this order belongs to the correct medical record of this appointment
-        if (!order.getMedicalRecord().getAppointment().getId().equals(id)) {
-            throw new org.springframework.security.access.AccessDeniedException("Chỉ định dịch vụ này không thuộc về lịch hẹn");
-        }
-        
-        // Ensure the service order is paid (status is not PENDING_PAYMENT and not CANCELLED)
-        if ("PENDING_PAYMENT".equals(order.getStatus())) {
-            throw new org.springframework.security.access.AccessDeniedException("Dịch vụ chưa được thanh toán, không thể cập nhật kết quả");
-        }
-        if ("CANCELLED".equals(order.getStatus())) {
-            throw new org.springframework.security.access.AccessDeniedException("Dịch vụ đã bị hủy, không thể cập nhật kết quả");
-        }
-
-        // Update result, note and status
-        order.setNote(note);
-        order.setResult(result);
-        if (result != null && !result.trim().isEmpty()) {
-            if (!"PENDING_PAYMENT".equals(order.getStatus()) && !"CANCELLED".equals(order.getStatus())) {
-                order.setStatus("COMPLETED");
-            }
-        }
-        order.setUpdateAt(LocalDateTime.now());
-        
-        medicalServiceOrderRepository.save(order);
-        
-        redirectAttributes.addFlashAttribute("successMessage", "Cập nhật dịch vụ khám thành công");
-        return "redirect:/doctor/appointments/" + id + "/detail?tab=services";
-    }
 }
-
-

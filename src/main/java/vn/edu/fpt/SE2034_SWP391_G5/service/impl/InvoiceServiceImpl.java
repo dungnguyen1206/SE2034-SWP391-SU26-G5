@@ -502,7 +502,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                     .filter(i -> "UNPAID".equalsIgnoreCase(i.getPaymentStatus()))
                     .findFirst()
                     .orElse(null);
-            
+
             if (newInvoice != null && newInvoice.getInvoiceItems() != null) {
                 invoiceItemRepository.deleteAll(newInvoice.getInvoiceItems());
                 newInvoice.getInvoiceItems().clear();

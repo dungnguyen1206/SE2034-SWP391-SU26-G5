@@ -930,6 +930,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .build();
     }
 
+
     private String buildFullName(String lastName, String middleName, String firstName) {
         StringBuilder sb = new StringBuilder();
 
@@ -1024,6 +1025,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 status.toUpperCase());
     }
 
+    //LinhNH
     @Override
     @Transactional
     public void updateAppointmentStatus(Long appointmentId, String newStatus) {

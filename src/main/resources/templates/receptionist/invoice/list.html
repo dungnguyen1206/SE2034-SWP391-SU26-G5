@@ -66,6 +66,7 @@
                         <th>Mã Lịch Hẹn</th>
                         <th>Bệnh nhân</th>
                         <th>SĐT</th>
+                        <th>Dịch vụ</th>
                         <th>Tổng Tiền</th>
                         <th>Trạng thái</th>
                         <th>Thao tác</th>
@@ -80,6 +81,7 @@
                         </td>
                         <td th:text="${inv.patientFullName}"></td>
                         <td th:text="${inv.phone != null ? inv.phone : '-'}"></td>
+                        <td th:text="${inv.services}" th:title="${inv.services}" style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></td>
                         <td>
                             <strong style="color: #2563eb;" th:text="${inv.displayAmount != null ? #numbers.formatDecimal(inv.displayAmount, 0, 'COMMA', 0, 'POINT') : '0'} + ' đ'"></strong>
                         </td>
@@ -105,7 +107,7 @@
                     <!-- Không có dữ liệu -->
                     <tbody th:if="${invoicePage == null || invoicePage.empty}">
                     <tr>
-                        <td colspan="7" class="empty-row">Không có hóa đơn nào</td>
+                        <td colspan="8" class="empty-row">Không có hóa đơn nào</td>
                     </tr>
                     </tbody>
                 </table>

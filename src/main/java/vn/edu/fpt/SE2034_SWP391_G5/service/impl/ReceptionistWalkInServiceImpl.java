@@ -292,6 +292,7 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
         item.setQuantity(1);
         item.setLineTotal(initialService.getReferencePrice());
         invoiceItemRepository.save(item);
+
         return appointment.getId();
     }
     // ======================== END WALK-IN BOOKING RECEPTIONIST ========================
