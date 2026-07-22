@@ -169,8 +169,21 @@ public class ScheduleServiceImpl implements ScheduleService {
         LocalDate prevWeekMonday = monday.minusWeeks(1);
         LocalDate nextWeekMonday = monday.plusWeeks(1);
 
-        LocalDate sunday = monday.plusDays(6);
-        double totalHours = doctorScheduleRepository.calculateTotalWorkHours(doctorId, monday, sunday);
+        // Calculate summary metrics
+        double totalHours = 0;
+        for (DoctorScheduleWeekResponse day : weekSchedule) {
+            if (day.getShifts() != null) {
+                for (DoctorScheduleWeekResponse.ShiftDetail shift : day.getShifts()) {
+                    if ("MORNING".equalsIgnoreCase(shift.getShift())) {
+                        totalHours += 4.5;
+                    } else if ("AFTERNOON".equalsIgnoreCase(shift.getShift())) {
+                        totalHours += 5.0;
+                    } else if ("FULL_DAY".equalsIgnoreCase(shift.getShift())) {
+                        totalHours += 12.0;
+                    }
+                }
+            }
+        }
 
         // Formatting double hours
         String totalHoursStr;
@@ -179,9 +192,15 @@ public class ScheduleServiceImpl implements ScheduleService {
         } else {
             totalHoursStr = String.format("%.1f", totalHours).replace(',', '.');
         }
-
-        long slotCount = timeSlotRepository.countSlotsByDoctorAndWeek(doctorId, monday, sunday);
-        String slotCountStr = String.valueOf(slotCount);
+        int shiftCount = 0;
+        for (DoctorScheduleWeekResponse day : weekSchedule) {
+            if (day.getShifts() != null) {
+                for (DoctorScheduleWeekResponse.ShiftDetail shift : day.getShifts()) {
+                    shiftCount++;
+                }
+            }
+        }
+        String shiftCountStr = String.valueOf(shiftCount);
 
         // Performance evaluation
         String performance = "N/A";
@@ -198,7 +217,7 @@ public class ScheduleServiceImpl implements ScheduleService {
         return DoctorScheduleReportResponse.builder()
                 .weekSchedule(weekSchedule)
                 .totalHoursStr(totalHoursStr)
-                .slotCountStr(slotCountStr)
+                .shiftCountStr(shiftCountStr)
                 .performance(performance)
                 .prevWeekDate(prevWeekMonday.toString())
                 .nextWeekDate(nextWeekMonday.toString())

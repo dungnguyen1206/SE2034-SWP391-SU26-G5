@@ -302,6 +302,27 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findAllAppointmentsForBilling(@Param("search") String search);
     // ======================== END LIST INVOICE RECEPTIONIST ========================
 
+    @Query("SELECT DISTINCT a FROM Appointment a " +
+            "LEFT JOIN FETCH a.patient p " +
+            "LEFT JOIN FETCH p.addresses addr " +
+            "LEFT JOIN FETCH addr.province " +
+            "LEFT JOIN FETCH a.doctor d " +
+            "LEFT JOIN FETCH d.department " +
+            "LEFT JOIN FETCH a.service sv " +
+            "LEFT JOIN FETCH sv.department " +
+            "LEFT JOIN FETCH a.slot sl " +
+            "LEFT JOIN FETCH sl.schedule sch " +
+            "LEFT JOIN FETCH sch.room " +
+            "LEFT JOIN FETCH a.invoices inv " +
+            "LEFT JOIN FETCH inv.invoiceItems items " +
+            "LEFT JOIN FETCH a.medicalRecord mr " +
+            "LEFT JOIN FETCH mr.medicalServiceOrders mso " +
+            "LEFT JOIN FETCH mso.medicalService ms " +
+            "LEFT JOIN FETCH mso.invoiceItem ii " +
+            "LEFT JOIN FETCH ii.invoice " +
+            "WHERE a.id = :appointmentId")
+    Optional<Appointment> findAppointmentDetailForInvoice(@Param("appointmentId") Long appointmentId);
+
     // ------------------------------------------------------------------------------------
 
     List<Appointment> findByPatientIdOrderByCreatedAtDesc(Long patientId);
