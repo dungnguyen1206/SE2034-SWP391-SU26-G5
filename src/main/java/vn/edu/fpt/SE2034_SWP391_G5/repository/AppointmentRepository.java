@@ -40,6 +40,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                         "JOIN FETCH a.slot sl " +
                         "JOIN FETCH sl.schedule ds " +
                         "JOIN FETCH ds.room r " +
+                        "LEFT JOIN FETCH a.medicalRecord mr " +
                         "WHERE a.bookingDate = :today " +
                         "AND (:search IS NULL OR :search = '' " +
                         "OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :search, '%')) " +
@@ -88,6 +89,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                         "JOIN FETCH a.slot sl " +
                         "JOIN FETCH sl.schedule ds " +
                         "JOIN FETCH ds.room r " +
+                        "LEFT JOIN FETCH a.medicalRecord mr " +
                         "WHERE a.bookingDate BETWEEN :fromDate AND :toDate " +
                         "AND (:status IS NULL OR :status = '' OR a.status = :status) " +
                         "AND (:search IS NULL OR :search = '' " +
@@ -146,6 +148,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                         "join fetch a.slot sl " +
                         "join fetch sl.schedule ds " +
                         "join fetch ds.room r " +
+                        "LEFT JOIN fetch a.medicalRecord mr " +
                         "WHERE a.bookingDate =:today " +
                         "order by sl.startTime asc")
         Page<Appointment> findAppointmentsByBookingDate(@Param("today") LocalDate today, Pageable pageable);
@@ -211,6 +214,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                         "JOIN FETCH a.slot sl " +
                         "JOIN FETCH sl.schedule sch " +
                         "JOIN FETCH sch.room r " +
+                        "LEFT JOIN FETCH a.medicalRecord mr " +
                         "WHERE a.bookingDate = :today " +
                         "AND a.status IN ('WAITING', 'EXAMINING') " +
                         "ORDER BY r.roomNumber ASC, a.checkInTime ASC, a.id ASC")
@@ -345,5 +349,27 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
         @Query("SELECT a FROM Appointment a WHERE a.patient.phone = :phone AND a.bookingDate = :today AND a.status = 'CONFIRMED' ORDER BY a.slot.startTime ASC")
         List<Appointment> findConfirmedAppointmentsByPhoneAndDate(@Param("phone") String phone,
                         @Param("today") LocalDate today);
+
+
+        @Query("SELECT DISTINCT a FROM Appointment a " +
+                "LEFT JOIN FETCH a.patient p " +
+                "LEFT JOIN FETCH p.addresses addr " +
+                "LEFT JOIN FETCH addr.province " +
+                "LEFT JOIN FETCH a.doctor d " +
+                "LEFT JOIN FETCH d.department " +
+                "LEFT JOIN FETCH a.service sv " +
+                "LEFT JOIN FETCH sv.department " +
+                "LEFT JOIN FETCH a.slot sl " +
+                "LEFT JOIN FETCH sl.schedule sch " +
+                "LEFT JOIN FETCH sch.room " +
+                "LEFT JOIN FETCH a.invoices inv " +
+                "LEFT JOIN FETCH inv.invoiceItems items " +
+                "LEFT JOIN FETCH a.medicalRecord mr " +
+                "LEFT JOIN FETCH mr.medicalServiceOrders mso " +
+                "LEFT JOIN FETCH mso.medicalService ms " +
+                "LEFT JOIN FETCH mso.invoiceItem ii " +
+                "LEFT JOIN FETCH ii.invoice " +
+                "WHERE a.id = :appointmentId")
+        Optional<Appointment> findAppointmentDetailForInvoice(@Param("appointmentId") Long appointmentId);
 
 }

@@ -204,14 +204,26 @@ public class InvoiceServiceImpl implements InvoiceService {
         long totalUnpaidCount = 0;
 
         for (Appointment a : allAppointments) {
-            BigDecimal totalExpected = a.getService() != null ? a.getService().getReferencePrice() : BigDecimal.ZERO;
+            List<String> serviceNames = new java.util.ArrayList<>();
+            if (a.getService() != null) {
+                serviceNames.add(a.getService().getName());
+            }
+
+            BigDecimal totalExpected = BigDecimal.ZERO;
+            if (a.getService() != null && a.getService().getReferencePrice() != null) {
+                totalExpected = a.getService().getReferencePrice();
+            }
             if (a.getMedicalRecord() != null && a.getMedicalRecord().getMedicalServiceOrders() != null) {
                 for (MedicalServiceOrder order : a.getMedicalRecord().getMedicalServiceOrders()) {
                     if (order.getPriceReference() != null && !"CANCELLED".equalsIgnoreCase(order.getStatus())) {
                         totalExpected = totalExpected.add(order.getPriceReference());
                     }
+                    if (!"CANCELLED".equalsIgnoreCase(order.getStatus()) && order.getMedicalService() != null) {
+                        serviceNames.add(order.getMedicalService().getName());
+                    }
                 }
             }
+            String servicesStr = serviceNames.isEmpty() ? "-" : String.join(", ", serviceNames);
 
             BigDecimal totalPaid = BigDecimal.ZERO;
             if (a.getInvoices() != null) {
@@ -274,6 +286,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                     .displayAmount(displayAmount)
                     .paymentStatus(status)
                     .createdAt(createdAt)
+                    .services(servicesStr)
                     .build());
         }
 
@@ -292,6 +305,10 @@ public class InvoiceServiceImpl implements InvoiceService {
             // nhất)
             if (r1.getCreatedAt() != null && r2.getCreatedAt() != null) {
                 return r2.getCreatedAt().compareTo(r1.getCreatedAt());
+            } else if (r1.getCreatedAt() == null && r2.getCreatedAt() != null) {
+                return 1;
+            } else if (r1.getCreatedAt() != null && r2.getCreatedAt() == null) {
+                return -1;
             }
             return 0;
         });

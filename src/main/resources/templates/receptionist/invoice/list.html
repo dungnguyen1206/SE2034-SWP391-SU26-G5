@@ -1,122 +1,137 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <title>Quản Lý Hóa Đơn</title>
+    <head>
+        <meta charset="UTF-8">
+        <title>Quản Lý Hóa Đơn</title>
 
-    <link rel="stylesheet" th:href="@{/css/receptionist/common/sidebar.css}">
-    <link rel="stylesheet" th:href="@{/css/receptionist/common/header.css}">
-    <link rel="stylesheet" th:href="@{/css/receptionist/invoice/list.css}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-</head>
+        <link rel="stylesheet" th:href="@{/css/receptionist/common/sidebar.css}">
+        <link rel="stylesheet" th:href="@{/css/receptionist/common/header.css}">
+        <link rel="stylesheet" th:href="@{/css/receptionist/invoice/list.css}">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    </head>
 
-<body>
-<div class="layout">
+    <body>
+        <div class="layout">
 
-    <!-- Sidebar -->
-    <div th:replace="~{receptionist/common/sidebar :: sidebar('invoice')}"></div>
+            <!-- Sidebar -->
+            <div th:replace="~{receptionist/common/sidebar :: sidebar('invoice')}"></div>
 
-    <main class="main">
+            <main class="main">
 
-        <!-- Header -->
-        <div th:replace="~{receptionist/common/header :: header('Quản lý Hóa đơn')}"></div>
+                <!-- Header -->
+                <div th:replace="~{receptionist/common/header :: header('Quản lý Hóa đơn')}"></div>
 
-        <section class="appointment-card" style="margin-top: 28px;">
+                <section class="appointment-card" style="margin-top: 28px;">
 
-            <!-- Statistics -->
-            <div style="display: flex; gap: 20px; margin-bottom: 20px;">
-                <div style="flex: 1; display: flex; align-items: center; padding: 20px; border-radius: 12px; background-color: #e8f5e9; border: 1px solid #c8e6c9; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                    <i class="bi bi-check-circle-fill" style="font-size: 2.5rem; color: #4caf50; margin-right: 15px;"></i>
-                    <div>
-                        <div style="color: #2e7d32; font-weight: bold; font-size: 0.9rem; margin-bottom: 5px; text-transform: uppercase;">Tổng Đã Thanh Toán</div>
-                        <div style="font-size: 1.8rem; font-weight: bold; color: #333; line-height: 1;" th:text="${totalPaidCount}">0</div>
+                    <!-- Statistics -->
+                    <div style="display: flex; gap: 20px; margin-bottom: 20px;">
+                        <div style="flex: 1; display: flex; align-items: center; padding: 20px; border-radius: 12px; background-color: #e8f5e9; border: 1px solid #c8e6c9; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                            <i class="bi bi-check-circle-fill"
+                               style="font-size: 2.5rem; color: #4caf50; margin-right: 15px;"></i>
+                            <div>
+                                <div style="color: #2e7d32; font-weight: bold; font-size: 0.9rem; margin-bottom: 5px; text-transform: uppercase;">
+                                    Tổng Đã Thanh Toán
+                                </div>
+                                <div style="font-size: 1.8rem; font-weight: bold; color: #333; line-height: 1;"
+                                     th:text="${totalPaidCount}">0
+                                </div>
+                            </div>
+                        </div>
+                        <div style="flex: 1; display: flex; align-items: center; padding: 20px; border-radius: 12px; background-color: #ffebee; border: 1px solid #ffcdd2; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                            <i class="bi bi-exclamation-circle-fill"
+                               style="font-size: 2.5rem; color: #f44336; margin-right: 15px;"></i>
+                            <div>
+                                <div style="color: #c62828; font-weight: bold; font-size: 0.9rem; margin-bottom: 5px; text-transform: uppercase;">
+                                    Tổng Chưa Thanh Toán
+                                </div>
+                                <div style="font-size: 1.8rem; font-weight: bold; color: #333; line-height: 1;"
+                                     th:text="${totalUnpaidCount}">0
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div style="flex: 1; display: flex; align-items: center; padding: 20px; border-radius: 12px; background-color: #ffebee; border: 1px solid #ffcdd2; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-                    <i class="bi bi-exclamation-circle-fill" style="font-size: 2.5rem; color: #f44336; margin-right: 15px;"></i>
-                    <div>
-                        <div style="color: #c62828; font-weight: bold; font-size: 0.9rem; margin-bottom: 5px; text-transform: uppercase;">Tổng Chưa Thanh Toán</div>
-                        <div style="font-size: 1.8rem; font-weight: bold; color: #333; line-height: 1;" th:text="${totalUnpaidCount}">0</div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Search And Filter -->
-            <form class="appointment-toolbar" th:action="@{/receptionist/invoice}" method="get">
-                <div class="search-box">
-                    <span class="search-icon"> ⌕ </span>
-                    <input type="text" name="keyword" placeholder="Mã HĐ, Tên bệnh nhân..." th:value="${keyword}">
-                </div>
+                    <!-- Search And Filter -->
+                    <form class="appointment-toolbar" th:action="@{/receptionist/invoice}" method="get">
+                        <div class="search-box">
+                            <span class="search-icon"> ⌕ </span>
+                            <input type="text" name="keyword" placeholder="Mã HĐ, Tên bệnh nhân..."
+                                   th:value="${keyword}">
+                        </div>
 
-                <select class="status-filter" name="paymentStatus">
-                    <option value="" th:selected="${paymentStatus == ''}">Tất cả trạng thái</option>
-                    <option value="UNPAID" th:selected="${paymentStatus == 'UNPAID'}">Chưa thanh toán</option>
-                    <option value="PAID" th:selected="${paymentStatus == 'PAID'}">Đã thanh toán</option>
-                </select>
+                        <select class="status-filter" name="paymentStatus">
+                            <option value="" th:selected="${paymentStatus == ''}">Tất cả trạng thái</option>
+                            <option value="UNPAID" th:selected="${paymentStatus == 'UNPAID'}">Chưa thanh toán</option>
+                            <option value="PAID" th:selected="${paymentStatus == 'PAID'}">Đã thanh toán</option>
+                        </select>
 
-                <button type="submit" class="btn-search">Tìm Kiếm</button>
-                <a th:href="@{/receptionist/invoice}" class="btn-reset">Làm Mới</a>
-            </form>
+                        <button type="submit" class="btn-search">Tìm Kiếm</button>
+                        <a th:href="@{/receptionist/invoice}" class="btn-reset">Làm Mới</a>
+                    </form>
 
-            <div class="table-wrapper">
-                <table class="appointment-table">
-                    <thead>
-                    <tr>
-                        <th>STT</th>
-                        <th>Mã Lịch Hẹn</th>
-                        <th>Bệnh nhân</th>
-                        <th>SĐT</th>
-                        <th>Dịch vụ</th>
-                        <th>Tổng Tiền</th>
-                        <th>Trạng thái</th>
-                        <th>Thao tác</th>
-                    </tr>
-                    </thead>
+                    <div class="table-wrapper">
+                        <table class="appointment-table">
+                            <thead>
+                                <tr>
+                                    <th>STT</th>
+                                    <th>Mã Lịch Hẹn</th>
+                                    <th>Bệnh nhân</th>
+                                    <th>SĐT</th>
+                                    <th>Dịch vụ</th>
+                                    <th>Tổng Tiền</th>
+                                    <th>Trạng thái</th>
+                                    <th>Thao tác</th>
+                                </tr>
+                            </thead>
 
-                    <tbody th:if="${invoicePage != null && !invoicePage.empty}">
-                    <tr th:each="inv, iterStat : ${invoicePage.content}">
-                        <td th:text="${iterStat.count + (invoicePage.number * invoicePage.size)}"></td>
-                        <td>
-                            <span class="appointment-code" th:text="${inv.appointmentCode}"></span>
-                        </td>
-                        <td th:text="${inv.patientFullName}"></td>
-                        <td th:text="${inv.phone != null ? inv.phone : '-'}"></td>
-                        <td th:text="${inv.services}" th:title="${inv.services}" style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></td>
-                        <td>
-                            <strong style="color: #2563eb;" th:text="${inv.displayAmount != null ? #numbers.formatDecimal(inv.displayAmount, 0, 'COMMA', 0, 'POINT') : '0'} + ' đ'"></strong>
-                        </td>
-                        <td>
+                            <tbody th:if="${invoicePage != null && !invoicePage.empty}">
+                                <tr th:each="inv, iterStat : ${invoicePage.content}">
+                                    <td th:text="${iterStat.count + (invoicePage.number * invoicePage.size)}"></td>
+                                    <td>
+                                        <span class="appointment-code" th:text="${inv.appointmentCode}"></span>
+                                    </td>
+                                    <td th:text="${inv.patientFullName}"></td>
+                                    <td th:text="${inv.phone != null ? inv.phone : '-'}"></td>
+                                    <td th:text="${inv.services}" th:title="${inv.services}"
+                                        style="max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"></td>
+                                    <td>
+                                        <strong style="color: #2563eb;"
+                                                th:text="${inv.displayAmount != null ? #numbers.formatDecimal(inv.displayAmount, 0, 'COMMA', 0, 'POINT') : '0'} + ' đ'"></strong>
+                                    </td>
+                                    <td>
                             <span th:if="${inv.paymentStatus == 'UNPAID'}" class="status-badge status-cancelled">
                                 Chưa thanh toán
                             </span>
-                            <span th:if="${inv.paymentStatus == 'PAID'}" class="status-badge status-completed">
+                                        <span th:if="${inv.paymentStatus == 'PAID'}"
+                                              class="status-badge status-completed">
                                 Đã thanh toán
                             </span>
-                        </td>
-                        <td class="action-cell">
-                            <a th:if="${inv.paymentStatus == 'UNPAID'}"
-                               class="btn-checkin"
-                               th:href="@{/receptionist/invoice/{id}(id=${inv.appointmentId})}">Thanh toán</a>
-                            <a th:if="${inv.paymentStatus == 'PAID'}"
-                               class="btn-detail"
-                               th:href="@{/receptionist/invoice/{id}(id=${inv.appointmentId})}">Chi tiết</a>
-                        </td>
-                    </tr>
-                    </tbody>
+                                    </td>
+                                    <td class="action-cell">
+                                        <a th:if="${inv.paymentStatus == 'UNPAID'}"
+                                           class="btn-checkin"
+                                           th:href="@{/receptionist/invoice/{id}(id=${inv.appointmentId})}">Thanh
+                                            toán</a>
+                                        <a th:if="${inv.paymentStatus == 'PAID'}"
+                                           class="btn-detail"
+                                           th:href="@{/receptionist/invoice/{id}(id=${inv.appointmentId})}">Chi tiết</a>
+                                    </td>
+                                </tr>
+                            </tbody>
 
-                    <!-- Không có dữ liệu -->
-                    <tbody th:if="${invoicePage == null || invoicePage.empty}">
-                    <tr>
-                        <td colspan="8" class="empty-row">Không có hóa đơn nào</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
+                            <!-- Không có dữ liệu -->
+                            <tbody th:if="${invoicePage == null || invoicePage.empty}">
+                                <tr>
+                                    <td colspan="8" class="empty-row">Không có hóa đơn nào</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
 
-            <!-- Pagination -->
-            <div class="pagination-footer"
-                 th:if="${invoicePage != null and invoicePage.totalPages > 1}"
-                 th:with="currentPage=${invoicePage.number + 1},
+                    <!-- Pagination -->
+                    <div class="pagination-footer"
+                         th:if="${invoicePage != null and invoicePage.totalPages > 1}"
+                         th:with="currentPage=${invoicePage.number + 1},
                           totalPages=${invoicePage.totalPages},
                           maxPages=5,
                           halfMax=${2},
@@ -126,53 +141,53 @@
                                       currentPage - halfMax)},
                           endPage=${startPage + maxPages - 1 > totalPages ? totalPages : startPage + maxPages - 1}">
 
-                <div class="pagination-info">
+                        <div class="pagination-info">
                     <span th:text="'Trang ' + ${currentPage} + ' / ' + ${totalPages}">
                         Trang 1 / 1
                     </span>
-                    <span th:text="'Tổng: ' + ${invoicePage.totalElements} + ' hóa đơn'">
+                            <span th:text="'Tổng: ' + ${invoicePage.totalElements} + ' hóa đơn'">
                         Tổng: 0 hóa đơn
                     </span>
-                </div>
+                        </div>
 
-                <div class="pagination">
-                    <!-- Trước -->
-                    <a class="page-btn"
-                       th:classappend="${invoicePage.first} ? ' disabled'"
-                       th:href="@{/receptionist/invoice(
+                        <div class="pagination">
+                            <!-- Trước -->
+                            <a class="page-btn"
+                               th:classappend="${invoicePage.first} ? ' disabled'"
+                               th:href="@{/receptionist/invoice(
                             page=${currentPage - 1},
                             keyword=${keyword},
                             paymentStatus=${paymentStatus}
                        )}">
-                        Trước
-                    </a>
+                                Trước
+                            </a>
 
-                    <!-- Số trang -->
-                    <a class="page-number"
-                       th:each="pageNumber : ${#numbers.sequence(startPage, endPage)}"
-                       th:classappend="${pageNumber == currentPage} ? ' active'"
-                       th:href="@{/receptionist/invoice(
+                            <!-- Số trang -->
+                            <a class="page-number"
+                               th:each="pageNumber : ${#numbers.sequence(startPage, endPage)}"
+                               th:classappend="${pageNumber == currentPage} ? ' active'"
+                               th:href="@{/receptionist/invoice(
                             page=${pageNumber},
                             keyword=${keyword},
                             paymentStatus=${paymentStatus}
                        )}"
-                       th:text="${pageNumber}">
-                    </a>
+                               th:text="${pageNumber}">
+                            </a>
 
-                    <!-- Sau -->
-                    <a class="page-btn"
-                       th:classappend="${invoicePage.last} ? ' disabled'"
-                       th:href="@{/receptionist/invoice(
+                            <!-- Sau -->
+                            <a class="page-btn"
+                               th:classappend="${invoicePage.last} ? ' disabled'"
+                               th:href="@{/receptionist/invoice(
                             page=${currentPage + 1},
                             keyword=${keyword},
                             paymentStatus=${paymentStatus}
                        )}">
-                        Sau
-                    </a>
-                </div>
-            </div>
-        </section>
-    </main>
-</div>
-</body>
+                                Sau
+                            </a>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </body>
 </html>

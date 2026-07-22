@@ -19,4 +19,5 @@ public class InvoiceListResponse {
     private BigDecimal displayAmount;
     private String paymentStatus;
     private LocalDateTime createdAt;
+    private String services;
 }
