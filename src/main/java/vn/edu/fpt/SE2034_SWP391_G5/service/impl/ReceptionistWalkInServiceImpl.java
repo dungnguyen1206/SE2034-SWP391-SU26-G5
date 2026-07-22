@@ -193,8 +193,8 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
         User selectedDoctor = selectedSchedule.getDoctor();
         Integer doctorDepartmentId = selectedDoctor == null || selectedDoctor.getDepartment() == null
                 ? null : selectedDoctor.getDepartment().getId();
-        Integer serviceDepartmentId = initialService.getDepartment() == null
-                ? null : initialService.getDepartment().getId();
+        Integer serviceDepartmentId = selectedService.getDepartment() == null
+                ? null : selectedService.getDepartment().getId();
 
         if (!"ACTIVE".equalsIgnoreCase(selectedSchedule.getStatus())
                 || selectedSchedule.getWeekSchedule() == null

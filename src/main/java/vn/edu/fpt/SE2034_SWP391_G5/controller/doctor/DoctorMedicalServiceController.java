@@ -49,6 +49,10 @@ public class DoctorMedicalServiceController {
             throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền cập nhật dịch vụ cho lịch hẹn này");
         }
 
+        if ("COMPLETED".equals(appointment.getStatus())) {
+            throw new org.springframework.security.access.AccessDeniedException("Cuộc hẹn đã hoàn thành, không thể thêm dịch vụ khám");
+        }
+
         MedicalRecord medicalRecord = medicalRecordRepository.findByAppointmentId(id)
                 .orElse(null);
 
@@ -109,6 +113,10 @@ public class DoctorMedicalServiceController {
             throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền cập nhật kết quả cho lịch hẹn này");
         }
 
+        if ("COMPLETED".equals(appointment.getStatus())) {
+            throw new org.springframework.security.access.AccessDeniedException("Cuộc hẹn đã hoàn thành, không thể cập nhật kết quả dịch vụ");
+        }
+
         MedicalServiceOrder order = medicalServiceOrderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chỉ định dịch vụ với ID: " + orderId));
 
@@ -138,6 +146,46 @@ public class DoctorMedicalServiceController {
         medicalServiceOrderRepository.save(order);
 
         redirectAttributes.addFlashAttribute("successMessage", "Cập nhật dịch vụ khám thành công");
+        return "redirect:/doctor/appointments/" + id + "/detail?tab=services";
+    }
+
+    @PostMapping("/appointments/{id}/services/{orderId}/delete")
+    @Transactional
+    public String deleteService(
+            @PathVariable Long id,
+            @PathVariable Long orderId,
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            RedirectAttributes redirectAttributes) {
+
+        Long doctorId = userDetails.getUser().getId();
+        AppointmentResponse appointment = appointmentService.getAppointmentDetailForReceptionist(id);
+
+        // Security check
+        if (appointment == null || !doctorId.equals(appointment.getDoctorId())) {
+            throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền xóa dịch vụ cho lịch hẹn này");
+        }
+
+        if ("COMPLETED".equals(appointment.getStatus())) {
+            throw new org.springframework.security.access.AccessDeniedException("Cuộc hẹn đã hoàn thành, không thể xóa dịch vụ khám");
+        }
+
+        MedicalServiceOrder order = medicalServiceOrderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chỉ định dịch vụ với ID: " + orderId));
+
+        // Ensure this order belongs to the correct medical record of this appointment
+        if (!order.getMedicalRecord().getAppointment().getId().equals(id)) {
+            throw new org.springframework.security.access.AccessDeniedException("Chỉ định dịch vụ này không thuộc về lịch hẹn");
+        }
+
+        // Only allow deletion if status is PENDING_PAYMENT (unpaid)
+        if (!"PENDING_PAYMENT".equals(order.getStatus())) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Dịch vụ đã được thanh toán hoặc đã thực hiện, không thể xóa");
+            return "redirect:/doctor/appointments/" + id + "/detail?tab=services";
+        }
+
+        medicalServiceOrderRepository.delete(order);
+
+        redirectAttributes.addFlashAttribute("successMessage", "Xóa dịch vụ khám thành công");
         return "redirect:/doctor/appointments/" + id + "/detail?tab=services";
     }
 }

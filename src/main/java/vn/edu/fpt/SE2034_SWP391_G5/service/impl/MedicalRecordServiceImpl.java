@@ -41,6 +41,11 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             throw new BadRequestException("Bạn không có quyền tạo hồ sơ bệnh án cho lịch hẹn này");
         }
 
+        // Check if appointment status is "Đang khám" (EXAMINING or IN_PROGRESS)
+        if (!"EXAMINING".equalsIgnoreCase(appointment.getStatus()) && !"IN_PROGRESS".equalsIgnoreCase(appointment.getStatus())) {
+            throw new BadRequestException("Chỉ cho phép tạo hồ sơ bệnh án khi trạng thái cuộc hẹn là 'Đang khám'");
+        }
+
         // Check if medical record already exists
         if (medicalRecordRepository.findByAppointmentId(appointmentId).isPresent()) {
             throw new BadRequestException("Hồ sơ bệnh án cho lịch hẹn này đã tồn tại");

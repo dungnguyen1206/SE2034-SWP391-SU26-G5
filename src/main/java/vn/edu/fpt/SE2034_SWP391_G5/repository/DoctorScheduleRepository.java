@@ -112,10 +112,4 @@ public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, 
                                                    @Param("shift") String shift,
                                                    @Param("weekScheduleId")  Long weekScheduleId,
                                                    Pageable pageable);
-
-
-
-
-
-
 }
