@@ -105,11 +105,17 @@
         <div class="detail-content-card" style="margin-top: 24px;">
             <div class="card-header-row">
                 <h3 class="card-title" style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 0;">Hồ sơ bệnh án</h3>
-                <a th:if="${medicalRecord == null and appointment.status != 'COMPLETED'}"
+                <a th:if="${medicalRecord == null and (appointment.status == 'EXAMINING' or appointment.status == 'IN_PROGRESS')}"
                    th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab}, action='create')}"
                    class="btn-create-record">
                     <i class="fa-solid fa-plus"></i> Tạo hồ sơ bệnh án
                 </a>
+                <span th:if="${medicalRecord == null and appointment.status != 'COMPLETED' and appointment.status != 'EXAMINING' and appointment.status != 'IN_PROGRESS'}"
+                      class="btn-create-record"
+                      title="Vui lòng chuyển trạng thái lịch hẹn sang 'Đang khám' để tạo hồ sơ bệnh án"
+                      style="background-color: #cbd5e1; color: #64748b; cursor: not-allowed;">
+                    <i class="fa-solid fa-plus"></i> Tạo hồ sơ bệnh án
+                </span>
                 <a th:if="${medicalRecord != null and appointment.status != 'COMPLETED'}"
                    th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab}, action='edit')}"
                    class="btn-create-record" style="background-color: #f59e0b;">
