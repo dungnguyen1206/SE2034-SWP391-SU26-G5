@@ -74,21 +74,36 @@
                             <td style="padding: 12px 8px; font-weight: 500;"
                                 th:text="${order.result != null and !order.result.isEmpty() ? order.result : (order.status == 'COMPLETED' ? 'Đã có kết quả' : 'Chưa có kết quả')}">-</td>
                             <td style="padding: 12px 8px;">
+                                <span th:if="${appointment.status == 'COMPLETED'}"
+                                      style="color: #64748b; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; font-weight: 600;">
+                                    <i class="fa-solid fa-lock"></i> Đã khóa (Hoàn thành)
+                                </span>
+                                <div th:if="${appointment.status != 'COMPLETED' and order.status == 'PENDING_PAYMENT'}"
+                                     style="display: inline-flex; align-items: center; gap: 8px;">
+                                    <span style="color: #ef4444; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; font-weight: 600;">
+                                        <i class="fa-solid fa-lock"></i> Chưa thanh toán
+                                    </span>
+                                    <form th:action="@{/doctor/appointments/{id}/services/{orderId}/delete(id=${appointment.id}, orderId=${order.id})}"
+                                          method="POST" style="display: inline;"
+                                          th:onsubmit="return confirm('Bạn có chắc chắn muốn xóa dịch vụ \'' + [[${order.medicalService.name}]] + '\' không?');">
+                                        <button type="submit" style="background: none; border: none; padding: 4px; cursor: pointer; color: #ef4444; display: inline-flex; align-items: center; justify-content: center; transition: color 0.2s;"
+                                                onmouseover="this.style.color='#b91c1c'" onmouseout="this.style.color='#ef4444'"
+                                                title="Xóa dịch vụ">
+                                            <i class="fa-solid fa-trash" style="font-size: 14px;"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                                <span th:if="${appointment.status != 'COMPLETED' and order.status == 'CANCELLED'}"
+                                      style="color: #94a3b8; font-size: 13px; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class="fa-solid fa-ban"></i> Đã hủy
+                                </span>
                                 <button type="button"
-                                        th:if="${order.status != 'PENDING_PAYMENT' and order.status != 'CANCELLED' and appointment.status != 'COMPLETED'}"
+                                        th:if="${appointment.status != 'COMPLETED' and order.status != 'PENDING_PAYMENT' and order.status != 'CANCELLED'}"
                                         th:onclick="openEditResultModal([[${order.id}]], [[${order.medicalService.name}]], [[${order.result != null ? order.result : ''}]], [[${order.note != null ? order.note : ''}]])"
                                         class="btn-create-record"
                                         style="background-color: #2563eb; color: white; padding: 6px 12px; font-size: 12px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; border: none; cursor: pointer;">
                                     <i class="fa-solid fa-pen-to-square"></i> Nhập KQ
                                 </button>
-                                <span th:if="${order.status == 'PENDING_PAYMENT'}"
-                                      style="color: #ef4444; font-size: 12px; display: inline-flex; align-items: center; gap: 4px; font-weight: 600;">
-                                    <i class="fa-solid fa-lock"></i> Chưa thanh toán
-                                </span>
-                                <span th:if="${order.status == 'CANCELLED'}"
-                                      style="color: #94a3b8; font-size: 13px; display: inline-flex; align-items: center; gap: 4px;">
-                                    <i class="fa-solid fa-ban"></i> Đã hủy
-                                </span>
                             </td>
                         </tr>
                     </tbody>

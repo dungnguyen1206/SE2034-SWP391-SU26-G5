@@ -4,11 +4,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import vn.edu.fpt.SE2034_SWP391_G5.service.SmsService;
-
-
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +30,7 @@ public class SmsServiceImpl implements SmsService {
     }
 
     @Override
+    @Async
     public void sendOtpSms(String phoneNumber, String otp) {
         // Format phone number to standard E.164 if it starts with 0
         String formattedPhone = phoneNumber;
@@ -59,12 +59,12 @@ public class SmsServiceImpl implements SmsService {
             ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, request, String.class);
             log.debug("Traccar SMS Gateway response: {}", response.getBody());
         } catch (Exception e) {
-            log.error("Failed to send SMS via Traccar Gateway", e);
-            throw new RuntimeException("Lỗi gửi SMS qua Traccar Gateway nội bộ: " + e.getMessage());
+            log.error("Failed to send SMS via Traccar Gateway: {}", e.getMessage());
         }
     }
 
     @Override
+    @Async
     public void sendWalkInAccountSms(String phoneNumber, String password) {
         String formattedPhone = phoneNumber;
         if (phoneNumber.startsWith("0")) {
@@ -89,9 +89,7 @@ public class SmsServiceImpl implements SmsService {
             ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, request, String.class);
             log.debug("Traccar SMS Gateway response: {}", response.getBody());
         } catch (Exception e) {
-            log.error("Failed to send SMS via Traccar Gateway", e);
-            // Optionally throw or just log since this is just an info SMS and shouldn't block booking
-            log.error("Lỗi gửi SMS mật khẩu qua Traccar Gateway nội bộ: " + e.getMessage());
+            log.error("Lỗi gửi SMS mật khẩu qua Traccar Gateway nội bộ: {}", e.getMessage());
         }
     }
 }

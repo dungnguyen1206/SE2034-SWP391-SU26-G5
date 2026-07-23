@@ -27,9 +27,9 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
     private final MedicalServiceRepository medicalServiceRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final AppointmentRepository appointmentRepository;
+    private final SmsService smsService;
     private final InvoiceRepository invoiceRepository;
     private final InvoiceItemRepository invoiceItemRepository;
-    private final SmsService smsService;
 
     // ======================== WALK-IN BOOKING RECEPTIONIST ========================
     @Override
@@ -173,15 +173,13 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
             smsService.sendWalkInAccountSms(request.getPhone(), generatedPassword);
         }
 
-        // 2. Get Department's initial Medical Service
-        List<MedicalService> services = medicalServiceRepository.findByDepartmentIdAndStatus(request.getDepartmentId(), "ACTIVE");
-        if (services.isEmpty()) {
-            throw new RuntimeException("Không tìm thấy dịch vụ khám cho khoa này.");
+        // 2. Get Selected Medical Service
+        MedicalService selectedService = medicalServiceRepository.findById(request.getServiceId())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy dịch vụ khám."));
+
+        if (selectedService.getDepartment() == null || !selectedService.getDepartment().getId().equals(request.getDepartmentId())) {
+            throw new RuntimeException("Dịch vụ khám không thuộc khoa đã chọn.");
         }
-        MedicalService initialService = services.stream()
-                .filter(s -> s.getName().toLowerCase().contains("khám"))
-                .findFirst()
-                .orElse(services.get(0));
 
         // 3. Validate and Get Slot
         TimeSlot selectedSlot = timeSlotRepository.findByIdWithSchedule(request.getTimeSlotId())
@@ -195,8 +193,8 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
         User selectedDoctor = selectedSchedule.getDoctor();
         Integer doctorDepartmentId = selectedDoctor == null || selectedDoctor.getDepartment() == null
                 ? null : selectedDoctor.getDepartment().getId();
-        Integer serviceDepartmentId = initialService.getDepartment() == null
-                ? null : initialService.getDepartment().getId();
+        Integer serviceDepartmentId = selectedService.getDepartment() == null
+                ? null : selectedService.getDepartment().getId();
 
         if (!"ACTIVE".equalsIgnoreCase(selectedSchedule.getStatus())
                 || selectedSchedule.getWeekSchedule() == null
@@ -265,7 +263,7 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
         appointment.setAppointmentCode("WI-" + System.currentTimeMillis());
         appointment.setPatient(patient);
         appointment.setDoctor(selectedDoctor);
-        appointment.setService(initialService);
+        appointment.setService(selectedService);
         appointment.setSlot(selectedSlot);
         appointment.setBookingDate(request.getBookingDate());
         appointment.setStatus("WAITING"); // Offline booking auto check-in
@@ -279,7 +277,7 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
         String invCode = "INV-" + LocalDate.now().format(DateTimeFormatter.ofPattern("yyyyMM")) + String.format("%04d", new Random().nextInt(10000));
         invoice.setInvoiceCode(invCode);
         invoice.setAppointment(appointment);
-        invoice.setTotalAmount(initialService.getReferencePrice());
+        invoice.setTotalAmount(selectedService.getReferencePrice());
         invoice.setPaymentMethod("CASH");
         invoice.setPaymentStatus("PAID");
         invoice.setPaidAt(LocalDateTime.now());
@@ -290,11 +288,11 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
         // 6. Create InvoiceItem
         InvoiceItem item = new InvoiceItem();
         item.setInvoice(invoice);
-        item.setService(initialService);
-        item.setItemName(initialService.getName());
-        item.setPriceApplied(initialService.getReferencePrice());
+        item.setService(selectedService);
+        item.setItemName(selectedService.getName());
+        item.setPriceApplied(selectedService.getReferencePrice());
         item.setQuantity(1);
-        item.setLineTotal(initialService.getReferencePrice());
+        item.setLineTotal(selectedService.getReferencePrice());
         invoiceItemRepository.save(item);
 
         return appointment.getId();

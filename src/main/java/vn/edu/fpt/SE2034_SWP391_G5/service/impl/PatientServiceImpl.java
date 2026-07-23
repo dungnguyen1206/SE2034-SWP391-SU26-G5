@@ -278,4 +278,89 @@ public class PatientServiceImpl implements PatientService {
                 .anyMatch(addr -> addr.getAddressLine() != null && !addr.getAddressLine().strip().isEmpty()
                         && addr.getProvince() != null);
     }
+
+    @Override
+    @Transactional
+    public void updateNullProfileFields(Long patientId, UpdateUserRequest request) {
+        User user = userRepository.findById(patientId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bệnh nhân"));
+
+        if (user.getFirstName() == null || user.getFirstName().trim().isEmpty()) {
+            if (request.getFirstName() != null && !request.getFirstName().trim().isEmpty()) {
+                user.setFirstName(request.getFirstName());
+            }
+        }
+        if (user.getMiddleName() == null || user.getMiddleName().trim().isEmpty()) {
+            if (request.getMiddleName() != null) {
+                user.setMiddleName(request.getMiddleName());
+            }
+        }
+        if (user.getLastName() == null || user.getLastName().trim().isEmpty()) {
+            if (request.getLastName() != null && !request.getLastName().trim().isEmpty()) {
+                user.setLastName(request.getLastName());
+            }
+        }
+        if (user.getPhone() == null || user.getPhone().trim().isEmpty()) {
+            if (request.getPhone() != null && !request.getPhone().trim().isEmpty()) {
+                user.setPhone(request.getPhone());
+            }
+        }
+        if (user.getGender() == null || user.getGender().trim().isEmpty()) {
+            if (request.getGender() != null && !request.getGender().trim().isEmpty()) {
+                user.setGender(request.getGender());
+            }
+        }
+        if (user.getDateOfBirth() == null) {
+            if (request.getDateOfBirth() != null) {
+                user.setDateOfBirth(request.getDateOfBirth());
+            }
+        }
+        if (user.getBloodType() == null || user.getBloodType().trim().isEmpty()) {
+            if (request.getBloodType() != null && !request.getBloodType().trim().isEmpty()) {
+                user.setBloodType(request.getBloodType());
+            }
+        }
+
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+
+        // Address logic
+        UserAddress address = user.getAddresses() != null
+                ? user.getAddresses().stream()
+                        .filter(a -> Boolean.TRUE.equals(a.getIsDefault()))
+                        .findFirst().orElse(null)
+                : null;
+
+        if (address == null) {
+            if (request.getAddressLine() != null && !request.getAddressLine().trim().isEmpty() && request.getProvinceId() != null) {
+                Province province = provinceRepository.findById(request.getProvinceId())
+                        .orElseThrow(() -> new BadRequestException("Tỉnh/thành phố không hợp lệ"));
+                address = new UserAddress();
+                address.setUser(user);
+                address.setIsDefault(true);
+                address.setCreatedAt(LocalDateTime.now());
+                address.setAddressLine(request.getAddressLine());
+                address.setProvince(province);
+                address.setUpdatedAt(LocalDateTime.now());
+                userAddressRepository.save(address);
+            }
+        } else {
+            if (address.getAddressLine() == null || address.getAddressLine().trim().isEmpty()) {
+                if (request.getAddressLine() != null && !request.getAddressLine().trim().isEmpty()) {
+                    address.setAddressLine(request.getAddressLine());
+                    address.setUpdatedAt(LocalDateTime.now());
+                    userAddressRepository.save(address);
+                }
+            }
+            if (address.getProvince() == null) {
+                if (request.getProvinceId() != null) {
+                    Province province = provinceRepository.findById(request.getProvinceId())
+                            .orElseThrow(() -> new BadRequestException("Tỉnh/thành phố không hợp lệ"));
+                    address.setProvince(province);
+                    address.setUpdatedAt(LocalDateTime.now());
+                    userAddressRepository.save(address);
+                }
+            }
+        }
+    }
 }

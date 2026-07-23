@@ -24,4 +24,5 @@ public interface PatientService {
     MedicalRecordResponse getMedicalRecordDetail(Long recordId, Long patientId);
     List<User> findUsersByRoleName(String roleName);
     boolean isProfileComplete(Long patientId);
+    void updateNullProfileFields(Long patientId, UpdateUserRequest request);
 }

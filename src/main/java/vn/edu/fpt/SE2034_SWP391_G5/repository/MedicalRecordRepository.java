@@ -15,6 +15,17 @@ public interface MedicalRecordRepository extends JpaRepository<MedicalRecord, Lo
 
     List<MedicalRecord> findByPatientIdOrderByExaminationDateDesc(Long patientId);
 
+    @Query("SELECT DISTINCT mr FROM MedicalRecord mr " +
+           "LEFT JOIN FETCH mr.doctor d " +
+           "LEFT JOIN FETCH mr.appointment a " +
+           "LEFT JOIN FETCH a.service " +
+           "LEFT JOIN FETCH mr.medicalServiceOrders mso " +
+           "LEFT JOIN FETCH mso.medicalService " +
+           "WHERE mr.patient.id = :patientId " +
+           "AND mr.status = 'FINALIZED' " +
+           "ORDER BY mr.examinationDate DESC")
+    List<MedicalRecord> findByPatientIdWithDetails(@Param("patientId") Long patientId);
+
     @Query("SELECT mr FROM MedicalRecord mr " +
            "LEFT JOIN FETCH mr.medicalServiceOrders mso " +
            "LEFT JOIN FETCH mso.medicalService " +

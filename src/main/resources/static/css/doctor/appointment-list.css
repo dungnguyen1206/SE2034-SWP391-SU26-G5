@@ -25,7 +25,8 @@
     margin-bottom: 30px;
 }
 
-.filter-tabs button, .filter-tabs a {
+.filter-tabs button,
+.filter-tabs a {
     padding: 9px 16px;
     border: 1px solid #ddd;
     background: white;
@@ -38,7 +39,8 @@
     color: inherit;
 }
 
-.filter-tabs button.active, .filter-tabs a.active {
+.filter-tabs button.active,
+.filter-tabs a.active {
     background: #020617;
     color: white;
 }
@@ -163,7 +165,8 @@
     gap: 6px;
 }
 
-.pagination button, .pagination a {
+.pagination button,
+.pagination a {
     height: 32px;
     padding: 0 12px;
     border: 1px solid #e5e7eb;
@@ -179,7 +182,8 @@
     color: inherit;
 }
 
-.pagination button.active, .pagination a.active {
+.pagination button.active,
+.pagination a.active {
     background: #020617;
     color: white;
 }
@@ -272,7 +276,7 @@
     margin-bottom: 8px !important;
 }
 
-.modal-card > p.modal-subtitle {
+.modal-card>p.modal-subtitle {
     font-size: 12px !important;
     color: #64748b !important;
     margin-bottom: 24px !important;
@@ -306,7 +310,7 @@
     margin-bottom: 10px !important;
 }
 
-.modal-card .code, 
+.modal-card .code,
 .modal-card .status {
     padding: 6px 10px !important;
     font-size: 11px !important;

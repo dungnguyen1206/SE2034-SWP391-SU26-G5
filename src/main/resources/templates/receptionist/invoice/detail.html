@@ -94,38 +94,70 @@
                             </div>
                         </div>
 
-                        <!-- Các khoản chưa thanh toán -->
+                        <!-- Các khoản cần thanh toán - có checkbox chọn/bỏ chọn -->
                         <div class="card shadow-sm border-0 rounded-4 mb-4" th:if="${invoice.unpaidServices != null && !invoice.unpaidServices.empty}">
                             <div class="card-header bg-white border-bottom-0 pt-4 pb-0 px-4">
-                                <h5 class="fw-bold text-danger mb-0"><i class="bi bi-exclamation-circle me-2"></i>Các khoản cần thu</h5>
+                                <h5 class="fw-bold text-danger mb-0"><i class="bi bi-receipt-cutoff me-2"></i>Các khoản cần thu <span class="text-muted small fw-normal">(Lễ tân tích chọn dịch vụ bệnh nhân đồng ý thanh toán)</span></h5>
                             </div>
                             <div class="card-body p-4">
                                 <div class="table-responsive">
-                                    <table class="table table-borderless align-middle mb-0">
+                                    <table class="table table-borderless align-middle mb-0" id="unpaidTable">
                                         <thead class="border-bottom border-light">
                                             <tr>
+                                                <th style="width:40px">
+                                                    <input type="checkbox" id="checkAll" class="form-check-input" title="Chọn tất cả" checked>
+                                                </th>
                                                 <th class="text-muted fw-semibold">Tên dịch vụ</th>
                                                 <th class="text-muted fw-semibold text-center">Phân loại</th>
                                                 <th class="text-muted fw-semibold text-end">Thành tiền</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <tr th:each="item : ${invoice.unpaidServices}">
-                                                <td><span class="fw-medium text-dark" th:text="${item.serviceName}"></span></td>
-                                                <td class="text-center">
-                                                    <span th:if="${item.type == 'APPOINTMENT'}" class="badge bg-primary-subtle text-primary">Khám ban đầu</span>
-                                                    <span th:if="${item.type == 'ADDITIONAL'}" class="badge bg-warning-subtle text-warning">Dịch vụ phát sinh</span>
+                                            <tr th:each="item : ${invoice.unpaidServices}" class="service-row"
+                                                th:attr="data-price=${item.price != null ? item.price : 0}, data-type=${item.type}">
+                                                <td>
+                                                    <!-- For APPOINTMENT type: send as includeInitialFee -->
+                                                    <input th:if="${item.type == 'APPOINTMENT'}"
+                                                           type="checkbox" name="includeInitialFee" value="true"
+                                                           form="paymentForm"
+                                                           class="form-check-input service-checkbox"
+                                                           th:attr="data-price=${item.price != null ? item.price : 0}"
+                                                           checked>
+                                                    <!-- For ADDITIONAL type: send as selectedOrderIds -->
+                                                    <input th:if="${item.type == 'ADDITIONAL'}"
+                                                           type="checkbox" name="selectedOrderIds"
+                                                           form="paymentForm"
+                                                           th:value="${item.id}"
+                                                           class="form-check-input service-checkbox"
+                                                           th:attr="data-price=${item.price != null ? item.price : 0}"
+                                                           checked>
                                                 </td>
-                                                <td class="text-end fw-bold text-dark" th:text="${item.price != null ? #numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT') : '0'} + ' đ'"></td>
+                                                <td>
+                                                    <span class="fw-medium text-dark" th:text="${item.serviceName}"></span>
+                                                    <span th:if="${item.type == 'ADDITIONAL'}" class="text-muted small d-block">
+                                                        <i class="bi bi-info-circle me-1"></i>Bỏ chọn nếu bệnh nhân từ chối dịch vụ này
+                                                    </span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span th:if="${item.type == 'APPOINTMENT'}" class="badge bg-primary-subtle text-primary px-3 py-2">
+                                                        <i class="bi bi-clipboard-heart me-1"></i>Phí khám ban đầu
+                                                    </span>
+                                                    <span th:if="${item.type == 'ADDITIONAL'}" class="badge bg-warning-subtle text-warning px-3 py-2">
+                                                        <i class="bi bi-plus-circle me-1"></i>Dịch vụ chỉ định
+                                                    </span>
+                                                </td>
+                                                <td class="text-end fw-bold text-dark item-price"
+                                                    th:text="${item.price != null ? #numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT') : '0'} + ' đ'">
+                                                </td>
                                             </tr>
                                         </tbody>
-                                        <tfoot class="border-top border-light">
+                                        <tfoot class="border-top border-2">
                                             <tr>
-                                                <td colspan="2" class="text-end pt-4 pb-2">
+                                                <td colspan="3" class="text-end pt-3 pb-1">
                                                     <span class="fs-5 text-danger fw-semibold">TỔNG CẦN THU:</span>
                                                 </td>
-                                                <td class="text-end pt-4 pb-2">
-                                                    <span class="fs-4 text-danger fw-bold" th:text="${invoice.totalUnpaidAmount != null ? #numbers.formatDecimal(invoice.totalUnpaidAmount, 0, 'COMMA', 0, 'POINT') : '0'} + ' đ'"></span>
+                                                <td class="text-end pt-3 pb-1">
+                                                    <span class="fs-4 text-danger fw-bold" id="totalAmount">0 đ</span>
                                                 </td>
                                             </tr>
                                         </tfoot>
@@ -187,28 +219,33 @@
                             </div>
                         </div>
 
-                        <!-- Payment form -->
+                        <!-- Payment form with multi-select -->
                         <div class="card shadow-sm border-0 rounded-4" th:if="${invoice.unpaidServices != null && !invoice.unpaidServices.empty}">
                             <div class="card-header bg-white border-bottom-0 pt-4 pb-2 px-4">
                                 <h5 class="fw-bold text-dark mb-0">Xử lý thanh toán</h5>
                             </div>
                             <div class="card-body p-4">
-                                <form th:action="@{/receptionist/invoice/{id}/pay(id=${invoice.appointmentId})}" method="post">
+                                <form th:action="@{/receptionist/invoice/{id}/pay(id=${invoice.appointmentId})}" method="post" id="paymentForm">
                                     <input type="hidden" name="from" th:value="${from}" th:if="${from != null}">
+
+                                    <!-- Dynamic total summary -->
+                                    <div class="bg-danger bg-opacity-10 rounded-3 p-3 mb-4 text-center">
+                                        <div class="text-muted small mb-1">Tổng tiền cần thu</div>
+                                        <div class="fs-3 fw-bold text-danger" id="summaryTotal">0 đ</div>
+                                    </div>
+
                                     <div class="mb-4">
                                         <label class="form-label text-muted fw-semibold mb-3">Phương thức thanh toán</label>
-                                        
                                         <div class="payment-methods">
                                             <label class="payment-method-card w-100 mb-3">
-                                                <input type="radio" name="paymentMethod" value="CASH" class="d-none" required>
+                                                <input type="radio" name="paymentMethod" value="CASH" class="d-none">
                                                 <div class="card bg-white border border-2 rounded-3 p-3 text-center cursor-pointer radio-card">
                                                     <i class="bi bi-cash-stack fs-2 text-success mb-2"></i>
                                                     <div class="fw-bold">Tiền mặt</div>
                                                 </div>
                                             </label>
-                                            
                                             <label class="payment-method-card w-100 mb-2">
-                                                <input type="radio" name="paymentMethod" value="TRANSFER" class="d-none" required>
+                                                <input type="radio" name="paymentMethod" value="TRANSFER" class="d-none">
                                                 <div class="card bg-white border border-2 rounded-3 p-3 text-center cursor-pointer radio-card">
                                                     <i class="bi bi-bank fs-2 text-primary mb-2"></i>
                                                     <div class="fw-bold">Chuyển khoản</div>
@@ -216,8 +253,9 @@
                                             </label>
                                         </div>
                                     </div>
-                                    <button type="submit" class="btn btn-success w-100 py-3 rounded-3 fw-bold shadow-sm" onclick="return confirm('Xác nhận đã thu đủ tiền từ bệnh nhân?');">
-                                        XÁC NHẬN ĐÃ THU TIỀN
+                                    <button type="submit" class="btn btn-success w-100 py-3 rounded-3 fw-bold shadow-sm"
+                                            onclick="return confirmPayment();">
+                                        <i class="bi bi-check2-circle me-2"></i>XÁC NHẬN ĐÃ THU TIỀN
                                     </button>
                                 </form>
                             </div>
@@ -240,6 +278,13 @@
             border-color: #0d6efd !important;
             background-color: #f8fbff !important;
         }
+        .service-row.unchecked td {
+            opacity: 0.45;
+            text-decoration: line-through;
+        }
+        .service-row.unchecked .badge {
+            opacity: 0.5;
+        }
         
         @media print {
             .sidebar, .header, .btn, form, .payment-methods, .card-footer {
@@ -253,5 +298,53 @@
     </style>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // ===== Multi-select billing logic =====
+        function formatVND(amount) {
+            return new Intl.NumberFormat('vi-VN').format(amount) + ' đ';
+        }
+
+        function recalculateTotal() {
+            let total = 0;
+            document.querySelectorAll('.service-checkbox').forEach(function(cb) {
+                const row = cb.closest('tr');
+                const price = parseFloat(cb.getAttribute('data-price')) || 0;
+                if (cb.checked) {
+                    total += price;
+                    row.classList.remove('unchecked');
+                } else {
+                    row.classList.add('unchecked');
+                }
+            });
+            document.getElementById('totalAmount').textContent = formatVND(total);
+            document.getElementById('summaryTotal').textContent = formatVND(total);
+        }
+
+        // Check All toggle
+        document.getElementById('checkAll').addEventListener('change', function() {
+            document.querySelectorAll('.service-checkbox').forEach(function(cb) {
+                cb.checked = document.getElementById('checkAll').checked;
+            });
+            recalculateTotal();
+        });
+
+        // Individual checkbox
+        document.querySelectorAll('.service-checkbox').forEach(function(cb) {
+            cb.addEventListener('change', function() {
+                const allChecked = document.querySelectorAll('.service-checkbox:not(:checked)').length === 0;
+                document.getElementById('checkAll').checked = allChecked;
+                recalculateTotal();
+            });
+        });
+
+        // Confirm before submitting
+        function confirmPayment() {
+            const total = document.getElementById('summaryTotal').textContent;
+            return confirm('Xác nhận thu ' + total + ' từ bệnh nhân? Các dịch vụ không được chọn sẽ bị hủy.');
+        }
+
+        // Init on load
+        recalculateTotal();
+    </script>
 </body>
-</html>  
+</html>
