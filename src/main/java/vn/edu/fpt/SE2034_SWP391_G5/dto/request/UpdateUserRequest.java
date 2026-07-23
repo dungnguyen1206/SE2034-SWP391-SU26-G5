@@ -60,11 +60,14 @@ public class UpdateUserRequest {
     private String degree;
     private String licenseNumber;
 
-    // private LocalDate licenseIssueDate; // Đã xóa
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    private LocalDate licenseIssueDate;
 
     private String doctorStatus;
 
-    public Integer getExperienceYear(){
-        return 0; // Tạm thời trả về 0, cần implement logic khác nếu cần
-    }
-}
+    public Integer getExperienceYear() {
+        if (licenseIssueDate == null || licenseIssueDate.isAfter(LocalDate.now())) {
+            return 0;
+        }
+        return Period.between(licenseIssueDate, LocalDate.now()).getYears();
+    }}

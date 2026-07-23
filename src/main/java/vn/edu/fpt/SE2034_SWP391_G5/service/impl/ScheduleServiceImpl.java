@@ -274,18 +274,20 @@ public class ScheduleServiceImpl implements ScheduleService {
         List<TimeSlot> timeSlots = new ArrayList<>();
         switch (Shift) {
             case "MORNING":
-                timeSlots.add(buildSlot(doctorSchedule, "07:00", "09:00", maxCapacity));
-                timeSlots.add(buildSlot(doctorSchedule, "09:00", "11:00", maxCapacity));
+                timeSlots.add(buildSlot(doctorSchedule, "07:00", "08:00", Math.floorDiv(maxCapacity, 3)));
+                timeSlots.add(buildSlot(doctorSchedule, "09:00", "10:00", Math.ceilDiv(maxCapacity, 3)));
+                timeSlots.add(buildSlot(doctorSchedule, "10:00", "11:00", Math.ceilDiv(maxCapacity, 3)));
                 break;
             case "AFTERNOON":
-                timeSlots.add(buildSlot(doctorSchedule, "13:00", "15:00", maxCapacity));
-                timeSlots.add(buildSlot(doctorSchedule, "15:00", "17:00", maxCapacity));
+                timeSlots.add(buildSlot(doctorSchedule, "13:00", "14:00", Math.ceilDiv(maxCapacity, 2)));
+                timeSlots.add(buildSlot(doctorSchedule, "14:00", "15:00", Math.ceilDiv(maxCapacity, 2)));
                 break;
             case "FULL_DAY":
-                timeSlots.add(buildSlot(doctorSchedule, "07:00", "09:00", maxCapacity));
-                timeSlots.add(buildSlot(doctorSchedule, "09:00", "11:00", maxCapacity));
-                timeSlots.add(buildSlot(doctorSchedule, "13:00", "15:00", maxCapacity));
-                timeSlots.add(buildSlot(doctorSchedule, "15:00", "17:00", maxCapacity));
+                timeSlots.add(buildSlot(doctorSchedule, "07:00", "08:00", Math.ceilDiv(maxCapacity, 5)));
+                timeSlots.add(buildSlot(doctorSchedule, "09:00", "10:00", Math.ceilDiv(maxCapacity, 5)));
+                timeSlots.add(buildSlot(doctorSchedule, "10:00", "11:00", Math.floorDiv(maxCapacity, 5)));
+                timeSlots.add(buildSlot(doctorSchedule, "13:00", "14:00", Math.floorDiv(maxCapacity, 5)));
+                timeSlots.add(buildSlot(doctorSchedule, "14:00", "15:00", Math.floorDiv(maxCapacity, 5)));
                 break;
         }
         return timeSlots;
@@ -649,6 +651,24 @@ public class ScheduleServiceImpl implements ScheduleService {
         doctorSchedule.setShift(doctorScheduleUpdateRequest.getScheduleShift());
         DoctorSchedule saved = doctorScheduleRepository.save(doctorSchedule);
         return toDoctorScheduleUpdateRequest(saved);
+    }
+
+    @Override
+    @Transactional
+    public boolean deleteWeekSchedule(Long weekScheduleId) {
+
+        WeekSchedule weekSchedule = weekScheduleRepository.findWeekScheduleById(weekScheduleId);
+        if(weekSchedule == null){
+            throw new ScheduleConflictException("Lịch làm việc không tồn tại");
+        }
+        if(!weekSchedule.getStatus().equalsIgnoreCase("DRAFT")){
+            throw  new ScheduleConflictException("Chỉ được phép xóa lịch ở các tuần ở trạng thái nháp");
+        }
+        if(appointmentRepository.existsBySlotScheduleWeekScheduleId(weekScheduleId)){
+            throw new ScheduleConflictException("Không thể xóa lịch đã có lịch hẹn khám");
+        }
+        timeSlotRepository.deleteTimeSlotByWeekScheduleId(weekScheduleId);
+        return doctorScheduleRepository.deleteDoctorScheduleByWeekScheduleId(weekScheduleId) > 0;
     }
 
     private int deleteTimeSlotBaseOnSchedule(Long doctorScheduleId) {

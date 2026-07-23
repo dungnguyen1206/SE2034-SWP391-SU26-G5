@@ -379,4 +379,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     List<Appointment> findConfirmedAppointmentsByBookingDate(@Param("bookingDate") LocalDate bookingDate);
 
 
+
+    //delete doctorScheduleFunction
+    boolean existsBySlotScheduleWeekScheduleId(Long weekScheduleId);
+
+
 }

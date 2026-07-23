@@ -77,6 +77,7 @@ public class DoctorServiceImpl implements DoctorService {
                 .departmentName(u.getDepartment() != null ? u.getDepartment().getName() : null)
                 .departmentId(u.getDepartment() != null ? u.getDepartment().getId() : null)
                 .doctorStatus(u.getDoctorStatus())
+                .licenseIssueDate(u.getLicenseIssueDate())
                 .build();
     }
 

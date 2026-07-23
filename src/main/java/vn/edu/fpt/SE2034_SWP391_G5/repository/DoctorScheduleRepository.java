@@ -3,6 +3,7 @@ package vn.edu.fpt.SE2034_SWP391_G5.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.parameters.P;
@@ -115,7 +116,10 @@ public interface DoctorScheduleRepository extends JpaRepository<DoctorSchedule, 
 
 
 
-
+                //delete doctor Schedule
+        @Modifying
+        @Query("Delete  from DoctorSchedule ds  where ds.weekSchedule.id =:weekScheduleId")
+        Integer deleteDoctorScheduleByWeekScheduleId(@Param("weekScheduleId") Long weekScheduleId);
 
 
 }
