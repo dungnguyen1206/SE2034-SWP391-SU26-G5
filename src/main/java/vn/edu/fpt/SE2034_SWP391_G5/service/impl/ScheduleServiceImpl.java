@@ -81,6 +81,11 @@ public class ScheduleServiceImpl implements ScheduleService {
         for (int i = 0; i < 7; i++) {
             LocalDate currentDate = monday.plusDays(i);
             List<DoctorSchedule> daySchedules = schedulesByDate.getOrDefault(currentDate, new ArrayList<>());
+            daySchedules.sort((a, b) -> {
+                int aVal = "MORNING".equalsIgnoreCase(a.getShift()) ? 1 : ("AFTERNOON".equalsIgnoreCase(a.getShift()) ? 2 : 3);
+                int bVal = "MORNING".equalsIgnoreCase(b.getShift()) ? 1 : ("AFTERNOON".equalsIgnoreCase(b.getShift()) ? 2 : 3);
+                return Integer.compare(aVal, bVal);
+            });
 
             List<DoctorScheduleWeekResponse.ShiftDetail> shiftDetails = daySchedules.stream().map(ds -> {
                 String shiftType = ds.getShift(); // e.g. "MORNING"
@@ -166,11 +171,9 @@ public class ScheduleServiceImpl implements ScheduleService {
 
         // Calculate summary metrics
         double totalHours = 0;
-        int shiftCount = 0;
         for (DoctorScheduleWeekResponse day : weekSchedule) {
             if (day.getShifts() != null) {
                 for (DoctorScheduleWeekResponse.ShiftDetail shift : day.getShifts()) {
-                    shiftCount++;
                     if ("MORNING".equalsIgnoreCase(shift.getShift())) {
                         totalHours += 4.5;
                     } else if ("AFTERNOON".equalsIgnoreCase(shift.getShift())) {
@@ -189,8 +192,15 @@ public class ScheduleServiceImpl implements ScheduleService {
         } else {
             totalHoursStr = String.format("%.1f", totalHours).replace(',', '.');
         }
-
-        String shiftCountStr = String.format("%d", shiftCount);
+        int shiftCount = 0;
+        for (DoctorScheduleWeekResponse day : weekSchedule) {
+            if (day.getShifts() != null) {
+                for (DoctorScheduleWeekResponse.ShiftDetail shift : day.getShifts()) {
+                    shiftCount++;
+                }
+            }
+        }
+        String shiftCountStr = String.valueOf(shiftCount);
 
         // Performance evaluation
         String performance = "N/A";

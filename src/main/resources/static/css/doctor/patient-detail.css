@@ -721,3 +721,31 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     font-weight: 700;
 }
+
+/* History Table Styles */
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.history-table th {
+    background: #f8fafc;
+    text-align: left;
+    padding: 14px 20px;
+    font-size: 13.5px;
+    color: #475569;
+    font-weight: 700;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.history-table td {
+    padding: 14px 20px;
+    font-size: 14px;
+    color: #334155;
+    border-top: 1px solid #e2e8f0;
+}
+
+.history-table tbody tr:hover {
+    background: #f8fafc;
+}

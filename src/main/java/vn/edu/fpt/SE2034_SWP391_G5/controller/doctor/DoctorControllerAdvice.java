@@ -24,13 +24,16 @@ public class DoctorControllerAdvice {
                 DoctorResponse doctor = doctorService.getDoctorById(userDetails.getUser().getId());
                 model.addAttribute("doctorName", doctor.getFullName() != null ? doctor.getFullName().trim() : "Bác sĩ");
                 model.addAttribute("doctorDept", doctor.getDepartmentName() != null ? doctor.getDepartmentName() : "");
+                model.addAttribute("doctorAvatar", userDetails.getUser().getAvatar() != null ? userDetails.getUser().getAvatar() : "");
             } catch (Exception e) {
                 model.addAttribute("doctorName", "Bác sĩ");
                 model.addAttribute("doctorDept", "");
+                model.addAttribute("doctorAvatar", "");
             }
         } else {
             model.addAttribute("doctorName", "Bác sĩ");
             model.addAttribute("doctorDept", "");
+            model.addAttribute("doctorAvatar", "");
         }
     }
 }

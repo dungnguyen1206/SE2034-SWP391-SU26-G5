@@ -14,8 +14,6 @@ import java.util.List;
 public interface ReceptionistService {
     List<User> findByRoleNameAndStatus(String roleName, String status);
 
-    ReceptionistResponse getReceptionistByUsername(String username);
-    
     ReceptionistResponse getReceptionistById(Long userId);
 
     // Lấy các số liệu thống kê trên màn hình Dashboard của receptionist.

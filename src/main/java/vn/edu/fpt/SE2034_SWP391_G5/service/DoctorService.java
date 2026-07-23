@@ -5,6 +5,8 @@ import java.util.List;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 
 
+import org.springframework.data.domain.Page;
+
 public interface DoctorService {
     List<User> findByDoctorStatus(String doctorStatus);
     List<User> findByRoleNameAndStatus(String roleName, String status);
@@ -14,4 +16,5 @@ public interface DoctorService {
     List<DoctorResponse> getAllDoctors();
     DoctorResponse toResponse(User u);
     String buildFullName(String firstName, String middleName, String lastName);
+    Page<DoctorResponse> getActiveDoctorsPaginated(Integer departmentId, String search, int page, int size);
 }

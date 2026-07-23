@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateMedicalRecordRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.UpdateMedicalRecordRequest;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.MedicalRecordResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Appointment;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalRecord;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
@@ -14,8 +15,12 @@ import vn.edu.fpt.SE2034_SWP391_G5.repository.AppointmentRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalRecordRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.service.MedicalRecordService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +39,11 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         // Check if doctor matches the appointment
         if (!appointment.getDoctor().getId().equals(doctorId)) {
             throw new BadRequestException("Bạn không có quyền tạo hồ sơ bệnh án cho lịch hẹn này");
+        }
+
+        // Check if appointment status is "Đang khám" (EXAMINING or IN_PROGRESS)
+        if (!"EXAMINING".equalsIgnoreCase(appointment.getStatus()) && !"IN_PROGRESS".equalsIgnoreCase(appointment.getStatus())) {
+            throw new BadRequestException("Chỉ cho phép tạo hồ sơ bệnh án khi trạng thái cuộc hẹn là 'Đang khám'");
         }
 
         // Check if medical record already exists
@@ -92,5 +102,76 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         medicalRecord.setUpdatedAt(now);
 
         medicalRecordRepository.save(medicalRecord);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<User> searchPatients(String keyword, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return userRepository.searchPatients(keyword, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<MedicalRecordResponse> getPatientMedicalHistory(Long patientId) {
+        return medicalRecordRepository.findByPatientIdWithDetails(patientId)
+                .stream()
+                .map(this::toRecordResponse)
+                .toList();
+    }
+
+    private MedicalRecordResponse toRecordResponse(MedicalRecord r) {
+        User doctor = r.getDoctor();
+        String doctorFullName = doctor != null
+                ? buildFullName(doctor.getLastName(), doctor.getMiddleName(), doctor.getFirstName())
+                : "";
+        String appointmentCode = r.getAppointment() != null
+                ? r.getAppointment().getAppointmentCode() : null;
+        String serviceName = r.getAppointment() != null && r.getAppointment().getService() != null
+                ? r.getAppointment().getService().getName() : null;
+
+        List<MedicalRecordResponse.ServiceOrderInfo> serviceOrders = r.getMedicalServiceOrders() != null
+                ? r.getMedicalServiceOrders().stream()
+                        .map(mso -> MedicalRecordResponse.ServiceOrderInfo.builder()
+                                .id(mso.getId())
+                                .serviceName(mso.getMedicalService() != null ? mso.getMedicalService().getName() : "")
+                                .result(mso.getResult())
+                                .status(mso.getStatus())
+                                .note(mso.getNote())
+                                .price(mso.getPriceReference())
+                                .build())
+                        .toList()
+                : List.of();
+
+        return MedicalRecordResponse.builder()
+                .id(r.getId())
+                .appointmentId(r.getAppointment() != null ? r.getAppointment().getId() : null)
+                .appointmentCode(appointmentCode)
+                .doctorFullName(doctorFullName)
+                .doctorDegree(doctor != null ? doctor.getDegree() : null)
+                .departmentName(doctor != null && doctor.getDepartment() != null
+                        ? doctor.getDepartment().getName() : null)
+                .serviceName(serviceName)
+                .examinationDate(r.getExaminationDate())
+                .symptoms(r.getSymptoms())
+                .diagnosis(r.getDiagnosis())
+                .conclusion(r.getConclusion())
+                .prescriptionText(r.getPrescriptionText())
+                .notes(r.getNotes())
+                .heartRate(r.getHeartRate())
+                .bloodPressure(r.getBloodPressure())
+                .bloodGlucose(r.getBloodGlucose())
+                .weight(r.getWeight())
+                .status(r.getStatus())
+                .serviceOrders(serviceOrders)
+                .build();
+    }
+
+    private String buildFullName(String lastName, String middleName, String firstName) {
+        StringBuilder sb = new StringBuilder();
+        if (lastName != null) sb.append(lastName).append(" ");
+        if (middleName != null) sb.append(middleName).append(" ");
+        if (firstName != null) sb.append(firstName);
+        return sb.toString().trim();
     }
 }

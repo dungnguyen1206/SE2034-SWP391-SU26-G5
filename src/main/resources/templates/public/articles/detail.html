@@ -167,8 +167,8 @@
         </a>
         <ul class="navbar-nav">
             <li><a th:href="@{/home}">Trang chủ</a></li>
-            <li><a th:href="@{/patient/departments}">Chuyên khoa</a></li>
-            <li><a th:href="@{/doctors}">Bác sĩ</a></li>
+            <li sec:authorize="!isAuthenticated() or hasAuthority('ROLE_PATIENT')"><a th:href="@{/departments}">Chuyên khoa</a></li>
+            <li sec:authorize="!isAuthenticated() or hasAuthority('ROLE_PATIENT')"><a th:href="@{/doctors}">Bác sĩ</a></li>
             <li><a th:href="@{/articles}" class="active">Bài viết chuyên môn</a></li>
         </ul>
         <div class="navbar-actions">
@@ -192,9 +192,11 @@
                 <a sec:authorize="hasAuthority('ROLE_ADMIN')" th:href="@{/admin/account-list}" class="btn-outline" style="text-decoration: none;">
                     <i class="bi bi-speedometer2"></i> Quản trị
                 </a>
-                <a th:href="@{/logout}" class="btn-filled" style="background: #ef4444; border-color: #ef4444; text-decoration: none;">
-                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
-                </a>
+                <form th:action="@{/logout}" method="post" style="margin:0; display:inline-block;">
+                    <button type="submit" class="btn-filled" style="background: #ef4444; border-color: #ef4444; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                        <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                    </button>
+                </form>
             </div>
         </div>
     </div>
