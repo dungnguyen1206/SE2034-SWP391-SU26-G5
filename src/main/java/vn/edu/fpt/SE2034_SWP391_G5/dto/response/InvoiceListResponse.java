@@ -11,12 +11,13 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 public class InvoiceListResponse {
-    private Long appointmentId; // ID của lịch hẹn
+    private Long appointmentId;
     private Integer stt;
     private String appointmentCode;
     private String patientFullName;
     private String phone;
-    private BigDecimal displayAmount; // Số tiền hiển thị (tổng đã trả hoặc tổng nợ)
-    private String paymentStatus; // "PAID" (Hoàn thành) hoặc "UNPAID" (Chưa thanh toán)
-    private String services; // Các dịch vụ
+    private BigDecimal displayAmount;
+    private String paymentStatus;
+    private LocalDateTime createdAt;
+    private String services;
 }

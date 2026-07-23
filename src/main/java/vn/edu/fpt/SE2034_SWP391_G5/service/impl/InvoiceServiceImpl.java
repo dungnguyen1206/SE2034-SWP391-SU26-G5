@@ -19,8 +19,9 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Year;
 import java.util.List;
-import java.util.List;
 import java.util.Collections;
+import java.util.Objects;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -48,23 +49,24 @@ public class InvoiceServiceImpl implements InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final AppointmentRepository appointmentRepository;
     private final InvoiceItemRepository invoiceItemRepository;
+    private final vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalServiceOrderRepository medicalServiceOrderRepository;
 
     @Override
     public BigDecimal getTotalAmount(String paymentStatus, int month, int year) {
         return invoiceRepository.getTotalAmount(paymentStatus, month, year);
     }
 
-
     /*
      *
      *
      * ALL HERE RELATED TO INVOICE SCREEN FOR MANAGER
      *
-     * */
+     */
     @Override
-    public InvoiceSummaryResponse getInvoiceSummary(String paymentStatus, Integer month, Integer year, LocalDate startDate, LocalDate endDate) {
+    public InvoiceSummaryResponse getInvoiceSummary(String paymentStatus, Integer month, Integer year,
+            LocalDate startDate, LocalDate endDate) {
 
-        //Xử lí lỗi
+        // Xử lí lỗi
         if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
             throw new DataConflictException("Ngày bắt đầu phải trước ngày kết thúc");
         }
@@ -77,41 +79,48 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         InvoiceSummaryResponse result = null;
 
-        //  Tất cả filter đều null -> Quét trọn ngày hôm nay
+        // Tất cả filter đều null -> Quét trọn ngày hôm nay
         if (year == null && month == null && startDate == null && endDate == null) {
             result = invoiceRepository.getTotalAmountByPaymentStatus(
                     paymentStatus,
                     LocalDate.now().atStartOfDay(),
                     LocalDate.now().plusDays(1).atStartOfDay(),
                     null,
-                    null
-            ).orElse(null);
+                    null).orElse(null);
         }
         // 3. Có đủ cả khoảng ngày và tháng/năm
         else if ((year != null || month != null) && startDate != null && endDate != null) {
-            result = invoiceRepository.getTotalAmountByPaymentStatus(paymentStatus, startDate.atStartOfDay(), endDate.atTime(LocalTime.MAX), null, null).orElse(null);
+            result = invoiceRepository.getTotalAmountByPaymentStatus(paymentStatus, startDate.atStartOfDay(),
+                    endDate.atTime(LocalTime.MAX), null, null).orElse(null);
         }
         // 4. Chỉ có startDate
         else if (startDate != null && endDate == null) {
-            result = invoiceRepository.getTotalAmountByPaymentStatus(paymentStatus, startDate.atStartOfDay(), LocalDate.now().atTime(LocalTime.MAX), null, null).orElse(null);
+            result = invoiceRepository.getTotalAmountByPaymentStatus(paymentStatus, startDate.atStartOfDay(),
+                    LocalDate.now().atTime(LocalTime.MAX), null, null).orElse(null);
         }
         // 5. Chỉ có endDate
         else if (startDate == null && endDate != null) {
-            result = invoiceRepository.getTotalAmountByPaymentStatus(paymentStatus, endDate.atStartOfDay(), endDate.atTime(LocalTime.MAX), null, null).orElse(null);
+            result = invoiceRepository.getTotalAmountByPaymentStatus(paymentStatus, endDate.atStartOfDay(),
+                    endDate.atTime(LocalTime.MAX), null, null).orElse(null);
         }
         // 6. Không nhập khoảng ngày (Chỉ lọc theo Tháng / Năm)
         else if (startDate == null && endDate == null) {
             if (month == null && year != null) {
-                result = invoiceRepository.getTotalAmountByPaymentStatus(paymentStatus, null, null, null, year).orElse(null);
+                result = invoiceRepository.getTotalAmountByPaymentStatus(paymentStatus, null, null, null, year)
+                        .orElse(null);
             } else if (month != null && year == null) {
-                result = invoiceRepository.getTotalAmountByPaymentStatus(paymentStatus, null, null, month, Year.now().getValue()).orElse(null);
+                result = invoiceRepository
+                        .getTotalAmountByPaymentStatus(paymentStatus, null, null, month, Year.now().getValue())
+                        .orElse(null);
             } else {
-                result = invoiceRepository.getTotalAmountByPaymentStatus(paymentStatus, null, null, month, year).orElse(null);
+                result = invoiceRepository.getTotalAmountByPaymentStatus(paymentStatus, null, null, month, year)
+                        .orElse(null);
             }
         }
         // 7. Có cả hai ngày cụ thể
         else if (startDate != null && endDate != null) {
-            result = invoiceRepository.getTotalAmountByPaymentStatus(paymentStatus, startDate.atStartOfDay(), endDate.atTime(LocalTime.MAX), null, null).orElse(null);
+            result = invoiceRepository.getTotalAmountByPaymentStatus(paymentStatus, startDate.atStartOfDay(),
+                    endDate.atTime(LocalTime.MAX), null, null).orElse(null);
         }
 
         // Khởi tạo object rỗng nếu không tìm thấy dữ liệu
@@ -127,7 +136,8 @@ public class InvoiceServiceImpl implements InvoiceService {
     }
 
     @Override
-    public Page<InvoiceRowResponse> invoiceRowResponses(Integer month, Integer year, LocalDate startDate, LocalDate endDate, int page, int size) {
+    public Page<InvoiceRowResponse> invoiceRowResponses(Integer month, Integer year, LocalDate startDate,
+            LocalDate endDate, int page, int size) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         if (month == null) {
             month = 0;
@@ -135,7 +145,7 @@ public class InvoiceServiceImpl implements InvoiceService {
         if (year == null) {
             year = 0;
         }
-        //Xử lí lỗi
+        // Xử lí lỗi
         if (startDate != null && endDate != null && startDate.isAfter(endDate)) {
             throw new DataConflictException("Ngày bắt đầu phải trước ngày kết thúc");
         }
@@ -146,21 +156,24 @@ public class InvoiceServiceImpl implements InvoiceService {
             throw new DataConflictException("Ngày nhập không hợp lệ!");
         }
 
-
         if (year == 0 && month == 0 && startDate == null && endDate == null) {
-            return invoiceRepository.getInvoiceInforByFilter(LocalDate.now().atStartOfDay(), LocalDate.now().plusDays(1).atStartOfDay(), null, null, pageable);
+            return invoiceRepository.getInvoiceInforByFilter(LocalDate.now().atStartOfDay(),
+                    LocalDate.now().plusDays(1).atStartOfDay(), null, null, pageable);
         }
 
         /*
          * Trường hợp customer nhập cả tháng năm + data range
-         * */
+         */
 
         if ((year != 0 || month != 0) && startDate != null && endDate != null) {
-            return invoiceRepository.getInvoiceInforByFilter(startDate.atStartOfDay(), endDate.atTime(LocalTime.MAX), null, null, pageable);
+            return invoiceRepository.getInvoiceInforByFilter(startDate.atStartOfDay(), endDate.atTime(LocalTime.MAX),
+                    null, null, pageable);
         } else if (startDate != null && endDate == null) {
-            return invoiceRepository.getInvoiceInforByFilter(startDate.atStartOfDay(), LocalDate.now().atTime(LocalTime.MAX), null, null, pageable);
+            return invoiceRepository.getInvoiceInforByFilter(startDate.atStartOfDay(),
+                    LocalDate.now().atTime(LocalTime.MAX), null, null, pageable);
         } else if (startDate == null && endDate != null) {
-            return invoiceRepository.getInvoiceInforByFilter(endDate.atStartOfDay(), endDate.atTime(LocalTime.MAX), null, null, pageable);
+            return invoiceRepository.getInvoiceInforByFilter(endDate.atStartOfDay(), endDate.atTime(LocalTime.MAX),
+                    null, null, pageable);
         } else if (startDate == null && endDate == null) {
             if (month == 0) {
                 return invoiceRepository.getInvoiceInforByFilter(null, null, null, year, pageable);
@@ -171,9 +184,11 @@ public class InvoiceServiceImpl implements InvoiceService {
 
             }
         } else if (startDate != null && endDate != null && month == 0 && year == 0) {
-            return invoiceRepository.getInvoiceInforByFilter(startDate.atStartOfDay(), endDate.atTime(LocalTime.MAX), null, null, pageable);
+            return invoiceRepository.getInvoiceInforByFilter(startDate.atStartOfDay(), endDate.atTime(LocalTime.MAX),
+                    null, null, pageable);
         } else {
-            return invoiceRepository.getInvoiceInforByFilter(LocalDate.now().atStartOfDay(), LocalDate.now().atTime(LocalTime.MAX), null, null, pageable);
+            return invoiceRepository.getInvoiceInforByFilter(LocalDate.now().atStartOfDay(),
+                    LocalDate.now().atTime(LocalTime.MAX), null, null, pageable);
         }
     }
 
@@ -182,22 +197,34 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Transactional(readOnly = true)
     public InvoicePageWithStatsResponse getInvoices(String keyword, String paymentStatus, int page, int size) {
         List<Appointment> allAppointments = appointmentRepository.findAllAppointmentsForBilling(keyword);
-        
+
         List<InvoiceListResponse> allResponses = new java.util.ArrayList<>();
-        
+
         long totalPaidCount = 0;
         long totalUnpaidCount = 0;
-        
+
         for (Appointment a : allAppointments) {
-            BigDecimal totalExpected = a.getService() != null ? a.getService().getReferencePrice() : BigDecimal.ZERO;
+            List<String> serviceNames = new java.util.ArrayList<>();
+            if (a.getService() != null) {
+                serviceNames.add(a.getService().getName());
+            }
+
+            BigDecimal totalExpected = BigDecimal.ZERO;
+            if (a.getService() != null && a.getService().getReferencePrice() != null) {
+                totalExpected = a.getService().getReferencePrice();
+            }
             if (a.getMedicalRecord() != null && a.getMedicalRecord().getMedicalServiceOrders() != null) {
                 for (MedicalServiceOrder order : a.getMedicalRecord().getMedicalServiceOrders()) {
-                    if (order.getPriceReference() != null) {
+                    if (order.getPriceReference() != null && !"CANCELLED".equalsIgnoreCase(order.getStatus())) {
                         totalExpected = totalExpected.add(order.getPriceReference());
+                    }
+                    if (!"CANCELLED".equalsIgnoreCase(order.getStatus()) && order.getMedicalService() != null) {
+                        serviceNames.add(order.getMedicalService().getName());
                     }
                 }
             }
-            
+            String servicesStr = serviceNames.isEmpty() ? "-" : String.join(", ", serviceNames);
+
             BigDecimal totalPaid = BigDecimal.ZERO;
             if (a.getInvoices() != null) {
                 for (Invoice invoice : a.getInvoices()) {
@@ -206,46 +233,51 @@ public class InvoiceServiceImpl implements InvoiceService {
                     }
                 }
             }
-            
+
             BigDecimal unpaid = totalExpected.subtract(totalPaid);
-            if (unpaid.compareTo(BigDecimal.ZERO) < 0) unpaid = BigDecimal.ZERO;
-            
+            if (unpaid.compareTo(BigDecimal.ZERO) < 0)
+                unpaid = BigDecimal.ZERO;
+
             String status = unpaid.compareTo(BigDecimal.ZERO) > 0 ? "UNPAID" : "PAID";
-            
+
             // Calculate stats before filtering by status
             if ("PAID".equals(status)) {
                 totalPaidCount++;
             } else {
                 totalUnpaidCount++;
             }
-            
+
             // Filter by paymentStatus if provided
             if (paymentStatus != null && !paymentStatus.trim().isEmpty() && !paymentStatus.equalsIgnoreCase(status)) {
                 continue;
             }
-            
+
             BigDecimal displayAmount = "UNPAID".equals(status) ? unpaid : totalPaid;
-            
+
             User patient = a.getPatient();
-            String patientFullName = patient != null ? patient.getLastName() + " " + (patient.getMiddleName() != null ? patient.getMiddleName() + " " : "") + patient.getFirstName() : "-";
+            String patientFullName = patient != null ? patient.getLastName() + " "
+                    + (patient.getMiddleName() != null ? patient.getMiddleName() + " " : "") + patient.getFirstName()
+                    : "-";
             String phone = patient != null && patient.getPhone() != null ? patient.getPhone() : "-";
-            
-            List<String> serviceNames = new java.util.ArrayList<>();
-            if (a.getService() != null) {
-                serviceNames.add("Khám " + a.getService().getName());
-            }
-            if (a.getMedicalRecord() != null && a.getMedicalRecord().getMedicalServiceOrders() != null) {
-                for (MedicalServiceOrder order : a.getMedicalRecord().getMedicalServiceOrders()) {
-                    if (order.getMedicalService() != null) {
-                        serviceNames.add(order.getMedicalService().getName());
+
+            LocalDateTime createdAt = a.getCreatedAt();
+            if (a.getInvoices() != null && !a.getInvoices().isEmpty()) {
+                for (Invoice inv : a.getInvoices()) {
+                    if (inv.getCreatedAt() != null && (createdAt == null || inv.getCreatedAt().isAfter(createdAt))) {
+                        createdAt = inv.getCreatedAt();
                     }
                 }
+            } else if (a.getMedicalRecord() != null && a.getMedicalRecord().getMedicalServiceOrders() != null
+                    && !a.getMedicalRecord().getMedicalServiceOrders().isEmpty()) {
+                for (MedicalServiceOrder mso : a.getMedicalRecord().getMedicalServiceOrders()) {
+                    if (mso.getCreateAt() != null && (createdAt == null || mso.getCreateAt().isAfter(createdAt))) {
+                        createdAt = mso.getCreateAt();
+                    }
+                }
+            } else if (a.getUpdatedAt() != null) {
+                createdAt = a.getUpdatedAt();
             }
-            String services = String.join(", ", serviceNames);
-            if (services.isEmpty()) {
-                services = "-";
-            }
-            
+
             allResponses.add(InvoiceListResponse.builder()
                     .appointmentId(a.getId())
                     .appointmentCode(a.getAppointmentCode())
@@ -253,48 +285,73 @@ public class InvoiceServiceImpl implements InvoiceService {
                     .phone(phone)
                     .displayAmount(displayAmount)
                     .paymentStatus(status)
-                    .services(services)
+                    .createdAt(createdAt)
+                    .services(servicesStr)
                     .build());
         }
-        
+
         allResponses.sort((r1, r2) -> {
-            int statusCompare = r1.getPaymentStatus().compareTo(r2.getPaymentStatus());
+            // UNPAID trước, PAID sau
+            int statusCompare = 0;
+            if ("UNPAID".equals(r1.getPaymentStatus()) && "PAID".equals(r2.getPaymentStatus())) {
+                statusCompare = -1;
+            } else if ("PAID".equals(r1.getPaymentStatus()) && "UNPAID".equals(r2.getPaymentStatus())) {
+                statusCompare = 1;
+            }
             if (statusCompare != 0) {
                 return statusCompare;
             }
-            return r1.getPatientFullName().compareToIgnoreCase(r2.getPatientFullName());
+            // Trong cùng nhóm trạng thái: thời gian mới nhất xếp lên đầu (gần hiện tại
+            // nhất)
+            if (r1.getCreatedAt() != null && r2.getCreatedAt() != null) {
+                return r2.getCreatedAt().compareTo(r1.getCreatedAt());
+            } else if (r1.getCreatedAt() == null && r2.getCreatedAt() != null) {
+                return 1;
+            } else if (r1.getCreatedAt() != null && r2.getCreatedAt() == null) {
+                return -1;
+            }
+            return 0;
         });
-        
+
         Pageable pageable = PageRequest.of(page - 1, size);
         int start = (int) pageable.getOffset();
         int end = Math.min((start + pageable.getPageSize()), allResponses.size());
-        
+
         List<InvoiceListResponse> pagedResponses = new java.util.ArrayList<>();
         if (start <= end && start < allResponses.size()) {
             pagedResponses = allResponses.subList(start, end);
         }
-        
-        Page<InvoiceListResponse> pagedResult = new org.springframework.data.domain.PageImpl<>(pagedResponses, pageable, allResponses.size());
-        
+
+        Page<InvoiceListResponse> pagedResult = new org.springframework.data.domain.PageImpl<>(pagedResponses, pageable,
+                allResponses.size());
+
         return InvoicePageWithStatsResponse.builder()
                 .page(pagedResult)
                 .totalPaidCount(totalPaidCount)
                 .totalUnpaidCount(totalUnpaidCount)
                 .build();
     }
-    // ======================== END LIST INVOICE RECEPTIONIST ========================
+    // ======================== END LIST INVOICE RECEPTIONIST
+    // ========================
 
-    // ======================== VIEW INVOICE DETAIL RECEPTIONIST ========================
+    // ======================== VIEW INVOICE DETAIL RECEPTIONIST
+    // ========================
     @Override
     @Transactional(readOnly = true)
     public InvoiceDetailResponse getInvoiceDetail(Long appointmentId) {
-        Appointment a = appointmentRepository.findAppointmentDetailForInvoice(appointmentId)
+        Appointment a = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch hẹn có ID: " + appointmentId));
 
         User patient = a.getPatient();
         User doctor = a.getDoctor();
-        String patientFullName = patient != null ? patient.getLastName() + " " + (patient.getMiddleName() != null ? patient.getMiddleName() + " " : "") + patient.getFirstName() : "-";
-        String doctorFullName = doctor != null ? doctor.getLastName() + " " + (doctor.getMiddleName() != null ? doctor.getMiddleName() + " " : "") + doctor.getFirstName() : "-";
+        String patientFullName = patient != null
+                ? patient.getLastName() + " " + (patient.getMiddleName() != null ? patient.getMiddleName() + " " : "")
+                        + patient.getFirstName()
+                : "-";
+        String doctorFullName = doctor != null
+                ? doctor.getLastName() + " " + (doctor.getMiddleName() != null ? doctor.getMiddleName() + " " : "")
+                        + doctor.getFirstName()
+                : "-";
 
         String address = "-";
         if (patient != null && patient.getAddresses() != null && !patient.getAddresses().isEmpty()) {
@@ -302,9 +359,10 @@ public class InvoiceServiceImpl implements InvoiceService {
                     .filter(UserAddress::getIsDefault)
                     .findFirst()
                     .orElse(patient.getAddresses().iterator().next());
-            address = userAddress.getAddressLine() + (userAddress.getProvince() != null ? ", " + userAddress.getProvince().getName() : "");
+            address = userAddress.getAddressLine()
+                    + (userAddress.getProvince() != null ? ", " + userAddress.getProvince().getName() : "");
         }
-        
+
         List<InvoiceDetailResponse.PaidInvoiceDto> paidInvoices = new java.util.ArrayList<>();
         BigDecimal totalPaid = BigDecimal.ZERO;
         if (a.getInvoices() != null) {
@@ -337,7 +395,7 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         List<InvoiceDetailResponse.UnpaidServiceDto> unpaidServices = new java.util.ArrayList<>();
         BigDecimal totalUnpaid = BigDecimal.ZERO;
-        
+
         // 1. Check initial service
         boolean initialServicePaid = false;
         if (a.getInvoices() != null) {
@@ -352,7 +410,7 @@ public class InvoiceServiceImpl implements InvoiceService {
                 }
             }
         }
-        
+
         if (!initialServicePaid && a.getService() != null) {
             unpaidServices.add(InvoiceDetailResponse.UnpaidServiceDto.builder()
                     .id(a.getId())
@@ -372,11 +430,12 @@ public class InvoiceServiceImpl implements InvoiceService {
                         isOrderPaid = true;
                     }
                 }
-                
-                if (!isOrderPaid && order.getPriceReference() != null) {
+
+                if (!isOrderPaid && order.getPriceReference() != null && !"CANCELLED".equalsIgnoreCase(order.getStatus())) {
                     unpaidServices.add(InvoiceDetailResponse.UnpaidServiceDto.builder()
                             .id(order.getId())
-                            .serviceName(order.getMedicalService() != null ? order.getMedicalService().getName() : "Dịch vụ")
+                            .serviceName(
+                                    order.getMedicalService() != null ? order.getMedicalService().getName() : "Dịch vụ")
                             .price(order.getPriceReference())
                             .type("ADDITIONAL")
                             .build());
@@ -393,8 +452,12 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .patientPhone(patient != null && patient.getPhone() != null ? patient.getPhone() : "-")
                 .patientAddress(address)
                 .doctorFullName(doctorFullName)
-                .departmentName(doctor != null && doctor.getDepartment() != null ? doctor.getDepartment().getName() : "-")
-                .roomNumber(a.getSlot() != null && a.getSlot().getSchedule() != null && a.getSlot().getSchedule().getRoom() != null ? a.getSlot().getSchedule().getRoom().getRoomNumber() : "-")
+                .departmentName(
+                        doctor != null && doctor.getDepartment() != null ? doctor.getDepartment().getName() : "-")
+                .roomNumber(a.getSlot() != null && a.getSlot().getSchedule() != null
+                        && a.getSlot().getSchedule().getRoom() != null
+                                ? a.getSlot().getSchedule().getRoom().getRoomNumber()
+                                : "-")
                 .diagnosis(a.getMedicalRecord() != null ? a.getMedicalRecord().getDiagnosis() : null)
                 .paidInvoices(paidInvoices)
                 .unpaidServices(unpaidServices)
@@ -405,48 +468,107 @@ public class InvoiceServiceImpl implements InvoiceService {
 
     @Override
     @Transactional
-    public void processPayment(Long appointmentId, String paymentMethod) {
-        Appointment a = appointmentRepository.findAppointmentDetailForInvoice(appointmentId)
+    public void processPayment(Long appointmentId, String paymentMethod, boolean includeInitialFee,
+            List<Long> selectedOrderIds) {
+        Appointment a = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch hẹn: " + appointmentId));
-        
-        InvoiceDetailResponse detail = getInvoiceDetail(appointmentId);
-        if (detail.getUnpaidServices() == null || detail.getUnpaidServices().isEmpty()) {
-            throw new DataConflictException("Không có dịch vụ nào cần thanh toán.");
+
+        if (selectedOrderIds == null) {
+            selectedOrderIds = Collections.emptyList();
         }
-        
-        Invoice newInvoice = new Invoice();
-        newInvoice.setAppointment(a);
-        newInvoice.setInvoiceCode("INV-" + System.currentTimeMillis());
-        newInvoice.setTotalAmount(detail.getTotalUnpaidAmount());
+
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        List<InvoiceDetailResponse.UnpaidServiceDto> allUnpaid = getInvoiceDetail(appointmentId).getUnpaidServices();
+
+        // Determine which items are selected for payment
+        List<InvoiceDetailResponse.UnpaidServiceDto> selectedItems = new java.util.ArrayList<>();
+        List<InvoiceDetailResponse.UnpaidServiceDto> rejectedItems = new java.util.ArrayList<>();
+
+        for (InvoiceDetailResponse.UnpaidServiceDto unpaid : allUnpaid) {
+            if ("APPOINTMENT".equals(unpaid.getType())) {
+                // Initial exam fee
+                if (includeInitialFee) {
+                    selectedItems.add(unpaid);
+                }
+                // If not included - we just skip (no fee charged, bệnh nhân không đặt online)
+            } else if ("ADDITIONAL".equals(unpaid.getType())) {
+                // Additional service ordered by doctor
+                if (selectedOrderIds.contains(unpaid.getId())) {
+                    selectedItems.add(unpaid);
+                } else {
+                    rejectedItems.add(unpaid); // bệnh nhân từ chối làm dịch vụ này
+                }
+            }
+        }
+
+        if (selectedItems.isEmpty()) {
+            throw new DataConflictException("Vui lòng chọn ít nhất một dịch vụ để thanh toán.");
+        }
+
+        // Calculate total of selected items only
+        for (InvoiceDetailResponse.UnpaidServiceDto item : selectedItems) {
+            if (item.getPrice() != null) {
+                totalAmount = totalAmount.add(item.getPrice());
+            }
+        }
+
+        // Create or reuse Invoice for selected items
+        Invoice newInvoice = null;
+        if (includeInitialFee && a.getInvoices() != null) {
+            newInvoice = a.getInvoices().stream()
+                    .filter(i -> "UNPAID".equalsIgnoreCase(i.getPaymentStatus()))
+                    .findFirst()
+                    .orElse(null);
+
+            if (newInvoice != null && newInvoice.getInvoiceItems() != null) {
+                invoiceItemRepository.deleteAll(newInvoice.getInvoiceItems());
+                newInvoice.getInvoiceItems().clear();
+            }
+        }
+
+        if (newInvoice == null) {
+            newInvoice = new Invoice();
+            newInvoice.setAppointment(a);
+            newInvoice.setInvoiceCode("INV-" + System.currentTimeMillis());
+            newInvoice.setCreatedAt(LocalDateTime.now());
+        }
+
+        newInvoice.setTotalAmount(totalAmount);
         newInvoice.setPaymentMethod(paymentMethod != null ? paymentMethod.toUpperCase() : "CASH");
         newInvoice.setPaymentStatus("PAID");
         newInvoice.setPaidAt(LocalDateTime.now());
-        newInvoice.setCreatedAt(LocalDateTime.now());
         newInvoice.setUpdatedAt(LocalDateTime.now());
-        
         invoiceRepository.save(newInvoice);
-        
-        for (InvoiceDetailResponse.UnpaidServiceDto unpaid : detail.getUnpaidServices()) {
+
+        // Create InvoiceItems for selected services
+        for (InvoiceDetailResponse.UnpaidServiceDto selected : selectedItems) {
             InvoiceItem item = new InvoiceItem();
             item.setInvoice(newInvoice);
-            item.setItemName(unpaid.getServiceName());
-            item.setPriceApplied(unpaid.getPrice());
+            item.setItemName(selected.getServiceName());
+            item.setPriceApplied(selected.getPrice());
             item.setQuantity(1);
-            item.setLineTotal(unpaid.getPrice());
-            
-            if ("ADDITIONAL".equals(unpaid.getType())) {
+            item.setLineTotal(selected.getPrice());
+
+            if ("ADDITIONAL".equals(selected.getType()) && a.getMedicalRecord() != null) {
                 MedicalServiceOrder order = a.getMedicalRecord().getMedicalServiceOrders().stream()
-                        .filter(o -> o.getId().equals(unpaid.getId())).findFirst().orElse(null);
+                        .filter(o -> o.getId().equals(selected.getId())).findFirst().orElse(null);
                 if (order != null) {
                     item.setMedicalServiceOrder(order);
                     item.setService(order.getMedicalService());
-                    order.setStatus("PAID"); // Mark order as paid
+                    order.setStatus("PAID"); // Đánh dấu dịch vụ đã thanh toán
+                    medicalServiceOrderRepository.save(order);
                 }
-            } else if ("APPOINTMENT".equals(unpaid.getType())) {
+            } else if ("APPOINTMENT".equals(selected.getType())) {
                 item.setService(a.getService());
             }
             invoiceItemRepository.save(item);
         }
+
+        // Cancel rejected additional services (bệnh nhân đổi ý, không muốn làm)
+        // Lễ tân không tự hủy dịch vụ khi thanh toán, để dự phòng bệnh nhân đổi ý
+        // Dịch vụ chưa thanh toán sẽ tự động bị hủy khi Bác sĩ Hoàn thành lịch hẹn
+
     }
-    // ======================== END VIEW INVOICE DETAIL RECEPTIONIST ========================
+    // ======================== END VIEW INVOICE DETAIL RECEPTIONIST
+    // ========================
 }

@@ -44,6 +44,8 @@ public class SecurityConfig {
                     "/login",
                     "/forgot-password", "/reset-password",
                     "/css/**", "/js/**", "/images/**",
+                    // Kiosk - màn hình cảm ứng tại bệnh viện, không cần đăng nhập
+                    "/kiosk/**",
                     // Xem danh sách + chi tiết chuyên khoa — public
                     "/patient/departments", "/patient/departments/**",
                     // Xem danh sách + chi tiết bác sĩ — public

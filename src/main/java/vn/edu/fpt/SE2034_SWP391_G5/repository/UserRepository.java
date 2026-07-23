@@ -88,13 +88,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // -------------------------------------- RECEPTIONIST -----------------------------------------------
 
-    @Query("SELECT u.id, " +
-            "CONCAT(CONCAT(CONCAT(u.lastName, ' '), COALESCE(CONCAT(u.middleName, ' '), '')), u.firstName), " +
-            "UPPER(CONCAT(SUBSTRING(u.lastName, 1, 1), SUBSTRING(u.firstName, 1, 1))) " +
-            "FROM User u " +
-            "WHERE u.email = :email")
-    List<Object[]> findReceptionistInfoByEmail(@Param("email") String email);
-
     @Query("SELECT DISTINCT u FROM User u " +
             "JOIN FETCH u.userRoles ur " +
             "JOIN FETCH ur.role r " +

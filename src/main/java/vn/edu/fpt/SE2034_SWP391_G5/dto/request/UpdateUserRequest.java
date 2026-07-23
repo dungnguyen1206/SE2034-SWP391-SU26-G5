@@ -60,7 +60,7 @@ public class UpdateUserRequest {
     private String degree;
     private String licenseNumber;
 
-    // private LocalDate licenseIssueDate; // Đã xóa
+    private LocalDate licenseIssueDate;
 
     private String doctorStatus;
 

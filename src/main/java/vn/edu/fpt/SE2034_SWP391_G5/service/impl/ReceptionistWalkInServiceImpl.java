@@ -27,9 +27,9 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
     private final MedicalServiceRepository medicalServiceRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final AppointmentRepository appointmentRepository;
+    private final SmsService smsService;
     private final InvoiceRepository invoiceRepository;
     private final InvoiceItemRepository invoiceItemRepository;
-    private final SmsService smsService;
 
     // ======================== WALK-IN BOOKING RECEPTIONIST ========================
     @Override
@@ -176,7 +176,7 @@ public class ReceptionistWalkInServiceImpl implements ReceptionistWalkInService 
         // 2. Get Selected Medical Service
         MedicalService selectedService = medicalServiceRepository.findById(request.getServiceId())
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy dịch vụ khám."));
-        
+
         if (selectedService.getDepartment() == null || !selectedService.getDepartment().getId().equals(request.getDepartmentId())) {
             throw new RuntimeException("Dịch vụ khám không thuộc khoa đã chọn.");
         }
