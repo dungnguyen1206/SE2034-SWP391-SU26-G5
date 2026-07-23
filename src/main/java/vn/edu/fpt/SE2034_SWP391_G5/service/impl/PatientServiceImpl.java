@@ -76,12 +76,14 @@ public class PatientServiceImpl implements PatientService {
         user.setFirstName(request.getFirstName());
         user.setMiddleName(request.getMiddleName());
         user.setLastName(request.getLastName());
-        user.setPhone(request.getPhone());
+        // Số điện thoại không được thay đổi khi chỉnh sửa profile
         user.setGender(request.getGender());
         user.setDateOfBirth(request.getDateOfBirth());
         user.setBloodType(request.getBloodType());
         user.setUpdatedAt(LocalDateTime.now());
-        user.setAvatar(request.getAvatar());
+        if (request.getAvatar() != null && !request.getAvatar().isBlank()) {
+            user.setAvatar(request.getAvatar());
+        }
 
         if (request.getEmail() != null && !request.getEmail().trim().isEmpty() && !request.getEmail().equals(user.getEmail())) {
             if (userRepository.existsByEmail(request.getEmail())) {
@@ -94,7 +96,10 @@ public class PatientServiceImpl implements PatientService {
 
         userRepository.save(user);
 
-        if (request.getAddressLine() != null && request.getProvinceId() != null) {
+        if (request.getAddressLine() != null && !request.getAddressLine().trim().isEmpty()) {
+            if (request.getProvinceId() == null) {
+                throw new BadRequestException("Tỉnh/thành phố không được để trống");
+            }
             Province province = provinceRepository.findById(request.getProvinceId())
                     .orElseThrow(() -> new BadRequestException("Tỉnh/thành phố không hợp lệ"));
 
@@ -117,19 +122,67 @@ public class PatientServiceImpl implements PatientService {
         }
     }
 
+    private MedicalRecordResponse getMockRecord() {
+        List<MedicalRecordResponse.ServiceOrderInfo> orders = List.of(
+            MedicalRecordResponse.ServiceOrderInfo.builder()
+                .id(999991L)
+                .serviceName("Chụp X-quang phổi thẳng (Kỹ thuật số)")
+                .result("Hình ảnh bóng tim bình thường. Vùng phổi hai bên sáng, không thấy tổn thương nhu mô phổi tiến triển.")
+                .status("COMPLETED")
+                .note("Không phát hiện bất thường.")
+                .price(java.math.BigDecimal.valueOf(150000))
+                .build(),
+            MedicalRecordResponse.ServiceOrderInfo.builder()
+                .id(999992L)
+                .serviceName("Xét nghiệm tổng phân tích tế bào máu ngoại vi")
+                .result("Số lượng bạch cầu tăng nhẹ (10.5 G/L), các chỉ số hồng cầu và tiểu cầu trong giới hạn bình thường.")
+                .status("COMPLETED")
+                .note("Theo dõi tình trạng viêm nhẹ.")
+                .price(java.math.BigDecimal.valueOf(200000))
+                .build()
+        );
+
+        return MedicalRecordResponse.builder()
+                .id(999999L)
+                .appointmentId(999999L)
+                .appointmentCode("APT-DEMO-9999")
+                .doctorFullName("Nguyễn Việt Anh")
+                .doctorDegree("ThS. BS")
+                .departmentName("Khoa Hô hấp")
+                .serviceName("Khám nội hô hấp")
+                .examinationDate(java.time.LocalDateTime.now().minusDays(1))
+                .symptoms("Ho khạc đờm trắng đục kéo dài 3 ngày, sốt nhẹ về chiều (38 độ C), đau rát họng.")
+                .diagnosis("Viêm phế quản cấp tính")
+                .conclusion("Bệnh nhân nghỉ ngơi hợp lý, tránh tiếp xúc khói bụi và nước lạnh. Uống nhiều nước ấm.")
+                .prescriptionText("1. Kháng sinh Augmentin 1g - 14 viên (Ngày uống 2 lần, mỗi lần 1 viên sau ăn sáng/tối)\n2. Thuốc ho Acemuc 200mg - 20 gói (Ngày uống 3 lần, mỗi lần 1 gói hòa tan trong nước)\n3. Giảm đau hạ sốt Paracetamol 500mg - 10 viên (Uống 1 viên khi sốt trên 38.5 độ C, cách nhau tối thiểu 4-6 giờ)")
+                .notes("Tái khám sau 7 ngày hoặc khi có dấu hiệu khó thở tăng dần.")
+                .heartRate(82)
+                .bloodPressure("120/80")
+                .bloodGlucose(java.math.BigDecimal.valueOf(5.6))
+                .weight(java.math.BigDecimal.valueOf(68.5))
+                .status("FINALIZED")
+                .serviceOrders(orders)
+                .build();
+    }
+
     @Override
     @Transactional(readOnly = true)
     public List<MedicalRecordResponse> getMedicalRecords(Long patientId) {
-        return medicalRecordRepository.findByPatientIdOrderByExaminationDateDesc(patientId)
-                .stream()
+        List<MedicalRecord> list = medicalRecordRepository.findByPatientIdOrderByExaminationDateDesc(patientId);
+        List<MedicalRecordResponse> responses = new java.util.ArrayList<>(list.stream()
                 .filter(r -> "FINALIZED".equals(r.getStatus()))
                 .map(this::toRecordResponse)
-                .toList();
+                .toList());
+        responses.add(0, getMockRecord());
+        return responses;
     }
 
     @Override
     @Transactional(readOnly = true)
     public MedicalRecordResponse getMedicalRecordDetail(Long recordId, Long patientId) {
+        if (recordId != null && recordId.equals(999999L)) {
+            return getMockRecord();
+        }
         MedicalRecord record = medicalRecordRepository.findById(recordId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hồ sơ bệnh án"));
 

@@ -8,10 +8,10 @@
     <!-- Doctor Sidebar Fragment -->
     <aside th:fragment="sidebar(activePage)" class="sidebar">
         <div>
-            <div class="brand">
+            <a th:href="@{/}" class="brand" style="text-decoration: none; color: inherit; display: block; cursor: pointer;">
                 <h2>Hospital HAMS</h2>
                 <p>Bác Sĩ</p>
-            </div>
+            </a>
 
             <nav class="menu">
                 <a th:href="@{/doctor/dashboard}" th:classappend="${activePage == 'dashboard'} ? 'active' : ''">

@@ -210,8 +210,8 @@
 
                                     <!-- Triệu chứng -->
                                     <div class="book-form-field">
-                                        <label>Triệu chứng / Ghi chú</label>
-                                        <textarea th:field="*{note}"
+                                        <label>Triệu chứng / Ghi chú <span style="color:#dc2626;">*</span></label>
+                                        <textarea th:field="*{note}" required
                                             placeholder="Mô tả triệu chứng, lý do khám hoặc ghi chú cho bác sĩ..."></textarea>
                                     </div>
 
@@ -358,9 +358,15 @@
 
             // Render nút ca
             daySchedules.forEach(schedule => {
-                const isMorning = schedule.shift === 'MORNING';
-                const label = isMorning ? '☀️ Ca sáng' : '🌙 Ca chiều';
-                const timeRange = isMorning ? '07:00 – 12:00' : '13:00 – 17:00';
+                let label = '☀️ Ca sáng';
+                let timeRange = '07:00 – 12:00';
+                if (schedule.shift === 'AFTERNOON') {
+                    label = '🌙 Ca chiều';
+                    timeRange = '13:00 – 17:00';
+                } else if (schedule.shift === 'FULL_DAY') {
+                    label = '🗓️ Cả ngày';
+                    timeRange = '07:00 – 17:00';
+                }
 
                 // Đếm slot còn trống
                 const availableCount = (schedule.slots || []).filter(sl => sl.available).length;

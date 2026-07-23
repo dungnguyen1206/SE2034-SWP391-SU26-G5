@@ -156,7 +156,32 @@
         </div>
 
         <div class="result-count" th:unless="${#lists.isEmpty(doctors)}"
-             th:text="${#lists.size(doctors)} + ' bác sĩ'"></div>
+             th:text="'Hiển thị ' + ${#lists.size(doctors)} + ' bác sĩ (Trang ' + ${currentPage} + '/' + ${totalPages} + ')'"></div>
+
+        <!-- Phân trang -->
+        <div th:if="${totalPages > 1}" style="display: flex; justify-content: center; margin-top: 30px; margin-bottom: 20px;">
+            <ul style="display: flex; list-style: none; padding: 0; gap: 8px; margin: 0;">
+                <li th:if="${currentPage > 1}">
+                    <a th:href="@{/patient/doctors(page=${currentPage - 1}, departmentId=${selectedDepartmentId})}" 
+                       style="display: block; padding: 8px 14px; border: 1px solid #e2e8f0; border-radius: 6px; text-decoration: none; color: #64748b; background: white; transition: all 0.2s; font-size: 14px;">
+                       <i class="bi bi-chevron-left"></i>
+                    </a>
+                </li>
+                
+                <li th:each="i : ${#numbers.sequence(1, totalPages)}">
+                    <a th:href="@{/patient/doctors(page=${i}, departmentId=${selectedDepartmentId})}" 
+                       th:text="${i}"
+                       th:style="${currentPage == i} ? 'display: block; padding: 8px 14px; border: 1px solid #0284c7; border-radius: 6px; text-decoration: none; color: white; background-color: #0284c7; font-weight: 600; font-size: 14px;' : 'display: block; padding: 8px 14px; border: 1px solid #e2e8f0; border-radius: 6px; text-decoration: none; color: #64748b; background: white; transition: all 0.2s; font-size: 14px;'"></a>
+                </li>
+                
+                <li th:if="${currentPage < totalPages}">
+                    <a th:href="@{/patient/doctors(page=${currentPage + 1}, departmentId=${selectedDepartmentId})}" 
+                       style="display: block; padding: 8px 14px; border: 1px solid #e2e8f0; border-radius: 6px; text-decoration: none; color: #64748b; background: white; transition: all 0.2s; font-size: 14px;">
+                       <i class="bi bi-chevron-right"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
 
     </main>
 </div>

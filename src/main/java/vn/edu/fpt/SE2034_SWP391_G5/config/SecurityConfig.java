@@ -46,6 +46,7 @@ public class SecurityConfig {
                     "/css/**", "/js/**", "/images/**",
                     // Xem danh sách + chi tiết chuyên khoa — public
                     "/patient/departments", "/patient/departments/**",
+                    "/departments", "/departments/**",
                     // Xem danh sách + chi tiết bác sĩ — public
                     "/doctors", "/doctors/**",
                     // Xem bài viết - public

@@ -10,12 +10,12 @@
 <!--Common SideBar-->
 <aside th:fragment="managerSidebar(activeMenu)" class="manager-sidebar">
     <header class="manager-header">
-        <div class="manager-header-title">
+        <a th:href="@{/}" class="manager-header-title" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px; cursor: pointer;">
             <div class="manager-brand-icon"> <i class="bi bi-hospital"></i> </div>
             <div class="manager-brand-text"><h1>HMS</h1>
                 <p>HAMEMS System</p>
             </div>
-        </div>
+        </a>
     </header>
     <nav class="sidebar-section-title">Quản lý bệnh viện</nav>
     <nav class="manager-nav">

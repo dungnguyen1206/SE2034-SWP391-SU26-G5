@@ -609,25 +609,18 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .findAvailableSchedulesByDoctorId(doctorId, LocalDate.now());
 
         LocalDate today = LocalDate.now();
-        java.time.LocalTime now = java.time.LocalTime.now();
+        LocalTime now = LocalTime.now();
 
-        return schedules.stream()
-                .filter(schedule -> {
-                    if (!schedule.getWorkDate().isEqual(today)) {
-                        return true;
-                    }
+        List<ScheduleSlotResponse> result = new ArrayList<>();
 
-                    if ("MORNING".equals(schedule.getShift())) {
-                        return now.isBefore(java.time.LocalTime.of(12, 0));
-                    } else {
-                        return now.isBefore(java.time.LocalTime.of(17, 0));
-                    }
-                })
-                .map(schedule -> {
-                    List<TimeSlot> slots = timeSlotRepository
-                            .findByScheduleIdOrderByStartTimeAsc(schedule.getId());
+        for (DoctorSchedule schedule : schedules) {
+            List<TimeSlot> slots = timeSlotRepository.findByScheduleIdOrderByStartTimeAsc(schedule.getId());
 
-                    List<ScheduleSlotResponse.SlotInfo> slotInfos = slots.stream()
+            if ("FULL_DAY".equalsIgnoreCase(schedule.getShift())) {
+                // Ca sáng (sáng: start_time < 12:00)
+                if (!schedule.getWorkDate().isEqual(today) || now.isBefore(LocalTime.of(12, 0))) {
+                    List<ScheduleSlotResponse.SlotInfo> morningSlots = slots.stream()
+                            .filter(s -> s.getStartTime() != null && s.getStartTime().isBefore(LocalTime.of(12, 0)))
                             .map(slot -> ScheduleSlotResponse.SlotInfo.builder()
                                     .slotId(slot.getId())
                                     .startTime(slot.getStartTime())
@@ -641,18 +634,84 @@ public class AppointmentServiceImpl implements AppointmentService {
                                     .build())
                             .toList();
 
-                    String shiftLabel = "MORNING".equals(schedule.getShift()) ? "Ca sáng" : "Ca chiều";
+                    if (!morningSlots.isEmpty()) {
+                        result.add(ScheduleSlotResponse.builder()
+                                .scheduleId(schedule.getId())
+                                .workDate(schedule.getWorkDate())
+                                .shift("MORNING")
+                                .shiftLabel("Ca sáng")
+                                .roomNumber(schedule.getRoom() != null ? schedule.getRoom().getRoomNumber() : "")
+                                .slots(morningSlots)
+                                .build());
+                    }
+                }
 
-                    return ScheduleSlotResponse.builder()
-                            .scheduleId(schedule.getId())
-                            .workDate(schedule.getWorkDate())
-                            .shift(schedule.getShift())
-                            .shiftLabel(shiftLabel)
-                            .roomNumber(schedule.getRoom() != null ? schedule.getRoom().getRoomNumber() : "")
-                            .slots(slotInfos)
-                            .build();
-                })
-                .toList();
+                // Ca chiều (chiều: start_time >= 12:00)
+                if (!schedule.getWorkDate().isEqual(today) || now.isBefore(LocalTime.of(17, 0))) {
+                    List<ScheduleSlotResponse.SlotInfo> afternoonSlots = slots.stream()
+                            .filter(s -> s.getStartTime() != null && !s.getStartTime().isBefore(LocalTime.of(12, 0)))
+                            .map(slot -> ScheduleSlotResponse.SlotInfo.builder()
+                                    .slotId(slot.getId())
+                                    .startTime(slot.getStartTime())
+                                    .endTime(slot.getEndTime())
+                                    .bookedCapacity(slot.getBookedCapacity())
+                                    .maxCapacity(slot.getMaxCapacity())
+                                    .status(slot.getStatus())
+                                    .available("AVAILABLE".equals(slot.getStatus())
+                                            && slot.getBookedCapacity() < slot.getMaxCapacity()
+                                            && (!schedule.getWorkDate().isEqual(today) || slot.getStartTime().isAfter(now)))
+                                    .build())
+                            .toList();
+
+                    if (!afternoonSlots.isEmpty()) {
+                        result.add(ScheduleSlotResponse.builder()
+                                .scheduleId(schedule.getId())
+                                .workDate(schedule.getWorkDate())
+                                .shift("AFTERNOON")
+                                .shiftLabel("Ca chiều")
+                                .roomNumber(schedule.getRoom() != null ? schedule.getRoom().getRoomNumber() : "")
+                                .slots(afternoonSlots)
+                                .build());
+                    }
+                }
+            } else {
+                if (schedule.getWorkDate().isEqual(today)) {
+                    if ("MORNING".equalsIgnoreCase(schedule.getShift()) && !now.isBefore(LocalTime.of(12, 0))) {
+                        continue;
+                    }
+                    if ("AFTERNOON".equalsIgnoreCase(schedule.getShift()) && !now.isBefore(LocalTime.of(17, 0))) {
+                        continue;
+                    }
+                }
+
+                List<ScheduleSlotResponse.SlotInfo> slotInfos = slots.stream()
+                        .map(slot -> ScheduleSlotResponse.SlotInfo.builder()
+                                .slotId(slot.getId())
+                                .startTime(slot.getStartTime())
+                                .endTime(slot.getEndTime())
+                                .bookedCapacity(slot.getBookedCapacity())
+                                .maxCapacity(slot.getMaxCapacity())
+                                .status(slot.getStatus())
+                                .available("AVAILABLE".equals(slot.getStatus())
+                                        && slot.getBookedCapacity() < slot.getMaxCapacity()
+                                        && (!schedule.getWorkDate().isEqual(today) || slot.getStartTime().isAfter(now)))
+                                .build())
+                        .toList();
+
+                String shiftLabel = "MORNING".equalsIgnoreCase(schedule.getShift()) ? "Ca sáng" : "Ca chiều";
+
+                result.add(ScheduleSlotResponse.builder()
+                        .scheduleId(schedule.getId())
+                        .workDate(schedule.getWorkDate())
+                        .shift(schedule.getShift())
+                        .shiftLabel(shiftLabel)
+                        .roomNumber(schedule.getRoom() != null ? schedule.getRoom().getRoomNumber() : "")
+                        .slots(slotInfos)
+                        .build());
+            }
+        }
+
+        return result;
     }
 
     @Override
@@ -670,10 +729,19 @@ public class AppointmentServiceImpl implements AppointmentService {
         TimeSlot slot = timeSlotRepository.findByIdWithSchedule(request.getSlotId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy khung giờ"));
 
-        // Kiểm tra xem bệnh nhân có lịch hẹn nào trước đó chưa hoàn thành (CONFIRMED, WAITING, EXAMINING) không
-        DoctorSchedule schedule = slot.getSchedule();
+DoctorSchedule schedule = slot.getSchedule();
         if (schedule == null || schedule.getDoctor() == null || schedule.getWorkDate() == null) {
             throw new BadRequestException("Khung giờ không có lịch làm việc hợp lệ");
+        }
+
+        // Kiểm tra xem bệnh nhân có lịch hẹn nào chưa hoàn thành (CONFIRMED, WAITING, EXAMINING) trong cùng ngày khám không
+        LocalDate targetBookingDate = schedule.getWorkDate();
+        boolean hasActiveAppointmentOnDate = appointmentRepository.existsByPatientIdAndBookingDateAndStatusIn(
+                patientId,
+                targetBookingDate,
+                List.of("CONFIRMED", "WAITING", "EXAMINING"));
+        if (hasActiveAppointmentOnDate) {
+            throw new BadRequestException("Bạn hiện đang có lịch hẹn chưa hoàn thành trong ngày " + targetBookingDate + ". Vui lòng hoàn thành lịch khám hiện tại hoặc chọn ngày khác.");
         }
 
         if (!Objects.equals(schedule.getDoctor().getId(), doctor.getId())) {
@@ -900,6 +968,15 @@ public class AppointmentServiceImpl implements AppointmentService {
             }
         }
 
+        String resolvedShift = schedule != null ? schedule.getShift() : null;
+        if ("FULL_DAY".equalsIgnoreCase(resolvedShift) && slot != null && slot.getStartTime() != null) {
+            if (slot.getStartTime().isBefore(LocalTime.of(12, 0))) {
+                resolvedShift = "MORNING";
+            } else {
+                resolvedShift = "AFTERNOON";
+            }
+        }
+
         return AppointmentResponse.builder()
                 .id(a.getId())
                 .appointmentCode(a.getAppointmentCode())
@@ -923,7 +1000,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .serviceName(a.getService() != null ? a.getService().getName() : null)
                 .servicePrice(a.getService() != null ? a.getService().getReferencePrice() : null)
                 .bookingDate(a.getBookingDate())
-                .shift(schedule != null ? schedule.getShift() : null)
+                .shift(resolvedShift)
                 .slotStartTime(slot != null ? slot.getStartTime() : null)
                 .slotEndTime(slot != null ? slot.getEndTime() : null)
                 .roomNumber(schedule != null && schedule.getRoom() != null

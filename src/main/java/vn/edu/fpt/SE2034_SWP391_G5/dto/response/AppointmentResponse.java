@@ -101,7 +101,13 @@ public class AppointmentResponse {
             return "Ca sáng";
         } else if ("AFTERNOON".equalsIgnoreCase(shift)) {
             return "Ca chiều";
+        } else if ("FULL_DAY".equalsIgnoreCase(shift)) {
+            if (slotStartTime != null && slotStartTime.isBefore(LocalTime.of(12, 0))) {
+                return "Ca sáng";
+            } else {
+                return "Ca chiều";
+            }
         }
-        return shift;
+        return shift != null ? shift : "";
     }
 }

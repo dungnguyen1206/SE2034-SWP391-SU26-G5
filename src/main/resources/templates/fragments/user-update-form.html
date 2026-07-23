@@ -37,12 +37,12 @@
         </label>
         <label th:class="${formMode == 'PATIENT'} ? 'profile-form-field' : 'staff-form-field'">
             <span>Số điện thoại <strong>*</strong></span>
-            <input type="tel" th:field="*{phone}" placeholder="VD: 0901234567">
+            <input type="tel" th:field="*{phone}" placeholder="VD: 0901234567" th:readonly="${formMode == 'PATIENT'}" th:style="${formMode == 'PATIENT'} ? 'background-color: #f1f5f9; color: #64748b; cursor: not-allowed;' : ''">
             <div class="field-error" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
         </label>
 
         <label th:class="${formMode == 'PATIENT'} ? 'profile-form-field' : 'staff-form-field'">
-            <span>Ngày sinh</span>
+            <span>Ngày sinh <strong>*</strong></span>
             <input type="date" th:field="*{dateOfBirth}">
             <div class="field-error" th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}"></div>
         </label>
@@ -76,15 +76,16 @@
             </select>
         </label>
         <label class="profile-form-field">
-            <span>Tỉnh / Thành phố</span>
+            <span>Tỉnh / Thành phố <strong>*</strong></span>
             <select th:field="*{provinceId}">
                 <option value="">Chọn tỉnh/thành phố...</option>
                 <option th:each="prov : ${provinces}" th:value="${prov.id}" th:text="${prov.name}"></option>
             </select>
+            <div class="field-error" th:if="${#fields.hasErrors('provinceId')}" th:errors="*{provinceId}"></div>
         </label>
 
         <label class="profile-form-field profile-form-full">
-            <span>Địa chỉ chi tiết</span>
+            <span>Địa chỉ chi tiết <strong>*</strong></span>
             <input type="text" th:field="*{addressLine}" placeholder="Số nhà, tên đường, phường/xã, quận/huyện">
             <div class="field-error" th:if="${#fields.hasErrors('addressLine')}" th:errors="*{addressLine}"></div>
         </label>

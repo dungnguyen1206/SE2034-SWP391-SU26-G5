@@ -112,17 +112,41 @@
                         </div>
 
                         <!-- Nút đặt lịch -->
-                        <a th:if="${svc.department != null}"
-                            th:href="@{/patient/appointments/book/step2(departmentId=${svc.department.id})}"
+                        <a th:href="@{/patient/appointments/book}"
                             class="btn-primary" style="justify-content:center;font-size:13px;margin-top:auto;">
-                            <i class="bi bi-calendar-plus"></i> Đặt lịch dịch vụ này
+                            <i class="bi bi-calendar-plus"></i> Đặt lịch
                         </a>
                     </div>
                 </div>
             </div>
 
             <div style="margin-top:12px;font-size:13px;color:#94a3b8;" th:unless="${#lists.isEmpty(services)}"
-                th:text="${#lists.size(services)} + ' dịch vụ'"></div>
+                th:text="'Hiển thị ' + ${#lists.size(services)} + ' dịch vụ (Trang ' + ${currentPage} + '/' + ${totalPages} + ')'"></div>
+
+            <!-- Phân trang -->
+            <div th:if="${totalPages > 1}" style="display: flex; justify-content: center; margin-top: 30px; margin-bottom: 20px;">
+                <ul style="display: flex; list-style: none; padding: 0; gap: 8px; margin: 0;">
+                    <li th:if="${currentPage > 1}">
+                        <a th:href="@{/patient/services(page=${currentPage - 1}, departmentId=${selectedDepartmentId})}" 
+                           style="display: block; padding: 8px 14px; border: 1px solid #e2e8f0; border-radius: 6px; text-decoration: none; color: #64748b; background: white; transition: all 0.2s; font-size: 14px;">
+                           <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    
+                    <li th:each="i : ${#numbers.sequence(1, totalPages)}">
+                        <a th:href="@{/patient/services(page=${i}, departmentId=${selectedDepartmentId})}" 
+                           th:text="${i}"
+                           th:style="${currentPage == i} ? 'display: block; padding: 8px 14px; border: 1px solid #0284c7; border-radius: 6px; text-decoration: none; color: white; background-color: #0284c7; font-weight: 600; font-size: 14px;' : 'display: block; padding: 8px 14px; border: 1px solid #e2e8f0; border-radius: 6px; text-decoration: none; color: #64748b; background: white; transition: all 0.2s; font-size: 14px;'"></a>
+                    </li>
+                    
+                    <li th:if="${currentPage < totalPages}">
+                        <a th:href="@{/patient/services(page=${currentPage + 1}, departmentId=${selectedDepartmentId})}" 
+                           style="display: block; padding: 8px 14px; border: 1px solid #e2e8f0; border-radius: 6px; text-decoration: none; color: #64748b; background: white; transition: all 0.2s; font-size: 14px;">
+                           <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </div>
 
         </main>
     </div>

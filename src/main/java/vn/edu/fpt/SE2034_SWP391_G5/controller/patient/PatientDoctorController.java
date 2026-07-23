@@ -24,22 +24,38 @@ public class PatientDoctorController {
 
     // ---- Danh sách bác sĩ (yêu cầu login - ROLE_PATIENT) ----
     @GetMapping("/doctors")
-    public String listDoctors(@RequestParam(required = false) Integer departmentId, Model model) {
+    public String listDoctors(
+            @RequestParam(required = false) Integer departmentId,
+            @RequestParam(defaultValue = "1") int page,
+            Model model) {
         List<Department> departments = departmentService.getAllActiveDepartments();
-        List<DoctorResponse> doctors;
+        List<DoctorResponse> allDoctors;
 
         if (departmentId != null) {
-            doctors = doctorService.getDoctorsByDepartment(departmentId);
+            allDoctors = doctorService.getDoctorsByDepartment(departmentId);
             model.addAttribute("selectedDepartmentId", departmentId);
         } else {
-            doctors = departments.stream()
+            allDoctors = departments.stream()
                     .flatMap(d -> doctorService.getDoctorsByDepartment(d.getId()).stream())
                     .toList();
             model.addAttribute("selectedDepartmentId", null);
         }
 
+        int pageSize = 12;
+        int totalItems = allDoctors.size();
+        int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+        if (totalPages == 0) totalPages = 1;
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+
+        int start = (page - 1) * pageSize;
+        int end = Math.min(start + pageSize, totalItems);
+        List<DoctorResponse> doctors = allDoctors.subList(start, end);
+
         model.addAttribute("doctors", doctors);
         model.addAttribute("departments", departments);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
         return "patient/doctors/list";
     }
 

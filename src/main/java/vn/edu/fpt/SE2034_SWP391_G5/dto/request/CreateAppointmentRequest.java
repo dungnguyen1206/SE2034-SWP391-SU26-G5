@@ -21,5 +21,6 @@ public class CreateAppointmentRequest {
     // Trước đây không có field này nên redirect mất departmentId
     private Integer departmentId;
 
+    @jakarta.validation.constraints.NotBlank(message = "Vui lòng nhập triệu chứng / ghi chú khám")
     private String note;
 }

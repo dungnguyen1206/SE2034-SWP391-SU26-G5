@@ -26,13 +26,29 @@ public class PatientServiceController {
     private final MedicalServiceRepository medicalServiceRepository;
 
     @GetMapping("/services")
-    public String listServices(@RequestParam(required = false) Integer departmentId, Model model) {
+    public String listServices(
+            @RequestParam(required = false) Integer departmentId,
+            @RequestParam(defaultValue = "1") int page,
+            Model model) {
         List<Department> departments = departmentService.getAllActiveDepartments();
-        List<MedicalService> services = medicalServiceService.getMedicalServicelistByDepartment(departmentId);
+        List<MedicalService> allServices = medicalServiceService.getMedicalServicelistByDepartment(departmentId);
+
+        int pageSize = 12;
+        int totalItems = allServices.size();
+        int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+        if (totalPages == 0) totalPages = 1;
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+
+        int start = (page - 1) * pageSize;
+        int end = Math.min(start + pageSize, totalItems);
+        List<MedicalService> services = allServices.subList(start, end);
 
         model.addAttribute("departments", departments);
         model.addAttribute("services", services);
         model.addAttribute("selectedDepartmentId", departmentId);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
 
         return "patient/services/list";
     }
