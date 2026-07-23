@@ -11,14 +11,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalRecord;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalRecordRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
+import vn.edu.fpt.SE2034_SWP391_G5.service.MedicalRecordService;
 
 import java.time.LocalDate;
 import java.util.Locale;
-import java.util.Optional;
 
 @Controller
 @RequestMapping("/doctor")
@@ -26,7 +24,7 @@ import java.util.Optional;
 public class DoctorAppointmentController {
 
     private final AppointmentService appointmentService;
-    private final MedicalRecordRepository medicalRecordRepository;
+    private final MedicalRecordService medicalRecordService;
 
     @GetMapping("/appointment-list")
     public String appointmentList(
@@ -108,25 +106,10 @@ public class DoctorAppointmentController {
         }
 
         if ("COMPLETED".equals(status)) {
-            // Check if medical record is fully completed
-            Optional<MedicalRecord> medicalRecordOpt = medicalRecordRepository.findByAppointmentId(id);
-            if (medicalRecordOpt.isEmpty()) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Không thể chuyển trạng thái sang Hoàn thành vì hồ sơ bệnh án chưa được tạo.");
-                return redirectUrl;
-            }
-
-            MedicalRecord record = medicalRecordOpt.get();
-            if (record.getSymptoms() == null || record.getSymptoms().trim().isEmpty() ||
-                record.getDiagnosis() == null || record.getDiagnosis().trim().isEmpty() ||
-                record.getBloodPressure() == null || record.getBloodPressure().trim().isEmpty() ||
-                record.getWeight() == null ||
-                record.getConclusion() == null || record.getConclusion().trim().isEmpty() ||
-                record.getPrescriptionText() == null || record.getPrescriptionText().trim().isEmpty() ||
-                record.getNotes() == null || record.getNotes().trim().isEmpty() ||
-                record.getBloodGlucose() == null ||
-                record.getHeartRate() == null) {
-
-                redirectAttributes.addFlashAttribute("errorMessage", "Không thể chuyển trạng thái sang Hoàn thành vì hồ sơ bệnh án chưa đầy đủ thông tin.");
+            try {
+                medicalRecordService.validateMedicalRecordCompleteness(id);
+            } catch (Exception e) {
+                redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
                 return redirectUrl;
             }
         }

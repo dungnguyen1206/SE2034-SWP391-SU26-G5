@@ -120,6 +120,14 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 .toList();
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<MedicalRecordResponse> getPatientMedicalHistoryPaginated(Long patientId, String departmentName, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<MedicalRecord> recordPage = medicalRecordRepository.findByPatientIdWithDetailsPaginated(patientId, departmentName, pageable);
+        return recordPage.map(this::toRecordResponse);
+    }
+
     private MedicalRecordResponse toRecordResponse(MedicalRecord r) {
         User doctor = r.getDoctor();
         String doctorFullName = doctor != null
@@ -173,5 +181,37 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         if (middleName != null) sb.append(middleName).append(" ");
         if (firstName != null) sb.append(firstName);
         return sb.toString().trim();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.Optional<MedicalRecord> getMedicalRecordByAppointmentId(Long appointmentId) {
+        return medicalRecordRepository.findByAppointmentId(appointmentId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countPrescriptionsByDoctorAndDate(Long doctorId, java.time.LocalDateTime startOfDay, java.time.LocalDateTime endOfDay) {
+        return medicalRecordRepository.countPrescriptionsByDoctorAndDate(doctorId, startOfDay, endOfDay);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void validateMedicalRecordCompleteness(Long appointmentId) {
+        MedicalRecord record = medicalRecordRepository.findByAppointmentId(appointmentId)
+                .orElseThrow(() -> new BadRequestException("Không thể chuyển trạng thái sang Hoàn thành vì hồ sơ bệnh án chưa được tạo."));
+
+        if (record.getSymptoms() == null || record.getSymptoms().trim().isEmpty() ||
+            record.getDiagnosis() == null || record.getDiagnosis().trim().isEmpty() ||
+            record.getBloodPressure() == null || record.getBloodPressure().trim().isEmpty() ||
+            record.getWeight() == null ||
+            record.getConclusion() == null || record.getConclusion().trim().isEmpty() ||
+            record.getPrescriptionText() == null || record.getPrescriptionText().trim().isEmpty() ||
+            record.getNotes() == null || record.getNotes().trim().isEmpty() ||
+            record.getBloodGlucose() == null ||
+            record.getHeartRate() == null) {
+
+            throw new BadRequestException("Không thể chuyển trạng thái sang Hoàn thành vì hồ sơ bệnh án chưa đầy đủ thông tin.");
+        }
     }
 }

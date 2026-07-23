@@ -131,4 +131,9 @@ public class UserServiceImpl implements UserService {
         user.setStatus(status);
         userRepository.save(user);
     }
+
+    @Override
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId).orElse(null);
+    }
 }

@@ -8,18 +8,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.data.domain.Page;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.MedicalRecordResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalRecord;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalService;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalRecordRepository;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalServiceRepository;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.ProvinceRepository;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.MedicalRecordService;
+import vn.edu.fpt.SE2034_SWP391_G5.service.MedicalServiceService;
+import vn.edu.fpt.SE2034_SWP391_G5.service.ProvinceService;
+import vn.edu.fpt.SE2034_SWP391_G5.service.UserService;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,17 +30,17 @@ import java.util.Optional;
 public class DoctorPatientDetailController {
 
     private final AppointmentService appointmentService;
-    private final MedicalRecordRepository medicalRecordRepository;
     private final MedicalRecordService medicalRecordService;
-    private final MedicalServiceRepository medicalServiceRepository;
-    private final ProvinceRepository provinceRepository;
-    private final UserRepository userRepository;
+    private final MedicalServiceService medicalServiceService;
+    private final ProvinceService provinceService;
+    private final UserService userService;
 
     @GetMapping("/appointments/{id}/detail")
     public String appointmentDetail(
             @PathVariable Long id,
             @RequestParam(value = "tab", required = false, defaultValue = "info") String tab,
             @RequestParam(value = "action", required = false) String action,
+            @RequestParam(value = "historyPage", required = false, defaultValue = "0") int historyPage,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
         Long doctorId = userDetails.getUser().getId();
@@ -51,28 +51,28 @@ public class DoctorPatientDetailController {
             throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền xem thông tin lịch hẹn này");
         }
         
-        Optional<MedicalRecord> medicalRecordOpt = medicalRecordRepository.findByAppointmentId(id);
+        Optional<MedicalRecord> medicalRecordOpt = medicalRecordService.getMedicalRecordByAppointmentId(id);
         model.addAttribute("medicalRecord", medicalRecordOpt.orElse(null));
         
-        List<MedicalService> activeServices = medicalServiceRepository.findByStatus("ACTIVE");
+        List<MedicalService> activeServices = medicalServiceService.getMedicalServicelistByDepartment(null);
         model.addAttribute("activeServices", activeServices);
         
-        List<MedicalRecordResponse> historyList = medicalRecordService.getPatientMedicalHistory(appointment.getPatientId());
-        User currentDoctor = userRepository.findById(doctorId).orElse(null);
+        User currentDoctor = userService.getUserById(doctorId);
+        String deptName = null;
         if (currentDoctor != null && currentDoctor.getDepartment() != null) {
-            String deptName = currentDoctor.getDepartment().getName();
-            if (deptName != null) {
-                historyList = historyList.stream()
-                        .filter(r -> deptName.equals(r.getDepartmentName()))
-                        .toList();
-            }
+            deptName = currentDoctor.getDepartment().getName();
         }
-        model.addAttribute("historyList", historyList);
+        
+        Page<MedicalRecordResponse> historyPageData = medicalRecordService.getPatientMedicalHistoryPaginated(
+                appointment.getPatientId(), deptName, historyPage, 8);
+        
+        model.addAttribute("historyList", historyPageData.getContent());
+        model.addAttribute("historyPage", historyPageData);
         
         model.addAttribute("appointment", appointment);
         model.addAttribute("tab", tab);
         model.addAttribute("action", action);
-        model.addAttribute("provinces", provinceRepository.findAll());
+        model.addAttribute("provinces", provinceService.getAllProvinces());
         return "doctor/patient-detail";
     }
 }
