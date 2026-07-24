@@ -10,5 +10,5 @@ public interface UserService {
     Page<UserAccountResponse> getAccountList(String keyword, String roleName, boolean searchFirstName, boolean searchMiddleName, boolean searchLastName, int page, int size);
     void updateUserRoles(Long userId, List<String> roleNames);
     void toggleUserStatus(Long userId, String status);
-    User findUserById(Long userId);
+    User getUserById(Long userId);
 }

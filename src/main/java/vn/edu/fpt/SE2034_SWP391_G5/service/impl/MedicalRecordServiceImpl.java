@@ -230,4 +230,23 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     public long countPrescriptionsByDoctorAndDate(Long doctorId, LocalDateTime startOfDay, LocalDateTime endOfDay) {
         return medicalRecordRepository.countPrescriptionsByDoctorAndDate(doctorId, startOfDay, endOfDay);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void validateMedicalRecordCompleteness(Long appointmentId) {
+        MedicalRecord medicalRecord = medicalRecordRepository.findByAppointmentId(appointmentId)
+                .orElseThrow(() -> new BadRequestException("Không thể chuyển trạng thái sang Hoàn thành vì hồ sơ bệnh án chưa được tạo."));
+
+        if (medicalRecord.getSymptoms() == null || medicalRecord.getSymptoms().trim().isEmpty() ||
+            medicalRecord.getDiagnosis() == null || medicalRecord.getDiagnosis().trim().isEmpty() ||
+            medicalRecord.getBloodPressure() == null || medicalRecord.getBloodPressure().trim().isEmpty() ||
+            medicalRecord.getWeight() == null ||
+            medicalRecord.getConclusion() == null || medicalRecord.getConclusion().trim().isEmpty() ||
+            medicalRecord.getPrescriptionText() == null || medicalRecord.getPrescriptionText().trim().isEmpty() ||
+            medicalRecord.getNotes() == null || medicalRecord.getNotes().trim().isEmpty() ||
+            medicalRecord.getBloodGlucose() == null ||
+            medicalRecord.getHeartRate() == null) {
+            throw new BadRequestException("Không thể chuyển trạng thái sang Hoàn thành vì hồ sơ bệnh án chưa đầy đủ thông tin.");
+        }
+    }
 }

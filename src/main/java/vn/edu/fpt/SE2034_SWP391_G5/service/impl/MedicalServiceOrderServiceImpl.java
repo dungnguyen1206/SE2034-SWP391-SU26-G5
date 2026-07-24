@@ -30,7 +30,7 @@ public class MedicalServiceOrderServiceImpl implements MedicalServiceOrderServic
 
     @Override
     @Transactional
-    public void saveServices(Long appointmentId, List<Long> serviceIds, Long doctorId) {
+    public void createServiceOrders(Long appointmentId, Long doctorId, List<Long> serviceIds) {
         AppointmentResponse appointment = appointmentService.getAppointmentDetailForReceptionist(appointmentId);
 
         // Security check
@@ -82,7 +82,7 @@ public class MedicalServiceOrderServiceImpl implements MedicalServiceOrderServic
 
     @Override
     @Transactional
-    public void saveServiceResult(Long appointmentId, Long orderId, String result, String note, Long doctorId) {
+    public void updateServiceOrderResult(Long appointmentId, Long doctorId, Long orderId, String result, String note) {
         AppointmentResponse appointment = appointmentService.getAppointmentDetailForReceptionist(appointmentId);
 
         // Security check
@@ -125,7 +125,7 @@ public class MedicalServiceOrderServiceImpl implements MedicalServiceOrderServic
 
     @Override
     @Transactional
-    public void deleteService(Long appointmentId, Long orderId, Long doctorId) {
+    public void deleteServiceOrder(Long appointmentId, Long doctorId, Long orderId) {
         AppointmentResponse appointment = appointmentService.getAppointmentDetailForReceptionist(appointmentId);
 
         // Security check
