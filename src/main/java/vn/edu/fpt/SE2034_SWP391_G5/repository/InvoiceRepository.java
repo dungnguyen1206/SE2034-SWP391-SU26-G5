@@ -75,6 +75,7 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Long> {
                                                      @Param("month") Integer month,
                                                      @Param("year") Integer year, Pageable pageable);
 
-
+    @Query("SELECT i FROM Invoice i WHERE i.appointment.patient.id = :patientId AND i.paymentStatus = :paymentStatus")
+    List<Invoice> findByPatientIdAndPaymentStatus(@Param("patientId") Long patientId, @Param("paymentStatus") String paymentStatus);
 
 }

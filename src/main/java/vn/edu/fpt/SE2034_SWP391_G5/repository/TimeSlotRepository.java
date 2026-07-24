@@ -92,4 +92,5 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
             @Param("departmentId") Integer departmentId,
             @Param("workDate") LocalDate workDate
     );
+    // ======================== END WALK-IN BOOKING RECEPTIONIST ========================
 }

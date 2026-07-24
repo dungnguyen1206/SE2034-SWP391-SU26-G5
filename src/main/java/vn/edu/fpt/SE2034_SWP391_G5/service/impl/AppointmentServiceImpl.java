@@ -1059,9 +1059,21 @@ public class AppointmentServiceImpl implements AppointmentService {
                             // Dịch vụ đã thanh toán (PAID) hoặc đang thực hiện nhưng chưa xong -> Bắt buộc
                             // hoàn thành
                             throw new BadRequestException("Không thể hoàn thành lịch hẹn vì vẫn còn dịch vụ chỉ định ("
-                                    + order.getMedicalService().getName() + ") chưa hoàn thành.");
+                                     + order.getMedicalService().getName() + ") chưa hoàn thành.");
                         }
                     }
+                }
+            }
+
+            // Tự động thanh toán các hóa đơn chưa thanh toán (UNPAID) của bệnh nhân
+            if (appointment.getPatient() != null) {
+                List<Invoice> unpaidInvoices = invoiceRepository.findByPatientIdAndPaymentStatus(
+                        appointment.getPatient().getId(), "UNPAID");
+                for (Invoice invoice : unpaidInvoices) {
+                    invoice.setPaymentStatus("PAID");
+                    invoice.setPaidAt(LocalDateTime.now());
+                    invoice.setUpdatedAt(LocalDateTime.now());
+                    invoiceRepository.save(invoice);
                 }
             }
         }
