@@ -13,7 +13,7 @@ public interface MedicalRecordService {
     Page<User> searchPatients(String keyword, int page, int size);
     List<MedicalRecordResponse> getPatientMedicalHistory(Long patientId);
     Page<MedicalRecordResponse> getPatientMedicalHistoryPaginated(Long patientId, String departmentName, int page, int size);
-    
+
     java.util.Optional<vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalRecord> getMedicalRecordByAppointmentId(Long appointmentId);
     long countPrescriptionsByDoctorAndDate(Long doctorId, java.time.LocalDateTime startOfDay, java.time.LocalDateTime endOfDay);
     void validateMedicalRecordCompleteness(Long appointmentId);

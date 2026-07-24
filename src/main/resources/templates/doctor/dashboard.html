@@ -98,7 +98,7 @@
                             </tr>
 
                             <tr th:if="${#lists.isEmpty(appointments)}">
-                                <td colspan="3" style="text-align: center; color: #64748b; padding: 20px;">
+                                <td colspan="3" class="empty-table-cell">
                                     Không có lịch hẹn nào trong ngày hôm nay.
                                 </td>
                             </tr>
@@ -126,7 +126,7 @@
                     </div>
 
                     <div th:if="${#lists.isEmpty(recentPatients)}"
-                        style="grid-column: span 4; text-align: center; color: #64748b; padding: 20px; background: white; border: 1px solid #e5e7eb; border-radius: 12px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);">
+                        class="empty-patient-list">
                         Chưa có bệnh nhân nào hoàn thành khám gần đây.
                     </div>
                 </div>

@@ -28,7 +28,7 @@ public class DoctorMedicalServiceController {
             RedirectAttributes redirectAttributes) {
 
         Long doctorId = userDetails.getUser().getId();
-        
+
         try {
             medicalServiceOrderService.createServiceOrders(id, doctorId, serviceIds);
             redirectAttributes.addFlashAttribute("successMessage", "Chỉ định dịch vụ khám thành công");
@@ -49,7 +49,7 @@ public class DoctorMedicalServiceController {
             RedirectAttributes redirectAttributes) {
 
         Long doctorId = userDetails.getUser().getId();
-        
+
         try {
             medicalServiceOrderService.updateServiceOrderResult(id, doctorId, orderId, result, note);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật dịch vụ khám thành công");
@@ -68,7 +68,7 @@ public class DoctorMedicalServiceController {
             RedirectAttributes redirectAttributes) {
 
         Long doctorId = userDetails.getUser().getId();
-        
+
         try {
             medicalServiceOrderService.deleteServiceOrder(id, doctorId, orderId);
             redirectAttributes.addFlashAttribute("successMessage", "Xóa dịch vụ khám thành công");

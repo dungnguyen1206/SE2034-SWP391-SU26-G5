@@ -51,6 +51,8 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             throw new BadRequestException("Hồ sơ bệnh án cho lịch hẹn này đã tồn tại");
         }
 
+        validateBloodPressure(request.getBloodPressure());
+
         User doctor = userRepository.findById(doctorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bác sĩ với ID: " + doctorId));
 
@@ -88,6 +90,8 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         if (!medicalRecord.getDoctor().getId().equals(doctorId)) {
             throw new BadRequestException("Bạn không có quyền chỉnh sửa hồ sơ bệnh án này");
         }
+
+        validateBloodPressure(request.getBloodPressure());
 
         LocalDateTime now = LocalDateTime.now();
         medicalRecord.setSymptoms(request.getSymptoms());
@@ -183,6 +187,38 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         return sb.toString().trim();
     }
 
+    private void validateBloodPressure(String bloodPressure) {
+        if (bloodPressure == null || bloodPressure.trim().isEmpty()) {
+            throw new BadRequestException("Không được để trống");
+        }
+
+        String bp = bloodPressure.trim();
+        if (!bp.matches("^\\d+/\\d+$")) {
+            throw new BadRequestException("Định dạng huyết áp sai (Ví dụ: 120/80). Chỉ được chứa số nguyên.");
+        }
+
+        String[] parts = bp.split("/");
+        try {
+            int sys = Integer.parseInt(parts[0]);
+            int dia = Integer.parseInt(parts[1]);
+
+            if (sys < 40 || sys > 300) {
+                throw new BadRequestException("Huyết áp tâm thu phải trong khoảng từ 40 đến 300 mmHg");
+            }
+            if (dia < 20 || dia > 200) {
+                throw new BadRequestException("Huyết áp tâm trương phải trong khoảng từ 20 đến 200 mmHg");
+            }
+            if (sys <= dia) {
+                throw new BadRequestException("Huyết áp tâm thu phải lớn hơn huyết áp tâm trương");
+            }
+            if (sys - dia < 20) {
+                throw new BadRequestException("Huyết áp tâm thu phải lớn hơn huyết áp tâm trương ít nhất 20 mmHg");
+            }
+        } catch (NumberFormatException e) {
+            throw new BadRequestException("Chỉ số huyết áp phải là số nguyên");
+        }
+    }
+
     @Override
     @Transactional(readOnly = true)
     public java.util.Optional<MedicalRecord> getMedicalRecordByAppointmentId(Long appointmentId) {
@@ -191,27 +227,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
 
     @Override
     @Transactional(readOnly = true)
-    public long countPrescriptionsByDoctorAndDate(Long doctorId, java.time.LocalDateTime startOfDay, java.time.LocalDateTime endOfDay) {
+    public long countPrescriptionsByDoctorAndDate(Long doctorId, LocalDateTime startOfDay, LocalDateTime endOfDay) {
         return medicalRecordRepository.countPrescriptionsByDoctorAndDate(doctorId, startOfDay, endOfDay);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public void validateMedicalRecordCompleteness(Long appointmentId) {
-        MedicalRecord record = medicalRecordRepository.findByAppointmentId(appointmentId)
-                .orElseThrow(() -> new BadRequestException("Không thể chuyển trạng thái sang Hoàn thành vì hồ sơ bệnh án chưa được tạo."));
-
-        if (record.getSymptoms() == null || record.getSymptoms().trim().isEmpty() ||
-            record.getDiagnosis() == null || record.getDiagnosis().trim().isEmpty() ||
-            record.getBloodPressure() == null || record.getBloodPressure().trim().isEmpty() ||
-            record.getWeight() == null ||
-            record.getConclusion() == null || record.getConclusion().trim().isEmpty() ||
-            record.getPrescriptionText() == null || record.getPrescriptionText().trim().isEmpty() ||
-            record.getNotes() == null || record.getNotes().trim().isEmpty() ||
-            record.getBloodGlucose() == null ||
-            record.getHeartRate() == null) {
-
-            throw new BadRequestException("Không thể chuyển trạng thái sang Hoàn thành vì hồ sơ bệnh án chưa đầy đủ thông tin.");
-        }
     }
 }

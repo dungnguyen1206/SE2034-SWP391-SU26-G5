@@ -1,6 +1,5 @@
 package vn.edu.fpt.SE2034_SWP391_G5.service.impl;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +18,6 @@ import vn.edu.fpt.SE2034_SWP391_G5.service.UserService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 
@@ -133,7 +131,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserById(Long userId) {
+    public User findUserById(Long userId) {
         return userRepository.findById(userId).orElse(null);
     }
 }

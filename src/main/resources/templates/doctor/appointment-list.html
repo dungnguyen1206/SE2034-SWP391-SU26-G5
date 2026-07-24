@@ -25,13 +25,13 @@
 
             <!-- Alert Messages -->
             <div th:if="${errorMessage}"
-                style="margin: 20px; padding: 15px; background-color: #fee2e2; color: #b91c1c; border-radius: 8px; border-left: 4px solid #ef4444; font-weight: 500;">
-                <i class="fa-solid fa-circle-exclamation" style="margin-right: 8px;"></i>
+                class="alert-box alert-error">
+                <i class="fa-solid fa-circle-exclamation alert-icon"></i>
                 <span th:text="${errorMessage}"></span>
             </div>
             <div th:if="${successMessage}"
-                style="margin: 20px; padding: 15px; background-color: #d1fae5; color: #065f46; border-radius: 8px; border-left: 4px solid #10b981; font-weight: 500;">
-                <i class="fa-solid fa-circle-check" style="margin-right: 8px;"></i>
+                class="alert-box alert-success">
+                <i class="fa-solid fa-circle-check alert-icon"></i>
                 <span th:text="${successMessage}"></span>
             </div>
 
@@ -41,12 +41,12 @@
                     <p th:text="${currentDate}"></p>
                 </div>
                 <div class="date-filter-box">
-                    <form id="dateFilterForm" method="GET" th:action="@{/doctor/appointment-list}" style="display: flex; gap: 8px; align-items: center;">
+                    <form id="dateFilterForm" method="GET" th:action="@{/doctor/appointment-list}" class="flex-align-center">
                         <input type="hidden" name="status" th:value="${currentStatus}" />
                         <label for="dateFilter" class="date-filter-label">Chọn ngày khám:</label>
                         <input type="date" id="dateFilter" name="date" th:value="${selectedDate}"
-                            class="date-picker-input" style="width: auto;" />
-                        <button type="submit" style="padding: 8px 16px; background-color: #020617; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: background-color 0.2s;">
+                            class="date-picker-input w-auto" />
+                        <button type="submit" class="btn-filter">
                             Lọc
                         </button>
                     </form>
@@ -107,24 +107,22 @@
                             </td>
 
                             <td>
-                                <div th:if="${a.status == 'COMPLETED'}" style="display: flex; align-items: center;">
-                                    <span class="status-select done" style="display: inline-flex; align-items: center; justify-content: center; height: 34px; width: 145px; border-radius: 8px; font-size: 13px; font-weight: 700; color: #15803d; background: #dcfce7; pointer-events: none; text-align: center;">HOÀN THÀNH</span>
+                                <div th:if="${a.status == 'COMPLETED'}" class="flex-align-center">
+                                    <span class="status-completed-badge">HOÀN THÀNH</span>
                                 </div>
                                 <form th:if="${a.status != 'COMPLETED'}" th:action="@{/doctor/appointments/{id}/status(id=${a.id})}" method="POST"
-                                    style="display: flex; gap: 8px; align-items: center; justify-content: flex-start;"
+                                    class="flex-form"
                                     onsubmit="return confirmStatusChange(this);">
                                     <input type="hidden" name="currentStatus" th:value="${currentStatus}" />
                                     <input type="hidden" name="page" th:value="${currentPage}" />
                                     <input type="hidden" name="date" th:value="${selectedDate}" />
-                                    <select name="status" class="status-select"
-                                        th:classappend="${a.status == 'WAITING' ? 'waiting' : (a.status == 'EXAMINING' ? 'examining' : 'done')}"
-                                        style="margin-bottom: 0;">
+                                    <select name="status" class="status-select mb-0"
+                                        th:classappend="${a.status == 'WAITING' ? 'waiting' : (a.status == 'EXAMINING' ? 'examining' : 'done')}">
                                         <option value="WAITING" th:selected="${a.status == 'WAITING'}">ĐANG ĐỢI</option>
                                         <option value="EXAMINING" th:selected="${a.status == 'EXAMINING'}">ĐANG KHÁM</option>
                                         <option value="COMPLETED" th:selected="${a.status == 'COMPLETED'}">Hoàn thành</option>
                                     </select>
-                                    <button type="submit" class="btn-save-status"
-                                        style="padding: 6px 12px; background-color: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500; transition: background-color 0.2s;">
+                                    <button type="submit" class="btn-save-status">
                                         Lưu
                                     </button>
                                 </form>
@@ -156,7 +154,7 @@
                            th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''">Sau ›</a>
                     </div>
                 </div>
-                <div class="table-footer" th:if="${totalElements == 0}" style="justify-content: center;">
+                <div class="table-footer justify-center" th:if="${totalElements == 0}">
                     <p>Không tìm thấy bệnh nhân nào</p>
                 </div>
             </div>

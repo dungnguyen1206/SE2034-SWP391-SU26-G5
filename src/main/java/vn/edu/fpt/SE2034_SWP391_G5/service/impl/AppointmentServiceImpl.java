@@ -1045,6 +1045,17 @@ public class AppointmentServiceImpl implements AppointmentService {
             if (!"FINALIZED".equalsIgnoreCase(medicalRecord.getStatus())) {
                 throw new BadRequestException("Không thể hoàn thành lịch hẹn vì hồ sơ bệnh án chưa được hoàn tất.");
             }
+            if (medicalRecord.getSymptoms() == null || medicalRecord.getSymptoms().trim().isEmpty() ||
+                medicalRecord.getDiagnosis() == null || medicalRecord.getDiagnosis().trim().isEmpty() ||
+                medicalRecord.getBloodPressure() == null || medicalRecord.getBloodPressure().trim().isEmpty() ||
+                medicalRecord.getWeight() == null ||
+                medicalRecord.getConclusion() == null || medicalRecord.getConclusion().trim().isEmpty() ||
+                medicalRecord.getPrescriptionText() == null || medicalRecord.getPrescriptionText().trim().isEmpty() ||
+                medicalRecord.getNotes() == null || medicalRecord.getNotes().trim().isEmpty() ||
+                medicalRecord.getBloodGlucose() == null ||
+                medicalRecord.getHeartRate() == null) {
+                throw new BadRequestException("Không thể hoàn thành lịch hẹn vì hồ sơ bệnh án chưa đầy đủ thông tin.");
+            }
             if (medicalRecord.getMedicalServiceOrders() != null) {
                 for (MedicalServiceOrder order : medicalRecord.getMedicalServiceOrders()) {
                     String orderStatus = order.getStatus();

@@ -9,20 +9,20 @@
     <div th:fragment="history-tab" class="tab-pane" th:classappend="${tab == 'history' ? 'active' : ''}">
         
 
-        <div class="detail-content-card" th:if="${historyList != null and !historyList.isEmpty()}" style="padding: 0; overflow: hidden;">
+        <div class="detail-content-card detail-content-card-table" th:if="${historyList != null and !historyList.isEmpty()}">
             <table class="history-table">
                 <thead>
                     <tr>
-                        <th style="width: 80px; text-align: center;">STT</th>
+                        <th class="w-80 text-center">STT</th>
                         <th>Loại khám</th>
                         <th>Bác sĩ</th>
                         <th>Kết quả</th>
-                        <th style="width: 180px;">Ngày khám</th>
+                        <th class="w-180">Ngày khám</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr th:each="r, iterStat : ${historyList}">
-                        <td style="text-align: center;" th:text="${iterStat.count}">1</td>
+                        <td class="text-center" th:text="${iterStat.count}">1</td>
                         <td th:text="${r.serviceName != null ? r.serviceName : 'Khám bệnh tổng quát'}">Loại khám</td>
                         <td th:text="${r.doctorFullName}">Bác sĩ</td>
                         <td th:text="${r.conclusion != null and r.conclusion != '' ? r.conclusion : (r.diagnosis != null and r.diagnosis != '' ? r.diagnosis : 'Chưa có kết quả')}">Kết quả</td>
@@ -33,9 +33,9 @@
         </div>
 
         <!-- Empty history timeline -->
-        <div class="detail-content-card" th:if="${historyList == null || historyList.isEmpty()}" style="text-align: center; padding: 40px;">
-            <i class="fa-solid fa-triangle-exclamation" style="font-size: 36px; color: #94a3b8; margin-bottom: 12px;"></i>
-            <p style="color: #64748b; font-weight: 500;">Bệnh nhân này chưa có hồ sơ bệnh án nào hoàn thành thuộc chuyên khoa của bác sĩ.</p>
+        <div class="detail-content-card text-center-padded-40" th:if="${historyList == null || historyList.isEmpty()}">
+            <i class="fa-solid fa-triangle-exclamation warning-icon"></i>
+            <p class="text-slate-500 font-medium">Bệnh nhân này chưa có hồ sơ bệnh án nào hoàn thành thuộc chuyên khoa của bác sĩ.</p>
         </div>
 
     </div>

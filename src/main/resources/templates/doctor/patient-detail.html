@@ -37,20 +37,20 @@
 
             <!-- Alert Messages -->
             <div th:if="${errorMessage}"
-                style="margin: 20px 0; padding: 15px; background-color: #fee2e2; color: #b91c1c; border-radius: 8px; border-left: 4px solid #ef4444; font-weight: 500;">
-                <i class="fa-solid fa-circle-exclamation" style="margin-right: 8px;"></i>
+                class="alert-box alert-error">
+                <i class="fa-solid fa-circle-exclamation alert-icon"></i>
                 <span th:text="${errorMessage}"></span>
             </div>
             <div th:if="${successMessage}"
-                style="margin: 20px 0; padding: 15px; background-color: #d1fae5; color: #065f46; border-radius: 8px; border-left: 4px solid #10b981; font-weight: 500;">
-                <i class="fa-solid fa-circle-check" style="margin-right: 8px;"></i>
+                class="alert-box alert-success">
+                <i class="fa-solid fa-circle-check alert-icon"></i>
                 <span th:text="${successMessage}"></span>
             </div>
 
             <!-- Client-side Alert Message (hidden by default) -->
             <div id="clientAlert"
-                style="display: none; margin: 20px 0; padding: 15px; background-color: #fee2e2; color: #b91c1c; border-radius: 8px; border-left: 4px solid #ef4444; font-weight: 500;">
-                <i class="fa-solid fa-circle-exclamation" style="margin-right: 8px;"></i>
+                class="alert-box alert-error" style="display: none;">
+                <i class="fa-solid fa-circle-exclamation alert-icon"></i>
                 <span id="clientAlertMessage"></span>
             </div>
 

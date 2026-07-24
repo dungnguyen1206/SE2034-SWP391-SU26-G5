@@ -378,3 +378,20 @@ tbody tr:hover {
     color: #64748b;
     font-size: 11px;
 }
+
+/* Empty states */
+.empty-table-cell {
+    text-align: center;
+    color: #64748b;
+    padding: 20px;
+}
+.empty-patient-list {
+    grid-column: span 4;
+    text-align: center;
+    color: #64748b;
+    padding: 20px;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+}

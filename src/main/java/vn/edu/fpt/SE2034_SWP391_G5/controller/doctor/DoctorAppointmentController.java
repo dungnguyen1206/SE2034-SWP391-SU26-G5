@@ -117,7 +117,7 @@ public class DoctorAppointmentController {
         try {
             appointmentService.updateAppointmentStatus(id, status);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
 
         return redirectUrl;
