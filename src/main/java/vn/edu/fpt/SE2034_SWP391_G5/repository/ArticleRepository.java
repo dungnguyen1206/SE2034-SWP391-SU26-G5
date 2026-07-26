@@ -10,9 +10,11 @@ import vn.edu.fpt.SE2034_SWP391_G5.entity.Article;
 
 import java.util.List;
 
+// Truy vấn dữ liệu bài viết
 @Repository
 public interface ArticleRepository extends JpaRepository<Article, Long> {
-    
+
+    // Tìm bài viết theo từ khóa, chuyên mục, trạng thái (bỏ bài đã xóa)
     @Query("SELECT a FROM Article a WHERE " +
            "a.status != 'DELETED' AND " +
            "(:keyword IS NULL OR LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
@@ -23,6 +25,7 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
                                 @Param("category") String category, 
                                 @Param("status") String status);
 
+    // Tìm bài viết như trên nhưng có phân trang
     @Query("SELECT a FROM Article a WHERE " +
            "a.status != 'DELETED' AND " +
            "(:keyword IS NULL OR LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
@@ -34,5 +37,6 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
                                        @Param("status") String status,
                                        Pageable pageable);
 
+    // Lấy 3 bài mới nhất cùng chuyên mục, trừ bài đang xem
     List<Article> findTop3ByCategoryAndIdNotAndStatusOrderByCreatedAtDesc(String category, Long id, String status);
 }

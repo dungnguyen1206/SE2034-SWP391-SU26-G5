@@ -1,6 +1,5 @@
 package vn.edu.fpt.SE2034_SWP391_G5.controller.publicpage;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -11,15 +10,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import vn.edu.fpt.SE2034_SWP391_G5.enums.ArticleCategory;
+import vn.edu.fpt.SE2034_SWP391_G5.enums.ArticleStatus;
+import vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Article;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.ArticleComment;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 import vn.edu.fpt.SE2034_SWP391_G5.service.ArticleService;
 
 import java.security.Principal;
-import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
@@ -29,13 +28,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class PublicArticleController {
 
-    private static final int PAGE_SIZE = 9; // 3 columns grid, 3 rows is nice
+    private static final int PAGE_SIZE = 9; // 3 cột x 3 hàng
 
     private final ArticleService articleService;
 
-    // The categories currently hardcoded in manager form
-    private final List<String> CATEGORIES = Arrays.asList("Tim mạch", "Nhi khoa", "Da liễu", "Sức khỏe", "Dinh dưỡng");
-
+    // Hiển thị danh sách bài viết công khai
     @GetMapping
     public String listArticles(
             @RequestParam(required = false) String category,
@@ -43,36 +40,37 @@ public class PublicArticleController {
             Model model) {
 
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
-        // Only fetch PUBLISHED articles
-        Page<Article> articlePage = articleService.getArticlesByFilters(null, category, "PUBLISHED", pageable);
+        // Chỉ lấy bài viết đã xuất bản
+        Page<Article> articlePage = articleService.getArticlesByFilters(null, category, ArticleStatus.PUBLISHED.name(), pageable);
 
         model.addAttribute("articleList", articlePage.getContent());
         model.addAttribute("currentPage", articlePage.getNumber());
         model.addAttribute("totalPages", articlePage.getTotalPages());
         model.addAttribute("category", category);
-        model.addAttribute("categories", CATEGORIES);
+        model.addAttribute("categories", ArticleCategory.getAllDisplayNames());
 
         return "public/articles/list";
     }
 
+    // Xem chi tiết bài viết
     @GetMapping("/{id}")
     public String detailArticle(@PathVariable Long id, Model model, Principal principal) {
         Article article = articleService.getArticleById(id);
-        if (article == null || !"PUBLISHED".equals(article.getStatus())) {
-            return "redirect:/articles"; // Or a 404 page
+        if (article == null || !ArticleStatus.PUBLISHED.name().equals(article.getStatus())) {
+            return "redirect:/articles"; // Hoặc trang 404
         }
 
-        // Increment view count
+        // Tăng lượt xem
         articleService.incrementViewCount(id);
         
-        // Load comments (only top-level, replies are loaded via entity relationship)
+        // Lấy bình luận
         List<ArticleComment> comments = articleService.getCommentsByArticleId(id);
         long commentCount = articleService.getCommentCountByArticleId(id);
 
-        // Load related articles (same category, excluding current article)
+        // Lấy bài viết cùng chuyên mục
         List<Article> relatedArticles = articleService.getRelatedArticles(article.getCategory(), article.getId());
 
-        // Check if user is logged in
+        // Kiểm tra đã đăng nhập chưa
         boolean isLoggedIn = principal != null;
 
         model.addAttribute("article", article);
@@ -84,17 +82,22 @@ public class PublicArticleController {
         return "public/articles/detail";
     }
 
+    // Gửi bình luận
     @PostMapping("/{id}/comment")
     public String postComment(@PathVariable Long id,
                               @RequestParam String content,
-                              @RequestParam(required = false) Long parentId,
-                              Principal principal) {
-        // Must be logged in
+                              Principal principal,
+                              RedirectAttributes redirectAttributes) {
+        // Phải đăng nhập
         if (principal == null) {
             return "redirect:/login";
         }
 
-        articleService.addComment(id, content, parentId, principal.getName());
+        try {
+            articleService.addComment(id, content, principal.getName());
+        } catch (BadRequestException e) {
+            redirectAttributes.addFlashAttribute("commentError", e.getMessage());
+        }
 
         return "redirect:/articles/" + id;
     }

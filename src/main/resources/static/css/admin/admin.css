@@ -326,6 +326,88 @@ button, input, select {
     color: #374151;
 }
 
+/* Manager Topbar (dùng chung fragment header từ manager) */
+.manager-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: #ffffff;
+    border-bottom: 1px solid var(--border-color);
+    height: 70px;
+}
+
+.manager-topbar-title h3 {
+    margin: 0;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.manager-topbar-title p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.manager-topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.manager-topbar-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--primary-blue);
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.manager-topbar-avatar-img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.manager-topbar-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+}
+
+.manager-topbar-info strong {
+    font-size: 14px;
+    color: #0f172a;
+}
+
+.manager-topbar-info span {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.manager-topbar-logout {
+    color: var(--text-muted);
+    font-size: 18px;
+    padding: 8px;
+    border-radius: 8px;
+    display: inline-flex;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.manager-topbar-logout:hover {
+    color: #dc2626;
+    background: #fef2f2;
+}
+
 /* Main Dashboard Panel */
 .admin-content {
     padding: 32px;

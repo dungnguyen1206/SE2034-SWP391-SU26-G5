@@ -1,38 +1,29 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/manager/fragments/layout}"
+      th:with="pageTitle='Chi tiết bài viết', pageSubtitle='Xem thông tin chi tiết bài viết, tin tức', activeMenu='articles'">
 
 <head>
     <meta charset="UTF-8">
     <title>Chi tiết bài viết</title>
-    <link rel="stylesheet" th:href="@{/css/manager/manager-common.css}">
-    <link rel="stylesheet" th:href="@{/css/manager/manager-articles.css}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <th:block layout:fragment="pageCss">
+        <link rel="stylesheet" th:href="@{/css/manager/manager-articles.css}">
+    </th:block>
 </head>
 
 <body>
-<div class="manager-layout">
-
-    <div th:replace="~{manager/fragments/sidebar :: managerSidebar('articles')}"></div>
-
-    <main class="manager-main">
+<div layout:fragment="content">
         
-        <header class="article-header">
-            <div style="display: flex; align-items: center; gap: 16px;">
-                <a th:href="@{/manager/articles}" class="staff-back-link" title="Quay lại" style="color: #64748b; font-size: 20px; text-decoration: none;">
-                    <i class="bi bi-arrow-left"></i>
-                </a>
-                <div class="article-header-title">
-                    <h2>Chi tiết bài viết</h2>
-                    <p>Xem thông tin chi tiết bài viết, tin tức</p>
-                </div>
-            </div>
-            
-            <div class="article-actions">
-                <a th:href="@{'/manager/articles/edit/' + ${article.id}}" class="article-create-button" style="background: #00a651;">
-                    <i class="bi bi-pencil-square"></i> Chỉnh sửa
-                </a>
-            </div>
-        </header>
+        <!-- Thanh công cụ: quay lại + chỉnh sửa -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+            <a th:href="@{/manager/articles}" style="display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: #64748b; text-decoration: none;">
+                <i class="bi bi-arrow-left"></i> Quay lại danh sách
+            </a>
+            <a th:href="@{'/manager/articles/edit/' + ${article.id}}" class="article-create-button" style="background: #00a651;">
+                <i class="bi bi-pencil-square"></i> Chỉnh sửa
+            </a>
+        </div>
 
         <!-- Main Article Container -->
         <div class="article-detail-card" th:if="${article != null}">
@@ -70,8 +61,6 @@
             <p>Bài viết không tồn tại.</p>
             <a th:href="@{/manager/articles}" style="color: #3b82f6;">Quay lại danh sách</a>
         </div>
-
-    </main>
 
 </div>
 </body>

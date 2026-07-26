@@ -43,6 +43,11 @@
                 <span sec:authentication="principal.username">username</span>
             </div>
 
+            <!-- Nút đổi mật khẩu -->
+            <a class="manager-topbar-logout" th:href="@{/change-password}" title="Đổi mật khẩu" style="margin-right: -8px;">
+                <i class="bi bi-shield-lock"></i>
+            </a>
+            <!-- Nút đăng xuất -->
             <a class="manager-topbar-logout" th:href="@{/login}" title="Đăng xuất">
                 <i class="bi bi-box-arrow-right"></i>
             </a>

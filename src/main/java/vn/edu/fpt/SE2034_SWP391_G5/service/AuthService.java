@@ -1,18 +1,22 @@
 package vn.edu.fpt.SE2034_SWP391_G5.service;
 
-import jakarta.servlet.http.HttpSession;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.OtpToken;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.RegisterPatientRequest;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 
 public interface AuthService {
-    // Process new user registration and trigger OTP
-    void processRegistration(RegisterPatientRequest registerRequest, HttpSession session, String otpChannel);
-    
-    // Verify user's OTP to activate account
-    void verifyOtp(String otp, HttpSession session);
-    
-    // Process forgot password request and send reset OTP
-    void processForgotPassword(String email, String phone, HttpSession session, String otpChannel);
-    
-    // Verify OTP and update user's password
-    void processResetPassword(String otp, String newPassword, String confirmNewPassword, HttpSession session);
+    // Kiểm tra dữ liệu đăng ký rồi gửi OTP, trả về mã để controller giữ trong session
+    OtpToken startRegistration(RegisterPatientRequest registerRequest, String otpChannel);
+
+    // Tạo tài khoản bệnh nhân sau khi OTP đã hợp lệ
+    void completeRegistration(RegisterPatientRequest registerRequest);
+
+    // Tìm tài khoản theo email hoặc số điện thoại rồi gửi OTP đặt lại mật khẩu
+    OtpToken startPasswordReset(String email, String phone, String otpChannel);
+
+    // Đặt lại mật khẩu cho tài khoản đã xác minh OTP
+    void resetPassword(String identifier, String otpChannel, String newPassword, String confirmNewPassword);
+
+    // Đổi mật khẩu cho user đang đăng nhập
+    void changePassword(User currentUser, String oldPassword, String newPassword, String confirmNewPassword);
 }
