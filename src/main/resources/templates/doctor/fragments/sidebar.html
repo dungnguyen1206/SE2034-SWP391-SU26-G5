@@ -5,7 +5,7 @@
 </head>
 <body>
 
-    <!-- Doctor Sidebar Fragment -->
+    <!-- Doctor Sidebar  -->
     <aside th:fragment="sidebar(activePage)" class="sidebar">
         <div>
             <div class="brand">
@@ -13,22 +13,26 @@
                 <p>Bác Sĩ</p>
             </div>
 
+            <!-- dashboard -->
             <nav class="menu">
                 <a th:href="@{/doctor/dashboard}" th:classappend="${activePage == 'dashboard'} ? 'active' : ''">
                     <i class="fa-solid fa-table-cells-large"></i>
                     Trang tổng quan
                 </a>
 
+                <!-- schedule -->
                 <a th:href="@{/doctor/schedule}" th:classappend="${activePage == 'schedule'} ? 'active' : ''">
                     <i class="fa-regular fa-calendar-days"></i>
                     Lịch làm việc
                 </a>
 
+                <!-- appointment-list -->
                 <a th:href="@{/doctor/appointment-list}" th:classappend="${activePage == 'appointments'} ? 'active' : ''">
                     <i class="fa-regular fa-calendar-check"></i>
                     Danh sách bệnh nhân
                 </a>
 
+                <!-- notifications -->
                 <a th:href="@{/notifications/list}" th:classappend="${activePage == 'notifications'} ? 'active' : ''">
                     <i class="fa-regular fa-bell"></i>
                     Thông báo
@@ -40,20 +44,23 @@
             </nav>
         </div>
 
+        <!-- Doctor's info -->
         <div class="doctor-box">
             <div class="doctor-info-box">
-                <a th:href="@{/doctor/profile}" class="doctor-avatar" style="text-decoration: none; display: block; color: inherit;">
+                <div class="doctor-avatar">
                     <img th:if="${doctorAvatar != null and doctorAvatar != ''}"
                          th:src="${#strings.replace(doctorAvatar, '/upload/', '/upload/w_150,h_150,c_fill,g_face,q_auto,f_auto/')}"
                          alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"/>
                     <i th:unless="${doctorAvatar != null and doctorAvatar != ''}"
                        class="fa-regular fa-user"></i>
-                </a>
+                </div>
                 <div>
                     <h4 th:text="${doctorName}"></h4>
                     <p th:text="${doctorDept}"></p>
                 </div>
             </div>
+
+            <!-- Logout -->
             <form th:action="@{/logout}" method="post" class="logout-form">
                 <button type="submit" class="logout-btn">
                     <i class="fa-solid fa-right-from-bracket"></i>

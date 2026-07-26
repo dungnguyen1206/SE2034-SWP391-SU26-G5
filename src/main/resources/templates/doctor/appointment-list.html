@@ -43,7 +43,6 @@
                 <div class="date-filter-box">
                     <form id="dateFilterForm" method="GET" th:action="@{/doctor/appointment-list}" class="flex-align-center">
                         <input type="hidden" name="status" th:value="${currentStatus}" />
-                        <label for="dateFilter" class="date-filter-label">Chọn ngày khám:</label>
                         <input type="date" id="dateFilter" name="date" th:value="${selectedDate}"
                             class="date-picker-input w-auto" />
                         <button type="submit" class="btn-filter">
