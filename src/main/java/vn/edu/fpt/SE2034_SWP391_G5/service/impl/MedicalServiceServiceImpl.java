@@ -46,6 +46,23 @@ public class MedicalServiceServiceImpl implements MedicalServiceService {
     }
 
     @Override
+    public MedicalService getMedicalServiceEntityById(Long id) {
+        return medicalServiceRepository.findMedicalServiceById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dịch vụ y tế với ID: " + id));
+    }
+
+    @Override
+    public java.util.Optional<MedicalService> getDefaultClinicalService(Integer departmentId) {
+        return medicalServiceRepository
+                .findFirstByDepartmentIdAndNameContainingIgnoreCaseAndStatus(departmentId, "tổng quát", "ACTIVE")
+                .or(() -> medicalServiceRepository.findFirstByDepartmentIdAndNameContainingIgnoreCaseAndStatus(departmentId, "khám", "ACTIVE"))
+                .or(() -> {
+                    List<MedicalService> list = medicalServiceRepository.findByDepartmentIdAndStatus(departmentId, "ACTIVE");
+                    return list.isEmpty() ? java.util.Optional.empty() : java.util.Optional.of(list.get(0));
+                });
+    }
+
+    @Override
     public UpdateMedicalServiceRequest getMedicalServiceById(Long id) {
         MedicalService medicalService = medicalServiceRepository.findMedicalServiceById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dịch vụ y tế"));
         return UpdateMedicalServiceRequest.builder()

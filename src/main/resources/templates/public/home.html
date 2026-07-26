@@ -212,51 +212,23 @@
         </div>
         <div class="hero-stat-row">
             <div>
-                <div class="hero-stat-num" th:text="${#lists.size(departments)}">0</div>
+                <div class="hero-stat-num" th:text="${totalDepartments}">0</div>
                 <div class="hero-stat-lbl">Chuyên khoa</div>
+            </div>
+            <div>
+                <div class="hero-stat-num" th:text="${totalDoctors}">0</div>
+                <div class="hero-stat-lbl">Bác sĩ</div>
+            </div>
+            <div>
+                <div class="hero-stat-num" th:text="${totalArticles}">0</div>
+                <div class="hero-stat-lbl">Bài viết</div>
             </div>
         </div>
     </div>
     <div class="hero-visual"><i class="bi bi-heart-pulse"></i></div>
 </section>
 
-<!-- DEPARTMENTS (Hiển thị cho Khách và Bệnh nhân) -->
-<section class="section" sec:authorize="!isAuthenticated() or hasAuthority('ROLE_PATIENT')">
-    <div class="section-header">
-        <div class="section-tag"><i class="bi bi-grid-3x3-gap"></i> Chuyên khoa</div>
-        <h2>Các chuyên khoa tại HAMS</h2>
-        <p>Đội ngũ bác sĩ chuyên môn cao, trang thiết bị hiện đại tại từng khoa</p>
-    </div>
 
-    <div class="dept-grid" th:unless="${#lists.isEmpty(departments)}">
-        <div th:each="dept : ${departments}" class="dept-card">
-            <!-- Ảnh khoa -->
-            <div class="dept-img">
-                <img th:if="${dept.imageUrl != null}" th:src="${dept.imageUrl}" th:alt="${dept.name}">
-                <i th:if="${dept.imageUrl == null}" class="bi bi-hospital"></i>
-            </div>
-            <div class="dept-body">
-                <div class="dept-name" th:text="${dept.name}">Khoa</div>
-                <div class="dept-desc" th:if="${dept.description != null}" th:text="${dept.description}"></div>
-                <div class="dept-actions">
-                    <!-- Xem chi tiết: public, không cần login -->
-                    <a th:href="@{/departments/{id}(id=${dept.id})}" class="btn-detail">
-                        <i class="bi bi-info-circle"></i> Chi tiết
-                    </a>
-                    <!-- Đặt lịch: yêu cầu login, Spring Security tự redirect về /login -->
-                    <a th:href="@{/patient/appointments/book/step2(departmentId=${dept.id})}" class="btn-book">
-                        <i class="bi bi-calendar-plus"></i> Đặt lịch
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="empty-state" th:if="${#lists.isEmpty(departments)}">
-        <i class="bi bi-building-x"></i>
-        <p>Chưa có chuyên khoa nào</p>
-    </div>
-</section>
 
 <!-- ARTICLES -->
 <section class="section" style="background: #f8fafc;">
