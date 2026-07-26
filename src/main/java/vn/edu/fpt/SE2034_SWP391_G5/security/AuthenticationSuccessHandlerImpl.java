@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
@@ -17,23 +16,7 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
     // Điều hướng user về trang tương ứng sau khi đăng nhập thành công
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        String selectedRole = request.getParameter("role");
-
-        // Người dùng có chọn vai trò trên form đăng nhập
-        if (selectedRole != null && !selectedRole.isEmpty()) {
-            // Chọn vai trò không thuộc tài khoản thì hủy phiên, bắt đăng nhập lại
-            if (!hasRole(authentication, selectedRole)) {
-                request.getSession().invalidate();
-                SecurityContextHolder.clearContext();
-                response.sendRedirect("/login?roleError=true");
-                return;
-            }
-
-            response.sendRedirect(getHomeUrl(selectedRole));
-            return;
-        }
-
-        // Không chọn thì vào trang của vai trò đầu tiên tìm được
+        // Vào trang của vai trò đầu tiên tìm được
         for (GrantedAuthority authority : authentication.getAuthorities()) {
             String homeUrl = getHomeUrl(authority.getAuthority());
             if (homeUrl != null) {
@@ -46,15 +29,7 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
         response.sendRedirect("/");
     }
 
-    // Kiểm tra tài khoản có thực sự giữ vai trò này không
-    private boolean hasRole(Authentication authentication, String role) {
-        for (GrantedAuthority authority : authentication.getAuthorities()) {
-            if (authority.getAuthority().equals(role)) {
-                return true;
-            }
-        }
-        return false;
-    }
+
 
     // Trang chủ tương ứng với từng vai trò
     private String getHomeUrl(String role) {

@@ -25,9 +25,6 @@
                 <div th:if="${param.error != null}" class="auth-alert error">
                     <i class="fa-solid fa-circle-exclamation"></i> Tên đăng nhập hoặc mật khẩu không đúng
                 </div>
-                <div th:if="${param.roleError != null}" class="auth-alert error">
-                    <i class="fa-solid fa-circle-exclamation"></i> Tài khoản của bạn không có vai trò đã chọn
-                </div>
                 <div th:if="${param.logout != null}" class="auth-alert success">
                     <i class="fa-solid fa-circle-check"></i> Đã đăng xuất thành công
                 </div>
@@ -49,19 +46,6 @@
                     <div class="input-group">
                         <label class="input-label" for="password">Mật khẩu</label>
                         <input type="password" id="password" name="password" class="auth-input" placeholder="Nhập mật khẩu của bạn" required>
-                    </div>
-                    
-                    <!-- Vai trò: để trống thì hệ thống tự chọn, tài khoản nhiều vai trò thì chọn tay -->
-                    <div class="input-group">
-                        <label class="input-label" for="role">Vai trò</label>
-                        <select id="role" name="role" class="auth-input">
-                            <option value="">Tự động</option>
-                            <option value="ROLE_PATIENT">Bệnh nhân</option>
-                            <option value="ROLE_DOCTOR">Bác sĩ</option>
-                            <option value="ROLE_RECEPTIONIST">Lễ tân</option>
-                            <option value="ROLE_MANAGER">Quản lý bệnh viện</option>
-                            <option value="ROLE_ADMIN">Quản trị viên</option>
-                        </select>
                     </div>
 
                     <!-- Nút đăng nhập và liên kết quên mật khẩu -->
