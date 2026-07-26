@@ -1,25 +1,29 @@
 package vn.edu.fpt.SE2034_SWP391_G5.service.impl;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateArticleRequest;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ArticleCommentResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ArticleResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Article;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.ArticleComment;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.UserRole;
 import vn.edu.fpt.SE2034_SWP391_G5.enums.ArticleStatus;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
+import vn.edu.fpt.SE2034_SWP391_G5.repository.ArticleCommentRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.ArticleRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.service.ArticleService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.ImageUploadService;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.ArticleComment;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.ArticleCommentRepository;
-import org.springframework.web.multipart.MultipartFile;
 import vn.edu.fpt.SE2034_SWP391_G5.util.SlugUtil;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
@@ -34,32 +38,23 @@ public class ArticleServiceImpl implements ArticleService {
     private final ArticleCommentRepository articleCommentRepository;
     private final ImageUploadService imageUploadService;
 
-    // Lấy toàn bộ bài viết
+    // Lấy bài viết theo bộ lọc, có phân trang
     @Override
-    public List<Article> getAllArticles() {
-        return articleRepository.findAll();
+    public Page<ArticleResponse> getArticlesByFilters(String keyword, String category, String status, Pageable pageable) {
+        Page<Article> articlePage = articleRepository.findByFiltersPageable(keyword, category, status, pageable);
+
+        List<ArticleResponse> articles = toArticleResponseList(articlePage.getContent());
+        return new PageImpl<>(articles, pageable, articlePage.getTotalElements());
     }
 
-    // Lấy bài viết theo bộ lọc (không phân trang)
+    // Lấy bài viết theo id
     @Override
-    public List<Article> getArticlesByFilters(String keyword, String category, String status) {
-        return articleRepository.findByFilters(keyword, category, status);
-    }
-
-    // Lấy bài viết theo bộ lọc (có phân trang)
-    @Override
-    public Page<Article> getArticlesByFilters(String keyword, String category, String status, Pageable pageable) {
-        return articleRepository.findByFiltersPageable(keyword, category, status, pageable);
-    }
-
-    // Lấy bài viết theo id, bài đã xóa mềm coi như không tồn tại
-    @Override
-    public Article getArticleById(Long id) {
-        Article article = articleRepository.findById(id).orElse(null);
-        if (article != null && ArticleStatus.DELETED.name().equals(article.getStatus())) {
+    public ArticleResponse getArticleById(Long id) {
+        Article article = findActiveArticle(id);
+        if (article == null) {
             return null;
         }
-        return article;
+        return toArticleResponse(article);
     }
 
     // Tạo bài viết mới từ dữ liệu form
@@ -96,8 +91,8 @@ public class ArticleServiceImpl implements ArticleService {
     // Cập nhật bài viết đã có
     @Override
     public void updateArticle(Long id, CreateArticleRequest request) {
-        // Dùng getArticleById để bài đã xóa mềm không thể bị sửa lại
-        Article article = getArticleById(id);
+        // Bài đã xóa thì không thể sửa lại
+        Article article = findActiveArticle(id);
         if (article == null) {
             throw new ResourceNotFoundException("Không tìm thấy bài viết cần cập nhật.");
         }
@@ -129,7 +124,7 @@ public class ArticleServiceImpl implements ArticleService {
     // Xóa mềm bài viết: chỉ đổi trạng thái, vẫn giữ lại dữ liệu
     @Override
     public void deleteArticle(Long id) {
-        Article article = getArticleById(id);
+        Article article = findActiveArticle(id);
         if (article == null) {
             throw new ResourceNotFoundException("Không tìm thấy bài viết cần xóa.");
         }
@@ -140,8 +135,13 @@ public class ArticleServiceImpl implements ArticleService {
 
     // Lấy danh sách bình luận của bài viết, mới nhất lên đầu
     @Override
-    public List<ArticleComment> getCommentsByArticleId(Long articleId) {
-        return articleCommentRepository.findByArticleIdOrderByCreatedAtDesc(articleId);
+    public List<ArticleCommentResponse> getCommentsByArticleId(Long articleId) {
+        List<ArticleComment> comments = articleCommentRepository.findByArticleIdOrderByCreatedAtDesc(articleId);
+        List<ArticleCommentResponse> result = new ArrayList<>();
+        for (ArticleComment comment : comments) {
+            result.add(toCommentResponse(comment));
+        }
+        return result;
     }
 
     // Đếm số bình luận của bài viết
@@ -152,14 +152,17 @@ public class ArticleServiceImpl implements ArticleService {
 
     // Lấy tối đa 3 bài viết cùng chuyên mục, trừ bài đang xem
     @Override
-    public List<Article> getRelatedArticles(String category, Long excludeId) {
-        return articleRepository.findTop3ByCategoryAndIdNotAndStatusOrderByCreatedAtDesc(category, excludeId, ArticleStatus.PUBLISHED.name());
+    public List<ArticleResponse> getRelatedArticles(String category, Long excludeId) {
+        List<Article> articles = articleRepository
+                .findTop3ByCategoryAndIdNotAndStatusOrderByCreatedAtDesc(category, excludeId, ArticleStatus.PUBLISHED.name());
+
+        return toArticleResponseList(articles);
     }
 
     // Thêm bình luận vào bài viết đã xuất bản
     @Override
     public void addComment(Long articleId, String content, String username) {
-        Article article = getArticleById(articleId);
+        Article article = findActiveArticle(articleId);
         if (article == null || !ArticleStatus.PUBLISHED.name().equals(article.getStatus())) {
             throw new BadRequestException("Bài viết không tồn tại hoặc chưa được xuất bản.");
         }
@@ -191,7 +194,7 @@ public class ArticleServiceImpl implements ArticleService {
     // Tăng lượt xem mỗi lần mở bài viết
     @Override
     public void incrementViewCount(Long articleId) {
-        Article article = getArticleById(articleId);
+        Article article = findActiveArticle(articleId);
         if (article != null) {
             if (article.getViewCount() == null) {
                 article.setViewCount(1);
@@ -200,6 +203,84 @@ public class ArticleServiceImpl implements ArticleService {
             }
             articleRepository.save(article);
         }
+    }
+
+    // Đổi bài viết trong database sang dữ liệu hiển thị
+    private ArticleResponse toArticleResponse(Article article) {
+        ArticleResponse response = new ArticleResponse();
+        response.setId(article.getId());
+        response.setTitle(article.getTitle());
+        response.setSummary(article.getSummary());
+        response.setContent(article.getContent());
+        response.setCategory(article.getCategory());
+        response.setThumbnailUrl(article.getThumbnailUrl());
+        response.setStatus(article.getStatus());
+        response.setViewCount(article.getViewCount());
+        response.setPublishedAt(article.getPublishedAt());
+        response.setCreatedAt(article.getCreatedAt());
+        response.setAuthorName(buildAuthorName(article));
+
+        if (article.getDoctorAuthor() != null) {
+            response.setDoctorId(article.getDoctorAuthor().getId());
+        }
+
+        return response;
+    }
+
+    // Đổi cả danh sách bài viết
+    private List<ArticleResponse> toArticleResponseList(List<Article> articles) {
+        List<ArticleResponse> result = new ArrayList<>();
+        for (Article article : articles) {
+            result.add(toArticleResponse(article));
+        }
+        return result;
+    }
+
+    // Ưu tiên tên bác sĩ đứng tên, không có thì lấy người tạo bài
+    private String buildAuthorName(Article article) {
+        if (article.getDoctorAuthor() != null) {
+            return article.getDoctorAuthor().getFullName();
+        }
+
+        if (article.getCreatedBy() != null) {
+            return article.getCreatedBy().getFullName();
+        }
+
+        return "Admin";
+    }
+
+    // Đổi bình luận sang dữ liệu hiển thị
+    private ArticleCommentResponse toCommentResponse(ArticleComment comment) {
+        ArticleCommentResponse response = new ArticleCommentResponse();
+        response.setId(comment.getId());
+        response.setContent(comment.getContent());
+        response.setCreatedAt(comment.getCreatedAt());
+        response.setAuthorName(comment.getUser() != null ? comment.getUser().getFullName() : "Người dùng");
+        response.setAuthorInitial(buildInitial(comment));
+        return response;
+    }
+
+    // Chữ cái đầu của tên người bình luận, dùng cho ảnh đại diện tròn
+    private String buildInitial(ArticleComment comment) {
+        if (comment.getUser() == null) {
+            return "U";
+        }
+
+        String firstName = comment.getUser().getFirstName();
+        if (firstName == null || firstName.isEmpty()) {
+            return "U";
+        }
+
+        return firstName.substring(0, 1).toUpperCase();
+    }
+
+    // Lấy bài viết còn hiệu lực, bài đã xóa mềm coi như không tồn tại
+    private Article findActiveArticle(Long id) {
+        Article article = articleRepository.findById(id).orElse(null);
+        if (article != null && ArticleStatus.DELETED.name().equals(article.getStatus())) {
+            return null;
+        }
+        return article;
     }
 
     // Gán các trường người dùng nhập từ form vào bài viết

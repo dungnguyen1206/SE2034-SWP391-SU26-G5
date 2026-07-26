@@ -5,42 +5,72 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Collection;
 
 @Component
 public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHandler {
 
-    // Điều hướng user về dashboard tương ứng sau khi đăng nhập thành công
+    // Điều hướng user về trang tương ứng sau khi đăng nhập thành công
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        String selectedRole = request.getParameter("role");
 
-        for (GrantedAuthority authority : authorities) {
-            String role = authority.getAuthority();
+        // Người dùng có chọn vai trò trên form đăng nhập
+        if (selectedRole != null && !selectedRole.isEmpty()) {
+            // Chọn vai trò không thuộc tài khoản thì hủy phiên, bắt đăng nhập lại
+            if (!hasRole(authentication, selectedRole)) {
+                request.getSession().invalidate();
+                SecurityContextHolder.clearContext();
+                response.sendRedirect("/login?roleError=true");
+                return;
+            }
 
-            switch (role) {
-                case "ROLE_PATIENT":
-                    response.sendRedirect("/patient/dashboard");
-                    return;
-                case "ROLE_DOCTOR":
-                    response.sendRedirect("/doctor/dashboard");
-                    return;
-                case "ROLE_RECEPTIONIST":
-                    response.sendRedirect("/receptionist/dashboard");
-                    return;
-                case "ROLE_MANAGER":
-                    response.sendRedirect("/manager/dashboard");
-                    return;
-                case "ROLE_ADMIN":
-                    response.sendRedirect("/admin/account-list");
-                    return;
+            response.sendRedirect(getHomeUrl(selectedRole));
+            return;
+        }
+
+        // Không chọn thì vào trang của vai trò đầu tiên tìm được
+        for (GrantedAuthority authority : authentication.getAuthorities()) {
+            String homeUrl = getHomeUrl(authority.getAuthority());
+            if (homeUrl != null) {
+                response.sendRedirect(homeUrl);
+                return;
             }
         }
 
+        // Không có vai trò nào nhận diện được thì về trang chủ
         response.sendRedirect("/");
+    }
+
+    // Kiểm tra tài khoản có thực sự giữ vai trò này không
+    private boolean hasRole(Authentication authentication, String role) {
+        for (GrantedAuthority authority : authentication.getAuthorities()) {
+            if (authority.getAuthority().equals(role)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // Trang chủ tương ứng với từng vai trò
+    private String getHomeUrl(String role) {
+        switch (role) {
+            case "ROLE_PATIENT":
+                return "/patient/dashboard";
+            case "ROLE_DOCTOR":
+                return "/doctor/dashboard";
+            case "ROLE_RECEPTIONIST":
+                return "/receptionist/dashboard";
+            case "ROLE_MANAGER":
+                return "/manager/dashboard";
+            case "ROLE_ADMIN":
+                return "/admin/account-list";
+            default:
+                return null;
+        }
     }
 }

@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
         // Đổi từng tài khoản sang dữ liệu hiển thị
         List<UserAccountResponse> accounts = new ArrayList<>();
         for (User user : userPage.getContent()) {
-            accounts.add(UserAccountResponse.from(user));
+            accounts.add(toAccountResponse(user));
         }
 
         return new PageImpl<>(accounts, pageable, userPage.getTotalElements());
@@ -121,5 +121,53 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<User> getDoctors() {
         return userRepository.findByRoleName("DOCTOR");
+    }
+
+    // Đổi tài khoản trong database sang dữ liệu hiển thị
+    private UserAccountResponse toAccountResponse(User user) {
+        // Gom mã vai trò và tên vai trò tiếng Việt (lấy từ cột description của bảng roles)
+        List<String> roles = new ArrayList<>();
+        List<String> roleLabels = new ArrayList<>();
+        boolean isAdmin = false;
+
+        if (user.getUserRoles() != null) {
+            for (UserRole userRole : user.getUserRoles()) {
+                Role role = userRole.getRole();
+                roles.add(role.getName());
+                roleLabels.add(role.getDescription() != null ? role.getDescription() : role.getName());
+
+                if ("ADMIN".equals(role.getName())) {
+                    isAdmin = true;
+                }
+            }
+        }
+
+        boolean active = UserStatus.ACTIVE.name().equals(user.getStatus());
+
+        UserAccountResponse response = new UserAccountResponse();
+        response.setId(user.getId());
+        response.setFullName(buildFullName(user));
+        response.setEmail(user.getEmail());
+        response.setPhone(user.getPhone());
+        response.setCreatedAt(user.getCreatedAt());
+        response.setRoles(roles);
+        response.setRolesText(String.join(", ", roleLabels));
+        response.setStatus(user.getStatus());
+        response.setActive(active);
+        response.setStatusText(active ? "Hoạt động" : "Tạm khóa");
+
+        // Không được phép khóa tài khoản quản trị viên
+        response.setCanBeLocked(active && !isAdmin);
+        response.setCanBeUnlocked(!active && !isAdmin);
+
+        return response;
+    }
+
+    // Ghép họ, tên đệm và tên thành họ tên đầy đủ
+    private String buildFullName(User user) {
+        String fullName = user.getLastName() + " "
+                + (user.getMiddleName() != null ? user.getMiddleName() + " " : "")
+                + user.getFirstName();
+        return fullName.trim();
     }
 }

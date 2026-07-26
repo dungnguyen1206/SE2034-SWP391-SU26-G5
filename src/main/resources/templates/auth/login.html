@@ -4,26 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng nhập - HAMS</title>
-    <!-- FontAwesome CDN for modern vector icons -->
+    <!-- Thư viện icon FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Local preview fallback + Thymeleaf reference -->
+    <!-- Đường dẫn CSS: bản xem trước tĩnh và bản Thymeleaf -->
     <link rel="stylesheet" href="../../static/css/auth/auth.css" th:href="@{/css/auth/auth.css}">
 </head>
 <body>
-    <!-- Guest Home Button -->
+    <!-- Nút quay về trang chủ -->
     <a href="/" class="btn-guest-home">
         <i class="fa-solid fa-house"></i> Về trang chủ
     </a>
 
     <div class="auth-container">
-        <!-- Left Side: Login Card -->
+        <!-- Bên trái: thẻ đăng nhập -->
         <div class="auth-left">
             <div class="auth-card">
                 <h2 class="auth-card-title">Đăng nhập</h2>
                 
-                <!-- Alert Messages -->
+                <!-- Các thông báo -->
                 <div th:if="${param.error != null}" class="auth-alert error">
                     <i class="fa-solid fa-circle-exclamation"></i> Tên đăng nhập hoặc mật khẩu không đúng
+                </div>
+                <div th:if="${param.roleError != null}" class="auth-alert error">
+                    <i class="fa-solid fa-circle-exclamation"></i> Tài khoản của bạn không có vai trò đã chọn
                 </div>
                 <div th:if="${param.logout != null}" class="auth-alert success">
                     <i class="fa-solid fa-circle-check"></i> Đã đăng xuất thành công
@@ -36,26 +39,39 @@
                 </div>
                 
                 <form th:action="@{/login}" method="POST">
-                    <!-- Username Input -->
+                    <!-- Ô nhập tên đăng nhập -->
                     <div class="input-group">
                         <label class="input-label" for="username">Tên đăng nhập hoặc Số điện thoại</label>
                         <input type="text" id="username" name="username" class="auth-input" placeholder="Nhập tên đăng nhập hoặc số điện thoại" required autofocus>
                     </div>
                     
-                    <!-- Password Input -->
+                    <!-- Ô nhập mật khẩu -->
                     <div class="input-group">
                         <label class="input-label" for="password">Mật khẩu</label>
                         <input type="password" id="password" name="password" class="auth-input" placeholder="Nhập mật khẩu của bạn" required>
                     </div>
                     
-                    <!-- Form Actions: Login Button + Forgot Password Link -->
+                    <!-- Vai trò: để trống thì hệ thống tự chọn, tài khoản nhiều vai trò thì chọn tay -->
+                    <div class="input-group">
+                        <label class="input-label" for="role">Vai trò</label>
+                        <select id="role" name="role" class="auth-input">
+                            <option value="">Tự động</option>
+                            <option value="ROLE_PATIENT">Bệnh nhân</option>
+                            <option value="ROLE_DOCTOR">Bác sĩ</option>
+                            <option value="ROLE_RECEPTIONIST">Lễ tân</option>
+                            <option value="ROLE_MANAGER">Quản lý bệnh viện</option>
+                            <option value="ROLE_ADMIN">Quản trị viên</option>
+                        </select>
+                    </div>
+
+                    <!-- Nút đăng nhập và liên kết quên mật khẩu -->
                     <div class="auth-footer-actions">
                         <button type="submit" class="auth-btn">Đăng nhập</button>
                         <a href="forgot-password.html" th:href="@{/forgot-password}" class="forgot-link">Quên mật khẩu?</a>
                     </div>
                 </form>
                 
-                <!-- Registration Link Hint -->
+                <!-- Liên kết sang trang đăng ký -->
                 <div class="auth-nav-hint">
                     Chưa có tài khoản?
                     <a href="register.html" th:href="@{/register}">Đăng ký ngay</a>
@@ -63,7 +79,7 @@
             </div>
         </div>
         
-        <!-- Right Side: Brand Logo and Illustration -->
+        <!-- Bên phải: logo và ảnh minh họa -->
         <div class="auth-right">
             <div class="auth-logo-top">
                 <span class="logo-circle"></span>

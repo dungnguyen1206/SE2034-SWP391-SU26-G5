@@ -15,7 +15,7 @@
 <body>
 <div layout:fragment="content">
 
-        <!-- Flash Messages -->
+        <!-- Thông báo sau khi thao tác -->
         <div th:if="${successMessage}" class="alert-message alert-success">
             <i class="bi bi-check-circle-fill"></i>
             <span th:text="${successMessage}"></span>
@@ -69,7 +69,7 @@
             </div>
         </form>
 
-        <!-- Article Card List -->
+        <!-- Danh sách thẻ bài viết -->
         <div class="article-list-container">
             
             <div th:each="article : ${articleList}" class="article-card">
@@ -86,7 +86,7 @@
                         <div class="article-meta">
                             <span class="meta-category" th:text="${article.category}">Chuyên mục</span>
                             <span class="meta-separator">•</span>
-                            <span>Bởi <span th:text="${article.doctorAuthor != null ? article.doctorAuthor.fullName : (article.createdBy != null ? article.createdBy.fullName : 'Admin')}">Tác giả</span></span>
+                            <span>Bởi <span th:text="${article.authorName}">Tác giả</span></span>
                             <span class="meta-separator">•</span>
                             <span th:text="${article.createdAt != null ? #temporals.format(article.createdAt, 'dd/MM/yyyy') : ''}">2026-05-15</span>
                         </div>
@@ -107,7 +107,7 @@
                 </div>
             </div>
 
-            <!-- Empty State -->
+            <!-- Khi không có dữ liệu -->
             <div th:if="${#lists.isEmpty(articleList)}" class="article-empty-state">
                 <i class="bi bi-folder-x"></i>
                 <p>Không có bài viết nào.</p>
@@ -115,7 +115,7 @@
 
         </div>
 
-        <!-- Pagination -->
+        <!-- Phân trang -->
         <div th:if="${totalPages > 1}" class="article-pagination">
             <span class="pagination-info"
                   th:text="'Trang ' + ${currentPage + 1} + ' / ' + ${totalPages}"></span>
@@ -129,21 +129,21 @@
                 <i class="bi bi-chevron-left"></i> Trước
             </span>
 
-            <!-- Always show page 1 -->
+            <!-- Luôn hiện trang đầu -->
             <a th:if="${totalPages >= 1}" class="pager-button" th:classappend="${currentPage == 0} ? 'active' : ''" th:text="1" th:href="@{/manager/articles(keyword=${keyword}, category=${category}, status=${status}, page=0)}">1</a>
 
-            <!-- Show left ellipsis -->
+            <!-- Dấu ba chấm bên trái -->
             <span th:if="${currentPage > 2}" style="padding: 0 8px; color: #64748b; align-self: center;">...</span>
 
-            <!-- Show window (currentPage is 0-indexed) -->
+            <!-- Các trang quanh trang hiện tại, currentPage đếm từ 0 -->
             <th:block th:if="${totalPages > 2}" th:each="i : ${#numbers.sequence(currentPage - 1 > 0 ? currentPage - 1 : 1, currentPage + 1 < totalPages - 1 ? currentPage + 1 : totalPages - 2)}">
                 <a th:if="${i >= 1 and i < totalPages - 1}" class="pager-button" th:classappend="${currentPage == i} ? 'active' : ''" th:text="${i + 1}" th:href="@{/manager/articles(keyword=${keyword}, category=${category}, status=${status}, page=${i})}"></a>
             </th:block>
 
-            <!-- Show right ellipsis -->
+            <!-- Dấu ba chấm bên phải -->
             <span th:if="${currentPage < totalPages - 3}" style="padding: 0 8px; color: #64748b; align-self: center;">...</span>
 
-            <!-- Always show last page -->
+            <!-- Luôn hiện trang cuối -->
             <a th:if="${totalPages > 1}" class="pager-button" th:classappend="${currentPage == totalPages - 1} ? 'active' : ''" th:text="${totalPages}" th:href="@{/manager/articles(keyword=${keyword}, category=${category}, status=${status}, page=${totalPages - 1})}"></a>
 
             <a th:if="${currentPage < totalPages - 1}"

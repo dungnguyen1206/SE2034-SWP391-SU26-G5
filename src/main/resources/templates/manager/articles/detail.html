@@ -25,22 +25,22 @@
             </a>
         </div>
 
-        <!-- Main Article Container -->
+        <!-- Khung nội dung bài viết -->
         <div class="article-detail-card" th:if="${article != null}">
             
-            <!-- Huge Title -->
+            <!-- Tiêu đề lớn -->
             <h1 class="article-title-main" th:text="${article.title}">Tiêu đề bài viết</h1>
             
-            <!-- Simple Meta Data -->
+            <!-- Thông tin phụ: tác giả, ngày, chuyên mục -->
             <div class="article-meta-simple">
                 <span th:text="${article.createdAt != null ? #temporals.format(article.createdAt, 'dd/MM/yyyy') : ''}">26-06-2026</span>
                 <span class="dot-separator">•</span>
                 <span class="meta-cat" th:text="${article.category}">Khoa nhi</span>
                 <span class="dot-separator">•</span>
-                <span th:text="${article.doctorAuthor != null ? article.doctorAuthor.fullName : (article.createdBy != null ? article.createdBy.fullName : 'Admin')}">Tác giả</span>
+                <span th:text="${article.authorName}">Tác giả</span>
             </div>
 
-            <!-- Highlighted Summary Box (like the image) -->
+            <!-- Khung tóm tắt nổi bật -->
             <div class="article-summary-box" th:if="${article.summary != null and !article.summary.isEmpty()}">
                 <div class="summary-header">
                     <strong>Tóm tắt ý chính bài viết</strong>
@@ -50,13 +50,13 @@
                 </div>
             </div>
 
-            <!-- WYSIWYG HTML Content -->
+            <!-- Nội dung bài viết soạn bằng trình soạn thảo -->
             <div class="article-body-text" th:utext="${article.content}">
                 Nội dung bài viết
             </div>
         </div>
 
-        <!-- Fallback if not found -->
+        <!-- Trường hợp không tìm thấy bài viết -->
         <div th:if="${article == null}" style="padding: 48px; background: white; border-radius: 12px; border: 1px solid #e2e8f0;">
             <p>Bài viết không tồn tại.</p>
             <a th:href="@{/manager/articles}" style="color: #3b82f6;">Quay lại danh sách</a>
