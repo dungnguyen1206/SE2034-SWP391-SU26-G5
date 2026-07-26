@@ -10,29 +10,29 @@ import vn.edu.fpt.SE2034_SWP391_G5.entity.Article;
 
 import java.util.List;
 
+// Truy vấn dữ liệu bài viết
 @Repository
 public interface ArticleRepository extends JpaRepository<Article, Long> {
-    
-    @Query("SELECT a FROM Article a WHERE " +
-           "a.status != 'DELETED' AND " +
-           "(:keyword IS NULL OR LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
-           "(:category IS NULL OR :category = '' OR a.category = :category) AND " +
-           "(:status IS NULL OR :status = '' OR a.status = :status) " +
-           "ORDER BY a.createdAt DESC")
-    List<Article> findByFilters(@Param("keyword") String keyword, 
-                                @Param("category") String category, 
-                                @Param("status") String status);
 
-    @Query("SELECT a FROM Article a WHERE " +
-           "a.status != 'DELETED' AND " +
+    // Tìm bài viết theo từ khóa, chuyên mục, trạng thái (bỏ bài đã xóa).
+    @Query(value = "SELECT a FROM Article a " +
+           "LEFT JOIN FETCH a.doctorAuthor " +
+           "LEFT JOIN FETCH a.createdBy " +
+           "WHERE a.status != 'DELETED' AND " +
            "(:keyword IS NULL OR LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
            "(:category IS NULL OR :category = '' OR a.category = :category) AND " +
            "(:status IS NULL OR :status = '' OR a.status = :status) " +
-           "ORDER BY a.createdAt DESC")
+           "ORDER BY a.createdAt DESC",
+           countQuery = "SELECT COUNT(a) FROM Article a WHERE " +
+           "a.status != 'DELETED' AND " +
+           "(:keyword IS NULL OR LOWER(a.title) LIKE LOWER(CONCAT('%', :keyword, '%'))) AND " +
+           "(:category IS NULL OR :category = '' OR a.category = :category) AND " +
+           "(:status IS NULL OR :status = '' OR a.status = :status)")
     Page<Article> findByFiltersPageable(@Param("keyword") String keyword,
                                        @Param("category") String category,
                                        @Param("status") String status,
                                        Pageable pageable);
 
+    // Lấy 3 bài mới nhất cùng chuyên mục, trừ bài đang xem
     List<Article> findTop3ByCategoryAndIdNotAndStatusOrderByCreatedAtDesc(String category, Long id, String status);
 }

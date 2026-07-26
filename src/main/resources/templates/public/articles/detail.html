@@ -113,10 +113,10 @@
         .comment-time { font-size: 13px; color: #94a3b8; font-weight: normal; }
         .comment-text { font-size: 15px; color: #334155; line-height: 1.5; margin-bottom: 4px; }
         .comment-empty { text-align: center; color: #94a3b8; font-size: 14px; padding: 24px 0; font-style: italic; }
-
-        /* REPLIES (cùng dạng comment nhưng lùi vào) */
-        .replies-list { margin-top: 16px; margin-left: 56px; display: flex; flex-direction: column; gap: 16px; border-left: 2px solid #e2e8f0; padding-left: 16px; }
-        .reply-avatar { width: 32px; height: 32px; font-size: 12px; }
+        .comment-error {
+            background: #fee2e2; color: #b91c1c; border-left: 4px solid #ef4444;
+            border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; font-size: 14px; font-weight: 500;
+        }
 
         /* SIDEBAR */
         .article-sidebar {
@@ -153,13 +153,12 @@
             .container { padding: 0 20px; }
             .navbar-nav { display: none; }
             .article-title-main { font-size: 28px; }
-            .replies-list { margin-left: 32px; }
         }
     </style>
 </head>
 <body>
 
-<!-- NAVBAR -->
+<!-- THANH ĐIỀU HƯỚNG -->
 <nav class="navbar">
     <div class="container">
         <a th:href="@{/home}" class="navbar-brand">
@@ -202,7 +201,7 @@
     </div>
 </nav>
 
-<!-- HEADER -->
+<!-- PHẦN ĐẦU BÀI VIẾT -->
 <div class="page-header">
     <div class="container">
         <h1>Chi tiết bài tư vấn</h1>
@@ -221,7 +220,7 @@
             <span class="dot-separator">•</span>
             <span class="meta-cat" th:text="${article.category}">Khoa nhi</span>
             <span class="dot-separator">•</span>
-            <span th:text="${article.doctorAuthor != null ? article.doctorAuthor.fullName : 'HAMS Admin'}">Tác giả</span>
+            <span th:text="${article.authorName}">Tác giả</span>
         </div>
 
         <div class="article-summary-box" th:if="${article.summary != null and !article.summary.isEmpty()}">
@@ -241,6 +240,9 @@
                 (<span th:text="${commentCount}">0</span>)
             </h3>
             
+            <!-- Báo lỗi khi bình luận không hợp lệ -->
+            <div th:if="${commentError}" class="comment-error" th:text="${commentError}"></div>
+
             <!-- Form gửi bình luận (chỉ hiện khi đã đăng nhập) -->
             <form th:if="${isLoggedIn}" class="comment-form" th:action="@{'/articles/' + ${article.id} + '/comment'}" method="post">
                 <input type="text" name="content" placeholder="Chia sẻ ý kiến của bạn..." required maxlength="1000">
@@ -264,28 +266,13 @@
                     <!-- Bình luận gốc -->
                     <div class="comment-item">
                         <div class="comment-avatar" 
-                             th:text="${comment.user.firstName != null ? comment.user.firstName.substring(0,1).toUpperCase() : 'U'}">H</div>
+                             th:text="${comment.authorInitial}">H</div>
                         <div class="comment-body">
                             <div class="comment-author">
-                                <span th:text="${comment.user.fullName}">Hoàng Thanh</span>
+                                <span th:text="${comment.authorName}">Hoàng Thanh</span>
                                 <span class="comment-time" th:text="${#temporals.format(comment.createdAt, 'dd/MM/yyyy HH:mm')}">2 giờ trước</span>
                             </div>
                             <div class="comment-text" th:text="${comment.content}">Nội dung bình luận...</div>
-                        </div>
-                    </div>
-
-                    <!-- Danh sách Reply -->
-                    <div class="replies-list" th:if="${comment.replies != null and !comment.replies.isEmpty()}">
-                        <div class="comment-item" th:each="reply : ${comment.replies}">
-                            <div class="comment-avatar reply-avatar"
-                                 th:text="${reply.user.firstName != null ? reply.user.firstName.substring(0,1).toUpperCase() : 'U'}">M</div>
-                            <div class="comment-body">
-                                <div class="comment-author">
-                                    <span th:text="${reply.user.fullName}">Mai Nguyễn</span>
-                                    <span class="comment-time" th:text="${#temporals.format(reply.createdAt, 'dd/MM/yyyy HH:mm')}">5 giờ trước</span>
-                                </div>
-                                <div class="comment-text" th:text="${reply.content}">Nội dung trả lời...</div>
-                            </div>
                         </div>
                     </div>
                 </div>

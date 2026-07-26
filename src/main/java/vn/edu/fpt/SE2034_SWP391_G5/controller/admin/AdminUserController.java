@@ -1,6 +1,5 @@
 package vn.edu.fpt.SE2034_SWP391_G5.controller.admin;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -10,9 +9,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.request.UserSearchCriteria;
+import vn.edu.fpt.SE2034_SWP391_G5.enums.UserStatus;
+import vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException;
+import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.UserAccountResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.service.UserService;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 
@@ -23,6 +27,7 @@ public class AdminUserController {
 
     private final UserService userService;
 
+    // Hiển thị danh sách tài khoản (có lọc, phân trang)
     @GetMapping("/account-list")
     public String accountList(@RequestParam(required = false) String keyword,
                               @RequestParam(required = false) String role,
@@ -30,30 +35,71 @@ public class AdminUserController {
                               @RequestParam(defaultValue = "1") int page,
                               @RequestParam(defaultValue = "10") int size,
                               Model model) {
-        if (keyword != null && keyword.trim().isEmpty()) keyword = null;
-        if (role != null && role.trim().isEmpty()) role = null;
+        UserSearchCriteria criteria = buildSearchCriteria(keyword, role, searchFields);
 
-        boolean searchFirstName = searchFields == null || searchFields.isEmpty() || searchFields.contains("firstName");
-        boolean searchMiddleName = searchFields == null || searchFields.isEmpty() || searchFields.contains("middleName");
-        boolean searchLastName = searchFields == null || searchFields.isEmpty() || searchFields.contains("lastName");
+        // Spring Data JPA tính trang từ 0
+        Page<UserAccountResponse> userPage = userService.getAccountList(criteria, Math.max(0, page - 1), size);
 
-        // Page in Spring Data JPA is 0-indexed
-        Page<UserAccountResponse> userPage = userService.getAccountList(keyword, role, searchFirstName, searchMiddleName, searchLastName, Math.max(0, page - 1), size);
-        
+        int totalPages = userPage.getTotalPages();
+
         model.addAttribute("users", userPage.getContent());
         model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", userPage.getTotalPages());
+        model.addAttribute("totalPages", totalPages);
         model.addAttribute("totalItems", userPage.getTotalElements());
-        
-        model.addAttribute("keyword", keyword);
-        model.addAttribute("roleFilter", role);
-        model.addAttribute("searchFirstName", searchFirstName);
-        model.addAttribute("searchMiddleName", searchMiddleName);
-        model.addAttribute("searchLastName", searchLastName);
-        
-        return "admin/users/account-list";
+
+        // Dữ liệu cho thanh phân trang, tính sẵn để template chỉ việc hiển thị
+        model.addAttribute("middlePages", buildMiddlePages(page, totalPages));
+        model.addAttribute("showLeftDots", page > 3);
+        model.addAttribute("showRightDots", page < totalPages - 2);
+
+        model.addAttribute("keyword", criteria.getKeyword());
+        model.addAttribute("roleFilter", criteria.getRoleName());
+        model.addAttribute("searchFirstName", criteria.isSearchFirstName());
+        model.addAttribute("searchMiddleName", criteria.isSearchMiddleName());
+        model.addAttribute("searchLastName", criteria.isSearchLastName());
+
+        return "admin/account-list";
     }
 
+    // Các số trang hiện ở giữa thanh phân trang.
+    // Trang đầu và trang cuối luôn hiện riêng nên không tính vào đây.
+    private List<Integer> buildMiddlePages(int currentPage, int totalPages) {
+        List<Integer> pages = new ArrayList<>();
+
+        // Lấy 2 trang trước và 2 trang sau trang hiện tại, không vượt ra ngoài khoảng giữa
+        int from = Math.max(currentPage - 2, 2);
+        int to = Math.min(currentPage + 2, totalPages - 1);
+
+        for (int page = from; page <= to; page++) {
+            pages.add(page);
+        }
+        return pages;
+    }
+
+    // Dựng điều kiện tìm kiếm từ tham số trên URL
+    private UserSearchCriteria buildSearchCriteria(String keyword, String roleName, List<String> searchFields) {
+        UserSearchCriteria criteria = new UserSearchCriteria();
+        criteria.setKeyword(normalize(keyword));
+        criteria.setRoleName(normalize(roleName));
+
+        // Không tick trường nào thì mặc định tìm trong cả họ, tên đệm và tên
+        boolean noneSelected = searchFields == null || searchFields.isEmpty();
+        criteria.setSearchFirstName(noneSelected || searchFields.contains("firstName"));
+        criteria.setSearchMiddleName(noneSelected || searchFields.contains("middleName"));
+        criteria.setSearchLastName(noneSelected || searchFields.contains("lastName"));
+
+        return criteria;
+    }
+
+    // Chuỗi rỗng coi như người dùng không nhập gì
+    private String normalize(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        return value;
+    }
+
+    // Cập nhật vai trò cho user
     @PostMapping("/update-role")
     public String updateRoles(@RequestParam("userId") Long id, 
                               @RequestParam(name = "roles", required = false) List<String> roles,
@@ -61,30 +107,32 @@ public class AdminUserController {
         try {
             userService.updateUserRoles(id, roles);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật vai trò thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+        } catch (BadRequestException | ResourceNotFoundException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/admin/account-list";
     }
 
+    // Khóa tài khoản
     @PostMapping("/account-list/{id}/lock")
     public String lockAccount(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-            userService.toggleUserStatus(id, "INACTIVE");
+            userService.toggleUserStatus(id, UserStatus.INACTIVE.name());
             redirectAttributes.addFlashAttribute("successMessage", "Khóa tài khoản thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+        } catch (BadRequestException | ResourceNotFoundException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/admin/account-list";
     }
 
+    // Mở khóa tài khoản
     @PostMapping("/account-list/{id}/unlock")
     public String unlockAccount(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
-            userService.toggleUserStatus(id, "ACTIVE");
+            userService.toggleUserStatus(id, UserStatus.ACTIVE.name());
             redirectAttributes.addFlashAttribute("successMessage", "Mở khóa tài khoản thành công!");
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi: " + e.getMessage());
+        } catch (BadRequestException | ResourceNotFoundException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/admin/account-list";
     }

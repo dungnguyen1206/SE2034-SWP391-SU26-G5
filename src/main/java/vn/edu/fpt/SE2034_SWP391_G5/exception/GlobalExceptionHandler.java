@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
         }
         if(referer == null) {
             if (request.isUserInRole("ROLE_ADMIN")) {
-                referer = "/admin/dashboard";
+                referer = "/admin/account-list";
             }
             else  if(request.isUserInRole("ROLE_MANAGER")) {
                 referer = "/manager/dashboard";

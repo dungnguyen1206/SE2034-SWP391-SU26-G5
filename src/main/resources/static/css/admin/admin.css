@@ -6,31 +6,16 @@
     --primary-hover: #163f7a;     /* Slightly darker blue for hover states */
     --dark-sidebar: #192231;      /* Dark slate blue for sidebar / login split screen background */
     --sidebar-active-bg: #223c61; /* Dark blue hover/active background for sidebar items */
-    
+
     /* Backgrounds and Neutrals */
     --light-bg: #f5f7fb;          /* Main admin page content background */
     --white: #ffffff;
     --border-color: #e5e9f0;      /* Soft border lines */
-    
+
     /* Typography Colors */
     --text-main: #1f2937;         /* Neutral dark text */
     --text-muted: #6b7280;        /* Gray text for labels & inactive breadcrumbs */
-    
-    /* Role Badges (Tailored matching the mockups) */
-    --badge-patient-bg: #e0f2fe;
-    --badge-patient-text: #0284c7;
-    
-    --badge-doctor-bg: #dcfce7;
-    --badge-doctor-text: #16a34a;
-    
-    --badge-receptionist-bg: #ffedd5;
-    --badge-receptionist-text: #d97706;
-    
-    --badge-manager-bg: #f3e8ff;
-    --badge-manager-text: #7c3aed;
-    
-    --badge-admin-bg: #f1f5f9;
-    --badge-admin-text: #475569;
+
 }
 
 * {
@@ -172,28 +157,6 @@ button, input, select {
     font-size: 1.1rem;
 }
 
-.sidebar-badge {
-    background-color: rgba(255, 255, 255, 0.15);
-    color: var(--white);
-    font-size: 0.75rem;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 12px;
-}
-
-.sidebar-item.active .sidebar-badge {
-    background-color: rgba(255, 255, 255, 0.2);
-}
-
-.sidebar-profile {
-    padding: 20px 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    background-color: rgba(0, 0, 0, 0.15);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
 .profile-info {
     display: flex;
     align-items: center;
@@ -230,32 +193,6 @@ button, input, select {
     text-overflow: ellipsis;
 }
 
-.profile-email {
-    font-size: 0.75rem;
-    color: #64748b;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.profile-signout {
-    color: #94a3b8;
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 6px;
-    border-radius: 6px;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.profile-signout:hover {
-    color: var(--white);
-    background-color: rgba(255, 255, 255, 0.05);
-}
-
 /* Main Content Area */
 .admin-main {
     flex: 1;
@@ -266,33 +203,8 @@ button, input, select {
 }
 
 /* Top Header */
-.admin-header {
-    height: 70px;
-    background-color: var(--white);
-    border-bottom: 1px solid var(--border-color);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 32px;
-    flex-shrink: 0;
-}
-
-.breadcrumbs {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.88rem;
-    font-weight: 500;
-    color: var(--text-muted);
-}
-
 .breadcrumb-separator {
     color: #cbd5e1;
-}
-
-.breadcrumb-active {
-    color: var(--text-main);
-    font-weight: 600;
 }
 
 .header-right {
@@ -320,10 +232,86 @@ button, input, select {
     font-size: 0.8rem;
 }
 
-.header-username {
-    font-size: 0.88rem;
+/* Manager Topbar (dùng chung fragment header từ manager) */
+.manager-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    background: #ffffff;
+    border-bottom: 1px solid var(--border-color);
+    height: 70px;
+}
+
+.manager-topbar-title h3 {
+    margin: 0;
     font-weight: 600;
-    color: #374151;
+    color: #0f172a;
+}
+
+.manager-topbar-title p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--text-muted);
+}
+
+.manager-topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.manager-topbar-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--primary-blue);
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.manager-topbar-avatar-img {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.manager-topbar-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+}
+
+.manager-topbar-info strong {
+    font-size: 14px;
+    color: #0f172a;
+}
+
+.manager-topbar-info span {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.manager-topbar-logout {
+    color: var(--text-muted);
+    font-size: 18px;
+    padding: 8px;
+    border-radius: 8px;
+    display: inline-flex;
+    text-decoration: none;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+.manager-topbar-logout:hover {
+    color: #dc2626;
+    background: #fef2f2;
 }
 
 /* Main Dashboard Panel */
@@ -341,11 +329,6 @@ button, input, select {
     font-weight: 700;
     color: #0f172a;
     margin-bottom: 4px;
-}
-
-.page-subtitle {
-    font-size: 0.88rem;
-    color: var(--text-muted);
 }
 
 /* Filter Bar Actions */
@@ -451,14 +434,6 @@ button, input, select {
     font-weight: 600;
 }
 
-/* Results Info Count */
-.results-summary {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    font-weight: 500;
-    margin-bottom: 12px;
-}
-
 /* Table Container & Layout */
 .table-container {
     background-color: var(--white);
@@ -509,50 +484,9 @@ button, input, select {
     gap: 12px;
 }
 
-.user-name-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background-color: #f1f5f9;
-    color: #475569;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 600;
-    font-size: 0.85rem;
-}
-
 .user-name {
     font-weight: 600;
     color: #1e293b;
-}
-
-/* Role Badges */
-.role-badge {
-    display: inline-block;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-align: left;
-}
-
-.role-badge.patient {
-    color: var(--badge-patient-text);
-}
-
-.role-badge.doctor {
-    color: var(--badge-doctor-text);
-}
-
-.role-badge.receptionist {
-    color: var(--badge-receptionist-text);
-}
-
-.role-badge.manager {
-    color: var(--badge-manager-text);
-}
-
-.role-badge.admin {
-    color: var(--badge-admin-text);
 }
 
 /* Status Indicator */
@@ -751,23 +685,6 @@ button, input, select {
     margin-top: 14px;
 }
 
-.modal-select {
-    width: 100%;
-    padding: 10px 14px;
-    border: 1px solid #d1d5db;
-    border-radius: 8px;
-    font-size: 0.92rem;
-    color: var(--text-main);
-    background-color: #f9fafb;
-    outline: none;
-    transition: all 0.2s;
-}
-
-.modal-select:focus {
-    border-color: var(--primary-blue);
-    box-shadow: 0 0 0 3px rgba(30, 86, 160, 0.1);
-}
-
 .modal-footer {
     display: flex;
     justify-content: flex-end;
@@ -823,3 +740,97 @@ button, input, select {
     to { transform: translateY(0); opacity: 1; }
 }
 
+/* Chữ trạng thái của tài khoản đang bị khóa */
+.status-muted {
+    color: var(--text-muted);
+}
+
+/* Dấu ba chấm ngăn cách trong thanh phân trang */
+.pagination-dots {
+    padding: 0 8px;
+    color: var(--text-muted);
+    align-self: center;
+}
+
+/* Hộp thông báo sau khi thao tác */
+.alert-box {
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 6px;
+    border-left: 4px solid transparent;
+}
+
+.alert-box.success {
+    background-color: #d1fae5;
+    color: #065f46;
+    border-left-color: #10b981;
+}
+
+.alert-box.error {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    border-left-color: #ef4444;
+}
+
+/* Căn giữa nội dung ô trong bảng */
+.text-center {
+    text-align: center;
+}
+
+/* Số điện thoại: các chữ số rộng bằng nhau cho dễ đọc */
+.cell-phone {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.5px;
+}
+
+/* Nhóm nút thao tác ở cuối mỗi dòng */
+.action-group {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+/* Form bọc một nút, không chiếm thêm khoảng trống */
+.inline-form {
+    margin: 0;
+}
+
+/* Nút thao tác dạng thẻ button: bỏ viền và nền mặc định của trình duyệt */
+button.action-btn {
+    border: none;
+    cursor: pointer;
+    background: none;
+}
+
+/* Nút mở khóa tài khoản */
+.action-btn.unlock {
+    color: #10b981;
+    background-color: #d1fae5;
+}
+
+/* Hộp thoại nhỏ */
+.modal-box.small {
+    max-width: 400px;
+}
+
+/* Nhãn của một nhóm trường trong hộp thoại */
+.field-label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+    text-transform: uppercase;
+}
+
+/* Xếp các ô tick theo chiều dọc */
+.field-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Form bên trong hộp thoại */
+.modal-form {
+    margin-top: 15px;
+}
