@@ -93,4 +93,14 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
             @Param("workDate") LocalDate workDate
     );
     // ======================== END WALK-IN BOOKING RECEPTIONIST ========================
+
+
+    //delete timeSlot base on week scheuleID
+    @Modifying
+    @Query("delete from TimeSlot t where t.schedule.weekSchedule.id =:weekScheduleId")
+    Integer deleteTimeSlotByWeekScheduleId(@Param("weekScheduleId") Long weekScheduleId);
+
+
+
+
 }

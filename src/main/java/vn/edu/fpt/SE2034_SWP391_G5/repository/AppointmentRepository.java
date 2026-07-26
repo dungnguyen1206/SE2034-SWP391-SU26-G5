@@ -374,4 +374,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                 "WHERE a.id = :appointmentId")
         Optional<Appointment> findAppointmentDetailForInvoice(@Param("appointmentId") Long appointmentId);
 
+
+    //delete doctorScheduleFunction
+    boolean existsBySlotScheduleWeekScheduleId(Long weekScheduleId);
+
+
 }

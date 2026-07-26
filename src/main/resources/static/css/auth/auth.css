@@ -423,3 +423,19 @@ select {
 .phone-group-toggle.show {
     display: block;
 }
+
+    /* Dòng mô tả ngắn dưới tiêu đề thẻ */
+
+    .auth-card-desc {
+        color: #6b7280;
+        font-size: 0.95rem;
+        margin-bottom: 20px;
+        line-height: 1.5;
+    }
+
+    /* Nút chiếm trọn chiều ngang của thẻ */
+
+    .auth-btn-block {
+        width: 100%;
+    }
+

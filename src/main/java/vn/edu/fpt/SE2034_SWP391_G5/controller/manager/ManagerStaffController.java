@@ -4,8 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -25,13 +23,8 @@ import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 import vn.edu.fpt.SE2034_SWP391_G5.enums.AppointmentStatus;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.RoleRepository;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRoleRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
-import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetailsService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.*;
-
-import java.util.List;
 
 @Controller
 @RequestMapping("/manager/staff")

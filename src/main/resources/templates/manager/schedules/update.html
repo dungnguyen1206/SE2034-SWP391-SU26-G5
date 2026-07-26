@@ -88,7 +88,7 @@
                         <div class="col-md-4 mb-3">
                             <label for="maxCapacity" class="form-label">Số lượt khám tối đa</label>
                             <select class="form-select" th:field="*{maxCapacity}" th:disabled="${presentWeek.getStatus().equals('FINALIZED')}">
-                                <option th:value="8">8</option>
+                                <option th:value="4">4</option>
                                 <option th:value="10">10</option>
                             </select>
                         </div>
