@@ -43,9 +43,11 @@
                 <span sec:authentication="principal.username">username</span>
             </div>
 
-            <a class="manager-topbar-logout" th:href="@{/login}" title="Đăng xuất">
-                <i class="bi bi-box-arrow-right"></i>
-            </a>
+            <form th:action="@{/logout}" method="post" style="display:inline">
+                <button type="submit" class="manager-topbar-logout" title="Đăng xuất">
+                    <i class="bi bi-box-arrow-right"></i>
+                </button>
+            </form>
         </div>
     </div>
 
