@@ -29,8 +29,9 @@ import vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException;
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    // Số phút mã OTP còn hiệu lực
     private static final int OTP_EXPIRY_MINUTES = 5;
+
+    private static final int MAX_OTP_ATTEMPTS = 5;
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
@@ -69,6 +70,35 @@ public class AuthServiceImpl implements AuthService {
         sendOtp(otpChannel, registerRequest.getPhone(), registerRequest.getEmail(), otp);
 
         return new OtpToken(otp, LocalDateTime.now().plusMinutes(OTP_EXPIRY_MINUTES), otpChannel, null);
+    }
+
+    // Kiểm tra mã OTP người dùng nhập, sai hoặc hết hạn thì báo lỗi
+    @Override
+    public void verifyOtp(OtpToken otpToken, String inputOtp) {
+        if (LocalDateTime.now().isAfter(otpToken.getExpiryTime())) {
+            throw new BadRequestException("Mã OTP đã hết hạn. Vui lòng thực hiện lại từ đầu.");
+        }
+
+        if (!otpToken.getOtp().equals(inputOtp)) {
+            otpToken.setAttemptCount(otpToken.getAttemptCount() + 1);
+
+            // Nhập sai đủ số lần cho phép thì mã bị hủy
+            if (otpToken.getAttemptCount() >= MAX_OTP_ATTEMPTS) {
+                throw new BadRequestException("Bạn đã nhập sai mã OTP " + MAX_OTP_ATTEMPTS + " lần. Vui lòng thực hiện lại từ đầu.");
+            }
+
+            int remaining = MAX_OTP_ATTEMPTS - otpToken.getAttemptCount();
+            throw new BadRequestException("Mã OTP không chính xác. Bạn còn " + remaining + " lần thử.");
+        }
+    }
+
+    // Mã không dùng được nữa: hết hạn hoặc nhập sai quá số lần cho phép
+    @Override
+    public boolean isOtpVoided(OtpToken otpToken) {
+        if (otpToken.getAttemptCount() >= MAX_OTP_ATTEMPTS) {
+            return true;
+        }
+        return LocalDateTime.now().isAfter(otpToken.getExpiryTime());
     }
 
     // Tạo tài khoản bệnh nhân sau khi OTP đã hợp lệ

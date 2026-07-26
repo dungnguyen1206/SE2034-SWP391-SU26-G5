@@ -14,8 +14,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import vn.edu.fpt.SE2034_SWP391_G5.enums.ArticleCategory;
 import vn.edu.fpt.SE2034_SWP391_G5.enums.ArticleStatus;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.Article;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.ArticleComment;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ArticleCommentResponse;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ArticleResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.service.ArticleService;
 
 import java.security.Principal;
@@ -41,7 +41,7 @@ public class PublicArticleController {
 
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
         // Chỉ lấy bài viết đã xuất bản
-        Page<Article> articlePage = articleService.getArticlesByFilters(null, category, ArticleStatus.PUBLISHED.name(), pageable);
+        Page<ArticleResponse> articlePage = articleService.getArticlesByFilters(null, category, ArticleStatus.PUBLISHED.name(), pageable);
 
         model.addAttribute("articleList", articlePage.getContent());
         model.addAttribute("currentPage", articlePage.getNumber());
@@ -55,7 +55,7 @@ public class PublicArticleController {
     // Xem chi tiết bài viết
     @GetMapping("/{id}")
     public String detailArticle(@PathVariable Long id, Model model, Principal principal) {
-        Article article = articleService.getArticleById(id);
+        ArticleResponse article = articleService.getArticleById(id);
         if (article == null || !ArticleStatus.PUBLISHED.name().equals(article.getStatus())) {
             return "redirect:/articles"; // Hoặc trang 404
         }
@@ -64,11 +64,11 @@ public class PublicArticleController {
         articleService.incrementViewCount(id);
         
         // Lấy bình luận
-        List<ArticleComment> comments = articleService.getCommentsByArticleId(id);
+        List<ArticleCommentResponse> comments = articleService.getCommentsByArticleId(id);
         long commentCount = articleService.getCommentCountByArticleId(id);
 
         // Lấy bài viết cùng chuyên mục
-        List<Article> relatedArticles = articleService.getRelatedArticles(article.getCategory(), article.getId());
+        List<ArticleResponse> relatedArticles = articleService.getRelatedArticles(article.getCategory(), article.getId());
 
         // Kiểm tra đã đăng nhập chưa
         boolean isLoggedIn = principal != null;

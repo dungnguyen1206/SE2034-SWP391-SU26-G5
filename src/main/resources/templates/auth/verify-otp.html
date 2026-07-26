@@ -4,19 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xác thực OTP - HAMS</title>
-    <!-- FontAwesome CDN for modern vector icons -->
+    <!-- Thư viện icon FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Local preview fallback + Thymeleaf reference -->
+    <!-- Đường dẫn CSS: bản xem trước tĩnh và bản Thymeleaf -->
     <link rel="stylesheet" href="../../static/css/auth/auth.css" th:href="@{/css/auth/auth.css}">
 </head>
 <body>
-    <!-- Guest Home Button -->
+    <!-- Nút quay về trang chủ -->
     <a href="/" class="btn-guest-home">
         <i class="fa-solid fa-house"></i> Về trang chủ
     </a>
 
     <div class="auth-container">
-        <!-- Left Side: OTP Card -->
+        <!-- Bên trái: thẻ xác thực OTP -->
         <div class="auth-left">
             <div class="auth-card">
                 <h2 class="auth-card-title" th:text="${otpChannel == 'sms'} ? 'Xác thực SMS' : 'Xác thực Email'">Xác thực Email</h2>
@@ -25,26 +25,26 @@
                     Hệ thống đã gửi một mã xác thực OTP gồm 6 chữ số đến Gmail của bạn. Vui lòng kiểm tra và nhập mã vào ô bên dưới để hoàn tất đăng ký.
                 </p>
                 
-                <!-- Alert Messages -->
+                <!-- Các thông báo -->
                 <div th:if="${error != null}" class="auth-alert error">
                     <i class="fa-solid fa-circle-exclamation"></i> 
                     <span th:text="${error}">Mã OTP không chính xác</span>
                 </div>
                 
                 <form th:action="@{/verify-otp}" method="POST">
-                    <!-- OTP Input -->
+                    <!-- Ô nhập mã OTP -->
                     <div class="input-group">
                         <label class="input-label" for="otp">Mã xác thực OTP</label>
                         <input type="text" id="otp" name="otp" class="auth-input" placeholder="Nhập mã 6 chữ số" required autofocus maxlength="6" pattern="\d{6}" style="text-align: center; font-size: 1.3rem; letter-spacing: 5px;">
                     </div>
                     
-                    <!-- Form Actions: Verify Button -->
+                    <!-- Nút xác nhận -->
                     <div class="auth-footer-actions">
                         <button type="submit" class="auth-btn" style="width: 100%;">Xác nhận</button>
                     </div>
                 </form>
                 
-                <!-- Back Link Hint -->
+                <!-- Liên kết quay lại -->
                 <div class="auth-nav-hint">
                     Muốn đăng ký lại? 
                     <a href="register.html" th:href="@{/register}">Quay lại trang đăng ký</a>
@@ -52,7 +52,7 @@
             </div>
         </div>
         
-        <!-- Right Side: Brand Logo and Illustration -->
+        <!-- Bên phải: logo và ảnh minh họa -->
         <div class="auth-right">
             <div class="auth-logo-top">
                 <span class="logo-circle"></span>

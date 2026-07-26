@@ -104,7 +104,7 @@ public class AuthController {
         }
 
         try {
-            otpToken.verify(otp);
+            authService.verifyOtp(otpToken, otp);
             authService.completeRegistration(pendingRegister);
 
             // Đăng ký xong thì dọn dữ liệu tạm
@@ -114,7 +114,7 @@ public class AuthController {
             return "redirect:/login?success=true";
         } catch (BadRequestException | ResourceNotFoundException e) {
             // Mã hết hạn hoặc sai quá số lần cho phép thì hủy phiên, bắt đăng ký lại
-            if (otpToken.isVoided()) {
+            if (authService.isOtpVoided(otpToken)) {
                 session.removeAttribute(PENDING_REGISTER);
                 session.removeAttribute(REGISTER_OTP_TOKEN);
                 redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -188,7 +188,7 @@ public class AuthController {
         }
 
         try {
-            otpToken.verify(otp);
+            authService.verifyOtp(otpToken, otp);
             authService.resetPassword(otpToken.getIdentifier(), otpToken.getChannel(), newPassword, confirmNewPassword);
 
             // Đặt lại xong thì dọn dữ liệu tạm
@@ -197,7 +197,7 @@ public class AuthController {
             return "redirect:/login?resetSuccess=true";
         } catch (BadRequestException | ResourceNotFoundException e) {
             // Mã hết hạn hoặc sai quá số lần cho phép thì hủy phiên, bắt yêu cầu mã mới
-            if (otpToken.isVoided()) {
+            if (authService.isOtpVoided(otpToken)) {
                 session.removeAttribute(RESET_OTP_TOKEN);
                 redirectAttributes.addFlashAttribute("error", e.getMessage());
                 return "redirect:/forgot-password";

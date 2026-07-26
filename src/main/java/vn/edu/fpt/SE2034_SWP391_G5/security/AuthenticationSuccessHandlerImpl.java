@@ -9,38 +9,43 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Collection;
 
 @Component
 public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHandler {
 
-    // Điều hướng user về dashboard tương ứng sau khi đăng nhập thành công
+    // Điều hướng user về trang tương ứng sau khi đăng nhập thành công
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-
-        for (GrantedAuthority authority : authorities) {
-            String role = authority.getAuthority();
-
-            switch (role) {
-                case "ROLE_PATIENT":
-                    response.sendRedirect("/patient/dashboard");
-                    return;
-                case "ROLE_DOCTOR":
-                    response.sendRedirect("/doctor/dashboard");
-                    return;
-                case "ROLE_RECEPTIONIST":
-                    response.sendRedirect("/receptionist/dashboard");
-                    return;
-                case "ROLE_MANAGER":
-                    response.sendRedirect("/manager/dashboard");
-                    return;
-                case "ROLE_ADMIN":
-                    response.sendRedirect("/admin/account-list");
-                    return;
+        // Vào trang của vai trò đầu tiên tìm được
+        for (GrantedAuthority authority : authentication.getAuthorities()) {
+            String homeUrl = getHomeUrl(authority.getAuthority());
+            if (homeUrl != null) {
+                response.sendRedirect(homeUrl);
+                return;
             }
         }
 
+        // Không có vai trò nào nhận diện được thì về trang chủ
         response.sendRedirect("/");
+    }
+
+
+
+    // Trang chủ tương ứng với từng vai trò
+    private String getHomeUrl(String role) {
+        switch (role) {
+            case "ROLE_PATIENT":
+                return "/patient/dashboard";
+            case "ROLE_DOCTOR":
+                return "/doctor/dashboard";
+            case "ROLE_RECEPTIONIST":
+                return "/receptionist/dashboard";
+            case "ROLE_MANAGER":
+                return "/manager/dashboard";
+            case "ROLE_ADMIN":
+                return "/admin/account-list";
+            default:
+                return null;
+        }
     }
 }

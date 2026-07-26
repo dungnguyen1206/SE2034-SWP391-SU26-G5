@@ -8,6 +8,12 @@ public interface AuthService {
     // Kiểm tra dữ liệu đăng ký rồi gửi OTP, trả về mã để controller giữ trong session
     OtpToken startRegistration(RegisterPatientRequest registerRequest, String otpChannel);
 
+    // Kiểm tra mã OTP người dùng nhập, sai hoặc hết hạn thì báo lỗi
+    void verifyOtp(OtpToken otpToken, String inputOtp);
+
+    // Mã không dùng được nữa: hết hạn hoặc nhập sai quá số lần cho phép
+    boolean isOtpVoided(OtpToken otpToken);
+
     // Tạo tài khoản bệnh nhân sau khi OTP đã hợp lệ
     void completeRegistration(RegisterPatientRequest registerRequest);
 

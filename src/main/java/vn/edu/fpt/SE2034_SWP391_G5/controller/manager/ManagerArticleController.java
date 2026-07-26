@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.validation.Valid;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.CreateArticleRequest;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.Article;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ArticleResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 import vn.edu.fpt.SE2034_SWP391_G5.enums.ArticleCategory;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException;
@@ -43,7 +43,7 @@ public class ManagerArticleController {
             Model model) {
 
         Pageable pageable = PageRequest.of(page, PAGE_SIZE);
-        Page<Article> articlePage = articleService.getArticlesByFilters(keyword, category, status, pageable);
+        Page<ArticleResponse> articlePage = articleService.getArticlesByFilters(keyword, category, status, pageable);
 
         model.addAttribute("articleList", articlePage.getContent());
         model.addAttribute("currentPage", articlePage.getNumber());
@@ -59,7 +59,7 @@ public class ManagerArticleController {
     // Xem chi tiết bài viết
     @GetMapping("/detail/{id}")
     public String detailArticle(@PathVariable Long id, Model model) {
-        Article article = articleService.getArticleById(id);
+        ArticleResponse article = articleService.getArticleById(id);
 
         // Bài không tồn tại hoặc đã xóa thì quay lại danh sách
         if (article == null) {
@@ -105,7 +105,7 @@ public class ManagerArticleController {
     // Hiển thị form sửa bài viết
     @GetMapping("/edit/{id}")
     public String editArticleForm(@PathVariable Long id, Model model) {
-        Article article = articleService.getArticleById(id);
+        ArticleResponse article = articleService.getArticleById(id);
         if (article == null) {
             return "redirect:/manager/articles";
         }
@@ -117,9 +117,7 @@ public class ManagerArticleController {
         request.setContent(article.getContent());
         request.setCategory(article.getCategory());
         request.setStatus(article.getStatus());
-        if (article.getDoctorAuthor() != null) {
-            request.setDoctorId(article.getDoctorAuthor().getId());
-        }
+        request.setDoctorId(article.getDoctorId());
         request.setCurrentThumbnailUrl(article.getThumbnailUrl());
 
         model.addAttribute("articleRequest", request);

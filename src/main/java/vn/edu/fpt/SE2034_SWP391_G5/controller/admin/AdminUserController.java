@@ -16,6 +16,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.UserAccountResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.service.UserService;
 
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 
@@ -34,15 +35,22 @@ public class AdminUserController {
                               @RequestParam(defaultValue = "1") int page,
                               @RequestParam(defaultValue = "10") int size,
                               Model model) {
-        UserSearchCriteria criteria = UserSearchCriteria.from(keyword, role, searchFields);
+        UserSearchCriteria criteria = buildSearchCriteria(keyword, role, searchFields);
 
         // Spring Data JPA tính trang từ 0
         Page<UserAccountResponse> userPage = userService.getAccountList(criteria, Math.max(0, page - 1), size);
 
+        int totalPages = userPage.getTotalPages();
+
         model.addAttribute("users", userPage.getContent());
         model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", userPage.getTotalPages());
+        model.addAttribute("totalPages", totalPages);
         model.addAttribute("totalItems", userPage.getTotalElements());
+
+        // Dữ liệu cho thanh phân trang, tính sẵn để template chỉ việc hiển thị
+        model.addAttribute("middlePages", buildMiddlePages(page, totalPages));
+        model.addAttribute("showLeftDots", page > 3);
+        model.addAttribute("showRightDots", page < totalPages - 2);
 
         model.addAttribute("keyword", criteria.getKeyword());
         model.addAttribute("roleFilter", criteria.getRoleName());
@@ -50,7 +58,45 @@ public class AdminUserController {
         model.addAttribute("searchMiddleName", criteria.isSearchMiddleName());
         model.addAttribute("searchLastName", criteria.isSearchLastName());
 
-        return "admin/users/account-list";
+        return "admin/account-list";
+    }
+
+    // Các số trang hiện ở giữa thanh phân trang.
+    // Trang đầu và trang cuối luôn hiện riêng nên không tính vào đây.
+    private List<Integer> buildMiddlePages(int currentPage, int totalPages) {
+        List<Integer> pages = new ArrayList<>();
+
+        // Lấy 2 trang trước và 2 trang sau trang hiện tại, không vượt ra ngoài khoảng giữa
+        int from = Math.max(currentPage - 2, 2);
+        int to = Math.min(currentPage + 2, totalPages - 1);
+
+        for (int page = from; page <= to; page++) {
+            pages.add(page);
+        }
+        return pages;
+    }
+
+    // Dựng điều kiện tìm kiếm từ tham số trên URL
+    private UserSearchCriteria buildSearchCriteria(String keyword, String roleName, List<String> searchFields) {
+        UserSearchCriteria criteria = new UserSearchCriteria();
+        criteria.setKeyword(normalize(keyword));
+        criteria.setRoleName(normalize(roleName));
+
+        // Không tick trường nào thì mặc định tìm trong cả họ, tên đệm và tên
+        boolean noneSelected = searchFields == null || searchFields.isEmpty();
+        criteria.setSearchFirstName(noneSelected || searchFields.contains("firstName"));
+        criteria.setSearchMiddleName(noneSelected || searchFields.contains("middleName"));
+        criteria.setSearchLastName(noneSelected || searchFields.contains("lastName"));
+
+        return criteria;
+    }
+
+    // Chuỗi rỗng coi như người dùng không nhập gì
+    private String normalize(String value) {
+        if (value == null || value.trim().isEmpty()) {
+            return null;
+        }
+        return value;
     }
 
     // Cập nhật vai trò cho user

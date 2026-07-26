@@ -6,9 +6,11 @@ import org.springframework.stereotype.Service;
 import vn.edu.fpt.SE2034_SWP391_G5.service.EmailService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 // Gửi email cho người dùng: mã OTP và các thông báo khác
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class EmailServiceImpl implements EmailService {
 
@@ -31,7 +33,7 @@ public class EmailServiceImpl implements EmailService {
         try {
             mailSender.send(message);
         } catch (Exception e) {
-            System.err.println("Lỗi gửi email: " + e.getMessage());
+            log.error("Lỗi gửi email OTP tới {}: {}", toEmail, e.getMessage());
         }
     }
 
@@ -47,7 +49,7 @@ public class EmailServiceImpl implements EmailService {
         try {
             mailSender.send(message);
         } catch (Exception e) {
-            System.err.println("Lỗi gửi email: " + e.getMessage());
+            log.error("Lỗi gửi email tới {}: {}", toEmail, e.getMessage());
         }
     }
 }

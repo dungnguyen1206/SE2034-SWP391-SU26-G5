@@ -4,37 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đăng ký tài khoản - HAMS</title>
-    <!-- FontAwesome CDN for modern vector icons -->
+    <!-- Thư viện icon FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Local preview fallback + Thymeleaf reference -->
+    <!-- Đường dẫn CSS: bản xem trước tĩnh và bản Thymeleaf -->
     <link rel="stylesheet" href="../../static/css/auth/auth.css" th:href="@{/css/auth/auth.css}">
 </head>
 <body>
-    <!-- Guest Home Button -->
+    <!-- Nút quay về trang chủ -->
     <a href="/" class="btn-guest-home">
         <i class="fa-solid fa-house"></i> Về trang chủ
     </a>
 
     <div class="auth-container">
-        <!-- Left Side: Register Card -->
+        <!-- Bên trái: thẻ đăng ký -->
         <div class="auth-left">
             <div class="auth-card">
                 <h2 class="auth-card-title">Đăng ký</h2>
                 
-                <!-- General Alert Message for All Errors -->
+                <!-- Thông báo lỗi chung của cả form -->
                 <div th:if="${error != null}" class="auth-alert error">
                     <i class="fa-solid fa-circle-exclamation"></i> 
                     <span th:text="${error}">Lỗi đăng ký</span>
                 </div>
 
                 <form th:action="@{/register}" th:object="${registerRequest}" method="POST">
-                    <!-- Username Input -->
+                    <!-- Ô nhập tên đăng nhập -->
                     <div class="input-group">
                         <label class="input-label" for="username">Tên đăng nhập</label>
                         <input type="text" id="username" th:field="*{username}" class="auth-input" placeholder="Tên đăng nhập" autofocus>
                     </div>
 
-                    <!-- Names Group: Họ, Tên đệm, Tên -->
+                    <!-- Nhóm ô nhập Họ, Tên đệm, Tên -->
                     <div style="display: flex; gap: 10px; margin-bottom: 15px;">
                         <div class="input-group" style="flex: 1; margin-bottom: 0;">
                             <label class="input-label" for="lastName">Họ</label>
@@ -52,31 +52,31 @@
                         </div>
                     </div>
                     
-                    <!-- Email Input -->
+                    <!-- Ô nhập email -->
                     <div class="input-group">
                         <label class="input-label" for="email">Gmail</label>
                         <input type="email" id="email" th:field="*{email}" class="auth-input" placeholder="nguyenvana@gmail.com">
                     </div>
                     
-                    <!-- Phone Input -->
+                    <!-- Ô nhập số điện thoại -->
                     <div class="input-group">
                         <label class="input-label" for="phone">Số điện thoại</label>
                         <input type="tel" id="phone" th:field="*{phone}" class="auth-input" placeholder="Nhập số điện thoại" required>
                     </div>
                     
-                    <!-- Password Input -->
+                    <!-- Ô nhập mật khẩu -->
                     <div class="input-group">
                         <label class="input-label" for="password">Mật khẩu</label>
                         <input type="password" id="password" th:field="*{password}" class="auth-input" placeholder="Tạo mật khẩu">
                     </div>
                     
-                    <!-- Confirm Password Input -->
+                    <!-- Ô nhập lại mật khẩu -->
                     <div class="input-group">
                         <label class="input-label" for="confirmPassword">Xác nhận mật khẩu</label>
                         <input type="password" id="confirmPassword" th:field="*{confirmPassword}" class="auth-input" placeholder="Nhập lại mật khẩu">
                     </div>
                     
-                    <!-- OTP Channel Selector -->
+                    <!-- Chọn kênh nhận mã OTP -->
                     <div class="otp-channel-group">
                         <label class="input-label">Nhận mã OTP qua</label>
                         <div class="otp-channel-options">
@@ -95,13 +95,13 @@
                         </div>
                     </div>
                     
-                    <!-- Form Actions: Register Button -->
+                    <!-- Nút đăng ký -->
                     <div class="auth-footer-actions">
                         <button type="submit" class="auth-btn" style="width: 100%;">Đăng ký</button>
                     </div>
                 </form>
                 
-                <!-- Login Link Hint -->
+                <!-- Liên kết sang trang đăng nhập -->
                 <div class="auth-nav-hint">
                     Đã có tài khoản?
                     <a href="login.html" th:href="@{/login}">Đăng nhập</a>
@@ -109,7 +109,7 @@
             </div>
         </div>
         
-        <!-- Right Side: Brand Logo and Illustration -->
+        <!-- Bên phải: logo và ảnh minh họa -->
         <div class="auth-right">
             <div class="auth-logo-top">
                 <span class="logo-circle"></span>

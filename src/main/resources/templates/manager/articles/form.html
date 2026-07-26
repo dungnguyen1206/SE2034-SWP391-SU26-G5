@@ -23,7 +23,7 @@
         <form th:action="${articleId != null ? '/manager/articles/edit/' + articleId : '/manager/articles/create'}" method="post" th:object="${articleRequest}" enctype="multipart/form-data">
             <div class="article-form-layout">
                 
-                <!-- Left Column -->
+                <!-- Cột trái: nội dung chính -->
                 <div class="article-form-main">
                     
                     <div class="form-card">
@@ -40,7 +40,7 @@
                             <div th:if="*{currentThumbnailUrl != null}" style="margin-top: 10px;">
                                 <p style="font-size: 13px; color: #64748b; margin-bottom: 5px;">Ảnh bìa hiện tại:</p>
                                 <img th:src="*{currentThumbnailUrl}" alt="Thumbnail" style="max-width: 200px; border-radius: 4px; border: 1px solid #e2e8f0;">
-                                <!-- Hidden field to keep track of the current URL when updating -->
+                                <!-- Ô ẩn giữ lại ảnh bìa hiện tại khi sửa bài -->
                                 <input type="hidden" th:field="*{currentThumbnailUrl}">
                             </div>
                         </div>
@@ -56,14 +56,14 @@
                     <div class="form-card">
                         <div class="form-group">
                             <label class="form-label">Nội dung bài viết</label>
-                            <!-- TinyMCE Rich Text Editor -->
+                            <!-- Trình soạn thảo TinyMCE -->
                             <textarea class="editor-placeholder" th:field="*{content}" style="width: 100%; min-height: 400px; border: 1px solid #e2e8f0; border-radius: 8px; outline: none; padding: 16px; font-family: inherit;" placeholder="Viết toàn bộ nội dung bài viết tại đây..."></textarea>
                         </div>
                     </div>
 
                 </div>
 
-                <!-- Right Column (Sidebar) -->
+                <!-- Cột phải: tùy chọn xuất bản -->
                 <div class="article-form-sidebar">
                     
                     <div class="form-card">
