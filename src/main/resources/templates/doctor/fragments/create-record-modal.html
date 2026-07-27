@@ -152,7 +152,9 @@
             if (typeof validateHeartRate !== 'function') {
                 function validateHeartRate(inputElement) {
                     if (inputElement.validity.badInput) {
-                        inputElement.setCustomValidity('Nhịp tim phải là số');
+                        inputElement.setCustomValidity('Định dạng Nhịp tim sai');
+                    } else if (inputElement.validity.valueMissing) {
+                        inputElement.setCustomValidity('Nhịp tim không được để trống');
                     } else if (inputElement.validity.rangeUnderflow) {
                         inputElement.setCustomValidity('Nhịp tim phải từ 30 bpm trở lên');
                     } else if (inputElement.validity.rangeOverflow) {
@@ -166,7 +168,9 @@
             if (typeof validateBloodGlucose !== 'function') {
                 function validateBloodGlucose(inputElement) {
                     if (inputElement.validity.badInput) {
-                        inputElement.setCustomValidity('Đường huyết phải là số');
+                        inputElement.setCustomValidity('Định dạng Đường huyết sai');
+                    } else if (inputElement.validity.valueMissing) {
+                        inputElement.setCustomValidity('Đường huyết không được để trống');
                     } else if (inputElement.validity.rangeUnderflow) {
                         inputElement.setCustomValidity('Đường huyết phải từ 0.1 mmol/L trở lên');
                     } else if (inputElement.validity.rangeOverflow) {
@@ -180,7 +184,7 @@
             if (typeof validateWeight !== 'function') {
                 function validateWeight(inputElement, minVal) {
                     if (inputElement.validity.badInput) {
-                        inputElement.setCustomValidity('Cân nặng phải là số');
+                        inputElement.setCustomValidity('Định dạng Cân nặng sai');
                     } else if (inputElement.validity.valueMissing) {
                         inputElement.setCustomValidity('Cân nặng không được để trống');
                     } else if (inputElement.validity.rangeUnderflow) {
