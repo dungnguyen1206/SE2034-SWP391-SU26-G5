@@ -23,11 +23,13 @@
 
             <section class="welcome">
                 <h1>Chào bác sĩ <span th:text="${doctorName}"></span></h1>
-                <p>Chúc bác sĩ một ngày làm việc hiệu quả</p>
+                <p>Chúc bác sĩ <span th:text="${doctorName}"></span> một ngày làm việc hiệu quả</p>
             </section>
 
             <!-- Cards -->
             <section class="stats">
+
+                <!-- BỆNH NHÂN HÔM NAY -->
                 <div class="stat-card">
                     <div>
                         <p>BỆNH NHÂN HÔM NAY</p>
@@ -38,6 +40,7 @@
                     </div>
                 </div>
 
+                <!-- HỒ SƠ CHỜ DUYỆT -->
                 <div class="stat-card">
                     <div>
                         <p>HỒ SƠ CHỜ DUYỆT</p>
@@ -48,6 +51,7 @@
                     </div>
                 </div>
 
+                <!-- HỒ SƠ ĐÃ HOÀN THÀNH -->
                 <div class="stat-card">
                     <div>
                         <p>SỐ HỒ SƠ ĐÃ HOÀN THÀNH</p>
@@ -58,6 +62,7 @@
                     </div>
                 </div>
 
+                <!-- ĐƠN THUỐC HÔM NAY -->
                 <div class="stat-card">
                     <div>
                         <p>ĐƠN THUỐC HÔM NAY</p>
@@ -67,6 +72,7 @@
                         <i class="fa-solid fa-capsules"></i>
                     </div>
                 </div>
+
             </section>
 
             <!-- Appointment -->

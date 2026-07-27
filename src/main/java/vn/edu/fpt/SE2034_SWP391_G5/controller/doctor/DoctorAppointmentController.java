@@ -113,7 +113,6 @@ public class DoctorAppointmentController {
                 return redirectUrl;
             }
         }
-
         try {
             appointmentService.updateAppointmentStatus(id, status);
         } catch (Exception e) {
