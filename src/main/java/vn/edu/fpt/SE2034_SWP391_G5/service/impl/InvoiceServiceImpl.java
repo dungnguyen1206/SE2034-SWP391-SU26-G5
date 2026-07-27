@@ -138,7 +138,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public Page<InvoiceRowResponse> invoiceRowResponses(Integer month, Integer year, LocalDate startDate,
             LocalDate endDate, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
         if (month == null) {
             month = 0;
         }
@@ -431,7 +431,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                     }
                 }
 
-                if (!isOrderPaid && order.getPriceReference() != null && !"CANCELLED".equalsIgnoreCase(order.getStatus())) {
+                if (!isOrderPaid && order.getPriceReference() != null
+                        && !"CANCELLED".equalsIgnoreCase(order.getStatus())) {
                     unpaidServices.add(InvoiceDetailResponse.UnpaidServiceDto.builder()
                             .id(order.getId())
                             .serviceName(
@@ -510,6 +511,8 @@ public class InvoiceServiceImpl implements InvoiceService {
         if (hasUnpaidAppointmentFee && !includeInitialFee && selectedOrderIds != null && !selectedOrderIds.isEmpty()) {
             throw new DataConflictException("Bạn phải thanh toán Phí khám ban đầu trước hoặc cùng lúc với các dịch vụ cận lâm sàng.");
         }
+
+
 
         // Calculate total of selected items only
         for (InvoiceDetailResponse.UnpaidServiceDto item : selectedItems) {

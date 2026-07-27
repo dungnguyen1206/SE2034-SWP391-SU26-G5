@@ -424,31 +424,41 @@ public class AppointmentServiceImpl implements AppointmentService {
         List<Appointment> todayAppointments = appointmentRepository.findQueueAppointmentsToday(today);
         List<DoctorSchedule> todaySchedules = doctorScheduleRepository.findActiveSchedulesByDate(today);
 
-        Map<String, QueueResponse.QueueResponseBuilder> roomBuilders = new LinkedHashMap<>();
-
-        // 1. Initialize all rooms that have an active schedule today
+        // 1. Determine active schedule per room for today
+        Map<String, DoctorSchedule> activeSchedulePerRoom = new LinkedHashMap<>();
         for (DoctorSchedule ds : todaySchedules) {
             if (ds.getRoom() != null && ds.getDoctor() != null) {
                 String roomNumber = ds.getRoom().getRoomNumber();
-                if (!roomBuilders.containsKey(roomNumber)) {
-                    String deptName = "-";
-                    if (ds.getDoctor().getDepartment() != null && ds.getDoctor().getDepartment().getName() != null) {
-                        deptName = ds.getDoctor().getDepartment().getName();
-                    }
-                    String doctorName = buildFullName(ds.getDoctor().getLastName(), ds.getDoctor().getMiddleName(),
-                            ds.getDoctor().getFirstName());
-
-                    roomBuilders.put(roomNumber, QueueResponse.builder()
-                            .roomNumber(roomNumber)
-                            .departmentName(deptName)
-                            .doctorFullName(doctorName)
-                            .waitingPatients(new ArrayList<>())
-                            .totalWaiting(0));
-                }
+                
+                // Since 1 doctor works the whole day per room, just take the first schedule found
+                activeSchedulePerRoom.putIfAbsent(roomNumber, ds);
             }
         }
 
-        // 2. Group appointments by room number
+        Map<String, QueueResponse.QueueResponseBuilder> roomBuilders = new LinkedHashMap<>();
+
+        // 2. Initialize all rooms based on the active schedule
+        for (Map.Entry<String, DoctorSchedule> entry : activeSchedulePerRoom.entrySet()) {
+            String roomNumber = entry.getKey();
+            DoctorSchedule ds = entry.getValue();
+            
+            String deptName = "-";
+            if (ds.getDoctor().getDepartment() != null && ds.getDoctor().getDepartment().getName() != null) {
+                deptName = ds.getDoctor().getDepartment().getName();
+            }
+            String doctorName = buildFullName(ds.getDoctor().getLastName(), ds.getDoctor().getMiddleName(),
+                    ds.getDoctor().getFirstName());
+
+            roomBuilders.put(roomNumber, QueueResponse.builder()
+                    .roomNumber(roomNumber)
+                    .departmentName(deptName)
+                    .doctorFullName(doctorName)
+                    .examiningPatients(new ArrayList<>())
+                    .waitingPatients(new ArrayList<>())
+                    .totalWaiting(0));
+        }
+
+        // 3. Group appointments by room number
         Map<String, List<Appointment>> groupedAppointments = new LinkedHashMap<>();
         for (Appointment a : todayAppointments) {
             String roomNumber = null;
@@ -461,7 +471,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             }
         }
 
-        // 3. Populate appointments into roomBuilders
+        // 4. Populate appointments into roomBuilders
         for (Map.Entry<String, List<Appointment>> entry : groupedAppointments.entrySet()) {
             String roomNumber = entry.getKey();
             List<Appointment> roomAppointments = entry.getValue();

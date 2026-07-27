@@ -264,8 +264,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                         "OR p.phone LIKE CONCAT('%', :search, '%')) " +
                         "ORDER BY a.createdAt DESC")
         List<Appointment> findAllAppointmentsForBilling(@Param("search") String search);
-        // ======================== END LIST INVOICE RECEPTIONIST
-        // ========================
+        // ======================== END LIST INVOICE RECEPTIONIS ========================
 
         // ------------------------------------------------------------------------------------
 
@@ -287,8 +286,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
         Optional<Appointment> findByAppointmentCode(String appointmentCode);
 
         boolean existsByPatientIdAndStatusIn(Long patientId, List<String> statuses);
-
-        boolean existsByPatientIdAndBookingDateAndStatusIn(Long patientId, LocalDate bookingDate, List<String> statuses);
 
         @Query(value = "SELECT CASE WHEN COUNT_BIG(a.id) > 0 THEN CAST(1 AS BIT) ELSE CAST(0 AS BIT) END " +
                         "FROM appointments a " +
