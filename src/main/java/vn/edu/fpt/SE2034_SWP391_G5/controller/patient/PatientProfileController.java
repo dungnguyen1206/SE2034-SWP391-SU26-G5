@@ -13,7 +13,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.dto.request.UpdateProfileRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.request.UpdateUserRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.PatientResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Province;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.ProvinceRepository;
+import vn.edu.fpt.SE2034_SWP391_G5.service.ProvinceService;
 import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.ImageUploadService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.PatientService;
@@ -28,7 +28,7 @@ public class PatientProfileController {
 
     private final PatientService patientService;
     private final StaffService staffService;
-    private final ProvinceRepository provinceRepository;
+    private final ProvinceService provinceService;
     private final ImageUploadService imageUploadService;
 
     @GetMapping
@@ -43,7 +43,7 @@ public class PatientProfileController {
         Long patientId = userDetails.getUser().getId();
         UpdateUserRequest updateUserForm = staffService.getPatientToUpdate(patientId);
         model.addAttribute("updateUserForm", updateUserForm);
-        model.addAttribute("provinces", provinceRepository.findAll());
+        model.addAttribute("provinces", provinceService.getAllProvinces());
         return "patient/profile/edit";
     }
 
@@ -88,7 +88,7 @@ public class PatientProfileController {
 
     private void reloadEditModel(Model model, Long patientId, UpdateUserRequest updateUserForm) {
         PatientResponse profile = patientService.getProfile(patientId);
-        List<Province> provinces = provinceRepository.findAll();
+        List<Province> provinces = provinceService.getAllProvinces();
 
         model.addAttribute("profile", profile);
         model.addAttribute("updateUserForm", updateUserForm);

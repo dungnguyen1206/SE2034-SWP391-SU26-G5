@@ -23,13 +23,18 @@
 
                 <section class="detail-page">
 
+                    <div class="alert-success-custom"
+                         th:if="${successMessage}"
+                         th:text="${successMessage}">
+                    </div>
+
                     <div class="detail-actions">
                         <a th:href="@{/receptionist/appointment}" class="btn-back">
                             Quay lại danh sách
                         </a>
 
                         <a th:if="${appointment.status == 'CONFIRMED'}"
-                           th:href="@{/receptionist/invoice/{id}(id=${appointment.id}, from='checkin')}"
+                           th:href="@{/receptionist/appointment/{id}/check-in-ticket(id=${appointment.id})}"
                            class="btn-checkin-detail">
                             Check-in
                         </a>

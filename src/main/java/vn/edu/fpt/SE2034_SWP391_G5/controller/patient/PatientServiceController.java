@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Department;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalService;
 import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalServiceRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DepartmentService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.MedicalServiceService;
 
@@ -23,7 +22,6 @@ public class PatientServiceController {
 
     private final MedicalServiceService medicalServiceService;
     private final DepartmentService departmentService;
-    private final MedicalServiceRepository medicalServiceRepository;
 
     @GetMapping("/services")
     public String listServices(
@@ -55,8 +53,7 @@ public class PatientServiceController {
 
     @GetMapping("/services/{id}")
     public String serviceDetail(@PathVariable Long id, Model model) {
-        MedicalService service = medicalServiceRepository.findMedicalServiceById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy dịch vụ y tế với ID: " + id));
+        MedicalService service = medicalServiceService.getMedicalServiceEntityById(id);
 
         model.addAttribute("service", service);
         return "patient/services/detail";

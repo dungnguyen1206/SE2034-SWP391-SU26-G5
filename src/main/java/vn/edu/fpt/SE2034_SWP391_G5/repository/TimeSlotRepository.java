@@ -68,7 +68,7 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
             "WHERE d.department.id = :departmentId " +
             "AND sch.workDate = :workDate " +
             "AND sch.status = 'ACTIVE' " +
-            "AND ws.status = 'FINALIZED' " +
+            "AND ws.status IN ('FINALIZED', 'PUBLISHED') " +
             "AND ts.status = 'AVAILABLE' " +
             "AND ts.bookedCapacity < ts.maxCapacity " +
             "AND ts.startTime > CAST(:currentTime AS LocalTime) " +
@@ -86,7 +86,7 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
             "WHERE d.department.id = :departmentId " +
             "AND sch.workDate = :workDate " +
             "AND sch.status = 'ACTIVE' " +
-            "AND ws.status = 'FINALIZED' " +
+            "AND ws.status IN ('FINALIZED', 'EXPIRED', 'PUBLISHED') " +
             "ORDER BY ts.startTime ASC")
     List<TimeSlot> findSlotsByDepartmentAndDate(
             @Param("departmentId") Integer departmentId,

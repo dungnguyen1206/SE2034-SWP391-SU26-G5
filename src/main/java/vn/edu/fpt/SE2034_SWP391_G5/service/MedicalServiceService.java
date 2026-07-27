@@ -13,6 +13,9 @@ public interface MedicalServiceService {
     List<MedicalService> getMedicalServicelistByDepartment(Integer departmentId);
     Page<MedicalServiceResponseForManager> getMedicalServiceResponsesByFilter(String filterKey, Integer departmentId, int page, int size);
 
+    MedicalService getMedicalServiceEntityById(Long id);
+    java.util.Optional<MedicalService> getDefaultClinicalService(Integer departmentId);
+
     UpdateMedicalServiceRequest getMedicalServiceById(Long id);
 
     UpdateMedicalServiceRequest saveMedicalServiceRequest(UpdateMedicalServiceRequest updateMedicalServiceRequest);

@@ -26,6 +26,17 @@ public interface MedicalRecordRepository extends JpaRepository<MedicalRecord, Lo
            "ORDER BY mr.examinationDate DESC")
     List<MedicalRecord> findByPatientIdWithDetails(@Param("patientId") Long patientId);
 
+    @Query(value = "SELECT mr FROM MedicalRecord mr " +
+           "LEFT JOIN FETCH mr.doctor d " +
+           "LEFT JOIN FETCH mr.appointment a " +
+           "LEFT JOIN FETCH a.service " +
+           "WHERE mr.patient.id = :patientId " +
+           "AND mr.status = 'FINALIZED' " +
+           "AND (:departmentName IS NULL OR d.department.name = :departmentName) " +
+           "ORDER BY mr.examinationDate DESC",
+           countQuery = "SELECT count(mr) FROM MedicalRecord mr WHERE mr.patient.id = :patientId AND mr.status = 'FINALIZED' AND (:departmentName IS NULL OR mr.doctor.department.name = :departmentName)")
+    org.springframework.data.domain.Page<MedicalRecord> findByPatientIdWithDetailsPaginated(@Param("patientId") Long patientId, @Param("departmentName") String departmentName, org.springframework.data.domain.Pageable pageable);
+
     @Query("SELECT mr FROM MedicalRecord mr " +
            "LEFT JOIN FETCH mr.medicalServiceOrders mso " +
            "LEFT JOIN FETCH mso.medicalService " +

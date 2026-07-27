@@ -26,9 +26,14 @@ class InvoiceServiceImplTest {
 
     @Test
     void getInvoiceSummary() {
-        InvoiceSummaryResponse invoiceSummaryResponse = invoiceRepository.getTotalAmountByPaymentStatus(PaymentStatus.PENDING.toString(), LocalDate.now().atStartOfDay(), LocalDate.now().plusDays(1).atStartOfDay(),null,null).orElse(null);
+        InvoiceSummaryResponse invoiceSummaryResponse = invoiceRepository.getTotalAmountByPaymentStatus(
+                PaymentStatus.PAID.toString(),
+                LocalDate.now().minusDays(2).atStartOfDay(),
+                LocalDate.now().plusDays(2).atStartOfDay(),
+                null,
+                null
+        ).orElse(null);
         Assertions.assertNotNull(invoiceSummaryResponse);
-
     }
 
     @Test

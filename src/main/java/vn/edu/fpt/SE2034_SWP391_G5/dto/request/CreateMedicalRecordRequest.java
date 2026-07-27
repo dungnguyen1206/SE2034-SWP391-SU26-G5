@@ -24,7 +24,6 @@ public class CreateMedicalRecordRequest {
     private String diagnosis;
 
     @NotBlank(message = "Không được để trống")
-    @Pattern(regexp = "^$|^\\d{2,3}/\\d{2,3}$", message = "Huyết áp phải đúng định dạng (ví dụ: 120/80)")
     private String bloodPressure;
 
     @NotNull(message = "Không được để trống")

@@ -254,7 +254,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                         "LEFT JOIN FETCH a.medicalRecord mr " +
                         "LEFT JOIN FETCH a.invoices inv " +
                         "WHERE a.bookingDate = CURRENT_DATE " +
-                        "AND a.status != 'CANCELLED' " +
+                        "AND a.status NOT IN ('CANCELLED', 'CONFIRMED', 'NO_SHOW') " +
                         "AND (:search IS NULL OR :search = '' " +
                         "OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :search, '%')) " +
                         "OR LOWER(p.firstName) LIKE LOWER(CONCAT('%', :search, '%')) " +
@@ -264,8 +264,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                         "OR p.phone LIKE CONCAT('%', :search, '%')) " +
                         "ORDER BY a.createdAt DESC")
         List<Appointment> findAllAppointmentsForBilling(@Param("search") String search);
-        // ======================== END LIST INVOICE RECEPTIONIST
-        // ========================
+        // ======================== END LIST INVOICE RECEPTIONIS ========================
 
         // ------------------------------------------------------------------------------------
 
@@ -344,7 +343,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
         @Query("SELECT a FROM Appointment a " +
                         "WHERE a.status = 'CONFIRMED' " +
                         "AND a.checkInTime IS NULL " +
-                        "AND (a.bookingDate < :today OR (a.bookingDate = :today AND a.slot.endTime < :timeLimit))")
+                        "AND (a.bookingDate < :today OR (a.bookingDate = :today AND a.slot.endTime < cast(:timeLimit as time)))")
         List<Appointment> findOverdueAppointments(@Param("today") LocalDate today,
                         @Param("timeLimit") java.time.LocalTime timeLimit);
 

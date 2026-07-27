@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div th:fragment="choose-services-modal">
+        <!-- Modal Chọn dịch vụ khám -->
+        <div id="chooseServicesModal" class="modal-overlay"
+            th:style="${action == 'selectServices' and appointment.status != 'COMPLETED' ? 'display: flex;' : 'display: none;'}">
+            <div class="modal-card services-modal-card">
+                <div class="modal-header services-modal-header">
+                    <h2 class="services-modal-title">
+                        <i class="fa-solid fa-list-check text-blue"></i> Chọn dịch vụ khám chỉ định
+                    </h2>
+                    <a th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab='services')}"
+                        class="btn-close-modal services-modal-close">&times;</a>
+                </div>
+                <form th:action="@{/doctor/appointments/{id}/services/save(id=${appointment.id})}" method="POST"
+                    id="chooseServicesForm" class="services-modal-form">
+                    <div class="modal-body services-modal-body">
+                        <p class="services-modal-desc">
+                            Chọn các dịch vụ khám cận lâm sàng (Xét nghiệm, siêu âm, chụp phim...) cần chỉ định cho bệnh
+                            nhân này. Dịch vụ đã chỉ định trước đó sẽ không thể chọn lại.
+                        </p>
+
+                        <!-- Bộ lọc theo Chuyên khoa -->
+                        <div class="services-modal-filter">
+                            <label for="deptFilter" class="services-modal-filter-label">Khoa /
+                                Chuyên khoa:</label>
+                            <select id="deptFilter" onchange="filterServicesByDept(this.value)"
+                                class="services-modal-filter-select">
+                                <option value="all">Tất cả các chuyên khoa</option>
+                                <option
+                                    th:each="dept : ${#sets.toSet(activeServices.?[department != null].![department])}"
+                                    th:value="${dept.id}" th:text="${dept.name}">Tên khoa</option>
+                            </select>
+                        </div>
+
+                        <div class="services-modal-list">
+                            <div th:each="service : ${activeServices}"
+                                th:with="alreadyOrdered=${medicalRecord != null and medicalRecord.medicalServiceOrders != null ? !#lists.isEmpty(medicalRecord.medicalServiceOrders.?[medicalService.id == __${service.id}__]) : false}"
+                                class="service-item-card"
+                                th:data-dept-id="${service.department != null ? service.department.id : ''}">
+
+                                <div class="service-item-card-inner">
+                                    <input type="checkbox" name="serviceIds" th:value="${service.id}"
+                                        th:id="${'service_' + service.id}" th:checked="${alreadyOrdered}"
+                                        th:disabled="${alreadyOrdered}" class="service-item-checkbox">
+
+                                    <div class="service-item-details">
+                                        <label th:for="${'service_' + service.id}" class="service-item-label"
+                                            th:text="${service.name}">
+                                            Tên dịch vụ
+                                        </label>
+                                        <div class="service-item-meta">
+                                            <span class="service-item-price"
+                                                th:text="${#numbers.formatDecimal(service.referencePrice, 0, 'COMMA', 0, 'POINT') + ' đ'}">
+                                                300,000 đ
+                                            </span>
+                                            <span class="service-item-dept"
+                                                th:text="${service.department != null ? service.department.name : 'Khác'}">
+                                                Khoa Tim mạch
+                                            </span>
+                                            <span th:if="${alreadyOrdered}" class="service-item-status-badge">
+                                                Đã chỉ định
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer services-modal-footer">
+                        <a th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab='services')}"
+                            class="btn-service-cancel">Hủy</a>
+                        <button type="submit" class="btn-submit btn-service-submit">Lưu
+                            chỉ định</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            if (typeof filterServicesByDept !== 'function') {
+                function filterServicesByDept(deptId) {
+                    const cards = document.querySelectorAll('.service-item-card');
+                    cards.forEach(card => {
+                        const cardDeptId = card.getAttribute('data-dept-id');
+                        if (deptId === 'all' || cardDeptId === deptId) {
+                            card.style.display = 'flex';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                }
+            }
+        </script>
+    </div>
+</body>
+</html>

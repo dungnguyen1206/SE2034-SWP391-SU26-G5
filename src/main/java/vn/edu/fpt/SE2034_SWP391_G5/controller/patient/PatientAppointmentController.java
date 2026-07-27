@@ -15,7 +15,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ScheduleSlotJsonResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ScheduleSlotResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Department;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalService;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalServiceRepository;
+import vn.edu.fpt.SE2034_SWP391_G5.service.MedicalServiceService;
 import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DepartmentService;
@@ -32,7 +32,7 @@ public class PatientAppointmentController {
     private final AppointmentService appointmentService;
     private final DepartmentService departmentService;
     private final DoctorService doctorService;
-    private final MedicalServiceRepository medicalServiceRepository;
+    private final MedicalServiceService medicalServiceService;
     private final PatientService patientService;
 
     // TODO: thay bằng @AuthenticationPrincipal khi auth sẵn sàng
@@ -102,14 +102,7 @@ public class PatientAppointmentController {
         model.addAttribute("bookRequest", bookRequest);
 
         // Lấy dịch vụ lâm sàng mặc định để hiển thị giá
-        MedicalService clinicalService = medicalServiceRepository
-                .findFirstByDepartmentIdAndNameContainingIgnoreCaseAndStatus(departmentId, "tổng quát", "ACTIVE")
-                .or(() -> medicalServiceRepository.findFirstByDepartmentIdAndNameContainingIgnoreCaseAndStatus(departmentId, "khám", "ACTIVE"))
-                .or(() -> {
-                    List<MedicalService> list = medicalServiceRepository.findByDepartmentIdAndStatus(departmentId, "ACTIVE");
-                    return list.isEmpty() ? java.util.Optional.empty() : java.util.Optional.of(list.get(0));
-                })
-                .orElse(null);
+        MedicalService clinicalService = medicalServiceService.getDefaultClinicalService(departmentId).orElse(null);
         model.addAttribute("clinicalService", clinicalService);
 
         if (doctorId != null) {
@@ -170,15 +163,8 @@ public class PatientAppointmentController {
         // Tự động gán dịch vụ "Khám lâm sàng" cho department này
         if (request.getServiceId() == null) {
             try {
-                MedicalService defaultService = medicalServiceRepository
-                        .findFirstByDepartmentIdAndNameContainingIgnoreCaseAndStatus(request.getDepartmentId(), "tổng quát", "ACTIVE")
-                        .or(() -> medicalServiceRepository.findFirstByDepartmentIdAndNameContainingIgnoreCaseAndStatus(request.getDepartmentId(), "khám", "ACTIVE"))
-                        .or(() -> {
-                            List<MedicalService> list = medicalServiceRepository.findByDepartmentIdAndStatus(request.getDepartmentId(), "ACTIVE");
-                            return list.isEmpty() ? java.util.Optional.empty() : java.util.Optional.of(list.get(0));
-                        })
-                        .orElseThrow(() -> new RuntimeException(
-                                "Không tìm thấy dịch vụ khám lâm sàng cho khoa này"));
+                MedicalService defaultService = medicalServiceService.getDefaultClinicalService(request.getDepartmentId())
+                        .orElseThrow(() -> new RuntimeException("Không tìm thấy dịch vụ khám lâm sàng cho khoa này"));
                 request.setServiceId(defaultService.getId());
             } catch (Exception e) {
                 redirectAttributes.addFlashAttribute("errorMessage", 

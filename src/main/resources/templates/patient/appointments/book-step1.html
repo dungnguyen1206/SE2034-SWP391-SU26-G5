@@ -58,8 +58,11 @@
             <div th:unless="${#lists.isEmpty(departments)}" class="dept-grid">
                 <a th:each="dept : ${departments}"
                     th:href="@{/patient/appointments/book/step2(departmentId=${dept.id})}" class="dept-card">
-                    <div class="dept-card-icon">
+                    <div th:if="${dept.imageUrl == null}" class="dept-card-icon">
                         <i class="bi bi-heart-pulse"></i>
+                    </div>
+                    <div th:if="${dept.imageUrl != null}" class="dept-card-icon" style="padding: 0; overflow: hidden; background: transparent;">
+                        <img th:src="${dept.imageUrl}" th:alt="${dept.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 14px;">
                     </div>
                     <div class="dept-card-name" th:text="${dept.name}">Nội tổng quát</div>
                     <div class="dept-card-desc" th:text="${dept.description}">Mô tả chuyên khoa</div>

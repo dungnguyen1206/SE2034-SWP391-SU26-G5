@@ -15,6 +15,8 @@ public interface UserService {
     // Khóa hoặc mở khóa tài khoản
     void toggleUserStatus(Long userId, String status);
 
+    User getUserById(Long userId);
+
     // Lấy danh sách bác sĩ để chọn làm tác giả bài viết
     List<User> getDoctors();
 }
