@@ -162,8 +162,8 @@
     </a>
     <ul class="navbar-nav">
         <li><a href="/home" class="active">Trang chủ</a></li>
-        <li><a href="/patient/departments">Chuyên khoa</a></li>
-        <li><a href="/doctors">Bác sĩ</a></li>
+        <li sec:authorize="!isAuthenticated() or hasAuthority('ROLE_PATIENT')"><a href="/departments">Chuyên khoa</a></li>
+        <li sec:authorize="!isAuthenticated() or hasAuthority('ROLE_PATIENT')"><a href="/doctors">Bác sĩ</a></li>
         <li><a href="/articles">Bài viết chuyên môn</a></li>
     </ul>
     <div class="navbar-actions">
@@ -191,9 +191,11 @@
                 <i class="bi bi-speedometer2"></i> Quản trị
             </a>
             
-            <a href="/logout" class="btn-filled" style="background: #ef4444; border-color: #ef4444; text-decoration: none;">
-                <i class="bi bi-box-arrow-right"></i> Đăng xuất
-            </a>
+            <form th:action="@{/logout}" method="post" style="margin:0; display:inline-block;">
+                <button type="submit" class="btn-filled" style="background: #ef4444; border-color: #ef4444; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                </button>
+            </form>
         </div>
     </div>
 </nav>
@@ -205,8 +207,8 @@
         <h1>Chăm sóc sức khoẻ <span>toàn diện</span> cho bạn và gia đình</h1>
         <p>HAMS kết nối bạn với đội ngũ bác sĩ chuyên nghiệp. Đặt lịch khám nhanh chóng, tiện lợi, không cần xếp hàng.</p>
         <div class="hero-btns">
-            <a href="/login" class="btn-hero-white"><i class="bi bi-calendar-plus"></i> Đặt lịch khám</a>
-            <a href="/patient/departments" class="btn-hero-ghost"><i class="bi bi-grid"></i> Xem chuyên khoa</a>
+            <a th:href="@{/patient/appointments/book}" class="btn-hero-white"><i class="bi bi-calendar-plus"></i> Đặt lịch khám</a>
+            <a href="/departments" class="btn-hero-ghost"><i class="bi bi-grid"></i> Xem chuyên khoa</a>
         </div>
         <div class="hero-stat-row">
             <div>
@@ -218,8 +220,8 @@
     <div class="hero-visual"><i class="bi bi-heart-pulse"></i></div>
 </section>
 
-<!-- DEPARTMENTS -->
-<section class="section">
+<!-- DEPARTMENTS (Hiển thị cho Khách và Bệnh nhân) -->
+<section class="section" sec:authorize="!isAuthenticated() or hasAuthority('ROLE_PATIENT')">
     <div class="section-header">
         <div class="section-tag"><i class="bi bi-grid-3x3-gap"></i> Chuyên khoa</div>
         <h2>Các chuyên khoa tại HAMS</h2>
@@ -238,7 +240,7 @@
                 <div class="dept-desc" th:if="${dept.description != null}" th:text="${dept.description}"></div>
                 <div class="dept-actions">
                     <!-- Xem chi tiết: public, không cần login -->
-                    <a th:href="@{/patient/departments/{id}(id=${dept.id})}" class="btn-detail">
+                    <a th:href="@{/departments/{id}(id=${dept.id})}" class="btn-detail">
                         <i class="bi bi-info-circle"></i> Chi tiết
                     </a>
                     <!-- Đặt lịch: yêu cầu login, Spring Security tự redirect về /login -->
@@ -303,11 +305,11 @@
     </div>
 </section>
 
-<!-- CTA -->
-<section class="cta">
+<!-- CTA (Hiển thị cho Khách và Bệnh nhân) -->
+<section class="cta" sec:authorize="!isAuthenticated() or hasAuthority('ROLE_PATIENT')">
     <h2>Sẵn sàng đặt lịch khám?</h2>
     <p>Đăng nhập để đặt lịch ngay hôm nay — nhanh chóng, tiện lợi, không cần xếp hàng</p>
-    <a href="/login" class="btn-hero-white" style="display:inline-flex;">
+    <a th:href="@{/patient/appointments/book}" class="btn-hero-white" style="display:inline-flex;">
         <i class="bi bi-calendar-plus"></i> Đặt lịch khám ngay
     </a>
 </section>
@@ -322,9 +324,9 @@
         <div class="footer-col">
             <div class="footer-col-title">Chuyên khoa</div>
             <ul>
-                <li><a href="/patient/departments">Tất cả chuyên khoa</a></li>
+                <li><a href="/departments">Tất cả chuyên khoa</a></li>
                 <li th:each="dept, stat : ${departments}" th:if="${stat.index < 4}">
-                    <a th:href="@{/patient/departments/{id}(id=${dept.id})}" th:text="${dept.name}"></a>
+                    <a th:href="@{/departments/{id}(id=${dept.id})}" th:text="${dept.name}"></a>
                 </li>
             </ul>
         </div>

@@ -908,6 +908,18 @@
     font-weight: 600;
     cursor: pointer;
 }
+.schedule-delete-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 14px;
+    border: none;
+    border-radius: 8px;
+    background: #ff002f;
+    color: #ffffff;
+    font-weight: 600;
+    cursor: pointer;
+}
 
 .schedule-import-submit:hover {
     background: #166534;

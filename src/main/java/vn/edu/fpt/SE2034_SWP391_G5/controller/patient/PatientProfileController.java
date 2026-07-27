@@ -57,15 +57,27 @@ public class PatientProfileController {
         updateUserForm.setProfileType("PATIENT");
         updateUserForm.setStaffRole("PATIENT");
 
+        if (updateUserForm.getDateOfBirth() == null) {
+            bindingResult.rejectValue("dateOfBirth", "error.dateOfBirth", "Ngày sinh không được để trống");
+        }
+        if (updateUserForm.getProvinceId() == null) {
+            bindingResult.rejectValue("provinceId", "error.provinceId", "Tỉnh/thành phố không được để trống");
+        }
+        if (updateUserForm.getAddressLine() == null || updateUserForm.getAddressLine().trim().isEmpty()) {
+            bindingResult.rejectValue("addressLine", "error.addressLine", "Địa chỉ chi tiết không được để trống");
+        }
+
         if (bindingResult.hasErrors()) {
             reloadEditModel(model, patientId, updateUserForm);
             return "patient/profile/edit";
         }
 
         try {
-            String avatar = imageUploadService.uploadImage(avatarFile);
-            updateUserForm.setAvatar(avatar);
-            patientService.updateProfile(patientId,updateUserForm);
+            if (avatarFile != null && !avatarFile.isEmpty()) {
+                String avatar = imageUploadService.uploadImage(avatarFile);
+                updateUserForm.setAvatar(avatar);
+            }
+            patientService.updateProfile(patientId, updateUserForm);
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật hồ sơ thành công");
             return "redirect:/patient/profile";
         } catch (Exception e) {

@@ -1,10 +1,363 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết bác sĩ - HAMS</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; color: #1e293b; background: #f8fafc; display: flex; flex-direction: column; min-height: 100vh; }
+
+        /* NAVBAR */
+        .navbar {
+            position: sticky; top: 0; z-index: 100;
+            background: #fff; border-bottom: 1px solid #e2e8f0;
+            padding: 0 48px; height: 64px;
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 1px 8px rgba(0,0,0,.06);
+        }
+        .navbar-brand {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 22px; font-weight: 800; color: #0f4c81; text-decoration: none;
+        }
+        .navbar-brand i { font-size: 26px; color: #2563eb; }
+        .navbar-nav { display: flex; gap: 32px; list-style: none; }
+        .navbar-nav a { color: #475569; text-decoration: none; font-size: 14px; font-weight: 500; transition: color .2s; }
+        .navbar-nav a:hover { color: #2563eb; }
+        .navbar-nav a.active { color: #2563eb; font-weight: 700; }
+        .navbar-actions { display: flex; gap: 10px; align-items: center; }
+        .btn-outline {
+            padding: 8px 18px; border: 1.5px solid #2563eb; border-radius: 8px;
+            color: #2563eb; font-size: 14px; font-weight: 600; text-decoration: none; transition: all .2s;
+        }
+        .btn-outline:hover { background: #eff6ff; }
+        .btn-filled {
+            padding: 8px 18px; background: #2563eb; border-radius: 8px;
+            color: #fff; font-size: 14px; font-weight: 600; text-decoration: none; transition: background .2s;
+        }
+        .btn-filled:hover { background: #1d4ed8; }
+
+        /* HERO HEADER */
+        .page-header {
+            background: linear-gradient(135deg, #0f4c81 0%, #1e6fbf 60%, #2563eb 100%);
+            color: #fff;
+            padding: 40px 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header-content { display: flex; align-items: center; gap: 16px; }
+        .btn-back {
+            color: #fff;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.2s;
+            font-size: 18px;
+        }
+        .btn-back:hover { background: rgba(255,255,255,0.3); transform: translateX(-3px); }
+        .header-title h1 { font-size: 24px; font-weight: 800; }
+        .header-title p { font-size: 14px; color: #bfdbfe; margin-top: 4px; }
+        .btn-book-header {
+            padding: 12px 24px;
+            background: #fff;
+            color: #1d4ed8;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14.5px;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s;
+        }
+        .btn-book-header:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.15); background: #eff6ff; }
+
+        /* MAIN CONTAINER */
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 24px;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 32px;
+            align-items: start;
+            flex: 1;
+        }
+
+        /* CARD LEFT */
+        .profile-sidebar {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 32px 24px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+        }
+        .doctor-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 44px;
+            font-weight: 800;
+            color: #1d4ed8;
+            margin: 0 auto 20px;
+            overflow: hidden;
+            border: 3px solid #fff;
+            box-shadow: 0 4px 14px rgba(37,99,235,0.2);
+        }
+        .doctor-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .profile-name { font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
+        .profile-degree { font-size: 13px; color: #2563eb; font-weight: 600; text-transform: uppercase; margin-bottom: 24px; letter-spacing: 0.5px; }
+        
+        .profile-details-list {
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 20px;
+        }
+        .detail-item-title { font-size: 11px; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .detail-item-value { font-size: 14px; color: #334155; font-weight: 600; }
+        .detail-item-value a { color: #0f4c81; text-decoration: none; transition: color 0.2s; }
+        .detail-item-value a:hover { color: #2563eb; }
+
+        .btn-book-sidebar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px;
+            background: #2563eb;
+            color: #fff;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 14px;
+            text-decoration: none;
+            margin-top: 28px;
+            transition: background 0.2s;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.25);
+        }
+        .btn-book-sidebar:hover { background: #1d4ed8; }
+
+        /* CARD RIGHT */
+        .profile-content {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 36px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.02);
+            min-height: 380px;
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1.5px solid #f1f5f9;
+            padding-bottom: 14px;
+            margin-bottom: 20px;
+            color: #0f172a;
+        }
+        .section-header i { font-size: 22px; color: #2563eb; }
+        .section-header h3 { font-size: 18px; font-weight: 800; }
+        
+        .bio-text {
+            font-size: 15px;
+            color: #334155;
+            line-height: 1.8;
+            white-space: pre-line;
+        }
+        .empty-bio {
+            text-align: center;
+            padding: 48px 0;
+            color: #94a3b8;
+        }
+        .empty-bio i { font-size: 40px; margin-bottom: 12px; display: block; color: #e2e8f0; }
+
+        /* FOOTER */
+        .footer { background: #0f172a; color: #94a3b8; padding: 40px 48px; margin-top: auto; }
+        .footer-top { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 32px; margin-bottom: 28px; }
+        .footer-brand { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 8px; }
+        .footer-desc { font-size: 13px; line-height: 1.7; }
+        .footer-col-title { font-size: 13px; font-weight: 700; color: #e2e8f0; margin-bottom: 12px; }
+        .footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .footer-col ul a { color: #94a3b8; text-decoration: none; font-size: 13px; transition: color .2s; }
+        .footer-col ul a:hover { color: #fff; }
+        .footer-bottom { border-top: 1px solid #1e293b; padding-top: 20px; text-align: center; font-size: 12px; color: #475569; }
+
+        @media (max-width: 768px) {
+            .navbar { padding: 0 20px; }
+            .navbar-nav { display: none; }
+            .page-header { padding: 24px 20px; flex-direction: column; align-items: flex-start; gap: 16px; }
+            .btn-book-header { width: 100%; justify-content: center; }
+            .container { grid-template-columns: 1fr; gap: 24px; margin: 24px auto; }
+            .footer-top { grid-template-columns: 1fr; }
+            .footer { padding: 32px 20px; }
+        }
+    </style>
 </head>
 <body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <a href="/home" class="navbar-brand">
+        <i class="bi bi-hospital"></i> HAMS
+    </a>
+    <ul class="navbar-nav">
+        <li><a href="/home">Trang chủ</a></li>
+        <li sec:authorize="!isAuthenticated() or hasAuthority('ROLE_PATIENT')"><a href="/departments" class="active">Chuyên khoa</a></li>
+        <li sec:authorize="!isAuthenticated() or hasAuthority('ROLE_PATIENT')"><a href="/doctors">Bác sĩ</a></li>
+        <li><a href="/articles">Bài viết chuyên môn</a></li>
+    </ul>
+    
+    <div class="navbar-actions">
+        <!-- Nếu chưa đăng nhập: Hiện Đăng nhập & Đăng ký -->
+        <div sec:authorize="!isAuthenticated()" style="display: flex; gap: 10px;">
+            <a href="/login" class="btn-outline">Đăng nhập</a>
+            <a href="/register" class="btn-filled">Đăng ký</a>
+        </div>
+        
+        <!-- Nếu đã đăng nhập: Hiện link đi tới Dashboard tương ứng & nút Đăng xuất -->
+        <div sec:authorize="isAuthenticated()" style="display: flex; gap: 12px; align-items: center;">
+            <a sec:authorize="hasAuthority('ROLE_PATIENT')" href="/patient/dashboard" class="btn-outline">
+                <i class="bi bi-speedometer2"></i> Trang cá nhân
+            </a>
+            <a sec:authorize="hasAuthority('ROLE_DOCTOR')" href="/doctor/dashboard" class="btn-outline">
+                <i class="bi bi-speedometer2"></i> Bảng điều khiển
+            </a>
+            <a sec:authorize="hasAuthority('ROLE_RECEPTIONIST')" href="/receptionist/dashboard" class="btn-outline">
+                <i class="bi bi-speedometer2"></i> Bảng điều khiển
+            </a>
+            <a sec:authorize="hasAuthority('ROLE_MANAGER')" href="/manager/dashboard" class="btn-outline">
+                <i class="bi bi-speedometer2"></i> Bảng điều khiển
+            </a>
+            <a sec:authorize="hasAuthority('ROLE_ADMIN')" href="/admin/account-list" class="btn-outline">
+                <i class="bi bi-speedometer2"></i> Quản trị
+            </a>
+            
+            <form th:action="@{/logout}" method="post" style="margin:0; display:inline-block;">
+                <button type="submit" class="btn-filled" style="background: #ef4444; border-color: #ef4444; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                </button>
+            </form>
+        </div>
+    </div>
+</nav>
+
+<!-- HERO HEADER -->
+<header class="page-header" style="background:linear-gradient(135deg,#0f4c81,#2563eb);color:#fff;padding:48px 48px;display:flex;align-items:center;justify-content:space-between;">
+    <div class="header-content">
+        <a href="/departments" class="btn-back" style="color:#fff;border-color:rgba(255,255,255,0.2);"><i class="bi bi-arrow-left"></i></a>
+        <div class="header-title">
+            <h1 th:text="${department.name}">Chuyên khoa</h1>
+            <p>Xem thông tin chi tiết và đội ngũ bác sĩ</p>
+        </div>
+    </div>
+    <a th:href="@{/patient/appointments/book/step2(departmentId=${department.id})}" class="btn-book-header" style="background:#fff;color:#2563eb;">
+        <i class="bi bi-calendar-plus"></i> Đặt lịch khoa này
+    </a>
+</header>
+
+<!-- MAIN CONTAINER -->
+<main class="container" style="max-width:1100px;margin:0 auto;padding:32px 24px 64px;">
+
+    <div style="background:#fff;border-radius:16px;border:1px solid #e2e8f0;overflow:hidden;margin-bottom:32px;">
+        <div style="height:240px;background:linear-gradient(135deg,#0f4c81,#2563eb);display:flex;align-items:center;justify-content:center;overflow:hidden;">
+            <img th:if="${department.imageUrl != null}" th:src="${department.imageUrl}" th:alt="${department.name}" style="width:100%;height:100%;object-fit:cover;">
+            <i th:if="${department.imageUrl == null}" class="bi bi-hospital" style="font-size:80px;color:rgba(255,255,255,.25);"></i>
+        </div>
+        <div style="padding:32px;display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap;">
+            <div>
+                <h1 style="font-size:24px;font-weight:800;color:#0f172a;margin-bottom:12px;" th:text="${department.name}">Khoa</h1>
+                <p th:if="${department.description != null}" style="font-size:15px;color:#475569;line-height:1.7;max-width:800px;" th:text="${department.description}"></p>
+                <p th:if="${department.description == null}" style="color:#94a3b8;font-size:15px;">Chưa có mô tả chi tiết</p>
+            </div>
+        </div>
+    </div>
+
+    <div style="font-size:18px;font-weight:800;color:#0f172a;display:flex;align-items:center;gap:10px;margin-bottom:24px;">
+        <i class="bi bi-people-fill" style="color:#2563eb;"></i> Đội ngũ bác sĩ
+        <span style="font-size:14px;font-weight:500;color:#64748b;background:#f1f5f9;padding:4px 10px;border-radius:20px;" th:if="${doctors != null}" th:text="${#lists.size(doctors)} + ' bác sĩ'"></span>
+    </div>
+
+    <div th:if="${doctors == null or #lists.isEmpty(doctors)}" style="background:#fff;border-radius:16px;border:1px solid #e2e8f0;padding:64px;text-align:center;color:#94a3b8;">
+        <i class="bi bi-person-x" style="font-size:48px;display:block;margin-bottom:16px;color:#cbd5e1;"></i>
+        <p style="font-size:15px;">Chưa có bác sĩ nào trong khoa này.</p>
+    </div>
+
+    <div th:if="${doctors != null and !#lists.isEmpty(doctors)}" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px;">
+        <div th:each="doc : ${doctors}" style="background:#fff;border:1px solid #e2e8f0;border-radius:16px;overflow:hidden;display:flex;flex-direction:column;transition:all .25s ease;box-shadow:0 2px 5px rgba(0,0,0,.02);">
+            <div style="padding:24px 20px 16px;display:flex;align-items:center;gap:16px;border-bottom:1px solid #f1f5f9;">
+                <div class="doc-av" style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#dbeafe,#bfdbfe);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#1d4ed8;flex-shrink:0;overflow:hidden;border:2px solid #fff;box-shadow:0 2px 8px rgba(37,99,235,0.15);">
+                    <img th:if="${doc.avatar != null}" th:src="${doc.avatar}" th:alt="${doc.fullName}" style="width:100%;height:100%;object-fit:cover;">
+                    <span th:if="${doc.avatar == null}" th:text="${doc.firstName != null ? doc.firstName.substring(0,1).toUpperCase() : 'BS'}"></span>
+                </div>
+                <div>
+                    <div style="font-size:16px;font-weight:700;color:#0f172a;margin-bottom:4px;">
+                        <span th:if="${doc.degree != null}" th:text="${doc.degree + '. '}"></span>
+                        <span th:text="${doc.fullName}"></span>
+                    </div>
+                    <div th:if="${doc.experienceYears != null and doc.experienceYears > 0}" style="font-size:12px;color:#64748b;display:flex;align-items:center;gap:4px;">
+                        <i class="bi bi-award" style="color:#2563eb;"></i> <span th:text="${doc.experienceYears} + ' năm kinh nghiệm'"></span>
+                    </div>
+                </div>
+            </div>
+            <div style="padding:16px 20px 24px;display:flex;gap:10px;background:#fafafa;">
+                <a th:href="@{/doctors/{id}(id=${doc.id})}" style="flex:1;padding:10px;text-align:center;border-radius:8px;border:1.5px solid #e2e8f0;color:#475569;font-size:13px;font-weight:600;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;background:#fff;">
+                    <i class="bi bi-info-circle"></i> Chi tiết
+                </a>
+                <a th:href="@{/patient/appointments/book/step2(departmentId=${department.id}, doctorId=${doc.id})}" style="flex:1;padding:10px;text-align:center;border-radius:8px;background:#2563eb;color:#fff;font-size:13px;font-weight:600;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:6px;">
+                    <i class="bi bi-calendar-plus"></i> Đặt lịch
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="footer">
+    <div class="footer-top">
+        <div>
+            <div class="footer-brand"><i class="bi bi-hospital"></i> HAMS</div>
+            <div class="footer-desc">Hệ thống quản lý y tế HAMS — kết nối bệnh nhân với bác sĩ một cách nhanh chóng và an toàn.</div>
+        </div>
+        <div class="footer-col">
+            <div class="footer-col-title">Chuyên khoa</div>
+            <ul>
+                <li><a href="/departments">Tất cả chuyên khoa</a></li>
+                <li th:each="dept, stat : ${departments}" th:if="${stat.index < 4}">
+                    <a th:href="@{/departments/{id}(id=${dept.id})}" th:text="${dept.name}"></a>
+                </li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <div class="footer-col-title">Tài khoản</div>
+            <ul>
+                <li sec:authorize="!isAuthenticated()"><a href="/login">Đăng nhập</a></li>
+                <li sec:authorize="!isAuthenticated()"><a href="/register">Đăng ký</a></li>
+                <li sec:authorize="isAuthenticated()"><a href="/logout">Đăng xuất</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">&copy; 2026 HAMS — Hệ thống Quản lý Y tế. All rights reserved.</div>
+</footer>
 
 </body>
 </html>

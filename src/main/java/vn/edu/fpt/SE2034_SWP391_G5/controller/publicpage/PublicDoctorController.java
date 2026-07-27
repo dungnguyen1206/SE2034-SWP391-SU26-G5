@@ -26,18 +26,19 @@ public class PublicDoctorController {
     public String listDoctors(
             @RequestParam(required = false) Integer departmentId,
             @RequestParam(required = false) String search,
+            @RequestParam(defaultValue = "1") int page,
             Model model) {
 
         List<Department> departments = departmentService.getAllActiveDepartments();
         
         // Fetch all active doctors (doctorStatus = 'ACTIVE')
-        List<DoctorResponse> doctors = doctorService.findByDoctorStatus("ACTIVE").stream()
+        List<DoctorResponse> allDoctors = doctorService.findByDoctorStatus("ACTIVE").stream()
                 .map(doctorService::toResponse)
                 .toList();
 
         // Apply department filter
         if (departmentId != null) {
-            doctors = doctors.stream()
+            allDoctors = allDoctors.stream()
                     .filter(d -> departmentId.equals(d.getDepartmentId()))
                     .toList();
             model.addAttribute("selectedDepartmentId", departmentId);
@@ -48,7 +49,7 @@ public class PublicDoctorController {
         // Apply name search filter
         if (search != null && !search.trim().isEmpty()) {
             String keyword = search.trim().toLowerCase();
-            doctors = doctors.stream()
+            allDoctors = allDoctors.stream()
                     .filter(d -> d.getFullName() != null && d.getFullName().toLowerCase().contains(keyword))
                     .toList();
             model.addAttribute("searchQuery", search);
@@ -56,8 +57,21 @@ public class PublicDoctorController {
             model.addAttribute("searchQuery", "");
         }
 
+        int pageSize = 12;
+        int totalItems = allDoctors.size();
+        int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+        if (totalPages == 0) totalPages = 1;
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+
+        int start = (page - 1) * pageSize;
+        int end = Math.min(start + pageSize, totalItems);
+        List<DoctorResponse> doctors = allDoctors.subList(start, end);
+
         model.addAttribute("doctors", doctors);
         model.addAttribute("departments", departments);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
 
         return "public/doctors/list";
     }

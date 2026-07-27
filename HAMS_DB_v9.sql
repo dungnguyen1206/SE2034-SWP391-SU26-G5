@@ -411,6 +411,17 @@ CREATE TABLE articles (
 );
 GO
 
+CREATE TABLE article_comments (
+                                  id          BIGINT          IDENTITY(1,1)   PRIMARY KEY,
+                                  article_id  BIGINT          NOT NULL,
+                                  user_id     BIGINT          NOT NULL,
+                                  content     NVARCHAR(1000)  NOT NULL,
+                                  created_at  DATETIME2       NOT NULL        DEFAULT GETDATE(),
+                                  FOREIGN KEY (article_id) REFERENCES articles(id),
+                                  FOREIGN KEY (user_id)    REFERENCES users(id)
+);
+GO
+
 -- [v9] Bảng news đã bị xóa — chức năng tin tức gộp vào bảng articles (dùng cột category)
 
 -- ============================================================

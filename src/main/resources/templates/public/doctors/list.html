@@ -274,8 +274,8 @@
     </a>
     <ul class="navbar-nav">
         <li><a href="/home">Trang chủ</a></li>
-        <li><a href="/patient/departments">Chuyên khoa</a></li>
-        <li><a href="/doctors" class="active">Bác sĩ</a></li>
+        <li sec:authorize="!isAuthenticated() or hasAuthority('ROLE_PATIENT')"><a href="/departments">Chuyên khoa</a></li>
+        <li sec:authorize="!isAuthenticated() or hasAuthority('ROLE_PATIENT')"><a href="/doctors" class="active">Bác sĩ</a></li>
         <li><a href="/articles">Bài viết chuyên môn</a></li>
     </ul>
     
@@ -304,9 +304,11 @@
                 <i class="bi bi-speedometer2"></i> Quản trị
             </a>
             
-            <a href="/logout" class="btn-filled" style="background: #ef4444; border-color: #ef4444;">
-                <i class="bi bi-box-arrow-right"></i> Đăng xuất
-            </a>
+            <form th:action="@{/logout}" method="post" style="margin:0; display:inline-block;">
+                <button type="submit" class="btn-filled" style="background: #ef4444; border-color: #ef4444; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                    <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                </button>
+            </form>
         </div>
     </div>
 </nav>
@@ -390,6 +392,30 @@
             
         </div>
     </div>
+    <!-- Phân trang -->
+    <div th:if="${totalPages > 1}" style="display: flex; justify-content: center; margin-top: 40px; margin-bottom: 20px;">
+        <ul style="display: flex; list-style: none; padding: 0; gap: 8px; margin: 0;">
+            <li th:if="${currentPage > 1}">
+                <a th:href="@{/doctors(page=${currentPage - 1}, departmentId=${selectedDepartmentId}, search=${searchQuery})}" 
+                   style="display: block; padding: 10px 16px; border: 1px solid #e2e8f0; border-radius: 8px; text-decoration: none; color: #64748b; background: white; transition: all 0.2s; font-size: 15px;">
+                   <i class="bi bi-chevron-left"></i>
+                </a>
+            </li>
+            
+            <li th:each="i : ${#numbers.sequence(1, totalPages)}">
+                <a th:href="@{/doctors(page=${i}, departmentId=${selectedDepartmentId}, search=${searchQuery})}" 
+                   th:text="${i}"
+                   th:style="${currentPage == i} ? 'display: block; padding: 10px 16px; border: 1px solid #3b82f6; border-radius: 8px; text-decoration: none; color: white; background-color: #3b82f6; font-weight: 600; font-size: 15px;' : 'display: block; padding: 10px 16px; border: 1px solid #e2e8f0; border-radius: 8px; text-decoration: none; color: #64748b; background: white; transition: all 0.2s; font-size: 15px;'"></a>
+            </li>
+            
+            <li th:if="${currentPage < totalPages}">
+                <a th:href="@{/doctors(page=${currentPage + 1}, departmentId=${selectedDepartmentId}, search=${searchQuery})}" 
+                   style="display: block; padding: 10px 16px; border: 1px solid #e2e8f0; border-radius: 8px; text-decoration: none; color: #64748b; background: white; transition: all 0.2s; font-size: 15px;">
+                   <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        </ul>
+    </div>
 
 </main>
 
@@ -403,9 +429,9 @@
         <div class="footer-col">
             <div class="footer-col-title">Chuyên khoa</div>
             <ul>
-                <li><a href="/patient/departments">Tất cả chuyên khoa</a></li>
+                <li><a href="/departments">Tất cả chuyên khoa</a></li>
                 <li th:each="dept, stat : ${departments}" th:if="${stat.index < 4}">
-                    <a th:href="@{/patient/departments/{id}(id=${dept.id})}" th:text="${dept.name}"></a>
+                    <a th:href="@{/departments/{id}(id=${dept.id})}" th:text="${dept.name}"></a>
                 </li>
             </ul>
         </div>

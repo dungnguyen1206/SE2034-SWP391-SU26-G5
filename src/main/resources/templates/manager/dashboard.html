@@ -68,13 +68,13 @@
                             22 Đang khám
                         </div>
                         <div class="status-card-badge status-completed"
-                             th:text="${completedAppointment} + ' Đã hoàn thành'">156 Đã hoàn thành
+                             th:text="${completedAppointment == null} ? '0 Đã hoàn thành' : ${completedAppointment} + ' Đã hoàn thành'">156 Đã hoàn thành
                         </div>
-                        <div class="status-card-badge status-cancelled" th:text="${cancelledAppointment} + ' Đã hủy'">12
+                        <div class="status-card-badge status-cancelled" th:text="${cancelledAppointment ==null} ? '0 Đã hủy' :${cancelledAppointment} + ' Đã hủy'">12
                             Đã
                             hủy
                         </div>
-                        <div class="status-card-badge status-cancelled" th:text="${noShowAppointment} + ' Không đến'">12
+                        <div class="status-card-badge status-cancelled" th:text="${noShowAppointment ==null} ?'0 Không đến' : ${noShowAppointment} + ' Không đến'">12
                             Đã
                             hủy
                         </div>

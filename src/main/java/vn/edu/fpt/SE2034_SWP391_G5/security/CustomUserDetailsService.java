@@ -1,12 +1,12 @@
 package vn.edu.fpt.SE2034_SWP391_G5.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.UserRole;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -19,7 +19,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     @Transactional(readOnly = true)
-    // Load user by username for authentication
+    // Tìm user theo username hoặc SĐT để xác thực
     public UserDetails loadUserByUsername(String usernameOrPhone) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(usernameOrPhone).orElse(null);
         if (user == null) {
@@ -29,8 +29,9 @@ public class CustomUserDetailsService implements UserDetailsService {
             }
         }
 
+        // Nạp sẵn vai trò khi còn trong transaction để tránh lỗi lazy loading
         if (user.getUserRoles() != null) {
-            for (vn.edu.fpt.SE2034_SWP391_G5.entity.UserRole userRole : user.getUserRoles()) {
+            for (UserRole userRole : user.getUserRoles()) {
                 if (userRole.getRole() != null) {
                     userRole.getRole().getName();
                 }

@@ -6,7 +6,7 @@
     <aside th:fragment="patientSidebar(activeMenu)" class="patient-sidebar">
 
         <div class="patient-sidebar-header">
-            <div class="patient-brand">
+            <a th:href="@{/}" class="patient-brand" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px; cursor: pointer;">
                 <div class="patient-brand-icon">
                     <i class="bi bi-hospital"></i>
                 </div>
@@ -14,7 +14,7 @@
                     <h1>HAMS</h1>
                     <p>Cổng bệnh nhân</p>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div class="patient-sidebar-section">Chức năng</div>

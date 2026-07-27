@@ -9,7 +9,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentPrintResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
 
 @Controller
-@RequestMapping("/kiosk")
+    @RequestMapping("/kiosk")
 @RequiredArgsConstructor
 public class KioskController {
 

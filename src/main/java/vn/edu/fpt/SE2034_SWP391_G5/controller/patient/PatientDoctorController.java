@@ -12,7 +12,6 @@ import vn.edu.fpt.SE2034_SWP391_G5.entity.Department;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DepartmentService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DoctorService;
 
-import org.springframework.data.domain.Page;
 import java.util.List;
 
 @Controller
@@ -27,22 +26,36 @@ public class PatientDoctorController {
     @GetMapping("/doctors")
     public String listDoctors(
             @RequestParam(required = false) Integer departmentId,
-            @RequestParam(required = false) String search,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(defaultValue = "1") int page,
             Model model) {
         List<Department> departments = departmentService.getAllActiveDepartments();
-        
-        Page<DoctorResponse> doctorPage = 
-                doctorService.getActiveDoctorsPaginated(departmentId, search, page, size);
+        List<DoctorResponse> allDoctors;
 
-        model.addAttribute("doctors", doctorPage.getContent());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", doctorPage.getTotalPages());
-        model.addAttribute("totalItems", doctorPage.getTotalElements());
-        model.addAttribute("selectedDepartmentId", departmentId);
-        model.addAttribute("searchQuery", search != null ? search : "");
+        if (departmentId != null) {
+            allDoctors = doctorService.getDoctorsByDepartment(departmentId);
+            model.addAttribute("selectedDepartmentId", departmentId);
+        } else {
+            allDoctors = departments.stream()
+                    .flatMap(d -> doctorService.getDoctorsByDepartment(d.getId()).stream())
+                    .toList();
+            model.addAttribute("selectedDepartmentId", null);
+        }
+
+        int pageSize = 12;
+        int totalItems = allDoctors.size();
+        int totalPages = (int) Math.ceil((double) totalItems / pageSize);
+        if (totalPages == 0) totalPages = 1;
+        if (page < 1) page = 1;
+        if (page > totalPages) page = totalPages;
+
+        int start = (page - 1) * pageSize;
+        int end = Math.min(start + pageSize, totalItems);
+        List<DoctorResponse> doctors = allDoctors.subList(start, end);
+
+        model.addAttribute("doctors", doctors);
         model.addAttribute("departments", departments);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
         return "patient/doctors/list";
     }
 

@@ -20,4 +20,17 @@ public class HomeController {
         model.addAttribute("departments", departmentService.getAllActiveDepartments());
         return "public/home";
     }
+
+    @GetMapping("/departments")
+    public String listDepartments(Model model) {
+        model.addAttribute("departments", departmentService.getAllActiveDepartments());
+        return "public/departments/list";
+    }
+
+    @GetMapping("/departments/{id}")
+    public String detailDepartment(@org.springframework.web.bind.annotation.PathVariable Integer id, Model model) {
+        vn.edu.fpt.SE2034_SWP391_G5.entity.Department department = departmentService.getDepartmentById(id);
+        model.addAttribute("department", department);
+        return "public/departments/detail";
+    }
 }

@@ -1,22 +1,21 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{/manager/fragments/layout}"
+      th:with="pageTitle='Danh sách bài viết y tế', pageSubtitle='Quản lý bài viết y tế trên hệ thống', activeMenu='articles'">
 
 <head>
     <meta charset="UTF-8">
     <title>Danh sách bài viết</title>
-    <link rel="stylesheet" th:href="@{/css/manager/manager-common.css}">
-    <link rel="stylesheet" th:href="@{/css/manager/manager-articles.css}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <th:block layout:fragment="pageCss">
+        <link rel="stylesheet" th:href="@{/css/manager/manager-articles.css}">
+    </th:block>
 </head>
 
 <body>
-<div class="manager-layout">
+<div layout:fragment="content">
 
-    <div th:replace="~{manager/fragments/sidebar :: managerSidebar('articles')}"></div>
-
-    <main class="manager-main">
-
-        <!-- Flash Messages -->
+        <!-- Thông báo sau khi thao tác -->
         <div th:if="${successMessage}" class="alert-message alert-success">
             <i class="bi bi-check-circle-fill"></i>
             <span th:text="${successMessage}"></span>
@@ -26,17 +25,17 @@
             <span th:text="${errorMessage}"></span>
         </div>
 
-        <header class="article-header">
-            <div class="article-header-title">
-                <h2>Danh sách bài viết y tế</h2>
-                <p><span th:text="${totalItems}">0</span> bài viết</p>
-            </div>
+        <!-- Thanh công cụ: số bài viết + nút tạo mới -->
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+            <p style="margin: 0; font-size: 14px; color: #64748b;">
+                <span th:text="${totalItems}">0</span> bài viết
+            </p>
             <a th:href="@{/manager/articles/create}" class="article-create-button">
                 <i class="bi bi-plus-lg"></i> Viết bài mới
             </a>
-        </header>
+        </div>
 
-        <!-- Search and Filter -->
+        <!-- Tìm kiếm và bộ lọc -->
         <form class="article-filter-card" th:action="@{/manager/articles}" method="get">
             <div class="article-search-box">
                 <i class="bi bi-search"></i>
@@ -49,11 +48,9 @@
                     <span class="filter-label">Chuyên mục:</span>
                     <select name="category" class="form-control filter-select" onchange="this.form.submit()">
                         <option value="" th:selected="${category == null or category == ''}">Tất cả</option>
-                        <option value="Tim mạch" th:selected="${category == 'Tim mạch'}">Tim mạch</option>
-                        <option value="Nhi khoa" th:selected="${category == 'Nhi khoa'}">Nhi khoa</option>
-                        <option value="Da liễu" th:selected="${category == 'Da liễu'}">Da liễu</option>
-                        <option value="Sức khỏe" th:selected="${category == 'Sức khỏe'}">Sức khỏe</option>
-                        <option value="Dinh dưỡng" th:selected="${category == 'Dinh dưỡng'}">Dinh dưỡng</option>
+                        <!-- Chuyên mục lấy từ enum ArticleCategory -->
+                        <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}"
+                                th:selected="${category == cat}"></option>
                     </select>
                 </div>
 
@@ -72,7 +69,7 @@
             </div>
         </form>
 
-        <!-- Article Card List -->
+        <!-- Danh sách thẻ bài viết -->
         <div class="article-list-container">
             
             <div th:each="article : ${articleList}" class="article-card">
@@ -89,7 +86,7 @@
                         <div class="article-meta">
                             <span class="meta-category" th:text="${article.category}">Chuyên mục</span>
                             <span class="meta-separator">•</span>
-                            <span>Bởi <span th:text="${article.doctorAuthor != null ? article.doctorAuthor.fullName : (article.createdBy != null ? article.createdBy.fullName : 'Admin')}">Tác giả</span></span>
+                            <span>Bởi <span th:text="${article.authorName}">Tác giả</span></span>
                             <span class="meta-separator">•</span>
                             <span th:text="${article.createdAt != null ? #temporals.format(article.createdAt, 'dd/MM/yyyy') : ''}">2026-05-15</span>
                         </div>
@@ -110,7 +107,7 @@
                 </div>
             </div>
 
-            <!-- Empty State -->
+            <!-- Khi không có dữ liệu -->
             <div th:if="${#lists.isEmpty(articleList)}" class="article-empty-state">
                 <i class="bi bi-folder-x"></i>
                 <p>Không có bài viết nào.</p>
@@ -118,7 +115,7 @@
 
         </div>
 
-        <!-- Pagination -->
+        <!-- Phân trang -->
         <div th:if="${totalPages > 1}" class="article-pagination">
             <span class="pagination-info"
                   th:text="'Trang ' + ${currentPage + 1} + ' / ' + ${totalPages}"></span>
@@ -132,21 +129,21 @@
                 <i class="bi bi-chevron-left"></i> Trước
             </span>
 
-            <!-- Always show page 1 -->
+            <!-- Luôn hiện trang đầu -->
             <a th:if="${totalPages >= 1}" class="pager-button" th:classappend="${currentPage == 0} ? 'active' : ''" th:text="1" th:href="@{/manager/articles(keyword=${keyword}, category=${category}, status=${status}, page=0)}">1</a>
 
-            <!-- Show left ellipsis -->
+            <!-- Dấu ba chấm bên trái -->
             <span th:if="${currentPage > 2}" style="padding: 0 8px; color: #64748b; align-self: center;">...</span>
 
-            <!-- Show window (currentPage is 0-indexed) -->
+            <!-- Các trang quanh trang hiện tại, currentPage đếm từ 0 -->
             <th:block th:if="${totalPages > 2}" th:each="i : ${#numbers.sequence(currentPage - 1 > 0 ? currentPage - 1 : 1, currentPage + 1 < totalPages - 1 ? currentPage + 1 : totalPages - 2)}">
                 <a th:if="${i >= 1 and i < totalPages - 1}" class="pager-button" th:classappend="${currentPage == i} ? 'active' : ''" th:text="${i + 1}" th:href="@{/manager/articles(keyword=${keyword}, category=${category}, status=${status}, page=${i})}"></a>
             </th:block>
 
-            <!-- Show right ellipsis -->
+            <!-- Dấu ba chấm bên phải -->
             <span th:if="${currentPage < totalPages - 3}" style="padding: 0 8px; color: #64748b; align-self: center;">...</span>
 
-            <!-- Always show last page -->
+            <!-- Luôn hiện trang cuối -->
             <a th:if="${totalPages > 1}" class="pager-button" th:classappend="${currentPage == totalPages - 1} ? 'active' : ''" th:text="${totalPages}" th:href="@{/manager/articles(keyword=${keyword}, category=${category}, status=${status}, page=${totalPages - 1})}"></a>
 
             <a th:if="${currentPage < totalPages - 1}"
@@ -158,8 +155,6 @@
                 Sau <i class="bi bi-chevron-right"></i>
             </span>
         </div>
-
-    </main>
 
 </div>
 </body>

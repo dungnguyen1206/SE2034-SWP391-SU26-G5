@@ -304,6 +304,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                         @Param("targetEndTime") LocalTime targetEndTime,
                         @Param("activeStatuses") List<String> activeStatuses);
 
+        boolean existsByPatientIdAndBookingDateAndStatusIn(Long patientId, LocalDate bookingDate, List<String> statuses);
+
         @Query("SELECT COUNT(a) FROM Appointment a WHERE a.patient.id = :patientId AND a.status = :status")
         long countByPatientIdAndStatus(@Param("patientId") Long patientId, @Param("status") String status);
 
@@ -373,5 +375,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
                 "LEFT JOIN FETCH ii.invoice " +
                 "WHERE a.id = :appointmentId")
         Optional<Appointment> findAppointmentDetailForInvoice(@Param("appointmentId") Long appointmentId);
+
+
+    //delete doctorScheduleFunction
+    boolean existsBySlotScheduleWeekScheduleId(Long weekScheduleId);
+
 
 }
