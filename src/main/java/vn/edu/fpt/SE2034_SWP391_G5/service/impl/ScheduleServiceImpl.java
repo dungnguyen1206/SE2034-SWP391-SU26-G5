@@ -284,20 +284,22 @@ public class ScheduleServiceImpl implements ScheduleService {
         List<TimeSlot> timeSlots = new ArrayList<>();
         switch (Shift) {
             case "MORNING":
-                timeSlots.add(buildSlot(doctorSchedule, "07:00", "08:00", Math.floorDiv(maxCapacity, 3)));
-                timeSlots.add(buildSlot(doctorSchedule, "09:00", "10:00", Math.ceilDiv(maxCapacity, 3)));
-                timeSlots.add(buildSlot(doctorSchedule, "10:00", "11:00", Math.ceilDiv(maxCapacity, 3)));
+                timeSlots.add(buildSlot(doctorSchedule, "07:00", "08:00", Math.floorDiv(maxCapacity, 4)));
+                timeSlots.add(buildSlot(doctorSchedule, "08:00", "09:00", Math.ceilDiv(maxCapacity, 4)));
+                timeSlots.add(buildSlot(doctorSchedule, "09:00", "10:00", Math.ceilDiv(maxCapacity, 4)));
+                timeSlots.add(buildSlot(doctorSchedule, "10:00", "11:00", Math.ceilDiv(maxCapacity, 4)));
                 break;
             case "AFTERNOON":
                 timeSlots.add(buildSlot(doctorSchedule, "13:00", "14:00", Math.ceilDiv(maxCapacity, 2)));
                 timeSlots.add(buildSlot(doctorSchedule, "14:00", "15:00", Math.ceilDiv(maxCapacity, 2)));
                 break;
             case "FULL_DAY":
-                timeSlots.add(buildSlot(doctorSchedule, "07:00", "08:00", Math.ceilDiv(maxCapacity, 5)));
-                timeSlots.add(buildSlot(doctorSchedule, "09:00", "10:00", Math.ceilDiv(maxCapacity, 5)));
-                timeSlots.add(buildSlot(doctorSchedule, "10:00", "11:00", Math.floorDiv(maxCapacity, 5)));
-                timeSlots.add(buildSlot(doctorSchedule, "13:00", "14:00", Math.floorDiv(maxCapacity, 5)));
-                timeSlots.add(buildSlot(doctorSchedule, "14:00", "15:00", Math.floorDiv(maxCapacity, 5)));
+                timeSlots.add(buildSlot(doctorSchedule, "07:00", "08:00", Math.ceilDiv(maxCapacity, 6)));
+                timeSlots.add(buildSlot(doctorSchedule, "08:00", "09:00", Math.ceilDiv(maxCapacity, 6)));
+                timeSlots.add(buildSlot(doctorSchedule, "09:00", "10:00", Math.ceilDiv(maxCapacity, 6)));
+                timeSlots.add(buildSlot(doctorSchedule, "10:00", "11:00", Math.ceilDiv(maxCapacity, 6)));
+                timeSlots.add(buildSlot(doctorSchedule, "13:00", "14:00", Math.floorDiv(maxCapacity, 6)));
+                timeSlots.add(buildSlot(doctorSchedule, "14:00", "15:00", Math.floorDiv(maxCapacity, 6)));
                 break;
         }
         return timeSlots;

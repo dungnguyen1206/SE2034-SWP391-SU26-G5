@@ -52,6 +52,15 @@ class AppointmentServiceImplTest {
 
         MedicalRecord medicalRecord = new MedicalRecord();
         medicalRecord.setStatus("FINALIZED");
+        medicalRecord.setSymptoms("Ho");
+        medicalRecord.setDiagnosis("Viêm họng");
+        medicalRecord.setBloodPressure("120/80");
+        medicalRecord.setWeight(new java.math.BigDecimal("60.0"));
+        medicalRecord.setConclusion("Uống thuốc");
+        medicalRecord.setPrescriptionText("Paracetamol");
+        medicalRecord.setNotes("Không");
+        medicalRecord.setBloodGlucose(new java.math.BigDecimal("5.5"));
+        medicalRecord.setHeartRate(80);
         appointment.setMedicalRecord(medicalRecord);
 
         Invoice unpaidInvoice = new Invoice();

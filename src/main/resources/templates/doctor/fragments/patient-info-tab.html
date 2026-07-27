@@ -9,10 +9,10 @@
     <div th:fragment="info-tab" class="tab-pane" th:classappend="${tab == 'info' || tab == null ? 'active' : ''}">
         <div class="detail-content-card">
             <div class="card-header-row">
-                <h3 class="card-title" style="font-size: 16px; font-weight: 700; color: #0f172a;">Thông tin cá nhân</h3>
+                <h3 class="card-title">Thông tin cá nhân</h3>
                 <a th:if="${(appointment.patientDateOfBirth == null or appointment.patientGender == null or appointment.patientBloodType == null or appointment.patientPhone == null or #strings.isEmpty(appointment.patientPhone) or appointment.patientAddress == null or #strings.isEmpty(appointment.patientAddress)) and appointment.status != 'COMPLETED'}"
                    th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab}, action='editPatient')}"
-                   class="btn-create-record" style="background-color: #3b82f6;">
+                   class="btn-create-record btn-blue">
                     <i class="fa-solid fa-user-pen"></i> Chỉnh sửa thông tin
                 </a>
             </div>
@@ -102,23 +102,22 @@
         </div>
 
         <!-- Medical Record Section -->
-        <div class="detail-content-card" style="margin-top: 24px;">
+        <div class="detail-content-card margin-top-24">
             <div class="card-header-row">
-                <h3 class="card-title" style="font-size: 16px; font-weight: 700; color: #0f172a; margin-bottom: 0;">Hồ sơ bệnh án</h3>
+                <h3 class="card-title card-title-no-margin">Hồ sơ bệnh án</h3>
                 <a th:if="${medicalRecord == null and (appointment.status == 'EXAMINING' or appointment.status == 'IN_PROGRESS')}"
                    th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab}, action='create')}"
                    class="btn-create-record">
                     <i class="fa-solid fa-plus"></i> Tạo hồ sơ bệnh án
                 </a>
                 <span th:if="${medicalRecord == null and appointment.status != 'COMPLETED' and appointment.status != 'EXAMINING' and appointment.status != 'IN_PROGRESS'}"
-                      class="btn-create-record"
-                      title="Vui lòng chuyển trạng thái lịch hẹn sang 'Đang khám' để tạo hồ sơ bệnh án"
-                      style="background-color: #cbd5e1; color: #64748b; cursor: not-allowed;">
+                      class="btn-create-record btn-disabled-gray"
+                      title="Vui lòng chuyển trạng thái lịch hẹn sang 'Đang khám' để tạo hồ sơ bệnh án">
                     <i class="fa-solid fa-plus"></i> Tạo hồ sơ bệnh án
                 </span>
                 <a th:if="${medicalRecord != null and appointment.status != 'COMPLETED'}"
                    th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab}, action='edit')}"
-                   class="btn-create-record" style="background-color: #f59e0b;">
+                   class="btn-create-record btn-orange">
                     <i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa
                 </a>
             </div>
@@ -127,8 +126,8 @@
             <!-- If medical record exists -->
             <div th:if="${medicalRecord != null}">
                 <!-- Vital Signs Grid -->
-                <h4 style="font-size: 14px; font-weight: 700; color: #334155; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
-                    <i class="fa-solid fa-heart-pulse" style="color: #ef4444;"></i> Chỉ số sinh tồn
+                <h4 class="section-subtitle">
+                    <i class="fa-solid fa-heart-pulse text-red"></i> Chỉ số sinh tồn
                 </h4>
                 <div class="vitals-grid">
                     <div class="vital-item">
@@ -149,11 +148,11 @@
                     </div>
                 </div>
 
-                <hr class="card-divider" style="margin: 20px 0;">
+                <hr class="card-divider margin-top-20-bottom-20">
 
                 <!-- Clinical Details -->
-                <h4 style="font-size: 14px; font-weight: 700; color: #334155; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
-                    <i class="fa-solid fa-stethoscope" style="color: #2563eb;"></i> Thông tin khám lâm sàng
+                <h4 class="section-subtitle section-subtitle-lg-mb">
+                    <i class="fa-solid fa-stethoscope text-blue"></i> Thông tin khám lâm sàng
                 </h4>
                 <div class="clinical-details">
                     <div class="clinical-item">

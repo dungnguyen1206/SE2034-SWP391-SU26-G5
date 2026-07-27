@@ -10,7 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.AppointmentResponse;
-import vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalRecordRepository;
+import vn.edu.fpt.SE2034_SWP391_G5.service.MedicalRecordService;
 import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.AppointmentService;
 
@@ -25,7 +25,7 @@ import java.util.List;
 public class DoctorDashboardController {
 
     private final AppointmentService appointmentService;
-    private final MedicalRecordRepository medicalRecordRepository;
+    private final MedicalRecordService medicalRecordService;
 
     @GetMapping("/dashboard")
     public String dashboard(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
@@ -53,7 +53,7 @@ public class DoctorDashboardController {
         // 4. Đơn thuốc hôm nay
         LocalDateTime startOfDay = today.atStartOfDay();
         LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
-        long todayPrescriptions = medicalRecordRepository.countPrescriptionsByDoctorAndDate(doctorId, startOfDay, endOfDay);
+        long todayPrescriptions = medicalRecordService.countPrescriptionsByDoctorAndDate(doctorId, startOfDay, endOfDay);
         model.addAttribute("todayPrescriptions", todayPrescriptions);
 
         // 5. Danh sách 4 lịch hẹn đầu tiên trong ngày

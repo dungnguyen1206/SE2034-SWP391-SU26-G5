@@ -23,6 +23,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.service.UserService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 
@@ -169,5 +170,10 @@ public class UserServiceImpl implements UserService {
                 + (user.getMiddleName() != null ? user.getMiddleName() + " " : "")
                 + user.getFirstName();
         return fullName.trim();
+    }
+
+    @Override
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId).orElse(null);
     }
 }
