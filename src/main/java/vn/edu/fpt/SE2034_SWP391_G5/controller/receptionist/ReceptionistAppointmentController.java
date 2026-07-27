@@ -35,7 +35,7 @@ public class ReceptionistAppointmentController {
     private final ReceptionistService receptionistService;
     private final ReceptionistWalkInService walkInService;
     private final DepartmentService departmentService;
-    private final vn.edu.fpt.SE2034_SWP391_G5.repository.MedicalServiceRepository medicalServiceRepository;
+    private final vn.edu.fpt.SE2034_SWP391_G5.service.MedicalServiceService medicalServiceService;
 
     @GetMapping("/receptionist/appointment")
     // Hiển thị toàn bộ danh sách lịch hẹn theo ngày
@@ -123,17 +123,17 @@ public class ReceptionistAppointmentController {
         model.addAttribute("receptionist", new ReceptionistResponse(user.getId(), fullName, avatarText));
     }
 
-    private void addPageInfo(Model model, String search, String status, LocalDate fromDate, LocalDate toDate) {
-        model.addAttribute("search", search);
-        model.addAttribute("selectedStatus", status);
-        model.addAttribute("fromDate", fromDate);
-        model.addAttribute("toDate", toDate);
-        model.addAttribute("currentDateTime", getCurrentDateTime());
-    }
-
-    private String getCurrentDateTime() {
-        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy · HH:mm"));
-    }
+//    private void addPageInfo(Model model, String search, String status, LocalDate fromDate, LocalDate toDate) {
+//        model.addAttribute("search", search);
+//        model.addAttribute("selectedStatus", status);
+//        model.addAttribute("fromDate", fromDate);
+//        model.addAttribute("toDate", toDate);
+//        model.addAttribute("currentDateTime", getCurrentDateTime());
+//    }
+//
+//    private String getCurrentDateTime() {
+//        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy · HH:mm"));
+//    }
 
     @GetMapping("/receptionist/appointment/{id}")
     public String showAppointmentDetail(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails,
@@ -141,7 +141,7 @@ public class ReceptionistAppointmentController {
         AppointmentResponse appointment = appointmentService.getAppointmentDetailForReceptionist(id);
         model.addAttribute("appointment", appointment);
         addReceptionistInfo(model, userDetails);
-        model.addAttribute("currentDateTime", getCurrentDateTime());
+//        model.addAttribute("currentDateTime", getCurrentDateTime());
         return "receptionist/appointment/detail";
     }
 
@@ -149,12 +149,13 @@ public class ReceptionistAppointmentController {
     public String showWalkInPage(
             @RequestParam(required = false) String phone,
             @RequestParam(required = false) Integer departmentId,
+            @RequestParam(required = false) Integer serviceId,
             @RequestParam(required = false) LocalDate bookingDate,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             Model model) {
 
         addReceptionistInfo(model, userDetails);
-        model.addAttribute("currentDateTime", getCurrentDateTime());
+//        model.addAttribute("currentDateTime", getCurrentDateTime());
 
         model.addAttribute("phone", phone);
         model.addAttribute("departmentId", departmentId);
@@ -163,36 +164,43 @@ public class ReceptionistAppointmentController {
             bookingDate = LocalDate.now();
         }
         model.addAttribute("bookingDate", bookingDate);
+        model.addAttribute("today", LocalDate.now());
 
-        if (phone != null && !phone.trim().isEmpty()) {
-            Object patientResult = walkInService.searchPatientByPhone(phone);
-            if (patientResult instanceof Map) {
-                Map<String, Object> result = (Map<String, Object>) patientResult;
-                if (result.containsKey("error")) {
-                    model.addAttribute("phoneError", result.get("error"));
-                } else {
-                    model.addAttribute("patientFound", result.get("found"));
-                    if ((Boolean) result.get("found")) {
-                        model.addAttribute("firstName", result.get("firstName"));
-                        model.addAttribute("lastName", result.get("lastName"));
-                        model.addAttribute("gender", result.get("gender"));
-                    }
+        if (phone != null) {
+            if (phone.trim().isEmpty()) {
+                model.addAttribute("phoneError", "Vui lòng nhập số điện thoại.");
+            } else {
+                Object patientResult = walkInService.searchPatientByPhone(phone);
+                if (patientResult instanceof Map) {
+                    Map<String, Object> result = (Map<String, Object>) patientResult;
+                    if (result.containsKey("error")) {
+                        model.addAttribute("phoneError", result.get("error"));
+                    } else {
+                        model.addAttribute("patientFound", result.get("found"));
+                        if ((Boolean) result.get("found")) {
+                            model.addAttribute("firstName", result.get("firstName"));
+                            model.addAttribute("lastName", result.get("lastName"));
+                            model.addAttribute("gender", result.get("gender"));
+                        }
 
-                    // Load departments
-                    model.addAttribute("departments", departmentService.getAllActiveDepartments());
+                        // Load departments
+                        model.addAttribute("departments", departmentService.getAllActiveDepartments());
 
-                    if (departmentId != null) {
-                        model.addAttribute("slots", walkInService.getAvailableSlots(departmentId, bookingDate));
+                        if (departmentId != null) {
+                            model.addAttribute("slots", walkInService.getAvailableSlots(departmentId, bookingDate));
 
-                        java.util.List<vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalService> services = medicalServiceRepository
-                                .findByDepartmentIdAndStatus(departmentId, "ACTIVE");
-                        if (!services.isEmpty()) {
-                            vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalService initialService = services.stream()
-                                    .filter(s -> s.getName().toLowerCase().contains("khám"))
-                                    .findFirst()
-                                    .orElse(services.get(0));
-                            model.addAttribute("serviceName", initialService.getName());
-                            model.addAttribute("servicePrice", initialService.getReferencePrice());
+                            java.util.List<vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalService> services = medicalServiceService
+                                    .getMedicalServicelistByDepartment(departmentId);
+                            if (!services.isEmpty()) {
+                                vn.edu.fpt.SE2034_SWP391_G5.entity.MedicalService initialService = services.stream()
+                                        .filter(s -> s.getName().toLowerCase().contains("khám"))
+                                        .findFirst()
+                                        .orElse(services.get(0));
+                                model.addAttribute("serviceName", initialService.getName());
+                                model.addAttribute("servicePrice", initialService.getReferencePrice());
+                                model.addAttribute("services", services);
+                                model.addAttribute("serviceId", serviceId != null ? serviceId : initialService.getId());
+                            }
                         }
                     }
                 }
@@ -206,14 +214,20 @@ public class ReceptionistAppointmentController {
     public String bookWalkIn(@ModelAttribute WalkInBookingRequest request, RedirectAttributes redirectAttributes) {
         try {
             Long appointmentId = walkInService.createWalkInAppointment(request);
-            redirectAttributes.addFlashAttribute("successMessage", "Đã tạo lịch khám trực tiếp và hóa đơn thành công!");
-            return "redirect:/receptionist/appointment/" + appointmentId + "/check-in-ticket";
+            if (request.getBookingDate() != null && request.getBookingDate().isEqual(LocalDate.now())) {
+                redirectAttributes.addFlashAttribute("successMessage", "Đã tạo lịch khám trực tiếp và hóa đơn thành công!");
+                return "redirect:/receptionist/appointment/" + appointmentId + "/check-in-ticket";
+            } else {
+                redirectAttributes.addFlashAttribute("successMessage", "Đã đặt lịch hẹn trước thành công cho ngày " + request.getBookingDate() + "!");
+                return "redirect:/receptionist/appointment/" + appointmentId;
+            }
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
 
             // Redirect back with current values
             redirectAttributes.addAttribute("phone", request.getPhone());
             redirectAttributes.addAttribute("departmentId", request.getDepartmentId());
+            redirectAttributes.addAttribute("serviceId", request.getServiceId());
             redirectAttributes.addAttribute("bookingDate", request.getBookingDate());
 
             return "redirect:/receptionist/appointment/walk-in";

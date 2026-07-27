@@ -138,7 +138,7 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Override
     public Page<InvoiceRowResponse> invoiceRowResponses(Integer month, Integer year, LocalDate startDate,
             LocalDate endDate, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
         if (month == null) {
             month = 0;
         }
@@ -431,7 +431,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                     }
                 }
 
-                if (!isOrderPaid && order.getPriceReference() != null && !"CANCELLED".equalsIgnoreCase(order.getStatus())) {
+                if (!isOrderPaid && order.getPriceReference() != null
+                        && !"CANCELLED".equalsIgnoreCase(order.getStatus())) {
                     unpaidServices.add(InvoiceDetailResponse.UnpaidServiceDto.builder()
                             .id(order.getId())
                             .serviceName(
@@ -504,6 +505,14 @@ public class InvoiceServiceImpl implements InvoiceService {
         if (selectedItems.isEmpty()) {
             throw new DataConflictException("Vui lòng chọn ít nhất một dịch vụ để thanh toán.");
         }
+
+        // BẮT BUỘC: Nếu có phí khám ban đầu chưa thanh toán, không được phép thanh toán dịch vụ cận lâm sàng mà bỏ qua phí khám
+        boolean hasUnpaidAppointmentFee = allUnpaid.stream().anyMatch(u -> "APPOINTMENT".equals(u.getType()));
+        if (hasUnpaidAppointmentFee && !includeInitialFee && selectedOrderIds != null && !selectedOrderIds.isEmpty()) {
+            throw new DataConflictException("Bạn phải thanh toán Phí khám ban đầu trước hoặc cùng lúc với các dịch vụ cận lâm sàng.");
+        }
+
+
 
         // Calculate total of selected items only
         for (InvoiceDetailResponse.UnpaidServiceDto item : selectedItems) {
