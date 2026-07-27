@@ -1,15 +1,20 @@
 package vn.edu.fpt.SE2034_SWP391_G5.service.impl;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.request.UserSearchCriteria;
 import vn.edu.fpt.SE2034_SWP391_G5.dto.response.UserAccountResponse;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.Role;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.UserRole;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.UserRoleId;
+import vn.edu.fpt.SE2034_SWP391_G5.enums.UserStatus;
+import vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException;
+import vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.RoleRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRepository;
 import vn.edu.fpt.SE2034_SWP391_G5.repository.UserRoleRepository;
@@ -18,12 +23,11 @@ import vn.edu.fpt.SE2034_SWP391_G5.service.UserService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 
-/**
- * Service implementation for managing users and roles.
- */
+// Xử lý nghiệp vụ quản lý tài khoản và vai trò
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
@@ -32,102 +36,140 @@ public class UserServiceImpl implements UserService {
     private final RoleRepository roleRepository;
     private final UserRoleRepository userRoleRepository;
 
-    /**
-     * Retrieves a paginated list of users based on filter criteria.
-     * Maps user entities to user account responses for admin display.
-     */
+    // Lấy danh sách tài khoản có lọc và phân trang
     @Override
-    public Page<UserAccountResponse> getAccountList(String keyword, String roleName, boolean searchFirstName, boolean searchMiddleName, boolean searchLastName, int page, int size) {
+    public Page<UserAccountResponse> getAccountList(UserSearchCriteria criteria, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<User> userPage = userRepository.findAllUsersWithFilters(keyword, roleName, searchFirstName, searchMiddleName, searchLastName, pageable);
-        return userPage.map(new java.util.function.Function<User, UserAccountResponse>() {
-            @Override
-            public UserAccountResponse apply(User user) {
-                List<String> roles = new ArrayList<>();
-                if (user.getUserRoles() != null) {
-                    for (UserRole ur : user.getUserRoles()) {
-                        roles.add(ur.getRole().getName());
-                    }
-                }
-                
-                String fullName = user.getLastName() + " " + 
-                                  (user.getMiddleName() != null ? user.getMiddleName() + " " : "") + 
-                                  user.getFirstName();
+        Page<User> userPage = userRepository.findAllUsersWithFilters(
+                criteria.getKeyword(),
+                criteria.getRoleName(),
+                criteria.isSearchFirstName(),
+                criteria.isSearchMiddleName(),
+                criteria.isSearchLastName(),
+                pageable);
 
-                return UserAccountResponse.builder()
-                        .id(user.getId())
-                        .fullName(fullName.trim())
-                        .email(user.getEmail())
-                        .phone(user.getPhone())
-                        .roles(roles)
-                        .status(user.getStatus())
-                        .createdAt(user.getCreatedAt())
-                        .build();
-            }
-        });
+        // Đổi từng tài khoản sang dữ liệu hiển thị
+        List<UserAccountResponse> accounts = new ArrayList<>();
+        for (User user : userPage.getContent()) {
+            accounts.add(toAccountResponse(user));
+        }
+
+        return new PageImpl<>(accounts, pageable, userPage.getTotalElements());
     }
 
-    /**
-     * Updates roles for a specific user.
-     * Completely replaces the user's existing roles with the provided role names.
-     */
+    // Cập nhật vai trò cho user
     @Override
     @Transactional
     public void updateUserRoles(Long userId, List<String> roleNames) {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
-            throw new vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException("User not found");
+            throw new ResourceNotFoundException("User not found");
         }
-        
+
+        // Mỗi tài khoản phải giữ ít nhất một vai trò
+        if (roleNames == null || roleNames.isEmpty()) {
+            throw new BadRequestException("Tài khoản phải có ít nhất một vai trò.");
+        }
+
         userRoleRepository.deleteByUserId(userId);
-        
-        if (roleNames != null && !roleNames.isEmpty()) {
-            for (String roleName : roleNames) {
-                Role role = roleRepository.findByName(roleName).orElse(null);
-                if (role == null) {
-                    throw new vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException("Role not found: " + roleName);
-                }
-                
-                UserRole userRole = new UserRole();
-                UserRoleId id = new UserRoleId(userId, role.getId());
-                userRole.setId(id);
-                userRole.setUser(user);
-                userRole.setRole(role);
-                userRole.setAssignedAt(LocalDateTime.now());
-                
-                userRoleRepository.save(userRole);
+
+        for (String roleName : roleNames) {
+            Role role = roleRepository.findByName(roleName).orElse(null);
+            if (role == null) {
+                throw new ResourceNotFoundException("Role not found: " + roleName);
             }
+
+            UserRole userRole = new UserRole();
+            UserRoleId id = new UserRoleId(userId, role.getId());
+            userRole.setId(id);
+            userRole.setUser(user);
+            userRole.setRole(role);
+            userRole.setAssignedAt(LocalDateTime.now());
+
+            userRoleRepository.save(userRole);
         }
     }
 
-    /**
-     * Toggles a user's status between ACTIVE and INACTIVE.
-     * Prevents locking ADMIN accounts.
-     */
+    // Khóa/mở khóa tài khoản (chặn khóa ADMIN)
     @Override
     public void toggleUserStatus(Long userId, String status) {
         User user = userRepository.findById(userId).orElse(null);
         if (user == null) {
-            throw new vn.edu.fpt.SE2034_SWP391_G5.exception.ResourceNotFoundException("User not found");
+            throw new ResourceNotFoundException("User not found");
         }
-        
-        if ("INACTIVE".equals(status)) {
+
+        if (UserStatus.INACTIVE.name().equals(status)) {
+            // Không cho khóa tài khoản có vai trò ADMIN
             boolean isAdmin = false;
             if (user.getUserRoles() != null) {
-                for (UserRole ur : user.getUserRoles()) {
-                    if ("ADMIN".equals(ur.getRole().getName())) {
+                for (UserRole userRole : user.getUserRoles()) {
+                    if ("ADMIN".equals(userRole.getRole().getName())) {
                         isAdmin = true;
                         break;
                     }
                 }
             }
             if (isAdmin) {
-                throw new vn.edu.fpt.SE2034_SWP391_G5.exception.BadRequestException("Không được phép khóa tài khoản quản trị viên (ADMIN).");
+                throw new BadRequestException("Không được phép khóa tài khoản quản trị viên (ADMIN).");
             }
         }
-        
+
         user.setStatus(status);
         userRepository.save(user);
+    }
+
+    // Lấy danh sách bác sĩ để chọn làm tác giả bài viết
+    @Override
+    public List<User> getDoctors() {
+        return userRepository.findByRoleName("DOCTOR");
+    }
+
+    // Đổi tài khoản trong database sang dữ liệu hiển thị
+    private UserAccountResponse toAccountResponse(User user) {
+        // Gom mã vai trò và tên vai trò tiếng Việt (lấy từ cột description của bảng roles)
+        List<String> roles = new ArrayList<>();
+        List<String> roleLabels = new ArrayList<>();
+        boolean isAdmin = false;
+
+        if (user.getUserRoles() != null) {
+            for (UserRole userRole : user.getUserRoles()) {
+                Role role = userRole.getRole();
+                roles.add(role.getName());
+                roleLabels.add(role.getDescription() != null ? role.getDescription() : role.getName());
+
+                if ("ADMIN".equals(role.getName())) {
+                    isAdmin = true;
+                }
+            }
+        }
+
+        boolean active = UserStatus.ACTIVE.name().equals(user.getStatus());
+
+        UserAccountResponse response = new UserAccountResponse();
+        response.setId(user.getId());
+        response.setFullName(buildFullName(user));
+        response.setEmail(user.getEmail());
+        response.setPhone(user.getPhone());
+        response.setCreatedAt(user.getCreatedAt());
+        response.setRoles(roles);
+        response.setRolesText(String.join(", ", roleLabels));
+        response.setStatus(user.getStatus());
+        response.setActive(active);
+        response.setStatusText(active ? "Hoạt động" : "Tạm khóa");
+
+        // Không được phép khóa tài khoản quản trị viên
+        response.setCanBeLocked(active && !isAdmin);
+        response.setCanBeUnlocked(!active && !isAdmin);
+
+        return response;
+    }
+
+    // Ghép họ, tên đệm và tên thành họ tên đầy đủ
+    private String buildFullName(User user) {
+        String fullName = user.getLastName() + " "
+                + (user.getMiddleName() != null ? user.getMiddleName() + " " : "")
+                + user.getFirstName();
+        return fullName.trim();
     }
 
     @Override

@@ -192,4 +192,14 @@ public class ManagerScheduleController {
         return "manager/schedules/update";
     }
 
+
+    @PostMapping("/delete")
+    public String deleteWeekSchedule(@RequestParam Long weekScheduleId, RedirectAttributes redirectAttributes){
+        boolean deleteDoctorWeekSchedule = scheduleService.deleteWeekSchedule(weekScheduleId);
+        redirectAttributes.addFlashAttribute("deleteScheduleMessage", deleteDoctorWeekSchedule ? "Xóa lịch thành công" : "Xóa lịch thất bại");
+        redirectAttributes.addAttribute("weekScheduleId", weekScheduleId);
+        return "redirect:/manager/schedules/list";
+    }
+
+
 }

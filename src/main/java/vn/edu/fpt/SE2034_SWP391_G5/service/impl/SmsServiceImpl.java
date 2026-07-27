@@ -32,7 +32,7 @@ public class SmsServiceImpl implements SmsService {
     @Override
     @Async
     public void sendOtpSms(String phoneNumber, String otp) {
-        // Format phone number to standard E.164 if it starts with 0
+        // Đổi số bắt đầu bằng 0 sang dạng quốc tế E.164
         String formattedPhone = phoneNumber;
         if (phoneNumber.startsWith("0")) {
             formattedPhone = "+84" + phoneNumber.substring(1);
@@ -42,20 +42,20 @@ public class SmsServiceImpl implements SmsService {
 
         String message = "Ma xac thuc OTP cua ban tai HAMS la: " + otp + ". Ma co hieu luc trong 5 phut.";
 
-        // Traccar SMS Gateway requires a JSON body: {"to": "+84...", "message": "..."}
+        // Traccar SMS Gateway yêu cầu body dạng JSON: {"to": "+84...", "message": "..."}
         Map<String, String> body = new HashMap<>();
         body.put("to", formattedPhone);
         body.put("message", message);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        // Traccar uses the raw token in the Authorization header
+        // Traccar nhận token thô đặt thẳng trong header Authorization
         headers.set("Authorization", apiKey);
 
         HttpEntity<Map<String, String>> request = new HttpEntity<>(body, headers);
 
         try {
-            // POST request to Traccar SMS Gateway URL (e.g. http://192.168.x.x:8082)
+            // Gửi POST tới địa chỉ Traccar SMS Gateway (ví dụ http://192.168.x.x:8082)
             ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, request, String.class);
             log.debug("Traccar SMS Gateway response: {}", response.getBody());
         } catch (Exception e) {

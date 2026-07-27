@@ -25,20 +25,15 @@ public class ManagerScheduleImportController {
     @PostMapping("/import")
     public String importSchedules(@RequestParam("weekScheduleId") Long weekScheduleId, @RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
         redirectAttributes.addAttribute("weekScheduleId", weekScheduleId);
-
         try {
             User manager = getAuthenticatedManager();
-
             ScheduleImportResult result = scheduleImportService.importSchedules(file, weekScheduleId, manager.getId());
-
             if (!result.isSuccessful()) {
                 redirectAttributes.addFlashAttribute("scheduleImportResult", result);
 
                 redirectAttributes.addFlashAttribute("importErrorMessage", "File Excel có dữ liệu không hợp lệ. " + "Không có lịch nào được import.");
-
                 return "redirect:/manager/schedules/list";
             }
-
             redirectAttributes.addFlashAttribute("importSuccessMessage", "Đã import thành công " + result.getImportedRows() + " lịch làm việc.");
 
         } catch (ScheduleImportException | ScheduleConflictException exception) {

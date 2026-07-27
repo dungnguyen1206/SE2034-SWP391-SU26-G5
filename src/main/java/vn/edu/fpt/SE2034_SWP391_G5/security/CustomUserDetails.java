@@ -4,6 +4,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.entity.User;
+import vn.edu.fpt.SE2034_SWP391_G5.entity.UserRole;
+import vn.edu.fpt.SE2034_SWP391_G5.enums.UserStatus;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -28,7 +30,7 @@ public class CustomUserDetails implements UserDetails {
             return Collections.emptyList();
         }
         List<GrantedAuthority> authorities = new ArrayList<>();
-        for (vn.edu.fpt.SE2034_SWP391_G5.entity.UserRole userRole : user.getUserRoles()) {
+        for (UserRole userRole : user.getUserRoles()) {
             String roleName = userRole.getRole().getName();
             // Đảm bảo luôn có prefix ROLE_ để Spring Security nhận diện đúng
             if (!roleName.startsWith("ROLE_")) {
@@ -45,7 +47,7 @@ public class CustomUserDetails implements UserDetails {
     }
 
     @Override
-    // Return username for Spring Security authentication
+    // Trả về username để Spring Security xác thực
     public String getUsername() {
         return user.getUsername(); // Đăng nhập sử dụng Username
     }
@@ -57,7 +59,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return "ACTIVE".equalsIgnoreCase(user.getStatus());
+        return UserStatus.ACTIVE.name().equalsIgnoreCase(user.getStatus());
     }
 
     @Override

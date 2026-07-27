@@ -5,7 +5,7 @@
 
         <aside class="sidebar" th:fragment="sidebar(activeMenu)">
 
-            <div class="brand">
+            <a th:href="@{/}" class="brand" style="text-decoration: none; color: inherit; display: flex; align-items: center; gap: 12px; cursor: pointer;">
                 <div class="brand-icon">
                     <i class="bi bi-hospital"></i>
                 </div>
@@ -14,7 +14,7 @@
                     <h2>Bệnh Viện</h2>
                     <p>HAMS HOSPITAL</p>
                 </div>
-            </div>
+            </a>
 
 
 

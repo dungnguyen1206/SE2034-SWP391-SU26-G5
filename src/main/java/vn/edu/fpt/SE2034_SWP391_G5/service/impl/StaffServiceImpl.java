@@ -90,8 +90,9 @@ public class StaffServiceImpl implements StaffService {
         doctorStaffDetailResponse.setPhone(doctor.getPhone());
         doctorStaffDetailResponse.setDepartmentName(doctor.getDepartment().getName());
         doctorStaffDetailResponse.setFullName(doctor.getFirstName() + " " + doctor.getMiddleName() + " " + doctor.getLastName());
-        doctorStaffDetailResponse.setExperienceYears(0); // Tạm thời set 0
-        // doctorStaffDetailResponse.setLicenseIssueDate(doctor.getLicenseIssueDate()); // Đã xóa
+        int experienceYears = doctor.getLicenseIssueDate() == null ? 0 : Math.max(0, Period.between(doctor.getLicenseIssueDate(), LocalDate.now()).getYears());
+        doctorStaffDetailResponse.setExperienceYears(experienceYears);
+        doctorStaffDetailResponse.setLicenseIssueDate(doctor.getLicenseIssueDate());
         doctorStaffDetailResponse.setLicenseNumber(String.valueOf(doctor.getLicenseNumber()));
         doctorStaffDetailResponse.setRoleName("DOCTOR");
         doctorStaffDetailResponse.setRoleLabel("Bác sĩ");
@@ -148,8 +149,7 @@ public class StaffServiceImpl implements StaffService {
 
     @Override
     public UpdateUserRequest getPatientToUpdate(Long id) {
-        User patient = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("patient not found"));
+        User patient = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("patient not found"));
         return toUpdateUserRequest(patient, "PATIENT");
     }
 
@@ -174,17 +174,12 @@ public class StaffServiceImpl implements StaffService {
         updateUserRequest.setBloodType(user.getBloodType());
 
         if (user.getAddresses() != null) {
-            UserAddress defaultAddress = user.getAddresses().stream()
-                    .filter(address -> Boolean.TRUE.equals(address.getIsDefault()))
-                    .findFirst()
-                    .orElse(null);
+            UserAddress defaultAddress = user.getAddresses().stream().filter(address -> Boolean.TRUE.equals(address.getIsDefault())).findFirst().orElse(null);
 
             if (defaultAddress != null) {
                 updateUserRequest.setAddressLine(defaultAddress.getAddressLine());
                 updateUserRequest.setDefaultAddress(defaultAddress.getIsDefault());
-                updateUserRequest.setProvinceId(defaultAddress.getProvince() != null
-                        ? defaultAddress.getProvince().getId()
-                        : null);
+                updateUserRequest.setProvinceId(defaultAddress.getProvince() != null ? defaultAddress.getProvince().getId() : null);
             }
         }
 
@@ -192,7 +187,7 @@ public class StaffServiceImpl implements StaffService {
             updateUserRequest.setDoctorStatus(user.getDoctorStatus());
             updateUserRequest.setDepartmentId(user.getDepartment() != null ? user.getDepartment().getId() : null);
             updateUserRequest.setDegree(user.getDegree());
-            // updateUserRequest.setLicenseIssueDate(user.getLicenseIssueDate()); // Đã xóa
+            updateUserRequest.setLicenseIssueDate(user.getLicenseIssueDate());
             updateUserRequest.setLicenseNumber(user.getLicenseNumber());
         }
 
@@ -203,10 +198,8 @@ public class StaffServiceImpl implements StaffService {
     @Transactional
     public void updateStaffProfile(Long id, UpdateUserRequest request) {
 
-        User staff = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("user not found"));
-        if (!request.getProfileType().equalsIgnoreCase("DOCTOR")
-                && !request.getProfileType().equalsIgnoreCase("RECEPTIONIST")) {
+        User staff = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("user not found"));
+        if (!request.getProfileType().equalsIgnoreCase("DOCTOR") && !request.getProfileType().equalsIgnoreCase("RECEPTIONIST")) {
             throw new BadRequestException("Chỉ được truy cập hồ sơ của lễ tân và bác sĩ");
         }
         // 2. Set common fields
@@ -222,11 +215,9 @@ public class StaffServiceImpl implements StaffService {
 
         if (!vertifyDOB(request.getDateOfBirth(), request.getStaffRole())) {
             throw new BadRequestException("Ngày sinh phải hợp lệ theo quy định của pháp luật về độ tuổi lao động");
+        } else if (Period.between(request.getDateOfBirth(), request.getLicenseIssueDate()).getYears() < 25) {
+            throw new BadRequestException("Ngày sinh xung đột với ngày cấp giấy phép hành nghề !" + "   Bác sĩ chưa đủ tuổi để được cấp giấy phép hành nghề");
         }
-        // Validation về licenseIssueDate đã bỏ vì field không còn nữa
-        // else if(Period.between(request.getDateOfBirth(), request.getLicenseIssueDate()).getYears() < 25) {
-        //     throw new BadRequestException("Ngày sinh xung đột với ngày cấp giấy phép hành nghề !" +"   Bác sĩ chưa đủ tuổi để được cấp giấy phép hành nghề");
-        // }
         staff.setDateOfBirth(request.getDateOfBirth());
 
         if (request.getAvatar() != null && !request.getAvatar().isEmpty()) {
@@ -249,12 +240,10 @@ public class StaffServiceImpl implements StaffService {
             Department department = departmentRepository.findById(request.getDepartmentId()).orElseThrow(() -> new ResourceNotFoundException("Phòng ban không hợp lệ"));
             staff.setDepartment(department);
             staff.setDegree(request.getDegree());
-            // Validation licenseIssueDate đã bỏ
-            // if (request.getLicenseIssueDate().getYear()  - request.getDateOfBirth().getYear() <=25 ) {
-            //     throw new BadRequestException("Số năm kinh nghiệm phải nhỏ hơn hoặc bằng số năm từ lúc lấy giấy phép hành nghê lần đầu tiên");
-            // } else {
-            //     staff.setLicenseIssueDate(request.getLicenseIssueDate());
-            // }
+            if (request.getLicenseIssueDate().getYear() - request.getDateOfBirth().getYear() <= 25) {
+                throw new BadRequestException("Số năm kinh nghiệm phải nhỏ hơn hoặc bằng số năm từ lúc lấy giấy phép hành nghê lần đầu tiên");
+            }
+            staff.setLicenseIssueDate(request.getLicenseIssueDate());
             staff.setLicenseNumber(request.getLicenseNumber());
             if (!staff.getLicenseNumber().equalsIgnoreCase(request.getLicenseNumber()) && userRepository.existsByLicenseNumber(request.getLicenseNumber())) {
                 throw new BadRequestException("Mã giấy phép đã tồn tại");
@@ -264,7 +253,7 @@ public class StaffServiceImpl implements StaffService {
             staff.setDepartment(null);
             staff.setDegree(null);
             staff.setLicenseNumber(null);
-            // staff.setLicenseIssueDate(null); // Đã xóa
+            staff.setLicenseIssueDate(null);
             staff.setDoctorStatus(null);
         }
         userRepository.save(staff);

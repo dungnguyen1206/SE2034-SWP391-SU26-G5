@@ -23,6 +23,7 @@ public interface ScheduleService {
     WeekSchedule updateWeekSchedule(Long weekScheduleId,String action, Long managerId);
     DoctorScheduleUpdateRequest getDoctorScheduleUpdateRequest(Long doctorScheduleId);
     DoctorScheduleUpdateRequest updateDoctorSchedule(DoctorScheduleUpdateRequest doctorScheduleUpdateRequest,Long  weekScheduleId);
+    boolean deleteWeekSchedule(Long weekScheduleId);
 
 
 

@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+// Dữ liệu form tạo và sửa bài viết
 @Getter
 @Setter
 @NoArgsConstructor
@@ -26,8 +27,12 @@ public class CreateArticleRequest {
     
     @NotBlank(message = "Chuyên mục không được để trống")
     private String category;
+
     private Long doctorId;
+
     private String status;
+
     private MultipartFile thumbnailFile;
+
     private String currentThumbnailUrl;
 }

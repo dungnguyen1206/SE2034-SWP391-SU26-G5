@@ -69,7 +69,7 @@ public class NotificationController {
                 return "receptionist/notifications";
             }
             if (role.equals("ROLE_ADMIN")) {
-                return "redirect:/admin/dashboard";
+                return "redirect:/admin/account-list";
             }
         }
         return "redirect:/login"; // Nếu lỗi thì đá về đăng nhập

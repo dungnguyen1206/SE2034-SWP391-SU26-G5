@@ -6,10 +6,13 @@ import vn.edu.fpt.SE2034_SWP391_G5.entity.ArticleComment;
 
 import java.util.List;
 
+// Truy vấn dữ liệu bình luận bài viết
 @Repository
 public interface ArticleCommentRepository extends JpaRepository<ArticleComment, Long> {
 
-    List<ArticleComment> findByArticleIdAndParentIsNullOrderByCreatedAtDesc(Long articleId);
+    // Lấy bình luận của một bài viết, mới nhất lên đầu
+    List<ArticleComment> findByArticleIdOrderByCreatedAtDesc(Long articleId);
 
+    // Đếm số bình luận của một bài viết
     long countByArticleId(Long articleId);
 }

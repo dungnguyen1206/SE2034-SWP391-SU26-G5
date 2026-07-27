@@ -6,6 +6,7 @@
     <link rel="stylesheet" th:href="@{/css/manager/manager-common.css}">
     <link rel="stylesheet" th:href="@{/css/manager/manager-schedules.css}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 <div class="manager-layout">
@@ -68,6 +69,18 @@
         </section>
 
         <input id="createShiftToggle" class="schedule-panel-toggle" type="checkbox">
+        <!--Delete Schedule message-->
+        <section class="schedule-import-alert "
+                 th:if="${deleteScheduleMessage != null}">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span th:text="${deleteScheduleMessage}"></span>
+        </section>
+<!--        Error message-->
+        <section class="schedule-import-alert error"
+                 th:if="${errorMessage != null}">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span th:text="${errorMessage}"></span>
+        </section>
 
         <!-- IMPORT EXCEL - SUCCESS MESSAGE -->
         <section class="schedule-import-alert success"
@@ -178,6 +191,19 @@
 
                     <div class="schedule-toolbar-actions">
 
+                        <!--                        delete week schedule form-->
+                        <div th:if="${presentWeek.getStatus()=='DRAFT'}">
+                            <form th:action="@{/manager/schedules/delete}" class="schedule-action" th:method="POST" id="delete-week-schedule-form">
+                                <input type="hidden" name="weekScheduleId" th:value="${presentWeek.getId()}">
+                                <button type="submit"
+                                        class="schedule-delete-button"
+                                        id="scheduleDelete">
+                                    <i class="bi bi-archive"></i>
+                                    Xóa lịch hiện tại
+                                </button>
+                            </form>
+                        </div>
+
                         <!-- IMPORT: chỉ được sử dụng khi tuần đang DRAFT -->
                         <form th:if="${presentWeek.status == 'DRAFT'}"
                               th:action="@{/manager/schedules/import}"
@@ -207,7 +233,7 @@
                                     class="schedule-import-submit"
                                     id="scheduleImportSubmit">
                                 <i class="bi bi-upload"></i>
-                                Import
+                                Tải lên
                             </button>
                         </form>
 
@@ -347,6 +373,27 @@
             scheduleImportSubmit.innerHTML =
                 '<i class="bi bi-hourglass-split"></i> Đang import...';
         });
+    }
+
+    const deleteWeekScheduleForm = document.getElementById('delete-week-schedule-form');
+    if(deleteWeekScheduleForm) {
+        deleteWeekScheduleForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            Swal.fire({
+                title:"Xác nhận xóa lịch tuần này",
+                text:"Thao tác này sẽ xóa hết toàn bộ lịch của tuần, hãy kiểm tra cẩn thận trước khi thao tác",
+                cancelButtonText:"Hủy",
+                confirmButtonText:"Xác nhận",
+                cancelButtonColor:"#d33",
+                confirmButtonColor: '#3085d6',
+                showCancelButton: true,
+
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    deleteWeekScheduleForm.submit();
+                }
+            })
+        })
     }
 </script>
 </body>
