@@ -537,6 +537,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         return appointmentRepository.count();
     }
 
+    
+    //This function help count the number of appointment following the Appointment Status for Manager
     public Map<String, Long> findTodayAppointmentsByStatus(LocalDate localDate) {
         List<AppointmentStatusCountResponse> list = appointmentRepository.findTodayAppointmentsByStatus(localDate);
 
@@ -546,6 +548,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         statusCount.put("EXAMINING", 0L);
         statusCount.put("COMPLETED", 0L);
         statusCount.put("CANCELLED", 0L);
+        statusCount.put("NO_SHOW", 0L);
 
         list.forEach(appointment -> {
             statusCount.put(appointment.getStatus(), appointment.getCount());

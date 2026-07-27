@@ -49,7 +49,7 @@ public class ManagerDashboardController {
         long totalPatient= patientService.findUsersByRoleName("PATIENT").size();
         long totalAppointment = appointmentService.getAllAppointment();
         long doctorActive = doctorService.findByDoctorStatus("ACTIVE").size();
-        long doctorInactive = doctorService.findByDoctorStatus("INACTIVE").size();
+//        long doctorInactive = doctorService.findByDoctorStatus("INACTIVE").size();
         BigDecimal totalAmount = invoiceService.getTotalAmount("PAID", LocalDate.now().getMonthValue(),LocalDate.now().getYear());
         Locale vietnamLocale = new Locale("vi", "VN");
         NumberFormat vnCurrencyFormat = NumberFormat.getCurrencyInstance(vietnamLocale);
@@ -57,11 +57,10 @@ public class ManagerDashboardController {
         Map<String,Long> appointmentStatusCountResponseMap = appointmentService.findTodayAppointmentsByStatus(LocalDate.now());
         Page<AppointmentResponse> todayAppointmentsList = appointmentService.findAppointmentsByBookingDate(LocalDate.now(),pageAppointment,sizeAppointment);
         Page<DoctorOnDutyResponse> doctorOnDutyResponses = scheduleService.findDoctorScheduleByDate(LocalDate.now(),pageDoctor,sizeDoctor);
-
         model.addAttribute("totalPatient", totalPatient);
         model.addAttribute("totalAppointment", totalAppointment);
         model.addAttribute("doctorActive", doctorActive);
-        model.addAttribute("doctorInactive", doctorInactive);
+//        model.addAttribute("doctorInactive", doctorInactive);
         model.addAttribute("totalAmount", formattedAmount);
         model.addAttribute("waitingAppointment", appointmentStatusCountResponseMap.get("WAITING"));
         model.addAttribute("confirmedAppointment", appointmentStatusCountResponseMap.get("CONFIRMED"));
@@ -75,7 +74,7 @@ public class ManagerDashboardController {
         model.addAttribute("currentPageDoctor", pageDoctor);
         model.addAttribute("totalPageAppointment",todayAppointmentsList.getTotalPages());
         model.addAttribute("totalPageDoctor",doctorOnDutyResponses.getTotalPages());
-        model.addAttribute("totalAppointment", todayAppointmentsList.getTotalElements());
+        model.addAttribute("totalAppointmentToday", todayAppointmentsList.getTotalElements());
         model.addAttribute("totalDoctor", doctorOnDutyResponses.getTotalElements());
         return "manager/dashboard";
     }
