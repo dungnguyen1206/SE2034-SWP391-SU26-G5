@@ -19,179 +19,186 @@
         <!--MAIN CONTENT -->
         <main class="manager-dashboard">
 
-                <!--Block 1-->
+            <!--Block 1-->
 
-                <div class="dashboard-stats">
+            <div class="dashboard-stats">
 
-                    <div class="dashboard-stat-card">
-                        <div class="dashboard-stat-label">Tổng lịch hẹn</div>
-                        <div class="dashboard-stat-value" th:text="${totalAppointment}">1,284</div>
-
-                    </div>
-
-                    <div class="dashboard-stat-card">
-                        <div class="dashboard-stat-label">Tổng bệnh nhân</div>
-                        <div class="dashboard-stat-value" th:text="${totalPatient}">892</div>
-
-                    </div>
-
-                    <div class="dashboard-stat-card">
-                        <div class="dashboard-stat-label">Bác sĩ đang hoạt động</div>
-                        <div class="dashboard-stat-value" th:text="${doctorActive}">18</div>
-
-                    </div>
-
-                    <div class="dashboard-stat-card">
-                        <div class="dashboard-stat-label">Doanh thu tháng này</div>
-                        <div class="dashboard-stat-value" th:text="${totalAmount} + 'VND'">128,4 triệu VND</div>
-
-                    </div>
+                <div class="dashboard-stat-card">
+                    <div class="dashboard-stat-label">Tổng lịch hẹn</div>
+                    <div class="dashboard-stat-value" th:text="${totalAppointment}">1,284</div>
 
                 </div>
 
-                <!--Block 2-->
-                <div class="dashboard-status-card">
-                    <div class="status-card-title">
-                        Thống kê trạng thái lịch hẹn hôm nay
-                    </div>
-                    <div class="status-card-list">
-                        <div class="status-card-badge status-confirmed"
-                             th:text="${confirmedAppointment} + ' Đã xác nhận'">
-                            87 Đã xác nhận
-                        </div>
-                        <div class="status-card-badge status-waiting" th:text="${waitingAppointment} + ' Chờ khám'">34
-                            Chờ
-                            khám
-                        </div>
-                        <div class="status-card-badge status-examining"
-                             th:text="${examiningAppointment == null}? '0 Đang khám' : ${examiningAppointment} + ' Đang khám'">
-                            22 Đang khám
-                        </div>
-                        <div class="status-card-badge status-completed"
-                             th:text="${completedAppointment == null} ? '0 Đã hoàn thành' : ${completedAppointment} + ' Đã hoàn thành'">156 Đã hoàn thành
-                        </div>
-                        <div class="status-card-badge status-cancelled" th:text="${cancelledAppointment ==null} ? '0 Đã hủy' :${cancelledAppointment} + ' Đã hủy'">12
-                            Đã
-                            hủy
-                        </div>
-                        <div class="status-card-badge status-cancelled" th:text="${noShowAppointment ==null} ?'0 Không đến' : ${noShowAppointment} + ' Không đến'">12
-                            Đã
-                            hủy
-                        </div>
-                    </div>
+                <div class="dashboard-stat-card">
+                    <div class="dashboard-stat-label">Tổng bệnh nhân</div>
+                    <div class="dashboard-stat-value" th:text="${totalPatient}">892</div>
+
                 </div>
 
-                <!--Block 3-->
-                <div class="dashboard-grid">
-                    <div class="dashboard-panel">
-                        <div class="dashboard-panel-header">
-                            Lịch hẹn hôm nay
-                        </div>
-                        <div class="dashboard-panel-body">
-                            <table class="dashboard-table">
-                                <thead>
-                                <tr>
-                                    <th>STT</th>
-                                    <th>Bệnh nhân</th>
-                                    <th>Bác sĩ</th>
-                                    <th>Dịch vụ</th>
-                                    <th>Thời gian</th>
-                                    <th>Trạng thái</th>
-                                </tr>
-                                </thead>
-                                <tbody>
+                <div class="dashboard-stat-card">
+                    <div class="dashboard-stat-label">Bác sĩ đang hoạt động</div>
+                    <div class="dashboard-stat-value" th:text="${doctorActive}">18</div>
 
-                                <tr th:each="appointment, index : ${todayAppointmentsList}">
-                                    <td th:text="${index.count}"></td>
-                                    <td th:text="${appointment.getPatientFullName()}">Nguyễn Việt Dũng</td>
-                                    <td th:text="${appointment.getDoctorFullName()}">BS. Nguyễn Văn A</td>
-                                    <td th:text="${appointment.getServiceName()}">Khám mắt</td>
-                                    <td th:text="${appointment.getSlotStartTime()}+'-'+ ${appointment.getSlotEndTime()}">
-                                        09:00 - 10:00
-                                    </td>
-                                    <td th:text="${appointment.getStatus()}">Đã xác nhận</td>
-                                </tr>
-                                </tbody>
-                            </table>
+                </div>
 
-                            <div class="schedule-pagination" style="justify-content: flex-end;">
+                <div class="dashboard-stat-card">
+                    <div class="dashboard-stat-label">Doanh thu tháng này</div>
+                    <div class="dashboard-stat-value" th:text="${totalAmount} + 'VND'">128,4 triệu VND</div>
+
+                </div>
+
+            </div>
+
+            <!--Block 2-->
+            <div class="dashboard-status-card">
+                <div class="status-card-title">
+                    Thống kê trạng thái lịch hẹn hôm nay
+                </div>
+                <div class="status-card-list">
+                    <div class="status-card-badge status-confirmed"
+                         th:text="${confirmedAppointment} + ' Đã xác nhận'">
+                        87 Đã xác nhận
+                    </div>
+                    <div class="status-card-badge status-waiting" th:text="${waitingAppointment} + ' Chờ khám'">34
+                        Chờ
+                        khám
+                    </div>
+                    <div class="status-card-badge status-examining"
+                         th:text="${examiningAppointment == null}? '0 Đang khám' : ${examiningAppointment} + ' Đang khám'">
+                        22 Đang khám
+                    </div>
+                    <div class="status-card-badge status-completed"
+                         th:text="${completedAppointment == null} ? '0 Đã hoàn thành' : ${completedAppointment} + ' Đã hoàn thành'">
+                        156 Đã hoàn thành
+                    </div>
+                    <div class="status-card-badge status-cancelled"
+                         th:text="${cancelledAppointment ==null} ? '0 Đã hủy' :${cancelledAppointment} + ' Đã hủy'">12
+                        Đã
+                        hủy
+                    </div>
+                    <div class="status-card-badge status-cancelled"
+                         th:text="${noShowAppointment ==null} ?'0 Không đến' : ${noShowAppointment} + ' Không đến'">12
+                        Đã
+                        hủy
+                    </div>
+                </div>
+            </div>
+
+            <!--Block 3-->
+            <div class="dashboard-grid">
+                <div class="dashboard-panel">
+                    <div class="dashboard-panel-header">
+                        Lịch hẹn hôm nay
+                    </div>
+                    <div class="dashboard-panel-body">
+                        <table class="dashboard-table">
+                            <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Bệnh nhân</th>
+                                <th>Bác sĩ</th>
+                                <th>Dịch vụ</th>
+                                <th>Thời gian</th>
+                                <th>Trạng thái</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+
+                            <tr th:each="appointment, index : ${todayAppointmentsList}">
+                                <td th:text="${index.count}"></td>
+                                <td th:text="${appointment.getPatientFullName()}">Nguyễn Việt Dũng</td>
+                                <td th:text="${appointment.getDoctorFullName()}">BS. Nguyễn Văn A</td>
+                                <td th:text="${appointment.getServiceName()}">Khám mắt</td>
+                                <td th:text="${appointment.getSlotStartTime()}+'-'+ ${appointment.getSlotEndTime()}">
+                                    09:00 - 10:00
+                                </td>
+                                <td th:text="${appointment.getStatus()}">Đã xác nhận</td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                        <!--           Paging of today appointment                 -->
+                        <div class="schedule-pagination" style="justify-content: flex-end;">
                             <span th:text="'Trang hiện tại ' +${currentPageAppointment + 1}+
                             ' trong '+${totalPageAppointment} "
                                   style=" font-weight: 500;padding: 6px 10px ; border-radius: 5px; margin-top: 5px; margin-bottom: 5px; font-size: 14px">
                             </span>
-                                <a th:if="${currentPageAppointment!=0}"
-                                   th:href="@{/manager/dashboard(pageAppointment=${currentPageAppointment - 1})}"
-                                   class="pager-button">Trước</a>
-                                <span th:if="${currentPageAppointment==0}"
-                                      class="pager-button disabled">Trước</span>
+                            <a th:if="${currentPageAppointment!=0}"
+                               th:href="@{/manager/dashboard(pageAppointment=${currentPageAppointment - 1})}"
+                               class="pager-button">Trước</a>
+                            <span th:if="${currentPageAppointment==0}"
+                                  class="pager-button disabled">Trước</span>
 
-                                <a th:if="${currentPageAppointment <(totalPageAppointment - 1)}"
-                                   th:href="@{/manager/dashboard(pageAppointment=${currentPageAppointment + 1})}"
-                                   class="pager-button">Sau</a>
-                                <span th:if="${currentPageAppointment == (totalPageAppointment - 1)}"
-                                      class="pager-button disabled">Sau</span>
-                            </div>
+                            <a th:if="${currentPageAppointment <(totalPageAppointment - 1)}"
+                               th:href="@{/manager/dashboard(pageAppointment=${currentPageAppointment + 1})}"
+                               class="pager-button">Sau</a>
+                            <span th:if="${currentPageAppointment == (totalPageAppointment - 1)}"
+                                  class="pager-button disabled">Sau</span>
                         </div>
                     </div>
-                    <div class="dashboard-panel">
-                        <div class="dashboard-panel-header">
-                            Bác sĩ trực hôm nay
-                        </div>
-                        <div class="dashboard-panel-body">
-                            <table class="dashboard-table">
-                                <thead>
-                                <tr>
-                                    <th>STT</th>
-                                    <th>Bác sĩ</th>
-                                    <th>Khoa</th>
-                                    <th>Ca trực</th>
-                                    <th>Trạng thái</th>
+                </div>
+                <div class="dashboard-panel">
+                    <div class="dashboard-panel-header">
+                        Bác sĩ trực hôm nay
+                    </div>
+                    <div class="dashboard-panel-body">
+                        <table class="dashboard-table">
+                            <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Bác sĩ</th>
+                                <th>Khoa</th>
+                                <th>Ca trực</th>
+                                <th>Trạng thái</th>
 
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr th:each="doctor,index : ${doctorOnDutyResponses}">
-                                    <td th:text="${index.count}"></td>
-                                    <td th:text="${doctor.getDoctorName()}">BS. Trần Minh Tuấn</td>
-                                    <td th:text="${doctor.getDepartmentName()}">Tim mạch</td>
-                                    <td th:text="${doctor.getShift() == 'MORNING' ? 'Ca sáng' : (doctor.getShift()=='AFTERNOON' ? 'Ca chiều' : 'Cả ngày')}">Ca sáng</td>
-                                    <td>
-                                        <div class="staff-status-text"
-                                             th:classappend="${doctor.getStatus().equals('ACTIVE')} ? ' active' : ' inactive'">
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="doctor,index : ${doctorOnDutyResponses}">
+                                <td th:text="${index.count}"></td>
+                                <td th:text="${doctor.getDoctorName()}">BS. Trần Minh Tuấn</td>
+                                <td th:text="${doctor.getDepartmentName()}">Tim mạch</td>
+                                <td th:text="${doctor.getShift() == 'MORNING' ? 'Ca sáng' : (doctor.getShift()=='AFTERNOON' ? 'Ca chiều' : 'Cả ngày')}">
+                                    Ca sáng
+                                </td>
+                                <td>
+                                    <div class="staff-status-text"
+                                         th:classappend="${doctor.getStatus().equals('ACTIVE')} ? ' active' : ' inactive'">
                                            <span class="staff-status-dot"
                                                  th:classappend="${doctor.getStatus().equals('ACTIVE')} ? ' active' : ' inactive'"></span>
-                                            <strong th:text="${doctor.getStatus().equals('ACTIVE')} ? 'Đang hoạt động' : 'Ngưng hoạt động'">
-                                                Đang hoạt động
-                                            </strong>
-                                        </div>
+                                        <strong th:text="${doctor.getStatus().equals('ACTIVE')} ? 'Đang hoạt động' : 'Ngưng hoạt động'">
+                                            Đang hoạt động
+                                        </strong>
+                                    </div>
 
-                                    </td>
+                                </td>
 
-                                </tr>
-                                </tbody>
-                            </table>
+                            </tr>
+                            </tbody>
+                        </table>
 
-                            <div class="schedule-pagination" style="justify-content: flex-end;">
+                        <!-- Paging for doctor Schedule-->
+                        <div class="schedule-pagination" style="justify-content: flex-end;">
                             <span th:text="'Trang hiện tại ' +${currentPageDoctor + 1}+
                             ' trong '+${totalPageDoctor} "
                                   style=" font-weight: 500;padding: 6px 10px ; border-radius: 5px; margin-top: 5px; margin-bottom: 5px; font-size: 14px">
                             </span>
-                                <a th:if="${currentPageDoctor!=0}"
-                                   th:href="@{/manager/dashboard(pageDoctor=${currentPageDoctor - 1})}"
-                                   class="pager-button">Trước</a>
-                                <span th:if="${currentPageDoctor==0}"
-                                      class="pager-button disabled">Trước</span>
+                            <a th:if="${currentPageDoctor!=0}"
+                               th:href="@{/manager/dashboard(pageDoctor=${currentPageDoctor - 1})}"
+                               class="pager-button">Trước</a>
+                            <span th:if="${currentPageDoctor==0}"
+                                  class="pager-button disabled">Trước</span>
 
-                                <a th:if="${currentPageDoctor <(totalPageDoctor - 1)}"
-                                   th:href="@{/manager/dashboard(pageDoctor=${currentPageDoctor + 1})}"
-                                   class="pager-button">Sau</a>
-                                <span th:if="${currentPageDoctor == (totalPageDoctor - 1)}"
-                                      class="pager-button disabled">Sau</span>
-                            </div>
+                            <a th:if="${currentPageDoctor <(totalPageDoctor - 1)}"
+                               th:href="@{/manager/dashboard(pageDoctor=${currentPageDoctor + 1})}"
+                               class="pager-button">Sau</a>
+                            <span th:if="${currentPageDoctor == (totalPageDoctor - 1)}"
+                                  class="pager-button disabled">Sau</span>
                         </div>
                     </div>
-
                 </div>
+
+            </div>
 
         </main>
     </div>

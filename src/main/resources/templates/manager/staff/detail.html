@@ -69,7 +69,6 @@
                         </div>
                     </div>
 
-
                 </section>
                 <aside class="staff-detail-side">
 
@@ -118,7 +117,7 @@
             </div>
                 <div class="staff-detail-main">
 
-                    <!--ACCOUNT INFORMATION-->
+                    <!--ACCOUNT INFORMATION FOR 2 ROLES-->
                     <section class="staff-form-card">
                         <div class="staff-form-card-header">
                             <i class="bi bi-person"></i>
@@ -133,9 +132,9 @@
                             <div><span>Trạng thái tài khoản</span><strong
                                     th:text="${staff.getAccountStatus() == 'ACTIVE'} ? 'Đang hoạt động' : 'Ngưng hoạt động '">N/A</strong>
                             </div>
-                            <div><span>Ngày tạo</span><strong th:text="${doctor.getCreatedAt() != null ? #temporals.format(doctor.getCreatedAt(), 'dd/MM/yyyy') : 'N/A'}">N/A</strong></div>
+                            <div><span>Ngày tạo</span><strong th:text="${staff.getCreatedAt() != null ? #temporals.format(staff.getCreatedAt(), 'dd/MM/yyyy') : 'N/A'}">N/A</strong></div>
                             <div><span>Ngày cập nhật</span><strong
-                                    th:text="${doctor.getUpdatedAt() != null ? #temporals.format(doctor.getUpdatedAt(), 'dd/MM/yyyy') : 'N/A'}">N/A</strong>
+                                    th:text="${staff.getUpdatedAt() != null ? #temporals.format(staff.getUpdatedAt(), 'dd/MM/yyyy') : 'N/A'}">N/A</strong>
                             </div>
                         </div>
                     </section>
@@ -184,7 +183,7 @@
                             <div><span>Mã nhân viên</span><strong
                                     th:text="'STF-' + ${receptionist.getId()}">STF-1</strong></div>
                             <div><span>Ngày bắt đầu</span><strong
-                                    th:text="${staff.getCreatedAt() != null} ? ${staff.getCreatedAt()} : 'N/A'">N/A</strong>
+                                    th:text="${staff.getCreatedAt() != null} ? ${#temporals.format(staff.getCreatedAt(), 'dd/MM/yyyy')} : 'N/A'">N/A</strong>
                             </div>
                             <div><span>Trạng thái làm việc</span><strong
                                     th:text="${staff.getAccountStatus() == 'ACTIVE'} ? 'Đang hoạt động' : 'Ngưng hoạt động'">N/A</strong>
