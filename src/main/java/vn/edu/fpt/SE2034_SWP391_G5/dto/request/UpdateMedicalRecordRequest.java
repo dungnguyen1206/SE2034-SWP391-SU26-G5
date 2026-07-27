@@ -24,8 +24,7 @@ public class UpdateMedicalRecordRequest {
     @Size(max = 2000, message = "Chẩn đoán không được vượt quá 2000 ký tự")
     private String diagnosis;
 
-    @NotBlank(message = "Huyết áp không được để trống")
-    @Pattern(regexp = "^\\d{2,3}/\\d{2,3}$", message = "Huyết áp phải đúng định dạng (ví dụ: 120/80)")
+    @NotBlank(message = "Không được để trống")
     private String bloodPressure;
 
     @NotNull(message = "Cân nặng không được để trống")

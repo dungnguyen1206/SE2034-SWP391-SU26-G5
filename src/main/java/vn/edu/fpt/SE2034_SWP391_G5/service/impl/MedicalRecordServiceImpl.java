@@ -51,6 +51,8 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             throw new BadRequestException("Hồ sơ bệnh án cho lịch hẹn này đã tồn tại");
         }
 
+        validateBloodPressure(request.getBloodPressure());
+
         User doctor = userRepository.findById(doctorId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bác sĩ với ID: " + doctorId));
 
@@ -89,6 +91,8 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
             throw new BadRequestException("Bạn không có quyền chỉnh sửa hồ sơ bệnh án này");
         }
 
+        validateBloodPressure(request.getBloodPressure());
+
         LocalDateTime now = LocalDateTime.now();
         medicalRecord.setSymptoms(request.getSymptoms());
         medicalRecord.setDiagnosis(request.getDiagnosis());
@@ -118,6 +122,14 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
                 .stream()
                 .map(this::toRecordResponse)
                 .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<MedicalRecordResponse> getPatientMedicalHistoryPaginated(Long patientId, String departmentName, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<MedicalRecord> recordPage = medicalRecordRepository.findByPatientIdWithDetailsPaginated(patientId, departmentName, pageable);
+        return recordPage.map(this::toRecordResponse);
     }
 
     private MedicalRecordResponse toRecordResponse(MedicalRecord r) {
@@ -173,5 +185,68 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
         if (middleName != null) sb.append(middleName).append(" ");
         if (firstName != null) sb.append(firstName);
         return sb.toString().trim();
+    }
+
+    private void validateBloodPressure(String bloodPressure) {
+        if (bloodPressure == null || bloodPressure.trim().isEmpty()) {
+            throw new BadRequestException("Không được để trống");
+        }
+
+        String bp = bloodPressure.trim();
+        if (!bp.matches("^\\d+/\\d+$")) {
+            throw new BadRequestException("Định dạng huyết áp sai (Ví dụ: 120/80). Chỉ được chứa số nguyên.");
+        }
+
+        String[] parts = bp.split("/");
+        try {
+            int sys = Integer.parseInt(parts[0]);
+            int dia = Integer.parseInt(parts[1]);
+
+            if (sys < 40 || sys > 300) {
+                throw new BadRequestException("Huyết áp tâm thu phải trong khoảng từ 40 đến 300 mmHg");
+            }
+            if (dia < 20 || dia > 200) {
+                throw new BadRequestException("Huyết áp tâm trương phải trong khoảng từ 20 đến 200 mmHg");
+            }
+            if (sys <= dia) {
+                throw new BadRequestException("Huyết áp tâm thu phải lớn hơn huyết áp tâm trương");
+            }
+            if (sys - dia < 20) {
+                throw new BadRequestException("Huyết áp tâm thu phải lớn hơn huyết áp tâm trương ít nhất 20 mmHg");
+            }
+        } catch (NumberFormatException e) {
+            throw new BadRequestException("Chỉ số huyết áp phải là số nguyên");
+        }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public java.util.Optional<MedicalRecord> getMedicalRecordByAppointmentId(Long appointmentId) {
+        return medicalRecordRepository.findByAppointmentId(appointmentId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long countPrescriptionsByDoctorAndDate(Long doctorId, LocalDateTime startOfDay, LocalDateTime endOfDay) {
+        return medicalRecordRepository.countPrescriptionsByDoctorAndDate(doctorId, startOfDay, endOfDay);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public void validateMedicalRecordCompleteness(Long appointmentId) {
+        MedicalRecord medicalRecord = medicalRecordRepository.findByAppointmentId(appointmentId)
+                .orElseThrow(() -> new BadRequestException("Không thể chuyển trạng thái sang Hoàn thành vì hồ sơ bệnh án chưa được tạo."));
+
+        if (medicalRecord.getSymptoms() == null || medicalRecord.getSymptoms().trim().isEmpty() ||
+            medicalRecord.getDiagnosis() == null || medicalRecord.getDiagnosis().trim().isEmpty() ||
+            medicalRecord.getBloodPressure() == null || medicalRecord.getBloodPressure().trim().isEmpty() ||
+            medicalRecord.getWeight() == null ||
+            medicalRecord.getConclusion() == null || medicalRecord.getConclusion().trim().isEmpty() ||
+            medicalRecord.getPrescriptionText() == null || medicalRecord.getPrescriptionText().trim().isEmpty() ||
+            medicalRecord.getNotes() == null || medicalRecord.getNotes().trim().isEmpty() ||
+            medicalRecord.getBloodGlucose() == null ||
+            medicalRecord.getHeartRate() == null) {
+            throw new BadRequestException("Không thể chuyển trạng thái sang Hoàn thành vì hồ sơ bệnh án chưa đầy đủ thông tin.");
+        }
     }
 }

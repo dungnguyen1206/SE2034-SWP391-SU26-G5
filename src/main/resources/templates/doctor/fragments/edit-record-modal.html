@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <div th:fragment="edit-record-modal">
+        <!-- Modal Chỉnh sửa hồ sơ bệnh án -->
+        <div id="editRecordModal" class="modal-overlay"
+            th:style="${action == 'edit' and appointment.status != 'COMPLETED' ? 'display: flex;' : 'display: none;'}">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <h2>Chỉnh sửa hồ sơ bệnh án</h2>
+                    <a th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab})}"
+                        class="btn-close-modal no-underline">&times;</a>
+                </div>
+                <form th:action="@{/doctor/appointments/{id}/records/update(id=${appointment.id})}" method="POST"
+                    id="editRecordForm">
+                    <div class="modal-body" th:if="${medicalRecord != null}">
+                        <!-- Chỉ số sinh tồn -->
+                        <h3 class="modal-section-title">
+                            <i class="fa-solid fa-heart-pulse text-red"></i> Chỉ số sinh tồn
+                        </h3>
+                        <div class="modal-vitals-grid">
+                            <div class="form-group">
+                                <label for="edit_bloodPressure">Huyết áp (mmHg) <span class="text-red">*</span></label>
+                                <input type="text" name="bloodPressure" id="edit_bloodPressure"
+                                    th:value="${tempRecord != null ? tempRecord.bloodPressure : (medicalRecord.bloodPressure != null ? medicalRecord.bloodPressure : '')}"
+                                    placeholder="Ví dụ: 120/80" required oninvalid="validateBloodPressure(this)"
+                                    oninput="validateBloodPressure(this)">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit_heartRate">Nhịp tim (bpm) <span class="text-red">*</span></label>
+                                <input type="number" name="heartRate" id="edit_heartRate"
+                                    th:value="${tempRecord != null ? tempRecord.heartRate : (medicalRecord.heartRate != null ? medicalRecord.heartRate : '')}"
+                                    placeholder="Ví dụ: 80" required
+                                    oninvalid="validateHeartRate(this)" oninput="validateHeartRate(this)"
+                                    min="30" max="250">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit_bloodGlucose">Đường huyết (mmol/L) <span
+                                        class="text-red">*</span></label>
+                                <input type="number" step="0.01" name="bloodGlucose" id="edit_bloodGlucose"
+                                    th:value="${tempRecord != null ? tempRecord.bloodGlucose : (medicalRecord.bloodGlucose != null ? medicalRecord.bloodGlucose : '')}"
+                                    placeholder="Ví dụ: 5.6" required
+                                    oninvalid="validateBloodGlucose(this)" oninput="validateBloodGlucose(this)"
+                                    min="0.1" max="50.0">
+                            </div>
+                            <div class="form-group">
+                                <label for="edit_weight">Cân nặng (kg) <span class="text-red">*</span></label>
+                                <input type="number" step="0.1" name="weight" id="edit_weight"
+                                    th:value="${tempRecord != null ? tempRecord.weight : (medicalRecord.weight != null ? medicalRecord.weight : '')}"
+                                    placeholder="Ví dụ: 60.5" required
+                                    oninvalid="validateWeight(this, '1.0')" oninput="validateWeight(this, '1.0')"
+                                    min="1.0" max="300.0">
+                            </div>
+                        </div>
+
+                        <hr class="modal-divider">
+
+                        <!-- Thông tin khám lâm sàng -->
+                        <h3 class="modal-section-title">
+                            <i class="fa-solid fa-stethoscope text-blue"></i> Thông tin khám lâm sàng
+                        </h3>
+                        <div class="form-group">
+                            <label for="edit_symptoms">Triệu chứng <span class="text-red">*</span></label>
+                            <textarea name="symptoms" id="edit_symptoms"
+                                placeholder="Mô tả triệu chứng của bệnh nhân..." rows="3" required
+                                oninvalid="validateRequiredField(this, 'Triệu chứng')" oninput="validateRequiredField(this, 'Triệu chứng')"
+                                th:text="${tempRecord != null ? tempRecord.symptoms : (medicalRecord.symptoms != null ? medicalRecord.symptoms : '')}"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_diagnosis">Chẩn đoán <span class="text-red">*</span></label>
+                            <textarea name="diagnosis" id="edit_diagnosis" placeholder="Chẩn đoán bệnh lý chính..."
+                                rows="3" required
+                                oninvalid="validateRequiredField(this, 'Chẩn đoán')" oninput="validateRequiredField(this, 'Chẩn đoán')"
+                                th:text="${tempRecord != null ? tempRecord.diagnosis : (medicalRecord.diagnosis != null ? medicalRecord.diagnosis : '')}"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_conclusion">Kết luận <span class="text-red">*</span></label>
+                            <textarea name="conclusion" id="edit_conclusion" placeholder="Kết luận và hướng điều trị..."
+                                rows="3" required
+                                oninvalid="validateRequiredField(this, 'Kết luận')" oninput="validateRequiredField(this, 'Kết luận')"
+                                th:text="${tempRecord != null ? tempRecord.conclusion : (medicalRecord.conclusion != null ? medicalRecord.conclusion : '')}"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_prescriptionText">Đơn thuốc <span class="text-red">*</span></label>
+                            <textarea name="prescriptionText" id="edit_prescriptionText"
+                                placeholder="Kê đơn thuốc (tên thuốc, liều dùng, tần suất)..." rows="4" required
+                                oninvalid="validateRequiredField(this, 'Đơn thuốc')" oninput="validateRequiredField(this, 'Đơn thuốc')"
+                                th:text="${tempRecord != null ? tempRecord.prescriptionText : (medicalRecord.prescriptionText != null ? medicalRecord.prescriptionText : '')}"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="edit_notes">Ghi chú <span class="text-red">*</span></label>
+                            <textarea name="notes" id="edit_notes" placeholder="Các ghi chú hoặc dặn dò thêm..."
+                                rows="2" required
+                                oninvalid="validateRequiredField(this, 'Ghi chú')" oninput="validateRequiredField(this, 'Ghi chú')"
+                                th:text="${tempRecord != null ? tempRecord.notes : (medicalRecord.notes != null ? medicalRecord.notes : '')}"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <a th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab})}"
+                            class="btn-cancel no-underline inline-block">Hủy</a>
+                        <button type="submit" class="btn-submit">Lưu thay đổi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script th:inline="javascript">
+            if (typeof validateBloodPressure !== 'function') {
+                function validateBloodPressure(inputElement) {
+                    const val = inputElement.value.trim();
+                    if (!val) {
+                        inputElement.setCustomValidity('Không được để trống');
+                        return;
+                    }
+
+                    const regex = /^\d+\/\d+$/;
+                    if (!regex.test(val)) {
+                        inputElement.setCustomValidity('Định dạng huyết áp sai (Ví dụ: 120/80). Chỉ được chứa số nguyên.');
+                        return;
+                    }
+
+                    const parts = val.split('/');
+                    const sys = parseInt(parts[0], 10);
+                    const dia = parseInt(parts[1], 10);
+
+                    if (sys < 40 || sys > 300) {
+                        inputElement.setCustomValidity('Huyết áp tâm thu phải trong khoảng từ 40 đến 300 mmHg');
+                        return;
+                    }
+
+                    if (dia < 20 || dia > 200) {
+                        inputElement.setCustomValidity('Huyết áp tâm trương phải trong khoảng từ 20 đến 200 mmHg');
+                        return;
+                    }
+
+                    if (sys <= dia) {
+                        inputElement.setCustomValidity('Huyết áp tâm thu phải lớn hơn huyết áp tâm trương');
+                        return;
+                    }
+
+                    if (sys - dia < 20) {
+                        inputElement.setCustomValidity('Huyết áp tâm thu phải lớn hơn huyết áp tâm trương ít nhất 20 mmHg');
+                        return;
+                    }
+
+                    inputElement.setCustomValidity('');
+                }
+            }
+
+            if (typeof validateHeartRate !== 'function') {
+                function validateHeartRate(inputElement) {
+                    if (inputElement.validity.valueMissing) {
+                        inputElement.setCustomValidity('Nhịp tim không được để trống');
+                    } else if (inputElement.validity.rangeUnderflow) {
+                        inputElement.setCustomValidity('Nhịp tim phải từ 30 bpm trở lên');
+                    } else if (inputElement.validity.rangeOverflow) {
+                        inputElement.setCustomValidity('Nhịp tim không được vượt quá 250 bpm');
+                    } else {
+                        inputElement.setCustomValidity('');
+                    }
+                }
+            }
+
+            if (typeof validateBloodGlucose !== 'function') {
+                function validateBloodGlucose(inputElement) {
+                    if (inputElement.validity.valueMissing) {
+                        inputElement.setCustomValidity('Đường huyết không được để trống');
+                    } else if (inputElement.validity.rangeUnderflow) {
+                        inputElement.setCustomValidity('Đường huyết phải từ 0.1 mmol/L trở lên');
+                    } else if (inputElement.validity.rangeOverflow) {
+                        inputElement.setCustomValidity('Đường huyết không được vượt quá 50.0 mmol/L');
+                    } else {
+                        inputElement.setCustomValidity('');
+                    }
+                }
+            }
+
+            if (typeof validateWeight !== 'function') {
+                function validateWeight(inputElement, minVal) {
+                    if (inputElement.validity.valueMissing) {
+                        inputElement.setCustomValidity('Cân nặng không được để trống');
+                    } else if (inputElement.validity.rangeUnderflow) {
+                        inputElement.setCustomValidity('Cân nặng phải từ ' + minVal + ' kg trở lên');
+                    } else if (inputElement.validity.rangeOverflow) {
+                        inputElement.setCustomValidity('Cân nặng không được vượt quá 300.0 kg');
+                    } else {
+                        inputElement.setCustomValidity('');
+                    }
+                }
+            }
+
+            if (typeof validateRequiredField !== 'function') {
+                function validateRequiredField(inputElement, fieldName) {
+                    if (inputElement.validity.valueMissing) {
+                        inputElement.setCustomValidity(fieldName + ' không được để trống');
+                    } else {
+                        inputElement.setCustomValidity('');
+                    }
+                }
+            }
+        </script>
+    </div>
+</body>
+</html>
