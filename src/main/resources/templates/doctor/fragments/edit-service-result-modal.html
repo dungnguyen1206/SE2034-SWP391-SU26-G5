@@ -23,20 +23,23 @@
                             <strong id="resultModalServiceName" class="result-modal-value-lg">Tên dịch vụ</strong>
                         </div>
                         <div class="form-group result-modal-group">
-                            <label for="serviceNoteTextarea" class="result-modal-label">Ghi chú</label>
+                            <label for="serviceNoteTextarea" class="result-modal-label">Ghi chú <span class="text-red">*</span></label>
                             <input type="text" name="note" id="serviceNoteTextarea"
-                                placeholder="Ví dụ: Triệu chứng hồi hộp, đánh trống ngực..." class="result-modal-input">
+                                placeholder="Ví dụ: Triệu chứng hồi hộp, đánh trống ngực..." class="result-modal-input"
+                                required maxlength="500"
+                                oninvalid="validateNoteField(this)" oninput="validateNoteField(this)">
                         </div>
                         <div class="form-group">
-                            <label for="serviceResultTextarea" class="result-modal-label">Kết quả khám</label>
+                            <label for="serviceResultTextarea" class="result-modal-label">Kết quả khám <span class="text-red">*</span></label>
                             <textarea name="result" id="serviceResultTextarea"
                                 placeholder="Nhập kết quả chi tiết của dịch vụ khám này..." rows="5"
-                                class="result-modal-input"></textarea>
+                                class="result-modal-input" required maxlength="500"
+                                oninvalid="validateResultField(this)" oninput="validateResultField(this)"></textarea>
                         </div>
                     </div>
                     <div class="modal-footer result-modal-footer">
                         <button type="button" onclick="closeEditResultModal()"
-                            class="btn-cancel btn-result-cancel">Hủy</button>
+                             class="btn-cancel btn-result-cancel">Hủy</button>
                         <button type="submit" class="btn-submit btn-result-submit">Lưu kết quả</button>
                     </div>
                 </form>
@@ -52,8 +55,13 @@
                     const appointmentId = [[${appointment.id}]];
                     form.action = '/doctor/appointments/' + appointmentId + '/services/' + orderId + '/result';
 
-                    document.getElementById('serviceNoteTextarea').value = currentNote;
-                    document.getElementById('serviceResultTextarea').value = currentResult;
+                    document.getElementById('serviceNoteTextarea').value = currentNote || '';
+                    document.getElementById('serviceResultTextarea').value = currentResult || '';
+                    
+                    // Reset validity status
+                    document.getElementById('serviceNoteTextarea').setCustomValidity('');
+                    document.getElementById('serviceResultTextarea').setCustomValidity('');
+                    
                     document.getElementById('editResultModalWrapper').style.display = 'flex';
                 }
             }
@@ -61,6 +69,32 @@
             if (typeof closeEditResultModal !== 'function') {
                 function closeEditResultModal() {
                     document.getElementById('editResultModalWrapper').style.display = 'none';
+                }
+            }
+
+            if (typeof validateResultField !== 'function') {
+                function validateResultField(inputElement) {
+                    const value = inputElement.value.trim();
+                    if (!value) {
+                        inputElement.setCustomValidity('Kết quả khám không được để trống');
+                    } else if (value.length > 500) {
+                        inputElement.setCustomValidity('Kết quả khám không được vượt quá 500 ký tự');
+                    } else {
+                        inputElement.setCustomValidity('');
+                    }
+                }
+            }
+
+            if (typeof validateNoteField !== 'function') {
+                function validateNoteField(inputElement) {
+                    const value = inputElement.value.trim();
+                    if (!value) {
+                        inputElement.setCustomValidity('Ghi chú không được để trống');
+                    } else if (value.length > 500) {
+                        inputElement.setCustomValidity('Ghi chú không được vượt quá 500 ký tự');
+                    } else {
+                        inputElement.setCustomValidity('');
+                    }
                 }
             }
         </script>

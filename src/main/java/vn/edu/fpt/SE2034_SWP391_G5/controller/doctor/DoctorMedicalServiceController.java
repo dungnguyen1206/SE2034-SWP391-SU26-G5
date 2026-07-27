@@ -1,17 +1,23 @@
 package vn.edu.fpt.SE2034_SWP391_G5.controller.doctor;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.request.UpdateServiceResultRequest;
 import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.MedicalServiceOrderService;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/doctor")
@@ -43,15 +49,23 @@ public class DoctorMedicalServiceController {
     public String saveServiceResult(
             @PathVariable Long id,
             @PathVariable Long orderId,
-            @RequestParam(value = "result", required = false) String result,
-            @RequestParam(value = "note", required = false) String note,
+            @Valid @ModelAttribute UpdateServiceResultRequest request,
+            BindingResult bindingResult,
             @AuthenticationPrincipal CustomUserDetails userDetails,
             RedirectAttributes redirectAttributes) {
+
+        if (bindingResult.hasErrors()) {
+            String errorMsg = bindingResult.getFieldErrors().stream()
+                    .map(FieldError::getDefaultMessage)
+                    .collect(Collectors.joining("; "));
+            redirectAttributes.addFlashAttribute("errorMessage", errorMsg);
+            return "redirect:/doctor/appointments/" + id + "/detail?tab=services";
+        }
 
         Long doctorId = userDetails.getUser().getId();
 
         try {
-            medicalServiceOrderService.updateServiceOrderResult(id, doctorId, orderId, result, note);
+            medicalServiceOrderService.updateServiceOrderResult(id, doctorId, orderId, request.getResult(), request.getNote());
             redirectAttributes.addFlashAttribute("successMessage", "Cập nhật dịch vụ khám thành công");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
@@ -79,3 +93,4 @@ public class DoctorMedicalServiceController {
         return "redirect:/doctor/appointments/" + id + "/detail?tab=services";
     }
 }
+
