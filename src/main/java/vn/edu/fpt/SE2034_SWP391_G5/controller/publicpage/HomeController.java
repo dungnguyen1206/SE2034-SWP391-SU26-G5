@@ -2,15 +2,16 @@ package vn.edu.fpt.SE2034_SWP391_G5.controller.publicpage;
 
 import org.springframework.ui.Model;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DepartmentService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.DoctorService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.ArticleService;
-import vn.edu.fpt.SE2034_SWP391_G5.entity.Article;
+import vn.edu.fpt.SE2034_SWP391_G5.dto.response.ArticleResponse;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
@@ -40,14 +41,9 @@ public class HomeController {
         model.addAttribute("totalDoctors", doctorService.findByRoleNameAndStatus("DOCTOR", "ACTIVE").size());
         
         // Fetch published articles for the latest news section
-        List<Article> articles = articleService.getArticlesByFilters(null, null, "PUBLISHED");
-        model.addAttribute("totalArticles", articles.size());
-        
-        // Just show the latest 3 articles on home page
-        if (articles.size() > 3) {
-            articles = articles.subList(0, 3);
-        }
-        model.addAttribute("articles", articles);
+        Page<ArticleResponse> articlePage = articleService.getArticlesByFilters(null, null, "PUBLISHED", PageRequest.of(0, 3));
+        model.addAttribute("totalArticles", articlePage.getTotalElements());
+        model.addAttribute("articles", articlePage.getContent());
         
         return "public/home";
     }
