@@ -769,15 +769,7 @@ DoctorSchedule schedule = slot.getSchedule();
             throw new BadRequestException("Lịch khám này chưa được công bố, vui lòng chọn lịch khác");
         }
 
-        boolean hasActiveAppointment = appointmentRepository.existsActiveAppointmentBefore(
-                patientId,
-                schedule.getWorkDate(),
-                slot.getEndTime(),
-                List.of("CONFIRMED", "WAITING", "EXAMINING"));
-        if (hasActiveAppointment) {
-            throw new BadRequestException(
-                    "Bạn có lịch hẹn trước đó chưa hoàn thành. Vui lòng hoàn thành lịch khám trước đó trước khi đặt lịch hẹn mới.");
-        }
+
 
         if (!"AVAILABLE".equals(slot.getStatus()) || slot.getBookedCapacity() >= slot.getMaxCapacity()) {
             throw new BadRequestException("Khung giờ này đã đầy, vui lòng chọn khung giờ khác");
