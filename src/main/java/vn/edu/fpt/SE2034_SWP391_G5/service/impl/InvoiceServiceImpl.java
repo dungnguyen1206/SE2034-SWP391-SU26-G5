@@ -505,6 +505,12 @@ public class InvoiceServiceImpl implements InvoiceService {
             throw new DataConflictException("Vui lòng chọn ít nhất một dịch vụ để thanh toán.");
         }
 
+        // BẮT BUỘC: Nếu có phí khám ban đầu chưa thanh toán, không được phép thanh toán dịch vụ cận lâm sàng mà bỏ qua phí khám
+        boolean hasUnpaidAppointmentFee = allUnpaid.stream().anyMatch(u -> "APPOINTMENT".equals(u.getType()));
+        if (hasUnpaidAppointmentFee && !includeInitialFee && selectedOrderIds != null && !selectedOrderIds.isEmpty()) {
+            throw new DataConflictException("Bạn phải thanh toán Phí khám ban đầu trước hoặc cùng lúc với các dịch vụ cận lâm sàng.");
+        }
+
         // Calculate total of selected items only
         for (InvoiceDetailResponse.UnpaidServiceDto item : selectedItems) {
             if (item.getPrice() != null) {

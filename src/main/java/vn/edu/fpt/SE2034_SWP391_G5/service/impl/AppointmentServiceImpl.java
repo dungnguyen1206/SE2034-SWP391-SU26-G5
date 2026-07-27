@@ -40,7 +40,8 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final vn.edu.fpt.SE2034_SWP391_G5.repository.InvoiceRepository invoiceRepository;
     private final vn.edu.fpt.SE2034_SWP391_G5.repository.InvoiceItemRepository invoiceItemRepository;
 
-    // ======================== LIST APPOINTMENT RECEPTIONIST ========================
+    // ======================== LIST APPOINTMENT RECEPTIONIST
+    // ========================
 
     private AppointmentResponse toAppointmentListResponse(Appointment appointment) {
         return AppointmentResponse.builder()
@@ -687,9 +688,9 @@ public class AppointmentServiceImpl implements AppointmentService {
             throw new BadRequestException("Không thể đặt lịch vào ngày hoặc khung giờ đã qua");
         }
 
-        if (schedule.getWeekSchedule() == null
-                || !"ACTIVE".equalsIgnoreCase(schedule.getStatus())
-                || !"FINALIZED".equalsIgnoreCase(schedule.getWeekSchedule().getStatus())) {
+        String wsStatus = schedule.getWeekSchedule() != null ? schedule.getWeekSchedule().getStatus() : "";
+        if (!"ACTIVE".equalsIgnoreCase(schedule.getStatus())
+                || (!"FINALIZED".equalsIgnoreCase(wsStatus) && !"EXPIRED".equalsIgnoreCase(wsStatus) && !"PUBLISHED".equalsIgnoreCase(wsStatus))) {
             throw new BadRequestException("Lịch khám này chưa được công bố, vui lòng chọn lịch khác");
         }
 
@@ -930,7 +931,6 @@ public class AppointmentServiceImpl implements AppointmentService {
                 .build();
     }
 
-
     private String buildFullName(String lastName, String middleName, String firstName) {
         StringBuilder sb = new StringBuilder();
 
@@ -1025,7 +1025,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                 status.toUpperCase());
     }
 
-    //LinhNH
+    // LinhNH
     @Override
     @Transactional
     public void updateAppointmentStatus(Long appointmentId, String newStatus) {
