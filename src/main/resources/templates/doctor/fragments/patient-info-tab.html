@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
 </head>
+
 <body>
 
     <!-- Tab Pane 1: Thông tin cá nhân & Bệnh án -->
@@ -11,8 +13,8 @@
             <div class="card-header-row">
                 <h3 class="card-title">Thông tin cá nhân</h3>
                 <a th:if="${(appointment.patientDateOfBirth == null or appointment.patientGender == null or appointment.patientBloodType == null or appointment.patientPhone == null or #strings.isEmpty(appointment.patientPhone) or appointment.patientAddress == null or #strings.isEmpty(appointment.patientAddress)) and appointment.status != 'COMPLETED'}"
-                   th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab}, action='editPatient')}"
-                   class="btn-create-record btn-blue">
+                    th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab}, action='editPatient')}"
+                    class="btn-create-record btn-blue">
                     <i class="fa-solid fa-user-pen"></i> Chỉnh sửa thông tin
                 </a>
             </div>
@@ -25,7 +27,9 @@
                     </div>
                     <div>
                         <p>Ngày sinh</p>
-                        <h3 th:text="${appointment.patientDateOfBirth != null ? #temporals.format(appointment.patientDateOfBirth, 'dd/MM/yyyy') : 'Chưa cập nhật'}"></h3>
+                        <h3
+                            th:text="${appointment.patientDateOfBirth != null ? #temporals.format(appointment.patientDateOfBirth, 'dd/MM/yyyy') : 'Chưa cập nhật'}">
+                        </h3>
                     </div>
                 </div>
 
@@ -35,7 +39,9 @@
                     </div>
                     <div>
                         <p>Giới tính</p>
-                        <h3 th:text="${appointment.patientGender == 'MALE'} ? 'Nam' : (${appointment.patientGender == 'FEMALE'} ? 'Nữ' : (${appointment.patientGender != null} ? ${appointment.patientGender} : 'Chưa cập nhật'))"></h3>
+                        <h3
+                            th:text="${appointment.patientGender == 'MALE'} ? 'Nam' : (${appointment.patientGender == 'FEMALE'} ? 'Nữ' : (${appointment.patientGender != null} ? ${appointment.patientGender} : 'Chưa cập nhật'))">
+                        </h3>
                     </div>
                 </div>
 
@@ -45,7 +51,9 @@
                     </div>
                     <div>
                         <p>Nhóm máu</p>
-                        <h3 th:text="${appointment.patientBloodType != null ? appointment.patientBloodType : 'Chưa cập nhật'}"></h3>
+                        <h3
+                            th:text="${appointment.patientBloodType != null ? appointment.patientBloodType : 'Chưa cập nhật'}">
+                        </h3>
                     </div>
                 </div>
 
@@ -55,7 +63,9 @@
                     </div>
                     <div>
                         <p>Số điện thoại</p>
-                        <h3 th:text="${appointment.patientPhone != null && !appointment.patientPhone.isEmpty() ? appointment.patientPhone : 'Chưa cập nhật'}"></h3>
+                        <h3
+                            th:text="${appointment.patientPhone != null && !appointment.patientPhone.isEmpty() ? appointment.patientPhone : 'Chưa cập nhật'}">
+                        </h3>
                     </div>
                 </div>
 
@@ -65,7 +75,9 @@
                     </div>
                     <div>
                         <p>Địa chỉ</p>
-                        <h3 th:text="${appointment.patientAddress != null && !appointment.patientAddress.isEmpty() ? appointment.patientAddress : 'Chưa cập nhật'}"></h3>
+                        <h3
+                            th:text="${appointment.patientAddress != null && !appointment.patientAddress.isEmpty() ? appointment.patientAddress : 'Chưa cập nhật'}">
+                        </h3>
                     </div>
                 </div>
 
@@ -75,7 +87,9 @@
                     </div>
                     <div>
                         <p>Giờ hẹn</p>
-                        <h3 th:text="${appointment.slotStartTime != null ? #temporals.format(appointment.slotStartTime, 'HH:mm') : ''}">09:00</h3>
+                        <h3
+                            th:text="${appointment.slotStartTime != null ? #temporals.format(appointment.slotStartTime, 'HH:mm') : ''}">
+                            09:00</h3>
                     </div>
                 </div>
 
@@ -95,7 +109,9 @@
                     </div>
                     <div>
                         <p>Ghi chú lịch hẹn</p>
-                        <h3 th:text="${appointment.note != null && !appointment.note.isEmpty() ? appointment.note : 'Không có ghi chú'}"></h3>
+                        <h3
+                            th:text="${appointment.note != null && !appointment.note.isEmpty() ? appointment.note : 'Không có ghi chú'}">
+                        </h3>
                     </div>
                 </div>
             </div>
@@ -106,18 +122,19 @@
             <div class="card-header-row">
                 <h3 class="card-title card-title-no-margin">Hồ sơ bệnh án</h3>
                 <a th:if="${medicalRecord == null and (appointment.status == 'EXAMINING' or appointment.status == 'IN_PROGRESS')}"
-                   th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab}, action='create')}"
-                   class="btn-create-record">
+                    th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab}, action='create')}"
+                    class="btn-create-record">
                     <i class="fa-solid fa-plus"></i> Tạo hồ sơ bệnh án
                 </a>
-                <span th:if="${medicalRecord == null and appointment.status != 'COMPLETED' and appointment.status != 'EXAMINING' and appointment.status != 'IN_PROGRESS'}"
-                      class="btn-create-record btn-disabled-gray"
-                      title="Vui lòng chuyển trạng thái lịch hẹn sang 'Đang khám' để tạo hồ sơ bệnh án">
+                <span
+                    th:if="${medicalRecord == null and appointment.status != 'COMPLETED' and appointment.status != 'EXAMINING' and appointment.status != 'IN_PROGRESS'}"
+                    class="btn-create-record btn-disabled-gray"
+                    title="Vui lòng chuyển trạng thái lịch hẹn sang 'Đang khám' để tạo hồ sơ bệnh án">
                     <i class="fa-solid fa-plus"></i> Tạo hồ sơ bệnh án
                 </span>
                 <a th:if="${medicalRecord != null and appointment.status != 'COMPLETED'}"
-                   th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab}, action='edit')}"
-                   class="btn-create-record btn-orange">
+                    th:href="@{/doctor/appointments/{id}/detail(id=${appointment.id}, tab=${tab}, action='edit')}"
+                    class="btn-create-record btn-orange">
                     <i class="fa-solid fa-pen-to-square"></i> Chỉnh sửa
                 </a>
             </div>
@@ -132,19 +149,23 @@
                 <div class="vitals-grid">
                     <div class="vital-item">
                         <span class="vital-label">Huyết áp:</span>
-                        <span class="vital-value" th:text="${medicalRecord.bloodPressure != null && !medicalRecord.bloodPressure.isEmpty() ? medicalRecord.bloodPressure + ' mmHg' : 'Chưa cập nhật'}"></span>
+                        <span class="vital-value"
+                            th:text="${medicalRecord.bloodPressure != null && !medicalRecord.bloodPressure.isEmpty() ? medicalRecord.bloodPressure + ' mmHg' : 'Chưa cập nhật'}"></span>
                     </div>
                     <div class="vital-item">
                         <span class="vital-label">Nhịp tim:</span>
-                        <span class="vital-value" th:text="${medicalRecord.heartRate != null ? medicalRecord.heartRate + ' bpm' : 'Chưa cập nhật'}"></span>
+                        <span class="vital-value"
+                            th:text="${medicalRecord.heartRate != null ? medicalRecord.heartRate + ' bpm' : 'Chưa cập nhật'}"></span>
                     </div>
                     <div class="vital-item">
                         <span class="vital-label">Đường huyết:</span>
-                        <span class="vital-value" th:text="${medicalRecord.bloodGlucose != null ? medicalRecord.bloodGlucose + ' mmol/L' : 'Chưa cập nhật'}"></span>
+                        <span class="vital-value"
+                            th:text="${medicalRecord.bloodGlucose != null ? medicalRecord.bloodGlucose + ' mmol/L' : 'Chưa cập nhật'}"></span>
                     </div>
                     <div class="vital-item">
                         <span class="vital-label">Cân nặng:</span>
-                        <span class="vital-value" th:text="${medicalRecord.weight != null ? medicalRecord.weight + ' kg' : 'Chưa cập nhật'}"></span>
+                        <span class="vital-value"
+                            th:text="${medicalRecord.weight != null ? medicalRecord.weight + ' kg' : 'Chưa cập nhật'}"></span>
                     </div>
                 </div>
 
@@ -157,23 +178,33 @@
                 <div class="clinical-details">
                     <div class="clinical-item">
                         <strong class="clinical-label">Triệu chứng:</strong>
-                        <p class="clinical-text" th:text="${medicalRecord.symptoms != null && !medicalRecord.symptoms.isEmpty() ? medicalRecord.symptoms : 'Không có'}"></p>
+                        <p class="clinical-text"
+                            th:text="${medicalRecord.symptoms != null && !medicalRecord.symptoms.isEmpty() ? medicalRecord.symptoms : 'Không có'}">
+                        </p>
                     </div>
                     <div class="clinical-item">
                         <strong class="clinical-label">Chẩn đoán:</strong>
-                        <p class="clinical-text" th:text="${medicalRecord.diagnosis != null && !medicalRecord.diagnosis.isEmpty() ? medicalRecord.diagnosis : 'Không có'}"></p>
+                        <p class="clinical-text"
+                            th:text="${medicalRecord.diagnosis != null && !medicalRecord.diagnosis.isEmpty() ? medicalRecord.diagnosis : 'Không có'}">
+                        </p>
                     </div>
                     <div class="clinical-item">
                         <strong class="clinical-label">Kết luận:</strong>
-                        <p class="clinical-text" th:text="${medicalRecord.conclusion != null && !medicalRecord.conclusion.isEmpty() ? medicalRecord.conclusion : 'Không có'}"></p>
+                        <p class="clinical-text"
+                            th:text="${medicalRecord.conclusion != null && !medicalRecord.conclusion.isEmpty() ? medicalRecord.conclusion : 'Không có'}">
+                        </p>
                     </div>
                     <div class="clinical-item">
                         <strong class="clinical-label">Đơn thuốc:</strong>
-                        <p class="clinical-text prescription-box" th:text="${medicalRecord.prescriptionText != null && !medicalRecord.prescriptionText.isEmpty() ? medicalRecord.prescriptionText : 'Không có đơn thuốc'}"></p>
+                        <p class="clinical-text prescription-box"
+                            th:text="${medicalRecord.prescriptionText != null && !medicalRecord.prescriptionText.isEmpty() ? medicalRecord.prescriptionText : 'Không có đơn thuốc'}">
+                        </p>
                     </div>
                     <div class="clinical-item">
                         <strong class="clinical-label">Ghi chú:</strong>
-                        <p class="clinical-text" th:text="${medicalRecord.notes != null && !medicalRecord.notes.isEmpty() ? medicalRecord.notes : 'Không có'}"></p>
+                        <p class="clinical-text"
+                            th:text="${medicalRecord.notes != null && !medicalRecord.notes.isEmpty() ? medicalRecord.notes : 'Không có'}">
+                        </p>
                     </div>
                 </div>
             </div>
@@ -187,4 +218,5 @@
     </div>
 
 </body>
+
 </html>

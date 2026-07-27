@@ -122,7 +122,7 @@
 
                     const regex = /^\d+\/\d+$/;
                     if (!regex.test(val)) {
-                        inputElement.setCustomValidity('Định dạng huyết áp sai (Ví dụ: 120/80). Chỉ được chứa số nguyên.');
+                        inputElement.setCustomValidity('Định dạng huyết áp sai (Ví dụ: 120/80).');
                         return;
                     }
 
@@ -140,11 +140,6 @@
                         return;
                     }
 
-                    if (sys <= dia) {
-                        inputElement.setCustomValidity('Huyết áp tâm thu phải lớn hơn huyết áp tâm trương');
-                        return;
-                    }
-
                     if (sys - dia < 20) {
                         inputElement.setCustomValidity('Huyết áp tâm thu phải lớn hơn huyết áp tâm trương ít nhất 20 mmHg');
                         return;
@@ -156,7 +151,9 @@
 
             if (typeof validateHeartRate !== 'function') {
                 function validateHeartRate(inputElement) {
-                    if (inputElement.validity.valueMissing) {
+                    if (inputElement.validity.badInput) {
+                        inputElement.setCustomValidity('Định dạng Nhịp tim sai');
+                    } else if (inputElement.validity.valueMissing) {
                         inputElement.setCustomValidity('Nhịp tim không được để trống');
                     } else if (inputElement.validity.rangeUnderflow) {
                         inputElement.setCustomValidity('Nhịp tim phải từ 30 bpm trở lên');
@@ -170,7 +167,9 @@
 
             if (typeof validateBloodGlucose !== 'function') {
                 function validateBloodGlucose(inputElement) {
-                    if (inputElement.validity.valueMissing) {
+                    if (inputElement.validity.badInput) {
+                        inputElement.setCustomValidity('Định dạng Đường huyết sai');
+                    } else if (inputElement.validity.valueMissing) {
                         inputElement.setCustomValidity('Đường huyết không được để trống');
                     } else if (inputElement.validity.rangeUnderflow) {
                         inputElement.setCustomValidity('Đường huyết phải từ 0.1 mmol/L trở lên');
@@ -184,7 +183,9 @@
 
             if (typeof validateWeight !== 'function') {
                 function validateWeight(inputElement, minVal) {
-                    if (inputElement.validity.valueMissing) {
+                    if (inputElement.validity.badInput) {
+                        inputElement.setCustomValidity('Định dạng Cân nặng sai');
+                    } else if (inputElement.validity.valueMissing) {
                         inputElement.setCustomValidity('Cân nặng không được để trống');
                     } else if (inputElement.validity.rangeUnderflow) {
                         inputElement.setCustomValidity('Cân nặng phải từ ' + minVal + ' kg trở lên');
