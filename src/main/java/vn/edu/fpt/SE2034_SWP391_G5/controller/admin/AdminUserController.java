@@ -58,7 +58,26 @@ public class AdminUserController {
         model.addAttribute("searchMiddleName", criteria.isSearchMiddleName());
         model.addAttribute("searchLastName", criteria.isSearchLastName());
 
+        // Các liên kết lọc vai trò và chuyển trang phải mang theo trường tìm kiếm đang chọn
+        model.addAttribute("searchFields", buildSearchFieldList(criteria));
+
         return "admin/account-list";
+    }
+
+    // Đổi ba cờ tìm kiếm thành danh sách tên trường để gắn vào đường dẫn
+    private List<String> buildSearchFieldList(UserSearchCriteria criteria) {
+        List<String> fields = new ArrayList<>();
+
+        if (criteria.isSearchLastName()) {
+            fields.add("lastName");
+        }
+        if (criteria.isSearchMiddleName()) {
+            fields.add("middleName");
+        }
+        if (criteria.isSearchFirstName()) {
+            fields.add("firstName");
+        }
+        return fields;
     }
 
     // Các số trang hiện ở giữa thanh phân trang.

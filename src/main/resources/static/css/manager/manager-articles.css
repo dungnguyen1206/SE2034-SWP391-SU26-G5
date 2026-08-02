@@ -54,6 +54,92 @@
     color: #0f172a;
 }
 
+/* Nút áp dụng bộ lọc */
+.filter-apply-btn {
+    border: none;
+    border-radius: 6px;
+    background: #3b82f6;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 18px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.filter-apply-btn:hover {
+    background: #2563eb;
+}
+
+/* Hộp thoại xác nhận: ẩn sẵn, chỉ hiện khi địa chỉ trang trỏ đúng vào id của nó */
+.confirm-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: rgba(15, 23, 42, 0.5);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+}
+
+.confirm-overlay:target {
+    display: flex;
+}
+
+.confirm-box {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 24px;
+    width: 380px;
+    max-width: 90%;
+    text-align: left;
+}
+
+.confirm-text {
+    margin: 0 0 20px;
+    font-size: 15px;
+    color: #0f172a;
+    line-height: 1.5;
+}
+
+.confirm-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.confirm-btn {
+    border: none;
+    border-radius: 6px;
+    padding: 8px 18px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.confirm-btn.cancel {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.confirm-btn.cancel:hover {
+    background: #e2e8f0;
+}
+
+.confirm-btn.danger {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+.confirm-btn.danger:hover {
+    background: #dc2626;
+}
+
 /* Meta Separator */
 .meta-separator {
     color: #cbd5e1;
@@ -447,12 +533,14 @@ textarea.form-control {
 }
 
 .editor-placeholder {
-    min-height: 300px;
+    width: 100%;
+    min-height: 400px;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     background: #f8fafc;
     padding: 16px;
-    color: #94a3b8;
+    outline: none;
+    font-family: inherit;
 }
 
 /* Publish Options */
@@ -675,4 +763,130 @@ textarea.form-control {
     background: #2563eb;
     color: white;
     transform: translateY(-2px);
+}
+
+/* ==== Các lớp thay cho CSS từng viết thẳng trong file HTML ==== */
+
+/* Thanh công cụ trên đầu trang: nút quay lại bên trái, nút thao tác bên phải */
+.article-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+/* Hàng chỉ chứa mỗi nút quay lại */
+.article-back-row {
+    margin-bottom: 16px;
+}
+
+/* Liên kết quay lại danh sách bài viết */
+.article-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #64748b;
+    text-decoration: none;
+}
+
+/* Nút chỉnh sửa ở trang chi tiết, để màu xanh lá cho khác nút tạo bài mới */
+.article-create-button.edit {
+    background: #00a651;
+}
+
+/* Khung báo bài viết không tồn tại */
+.article-missing-box {
+    padding: 48px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+/* Liên kết màu xanh nằm trong nội dung */
+.article-inline-link {
+    color: #3b82f6;
+}
+
+/* Dòng đếm số bài viết ở thanh công cụ */
+.article-count {
+    margin: 0;
+    font-size: 14px;
+    color: #64748b;
+}
+
+/* Nút gửi form được giấu đi, để bấm Enter trong ô tìm kiếm vẫn gửi được */
+.hidden-submit {
+    display: none;
+}
+
+/* Đẩy nhóm lọc này sang sát mép phải */
+.filter-group-right {
+    margin-left: auto;
+}
+
+/* Ảnh bìa trong thẻ bài viết */
+.article-thumb {
+    flex-shrink: 0;
+    width: 120px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #e2e8f0;
+}
+
+.article-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+}
+
+/* Ô thay thế khi bài viết chưa có ảnh bìa */
+.article-thumb.empty {
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+}
+
+.article-thumb.empty i {
+    font-size: 24px;
+}
+
+/* Dấu ba chấm xen giữa các số trang */
+.pager-dots {
+    padding: 0 8px;
+    color: #64748b;
+    align-self: center;
+}
+
+/* Khối xem trước ảnh bìa hiện tại khi sửa bài */
+.thumbnail-preview {
+    margin-top: 10px;
+}
+
+.thumbnail-preview-label {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 5px;
+}
+
+.thumbnail-preview-img {
+    max-width: 200px;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+}
+
+/* Thẻ trong suốt, dùng để bọc nhóm nút ở cuối form */
+.form-card.plain {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+/* Ẩn khung thông báo của trình soạn thảo TinyMCE */
+.tox-notifications-container {
+    display: none !important;
 }

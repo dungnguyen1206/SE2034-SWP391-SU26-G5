@@ -15,8 +15,8 @@
 <body>
 <div layout:fragment="content">
         <!-- Nút quay lại -->
-        <div style="margin-bottom: 16px;">
-            <a th:href="@{/manager/articles}" style="display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: #64748b; text-decoration: none;">
+        <div class="article-back-row">
+            <a th:href="@{/manager/articles}" class="article-back-link">
                 <i class="bi bi-arrow-left"></i> Quay lại danh sách
             </a>
         </div>
@@ -37,9 +37,9 @@
                         <div class="form-group">
                             <label class="form-label">Ảnh bìa (Thumbnail)</label>
                             <input type="file" class="form-control" th:field="*{thumbnailFile}" accept="image/*">
-                            <div th:if="*{currentThumbnailUrl != null}" style="margin-top: 10px;">
-                                <p style="font-size: 13px; color: #64748b; margin-bottom: 5px;">Ảnh bìa hiện tại:</p>
-                                <img th:src="*{currentThumbnailUrl}" alt="Thumbnail" style="max-width: 200px; border-radius: 4px; border: 1px solid #e2e8f0;">
+                            <div th:if="*{currentThumbnailUrl != null}" class="thumbnail-preview">
+                                <p class="thumbnail-preview-label">Ảnh bìa hiện tại:</p>
+                                <img th:src="*{currentThumbnailUrl}" alt="Ảnh bìa hiện tại" class="thumbnail-preview-img">
                                 <!-- Ô ẩn giữ lại ảnh bìa hiện tại khi sửa bài -->
                                 <input type="hidden" th:field="*{currentThumbnailUrl}">
                             </div>
@@ -57,7 +57,7 @@
                         <div class="form-group">
                             <label class="form-label">Nội dung bài viết</label>
                             <!-- Trình soạn thảo TinyMCE -->
-                            <textarea class="editor-placeholder" th:field="*{content}" style="width: 100%; min-height: 400px; border: 1px solid #e2e8f0; border-radius: 8px; outline: none; padding: 16px; font-family: inherit;" placeholder="Viết toàn bộ nội dung bài viết tại đây..."></textarea>
+                            <textarea class="editor-placeholder" th:field="*{content}" placeholder="Viết toàn bộ nội dung bài viết tại đây..."></textarea>
                         </div>
                     </div>
 
@@ -104,7 +104,7 @@
 
                     </div>
 
-                    <div class="form-card" style="background: transparent; border: none; padding: 0;">
+                    <div class="form-card plain">
                         <button type="submit" class="btn-publish">Xác nhận tạo bài viết</button>
                         <a th:href="@{/manager/articles}" class="btn-cancel">Hủy bỏ</a>
                     </div>
@@ -135,10 +135,5 @@
 </script>
 </th:block>
 
-<style>
-    .cursor-pointer { cursor: pointer; transition: color 0.2s; }
-    .cursor-pointer:hover { color: #0f172a; }
-    .tox-notifications-container { display: none !important; }
-</style>
 </body>
 </html>

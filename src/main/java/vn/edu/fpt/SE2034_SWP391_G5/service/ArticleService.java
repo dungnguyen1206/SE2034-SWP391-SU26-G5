@@ -14,6 +14,7 @@ public interface ArticleService {
     Page<ArticleResponse> getArticlesByFilters(String keyword, String category, String status, Pageable pageable);
 
     // Lấy bài viết theo id, bài đã xóa mềm coi như không tồn tại
+    // Lấy bài viết theo id, TRẢ VỀ null nếu không tìm thấy hoặc bài đã bị xóa mềm
     ArticleResponse getArticleById(Long id);
 
     // Tạo bài viết mới

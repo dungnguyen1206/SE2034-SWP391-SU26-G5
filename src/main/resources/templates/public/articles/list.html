@@ -5,160 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bài viết chuyên môn - HAMS</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: 'Segoe UI', system-ui, sans-serif; 
-            color: #1e293b; 
-            background: #f8fafc; 
-            min-height: 100vh; 
-            display: flex; 
-            flex-direction: column; 
-        }
-        a { text-decoration: none; }
-        ul { list-style: none; }
-
-        /* Khối căn lề chung cho tất cả nội dung */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 48px;
-            width: 100%;
-        }
-
-        /* NAVBAR (Lấy chuẩn từ home.html) */
-        .navbar {
-            position: sticky; top: 0; z-index: 100;
-            background: #fff; border-bottom: 1px solid #e2e8f0;
-            height: 64px; display: flex; align-items: center;
-            box-shadow: 0 1px 8px rgba(0,0,0,.06);
-        }
-        .navbar .container {
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .navbar-brand {
-            display: flex; align-items: center; gap: 10px;
-            font-size: 22px; font-weight: 800; color: #0f4c81; text-decoration: none;
-        }
-        .navbar-brand i { font-size: 26px; color: #2563eb; }
-        .navbar-nav { display: flex; gap: 32px; }
-        .navbar-nav a { color: #475569; font-size: 14px; font-weight: 500; transition: color .2s; }
-        .navbar-nav a:hover, .navbar-nav a.active { color: #2563eb; }
-        
-        .navbar-actions { display: flex; gap: 10px; align-items: center; }
-        .btn-outline {
-            padding: 8px 18px; border: 1.5px solid #2563eb; border-radius: 8px;
-            color: #2563eb; font-size: 14px; font-weight: 600; text-decoration: none; transition: all .2s;
-            display: flex; align-items: center; gap: 6px;
-        }
-        .btn-outline:hover { background: #eff6ff; }
-        .btn-filled {
-            padding: 8px 18px; background: #2563eb; border-radius: 8px;
-            color: #fff; font-size: 14px; font-weight: 600; text-decoration: none; transition: background .2s;
-            display: flex; align-items: center; gap: 6px;
-        }
-        .btn-filled:hover { background: #1d4ed8; }
-
-        /* HEADER SECTION (Màu nền xanh dương như Hero của home.html) */
-        .page-header { 
-            background: linear-gradient(135deg, #0f4c81, #2563eb); 
-            padding: 48px 0; 
-            color: #fff;
-        }
-        .breadcrumb { display: flex; gap: 8px; font-size: 13px; color: #bfdbfe; margin-bottom: 12px; }
-        .breadcrumb a { color: #fff; font-weight: 500; opacity: 0.9; }
-        .breadcrumb a:hover { opacity: 1; text-decoration: underline; }
-        .page-header h1 { font-size: 36px; font-weight: 800; color: #fff; margin: 0; }
-
-        /* BỘ LỌC DẠNG PILL */
-        .filter-nav-wrapper {
-            background: #fff; 
-            border-bottom: 1px solid #e2e8f0;
-            padding: 16px 0; 
-        }
-        .filter-nav { 
-            display: flex; gap: 12px; overflow-x: auto;
-        }
-        .filter-pill {
-            padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600;
-            background: #f1f5f9; color: #475569; transition: all .2s; white-space: nowrap;
-        }
-        .filter-pill:hover { background: #e2e8f0; color: #0f172a; }
-        .filter-pill.active { background: #2563eb; color: #fff; }
-
-        /* NỘI DUNG CHÍNH */
-        .main-content { 
-            padding: 48px 0; 
-            flex: 1; 
-            width: 100%; 
-        }
-        
-        .article-grid {
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); 
-            gap: 32px;
-        }
-
-        /* CARD BÀI VIẾT TỐI GIẢN */
-        .article-card {
-            background: #fff; border-radius: 12px; border: 1px solid #e2e8f0;
-            overflow: hidden; transition: box-shadow .2s, transform .2s;
-            display: flex; flex-direction: column;
-        }
-        .article-card:hover { 
-            box-shadow: 0 10px 25px rgba(0,0,0,.05); 
-            transform: translateY(-4px); 
-            border-color: #cbd5e1;
-        }
-
-        .article-img {
-            width: 100%; aspect-ratio: 3/2; background: #f1f5f9;
-            display: flex; align-items: center; justify-content: center; overflow: hidden;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .article-img img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
-        .article-img i { font-size: 40px; color: #cbd5e1; }
-
-        .article-body { padding: 20px; display: flex; flex-direction: column; flex: 1; justify-content: space-between; }
-        
-        .article-title {
-            font-size: 18px; font-weight: 700; color: #0f172a; line-height: 1.4;
-            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
-            margin-bottom: 16px;
-        }
-        .article-card:hover .article-title { color: #2563eb; }
-
-        .article-date { 
-            font-size: 13px; color: #64748b; 
-            font-weight: 500;
-        }
-
-        /* PAGINATION */
-        .pagination { display: flex; justify-content: center; gap: 8px; margin-top: 48px; }
-        .page-item {
-            width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
-            border-radius: 8px; font-size: 14px; font-weight: 600; color: #475569;
-            background: #fff; border: 1px solid #e2e8f0; transition: all .2s;
-        }
-        .page-item:hover:not(.disabled) { background: #f1f5f9; color: #0f172a; }
-        .page-item.active { background: #2563eb; color: #fff; border-color: #2563eb; }
-        .page-item.disabled { opacity: 0.5; cursor: not-allowed; }
-
-        /* FOOTER */
-        .footer { background: #0f172a; color: #94a3b8; padding: 40px 0; text-align: center; font-size: 13px; margin-top: auto; }
-        
-        .empty-state { text-align: center; padding: 64px 20px; color: #64748b; }
-        .empty-state i { font-size: 48px; color: #cbd5e1; margin-bottom: 16px; display: block; }
-        .empty-state p { font-size: 16px; }
-
-        @media (max-width: 768px) {
-            .container { padding: 0 20px; }
-            .navbar-nav { display: none; }
-            .article-grid { grid-template-columns: 1fr; }
-        }
-    </style>
+    <link rel="stylesheet" th:href="@{/css/public/public.css}">
 </head>
-<body>
+<body class="page-article-list">
 
 <!-- NAVBAR (Chuẩn xác như home.html) -->
 <nav class="navbar">
@@ -174,31 +23,31 @@
         </ul>
         <div class="navbar-actions">
             <!-- Nếu chưa đăng nhập: Hiện Đăng nhập & Đăng ký -->
-            <div sec:authorize="!isAuthenticated()" style="display: flex; gap: 10px;">
+            <div sec:authorize="!isAuthenticated()" class="navbar-guest-actions">
                 <a th:href="@{/login}" class="btn-outline">Đăng nhập</a>
                 <a th:href="@{/register}" class="btn-filled">Đăng ký</a>
             </div>
             
             <!-- Nếu đã đăng nhập: Hiện link đi tới Dashboard tương ứng & nút Đăng xuất -->
-            <div sec:authorize="isAuthenticated()" style="display: flex; gap: 12px; align-items: center;">
-                <a sec:authorize="hasAuthority('ROLE_PATIENT')" th:href="@{/patient/dashboard}" class="btn-outline" style="text-decoration: none;">
+            <div sec:authorize="isAuthenticated()" class="navbar-user-actions">
+                <a sec:authorize="hasAuthority('ROLE_PATIENT')" th:href="@{/patient/dashboard}" class="btn-outline">
                     <i class="bi bi-speedometer2"></i> Trang cá nhân
                 </a>
-                <a sec:authorize="hasAuthority('ROLE_DOCTOR')" th:href="@{/doctor/dashboard}" class="btn-outline" style="text-decoration: none;">
+                <a sec:authorize="hasAuthority('ROLE_DOCTOR')" th:href="@{/doctor/dashboard}" class="btn-outline">
                     <i class="bi bi-speedometer2"></i> Bảng điều khiển
                 </a>
-                <a sec:authorize="hasAuthority('ROLE_RECEPTIONIST')" th:href="@{/receptionist/dashboard}" class="btn-outline" style="text-decoration: none;">
+                <a sec:authorize="hasAuthority('ROLE_RECEPTIONIST')" th:href="@{/receptionist/dashboard}" class="btn-outline">
                     <i class="bi bi-speedometer2"></i> Bảng điều khiển
                 </a>
-                <a sec:authorize="hasAuthority('ROLE_MANAGER')" th:href="@{/manager/dashboard}" class="btn-outline" style="text-decoration: none;">
+                <a sec:authorize="hasAuthority('ROLE_MANAGER')" th:href="@{/manager/dashboard}" class="btn-outline">
                     <i class="bi bi-speedometer2"></i> Bảng điều khiển
                 </a>
-                <a sec:authorize="hasAuthority('ROLE_ADMIN')" th:href="@{/admin/account-list}" class="btn-outline" style="text-decoration: none;">
+                <a sec:authorize="hasAuthority('ROLE_ADMIN')" th:href="@{/admin/account-list}" class="btn-outline">
                     <i class="bi bi-speedometer2"></i> Quản trị
                 </a>
                 
-                <form th:action="@{/logout}" method="post" style="margin:0; display:inline-block;">
-                    <button type="submit" class="btn-filled" style="background: #ef4444; border-color: #ef4444; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                <form th:action="@{/logout}" method="post" class="logout-form">
+                    <button type="submit" class="btn-filled btn-logout">
                         <i class="bi bi-box-arrow-right"></i> Đăng xuất
                     </button>
                 </form>
@@ -258,22 +107,23 @@
 
         <!-- Phân trang -->
         <div th:if="${totalPages > 1}" class="pagination">
-            <a th:if="${currentPage > 0}" th:href="@{/articles(category=${category}, page=${currentPage - 1})}" class="page-item" title="Trang trước">
+            <a th:if="${currentPage > 1}" th:href="@{/articles(category=${category}, page=${currentPage - 1})}" class="page-item" title="Trang trước">
                 <i class="bi bi-chevron-left"></i>
             </a>
-            <span th:if="${currentPage == 0}" class="page-item disabled"><i class="bi bi-chevron-left"></i></span>
+            <span th:unless="${currentPage > 1}" class="page-item disabled"><i class="bi bi-chevron-left"></i></span>
 
-            <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-                <a th:href="@{/articles(category=${category}, page=${i})}" 
-                   class="page-item" 
-                   th:classappend="${currentPage == i} ? 'active' : ''" 
-                   th:text="${i + 1}">1</a>
+            <!-- Trang công khai ít bài nên liệt kê hết số trang, không cần rút gọn -->
+            <th:block th:each="i : ${#numbers.sequence(1, totalPages)}">
+                <a th:href="@{/articles(category=${category}, page=${i})}"
+                   class="page-item"
+                   th:classappend="${currentPage == i} ? 'active' : ''"
+                   th:text="${i}">1</a>
             </th:block>
 
-            <a th:if="${currentPage < totalPages - 1}" th:href="@{/articles(category=${category}, page=${currentPage + 1})}" class="page-item" title="Trang sau">
+            <a th:if="${currentPage < totalPages}" th:href="@{/articles(category=${category}, page=${currentPage + 1})}" class="page-item" title="Trang sau">
                 <i class="bi bi-chevron-right"></i>
             </a>
-            <span th:if="${currentPage == totalPages - 1}" class="page-item disabled"><i class="bi bi-chevron-right"></i></span>
+            <span th:unless="${currentPage < totalPages}" class="page-item disabled"><i class="bi bi-chevron-right"></i></span>
         </div>
     </div>
 </main>

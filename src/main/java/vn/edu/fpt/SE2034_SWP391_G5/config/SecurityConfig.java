@@ -12,6 +12,7 @@ import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetailsService;
 
 import lombok.RequiredArgsConstructor;
 
+// Cấu hình bảo mật: phân quyền theo đường dẫn, xử lý đăng nhập và đăng xuất
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -21,14 +22,15 @@ public class SecurityConfig {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationSuccessHandler successHandler;
 
+    // Nơi Spring Security lấy tài khoản và cách so mật khẩu khi đăng nhập
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder);
         return authProvider;
     }
 
+    // Khai báo trang nào cần vai trò gì, kèm cấu hình đăng nhập và đăng xuất
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http

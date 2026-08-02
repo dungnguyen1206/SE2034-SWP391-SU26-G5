@@ -35,18 +35,18 @@
                     </div>
 
                     <!-- Nhóm ô nhập Họ, Tên đệm, Tên -->
-                    <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-                        <div class="input-group" style="flex: 1; margin-bottom: 0;">
+                    <div class="name-row">
+                        <div class="input-group">
                             <label class="input-label" for="lastName">Họ</label>
                             <input type="text" id="lastName" th:field="*{lastName}" class="auth-input" placeholder="Họ">
                         </div>
                         
-                        <div class="input-group" style="flex: 1; margin-bottom: 0;">
+                        <div class="input-group">
                             <label class="input-label" for="middleName">Tên đệm</label>
                             <input type="text" id="middleName" th:field="*{middleName}" class="auth-input" placeholder="Tên đệm">
                         </div>
 
-                        <div class="input-group" style="flex: 1; margin-bottom: 0;">
+                        <div class="input-group">
                             <label class="input-label" for="firstName">Tên</label>
                             <input type="text" id="firstName" th:field="*{firstName}" class="auth-input" placeholder="Tên">
                         </div>
@@ -81,13 +81,13 @@
                         <label class="input-label">Nhận mã OTP qua</label>
                         <div class="otp-channel-options">
                             <div class="otp-channel-option">
-                                <input type="radio" id="channelEmail" name="otpChannel" value="email" checked onchange="toggleEmailRequired()">
+                                <input type="radio" id="channelEmail" name="otpChannel" value="email" checked>
                                 <label for="channelEmail">
                                     <i class="fa-solid fa-envelope"></i> Email
                                 </label>
                             </div>
                             <div class="otp-channel-option">
-                                <input type="radio" id="channelSms" name="otpChannel" value="sms" onchange="toggleEmailRequired()">
+                                <input type="radio" id="channelSms" name="otpChannel" value="sms">
                                 <label for="channelSms">
                                     <i class="fa-solid fa-comment-sms"></i> SMS
                                 </label>
@@ -97,7 +97,7 @@
                     
                     <!-- Nút đăng ký -->
                     <div class="auth-footer-actions">
-                        <button type="submit" class="auth-btn" style="width: 100%;">Đăng ký</button>
+                        <button type="submit" class="auth-btn auth-btn-block">Đăng ký</button>
                     </div>
                 </form>
                 
@@ -122,22 +122,5 @@
         </div>
     </div>
 
-    <script>
-        function toggleEmailRequired() {
-            var emailRadio = document.getElementById('channelEmail');
-            var emailInput = document.getElementById('email');
-            
-            if (emailRadio.checked) {
-                emailInput.setAttribute('required', 'required');
-            } else {
-                emailInput.removeAttribute('required');
-            }
-        }
-        
-        // Initialize state on load
-        document.addEventListener("DOMContentLoaded", function() {
-            toggleEmailRequired();
-        });
-    </script>
 </body>
 </html>

@@ -23,7 +23,7 @@
                     <span class="sidebar-header-subtitle">Quản trị viên</span>
                 </div>
             </div>
-            
+
             <nav class="sidebar-menu">
                 <div class="sidebar-menu-section">
                     <span class="sidebar-section-title">Quản trị</span>
@@ -36,46 +36,54 @@
                 </div>
             </nav>
         </aside>
-        
+
         <!-- 2. Khu vực nội dung chính -->
         <main class="admin-main">
             <!-- Header giống manager -->
             <div th:replace="~{manager/fragments/header :: managerHeader('Quản lý tài khoản', 'Quản trị / Danh sách tài khoản')}"></div>
-            
+
             <div class="admin-content">
                 <div class="page-title-section">
                     <h1 class="page-title">Quản lý tài khoản</h1>
                 </div>
-                
-                <!-- Thanh tìm kiếm và bộ lọc -->
-                <form id="filterForm" th:action="@{/admin/account-list}" method="get">
-                    <input type="hidden" name="page" id="pageFilter" th:value="${currentPage}">
+
+                <!-- Thanh tìm kiếm -->
+                <form th:action="@{/admin/account-list}" method="get">
                     <div class="filter-bar">
                         <div class="filter-left">
                             <div class="search-wrapper">
                                 <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
                                 <input type="text" name="keyword" th:value="${keyword}" class="search-input" placeholder="Từ khóa tìm kiếm...">
                             </div>
-                            <button type="button" class="filter-btn-trigger" title="Bộ lọc tìm kiếm" onclick="openAdvancedFilterModal();">
-                                <i class="fa-solid fa-filter"></i>
-                            </button>
+                            <!-- Giữ lại vai trò đang lọc khi tìm theo từ khóa -->
+                            <input type="hidden" name="role" th:value="${roleFilter}">
+                            <button type="submit" class="search-submit-btn">Tìm</button>
                         </div>
-                        
-                        <div class="filter-pills">
-                            <input type="hidden" name="role" id="roleFilter" th:value="${roleFilter}">
-                            <th:block th:if="${searchFirstName}"><input type="hidden" name="searchFields" value="firstName"></th:block>
-                            <th:block th:if="${searchMiddleName}"><input type="hidden" name="searchFields" value="middleName"></th:block>
-                            <th:block th:if="${searchLastName}"><input type="hidden" name="searchFields" value="lastName"></th:block>
-                            
-                            <button type="button" class="filter-pill" th:classappend="${roleFilter == null or roleFilter == ''} ? 'active' : ''" onclick="filterByRole('')">Tất cả</button>
-                            <button type="button" class="filter-pill" th:classappend="${roleFilter == 'PATIENT'} ? 'active' : ''" onclick="filterByRole('PATIENT')">Bệnh nhân</button>
-                            <button type="button" class="filter-pill" th:classappend="${roleFilter == 'DOCTOR'} ? 'active' : ''" onclick="filterByRole('DOCTOR')">Bác sĩ</button>
-                            <button type="button" class="filter-pill" th:classappend="${roleFilter == 'RECEPTIONIST'} ? 'active' : ''" onclick="filterByRole('RECEPTIONIST')">Lễ tân</button>
-                            <button type="button" class="filter-pill" th:classappend="${roleFilter == 'MANAGER'} ? 'active' : ''" onclick="filterByRole('MANAGER')">Quản lý</button>
+
+                        <!-- Chọn trường muốn tìm, không tick ô nào thì mặc định tìm cả ba -->
+                        <div class="search-field-options">
+                            <span class="search-field-label">Tìm trong:</span>
+                            <label><input type="checkbox" name="searchFields" value="lastName" th:checked="${searchLastName}"> Họ</label>
+                            <label><input type="checkbox" name="searchFields" value="middleName" th:checked="${searchMiddleName}"> Tên đệm</label>
+                            <label><input type="checkbox" name="searchFields" value="firstName" th:checked="${searchFirstName}"> Tên</label>
                         </div>
                     </div>
                 </form>
-                
+
+                <!-- Lọc theo vai trò, mỗi nút là liên kết mang theo từ khóa và trường tìm hiện tại -->
+                <div class="filter-pills">
+                    <a th:href="@{/admin/account-list(keyword=${keyword}, searchFields=${searchFields})}"
+                       class="filter-pill" th:classappend="${roleFilter == null or roleFilter == ''} ? 'active' : ''">Tất cả</a>
+                    <a th:href="@{/admin/account-list(keyword=${keyword}, role='PATIENT', searchFields=${searchFields})}"
+                       class="filter-pill" th:classappend="${roleFilter == 'PATIENT'} ? 'active' : ''">Bệnh nhân</a>
+                    <a th:href="@{/admin/account-list(keyword=${keyword}, role='DOCTOR', searchFields=${searchFields})}"
+                       class="filter-pill" th:classappend="${roleFilter == 'DOCTOR'} ? 'active' : ''">Bác sĩ</a>
+                    <a th:href="@{/admin/account-list(keyword=${keyword}, role='RECEPTIONIST', searchFields=${searchFields})}"
+                       class="filter-pill" th:classappend="${roleFilter == 'RECEPTIONIST'} ? 'active' : ''">Lễ tân</a>
+                    <a th:href="@{/admin/account-list(keyword=${keyword}, role='MANAGER', searchFields=${searchFields})}"
+                       class="filter-pill" th:classappend="${roleFilter == 'MANAGER'} ? 'active' : ''">Quản lý</a>
+                </div>
+
                 <div th:if="${successMessage}" class="alert-box success">
                     <i class="fa-solid fa-circle-check"></i> <span th:text="${successMessage}"></span>
                 </div>
@@ -116,191 +124,123 @@
                                 <td th:text="${user.createdAt != null ? #temporals.format(user.createdAt, 'dd/MM/yyyy') : ''}">18/05/2026</td>
                                 <td class="text-center">
                                     <div class="action-group">
-                                        <a href="#" class="action-btn edit-role" title="Thay đổi vai trò" th:data-id="${user.id}" th:data-name="${user.fullName}" th:data-roles="${#strings.listJoin(user.roles, ',')}" onclick="openEditRoleModal(this.getAttribute('data-id'), this.getAttribute('data-name'), this.getAttribute('data-roles')); return false;"><i class="fa-solid fa-user-shield"></i></a>
-                                        
-                                        <form th:if="${user.canBeLocked}" th:action="@{/admin/account-list/{id}/lock(id=${user.id})}" method="post" class="inline-form">
-                                            <button type="submit" class="action-btn delete" title="Khóa tài khoản" onclick="return confirm('Bạn có chắc chắn muốn khóa tài khoản này?');"><i class="fa-solid fa-lock"></i></button>
-                                        </form>
+                                        <a th:href="'#role-modal-' + ${user.id}" class="action-btn edit-role" title="Thay đổi vai trò"><i class="fa-solid fa-user-shield"></i></a>
 
-                                        <form th:if="${user.canBeUnlocked}" th:action="@{/admin/account-list/{id}/unlock(id=${user.id})}" method="post" class="inline-form">
-                                            <button type="submit" class="action-btn unlock" title="Mở khóa tài khoản" onclick="return confirm('Bạn có chắc chắn muốn mở khóa tài khoản này?');"><i class="fa-solid fa-unlock"></i></button>
-                                        </form>
+                                        <a th:if="${user.canBeLocked}" th:href="'#lock-modal-' + ${user.id}" class="action-btn delete" title="Khóa tài khoản"><i class="fa-solid fa-lock"></i></a>
+
+                                        <a th:if="${user.canBeUnlocked}" th:href="'#unlock-modal-' + ${user.id}" class="action-btn unlock" title="Mở khóa tài khoản"><i class="fa-solid fa-unlock"></i></a>
+                                    </div>
+
+                                    <!-- Hộp thoại đổi vai trò, vai trò hiện có được tick sẵn từ máy chủ -->
+                                    <div class="modal-overlay" th:id="'role-modal-' + ${user.id}">
+                                        <div class="modal-box">
+                                            <div class="modal-header">
+                                                <h3 class="modal-title">Thay đổi vai trò</h3>
+                                                <a href="#" class="modal-close-btn"><i class="fa-solid fa-xmark"></i></a>
+                                            </div>
+                                            <form th:action="@{/admin/update-role}" method="post" class="modal-form">
+                                                <div class="modal-body">
+                                                    <p>Thay đổi vai trò hệ thống cho tài khoản <strong th:text="${user.fullName}">...</strong>:</p>
+                                                    <input type="hidden" name="userId" th:value="${user.id}">
+                                                    <div class="modal-form-group">
+                                                        <label class="field-label">Vai trò</label>
+                                                        <div class="field-stack">
+                                                            <label><input type="checkbox" name="roles" value="PATIENT" th:checked="${#lists.contains(user.roles, 'PATIENT')}"> Bệnh nhân</label>
+                                                            <label><input type="checkbox" name="roles" value="DOCTOR" th:checked="${#lists.contains(user.roles, 'DOCTOR')}"> Bác sĩ</label>
+                                                            <label><input type="checkbox" name="roles" value="RECEPTIONIST" th:checked="${#lists.contains(user.roles, 'RECEPTIONIST')}"> Lễ tân</label>
+                                                            <label><input type="checkbox" name="roles" value="MANAGER" th:checked="${#lists.contains(user.roles, 'MANAGER')}"> Quản lý</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <a href="#" class="modal-btn cancel">Hủy</a>
+                                                    <button type="submit" class="modal-btn save">Lưu thay đổi</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                    <!-- Hộp thoại xác nhận khóa tài khoản -->
+                                    <div th:if="${user.canBeLocked}" class="modal-overlay" th:id="'lock-modal-' + ${user.id}">
+                                        <div class="modal-box small">
+                                            <div class="modal-header">
+                                                <h3 class="modal-title">Khóa tài khoản</h3>
+                                                <a href="#" class="modal-close-btn"><i class="fa-solid fa-xmark"></i></a>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Bạn có chắc chắn muốn khóa tài khoản <strong th:text="${user.fullName}">...</strong> không?</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <a href="#" class="modal-btn cancel">Hủy</a>
+                                                <form th:action="@{/admin/account-list/{id}/lock(id=${user.id})}" method="post" class="inline-form">
+                                                    <button type="submit" class="modal-btn danger">Khóa</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Hộp thoại xác nhận mở khóa tài khoản -->
+                                    <div th:if="${user.canBeUnlocked}" class="modal-overlay" th:id="'unlock-modal-' + ${user.id}">
+                                        <div class="modal-box small">
+                                            <div class="modal-header">
+                                                <h3 class="modal-title">Mở khóa tài khoản</h3>
+                                                <a href="#" class="modal-close-btn"><i class="fa-solid fa-xmark"></i></a>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>Bạn có chắc chắn muốn mở khóa tài khoản <strong th:text="${user.fullName}">...</strong> không?</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <a href="#" class="modal-btn cancel">Hủy</a>
+                                                <form th:action="@{/admin/account-list/{id}/unlock(id=${user.id})}" method="post" class="inline-form">
+                                                    <button type="submit" class="modal-btn save">Mở khóa</button>
+                                                </form>
+                                            </div>
+                                        </div>
                                     </div>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                
+
                 <div class="pagination-container" th:if="${totalPages > 0}">
                     <span>
                         Trang <span th:text="${currentPage}">1</span> / <span th:text="${totalPages}">2</span>
                         &bull; Tổng số <span th:text="${totalItems}">12</span> tài khoản
                     </span>
                     <div class="pagination-controls">
-                        <button class="pagination-btn" th:disabled="${currentPage == 1}" th:data-page="${currentPage - 1}" onclick="goToPage(this.dataset.page)"><i class="fa-solid fa-chevron-left"></i></button>
-                        
+                        <!-- Nút lùi một trang, đang ở trang đầu thì để mờ và không bấm được -->
+                        <a th:if="${currentPage > 1}" class="pagination-btn"
+                           th:href="@{/admin/account-list(keyword=${keyword}, role=${roleFilter}, searchFields=${searchFields}, page=${currentPage - 1})}"><i class="fa-solid fa-chevron-left"></i></a>
+                        <span th:unless="${currentPage > 1}" class="pagination-btn disabled"><i class="fa-solid fa-chevron-left"></i></span>
+
                         <!-- Luôn hiện trang đầu -->
-                        <button th:if="${totalPages >= 1}" class="pagination-btn" th:classappend="${currentPage == 1} ? 'active' : ''" onclick="goToPage(1)">1</button>
+                        <a th:if="${totalPages >= 1}" class="pagination-btn" th:classappend="${currentPage == 1} ? 'active' : ''"
+                           th:href="@{/admin/account-list(keyword=${keyword}, role=${roleFilter}, searchFields=${searchFields}, page=1)}">1</a>
 
                         <!-- Dấu ba chấm bên trái -->
                         <span th:if="${showLeftDots}" class="pagination-dots">...</span>
 
                         <!-- Các trang quanh trang hiện tại, danh sách do controller tính sẵn -->
-                        <button th:each="page : ${middlePages}" class="pagination-btn"
-                                th:classappend="${currentPage == page} ? 'active' : ''"
-                                th:text="${page}" th:data-page="${page}" onclick="goToPage(this.dataset.page)"></button>
+                        <a th:each="page : ${middlePages}" class="pagination-btn"
+                           th:classappend="${currentPage == page} ? 'active' : ''" th:text="${page}"
+                           th:href="@{/admin/account-list(keyword=${keyword}, role=${roleFilter}, searchFields=${searchFields}, page=${page})}"></a>
 
                         <!-- Dấu ba chấm bên phải -->
                         <span th:if="${showRightDots}" class="pagination-dots">...</span>
 
                         <!-- Luôn hiện trang cuối -->
-                        <button th:if="${totalPages > 1}" class="pagination-btn" th:classappend="${currentPage == totalPages} ? 'active' : ''" th:text="${totalPages}" th:data-page="${totalPages}" onclick="goToPage(this.dataset.page)"></button>
-                        
-                        <button class="pagination-btn" th:disabled="${currentPage == totalPages}" th:data-page="${currentPage + 1}" onclick="goToPage(this.dataset.page)"><i class="fa-solid fa-chevron-right"></i></button>
+                        <a th:if="${totalPages > 1}" class="pagination-btn" th:classappend="${currentPage == totalPages} ? 'active' : ''" th:text="${totalPages}"
+                           th:href="@{/admin/account-list(keyword=${keyword}, role=${roleFilter}, searchFields=${searchFields}, page=${totalPages})}"></a>
+
+                        <!-- Nút tiến một trang -->
+                        <a th:if="${currentPage < totalPages}" class="pagination-btn"
+                           th:href="@{/admin/account-list(keyword=${keyword}, role=${roleFilter}, searchFields=${searchFields}, page=${currentPage + 1})}"><i class="fa-solid fa-chevron-right"></i></a>
+                        <span th:unless="${currentPage < totalPages}" class="pagination-btn disabled"><i class="fa-solid fa-chevron-right"></i></span>
                     </div>
                 </div>
             </div>
         </main>
     </div>
-
-    <!-- MODAL BỘ LỌC TÌM KIẾM -->
-    <div id="advancedFilterModal" class="modal-overlay">
-        <div class="modal-box small">
-            <div class="modal-header">
-                <h3 class="modal-title">Cài đặt tìm kiếm</h3>
-                <button type="button" class="modal-close-btn" onclick="closeModal('advancedFilterModal')"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="modal-body">
-                <div class="modal-form-group">
-                    <label class="field-label">Chọn trường tìm kiếm</label>
-                    <div class="field-stack">
-                        <label><input type="checkbox" id="modalSearchFirstName" value="firstName" th:checked="${searchFirstName}"> Tên (First Name)</label>
-                        <label><input type="checkbox" id="modalSearchMiddleName" value="middleName" th:checked="${searchMiddleName}"> Tên đệm (Middle Name)</label>
-                        <label><input type="checkbox" id="modalSearchLastName" value="lastName" th:checked="${searchLastName}"> Họ (Last Name)</label>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="modal-btn cancel" onclick="closeModal('advancedFilterModal')">Hủy</button>
-                <button type="button" class="modal-btn save" onclick="applyAdvancedFilter()">Áp dụng</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL THAY ĐỔI VAI TRÒ -->
-    <div id="editRoleModal" class="modal-overlay">
-        <div class="modal-box">
-            <div class="modal-header">
-                <h3 class="modal-title">Thay đổi vai trò</h3>
-                <button type="button" class="modal-close-btn" onclick="closeModal('editRoleModal')"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="modal-body">
-                <p>Thay đổi vai trò hệ thống cho tài khoản <strong id="editRoleUserName">...</strong>:</p>
-                <form id="editRoleForm" th:action="@{/admin/update-role}" method="post" class="modal-form">
-                    <input type="hidden" name="userId" id="editRoleUserId">
-                    <div class="modal-form-group">
-                        <label class="field-label">Vai trò</label>
-                        <div class="field-stack">
-                            <label><input type="checkbox" name="roles" value="PATIENT"> Bệnh nhân</label>
-                            <label><input type="checkbox" name="roles" value="DOCTOR"> Bác sĩ</label>
-                            <label><input type="checkbox" name="roles" value="RECEPTIONIST"> Lễ tân</label>
-                            <label><input type="checkbox" name="roles" value="MANAGER"> Quản lý</label>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="modal-btn cancel" onclick="closeModal('editRoleModal')">Hủy</button>
-                <button type="submit" form="editRoleForm" class="modal-btn save">Lưu thay đổi</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Mọi thao tác lọc -->
-    <script>
-        // Lọc danh sách theo vai trò, luôn quay về trang đầu vì kết quả đã đổi
-        function filterByRole(role) {
-            document.getElementById('roleFilter').value = role;
-            goToPage(1);
-        }
-
-        // Chuyển sang trang chỉ định, giữ nguyên từ khóa và bộ lọc đang có
-        function goToPage(page) {
-            document.getElementById('pageFilter').value = page;
-            document.getElementById('filterForm').submit();
-        }
-
-        // Mở hộp thoại chọn trường tìm kiếm
-        function openAdvancedFilterModal() {
-            openModal('advancedFilterModal');
-        }
-
-        // Áp dụng các trường tìm kiếm đã tick trong hộp thoại
-        function applyAdvancedFilter() {
-            var form = document.getElementById('filterForm');
-
-            // Xóa lựa chọn cũ trước khi ghi lựa chọn mới
-            var oldFields = document.querySelectorAll('input[name="searchFields"]');
-            for (var i = 0; i < oldFields.length; i++) {
-                oldFields[i].remove();
-            }
-
-            addSearchField(form, 'modalSearchFirstName', 'firstName');
-            addSearchField(form, 'modalSearchMiddleName', 'middleName');
-            addSearchField(form, 'modalSearchLastName', 'lastName');
-
-            goToPage(1);
-        }
-
-        // Thêm một trường tìm kiếm vào form nếu ô tick đang được chọn
-        function addSearchField(form, checkboxId, fieldName) {
-            if (document.getElementById(checkboxId).checked) {
-                form.insertAdjacentHTML('beforeend',
-                    '<input type="hidden" name="searchFields" value="' + fieldName + '">');
-            }
-        }
-
-        // Mở hộp thoại đổi vai trò, tick sẵn những vai trò tài khoản đang có
-        function openEditRoleModal(userId, userName, rolesText) {
-            document.getElementById('editRoleUserId').value = userId;
-            document.getElementById('editRoleUserName').innerText = userName;
-
-            // Bỏ tick tất cả trước, rồi tick lại theo vai trò hiện tại
-            var checkboxes = document.querySelectorAll('input[name="roles"]');
-            for (var i = 0; i < checkboxes.length; i++) {
-                checkboxes[i].checked = false;
-            }
-
-            if (rolesText) {
-                var roles = rolesText.split(',');
-                for (var j = 0; j < roles.length; j++) {
-                    var checkbox = document.querySelector('input[name="roles"][value="' + roles[j].trim() + '"]');
-                    if (checkbox) {
-                        checkbox.checked = true;
-                    }
-                }
-            }
-
-            openModal('editRoleModal');
-        }
-
-        // Hiện một hộp thoại
-        function openModal(modalId) {
-            document.getElementById(modalId).classList.add('active');
-        }
-
-        // Ẩn một hộp thoại
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
-        // Bấm ra vùng nền tối bên ngoài thì đóng hộp thoại
-        window.addEventListener('click', function (event) {
-            if (event.target.classList.contains('modal-overlay')) {
-                event.target.classList.remove('active');
-            }
-        });
-    </script>
 </body>
 </html>

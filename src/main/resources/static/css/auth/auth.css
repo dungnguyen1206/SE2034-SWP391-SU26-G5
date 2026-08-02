@@ -415,27 +415,41 @@ select {
     font-size: 1rem;
 }
 
-/* Phone input for forgot password (show/hide based on channel) */
-.phone-group-toggle {
-    display: none;
+/* Dòng mô tả ngắn dưới tiêu đề thẻ */
+.auth-card-desc {
+    color: #6b7280;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+    line-height: 1.5;
 }
 
-.phone-group-toggle.show {
-    display: block;
+/* Nút chiếm trọn chiều ngang của thẻ */
+.auth-btn-block {
+    width: 100%;
 }
 
-    /* Dòng mô tả ngắn dưới tiêu đề thẻ */
+/* Ô nhập mã OTP: chữ to, giãn cách rộng, canh giữa cho dễ đọc */
+.otp-input {
+    text-align: center;
+    font-size: 1.3rem;
+    letter-spacing: 5px;
+}
 
-    .auth-card-desc {
-        color: #6b7280;
-        font-size: 0.95rem;
-        margin-bottom: 20px;
-        line-height: 1.5;
-    }
+/* Hàng ba ô Họ, Tên đệm, Tên xếp ngang nhau */
+.name-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
 
-    /* Nút chiếm trọn chiều ngang của thẻ */
+.name-row .input-group {
+    flex: 1;
+    margin-bottom: 0;
+}
 
-    .auth-btn-block {
-        width: 100%;
-    }
+/* Mũi tên nhỏ đứng trước chữ Quay lại Đăng nhập */
+.back-arrow-icon {
+    margin-right: 6px;
+    font-size: 0.8rem;
+}
 

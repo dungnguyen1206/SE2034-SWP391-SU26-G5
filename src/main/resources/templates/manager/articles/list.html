@@ -26,8 +26,8 @@
         </div>
 
         <!-- Thanh công cụ: số bài viết + nút tạo mới -->
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
-            <p style="margin: 0; font-size: 14px; color: #64748b;">
+        <div class="article-toolbar">
+            <p class="article-count">
                 <span th:text="${totalItems}">0</span> bài viết
             </p>
             <a th:href="@{/manager/articles/create}" class="article-create-button">
@@ -40,13 +40,13 @@
             <div class="article-search-box">
                 <i class="bi bi-search"></i>
                 <input type="text" name="keyword" th:value="${keyword}" placeholder="Tìm kiếm bài viết theo tiêu đề...">
-                <button type="submit" style="display:none;"></button>
+                <button type="submit" class="hidden-submit"></button>
             </div>
             
             <div class="article-filter-row">
                 <div class="filter-group">
                     <span class="filter-label">Chuyên mục:</span>
-                    <select name="category" class="form-control filter-select" onchange="this.form.submit()">
+                    <select name="category" class="form-control filter-select">
                         <option value="" th:selected="${category == null or category == ''}">Tất cả</option>
                         <!-- Chuyên mục lấy từ enum ArticleCategory -->
                         <option th:each="cat : ${categories}" th:value="${cat}" th:text="${cat}"
@@ -56,14 +56,19 @@
 
                 <div class="filter-group">
                     <span class="filter-label">Trạng thái:</span>
-                    <select name="status" class="form-control filter-select" onchange="this.form.submit()">
+                    <select name="status" class="form-control filter-select">
                         <option value="" th:selected="${status == null or status == ''}">Tất cả</option>
                         <option value="PUBLISHED" th:selected="${status == 'PUBLISHED'}">Đã xuất bản</option>
                         <option value="DRAFT" th:selected="${status == 'DRAFT'}">Bản nháp</option>
                     </select>
                 </div>
-                
-                <div class="filter-group" style="margin-left: auto;">
+
+                <!-- Bấm để áp dụng bộ lọc, thay cho việc tự gửi form khi chọn -->
+                <div class="filter-group">
+                    <button type="submit" class="filter-apply-btn">Lọc</button>
+                </div>
+
+                <div class="filter-group filter-group-right">
                     <a th:href="@{/manager/articles}" class="filter-clear-link">Xóa lọc</a>
                 </div>
             </div>
@@ -73,12 +78,12 @@
         <div class="article-list-container">
             
             <div th:each="article : ${articleList}" class="article-card">
-                <div class="article-card-left" style="display: flex; gap: 16px; align-items: center;">
-                    <div th:if="${article.thumbnailUrl != null}" style="flex-shrink: 0; width: 120px; height: 80px; border-radius: 8px; overflow: hidden; background: #e2e8f0;">
-                        <img th:src="${article.thumbnailUrl}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;">
+                <div class="article-card-left">
+                    <div th:if="${article.thumbnailUrl != null}" class="article-thumb">
+                        <img th:src="${article.thumbnailUrl}" th:alt="${article.title}">
                     </div>
-                    <div th:if="${article.thumbnailUrl == null}" style="flex-shrink: 0; width: 120px; height: 80px; border-radius: 8px; overflow: hidden; background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #94a3b8;">
-                        <i class="bi bi-image" style="font-size: 24px;"></i>
+                    <div th:if="${article.thumbnailUrl == null}" class="article-thumb empty">
+                        <i class="bi bi-image"></i>
                     </div>
 
                     <div class="article-info">
@@ -99,10 +104,20 @@
                     <div class="card-actions">
                         <a th:href="@{'/manager/articles/detail/' + ${article.id}}" class="action-btn" title="Xem chi tiết"><i class="bi bi-eye"></i></a>
                         <a th:href="@{'/manager/articles/edit/' + ${article.id}}" class="action-btn" title="Chỉnh sửa"><i class="bi bi-pencil-square"></i></a>
-                        <form th:action="@{'/manager/articles/delete/' + ${article.id}}" method="post" style="display:inline;"
-                              onsubmit="return confirm('Bạn có chắc chắn muốn xóa bài viết này không?');">
-                            <button type="submit" class="action-btn delete" title="Xóa"><i class="bi bi-trash"></i></button>
-                        </form>
+                        <a th:href="'#confirm-delete-' + ${article.id}" class="action-btn delete" title="Xóa"><i class="bi bi-trash"></i></a>
+
+                        <!-- Hộp thoại xác nhận, chỉ hiện khi địa chỉ trên trình duyệt trỏ đúng vào id này -->
+                        <div class="confirm-overlay" th:id="'confirm-delete-' + ${article.id}">
+                            <div class="confirm-box">
+                                <p class="confirm-text">Bạn có chắc chắn muốn xóa bài viết này không?</p>
+                                <div class="confirm-actions">
+                                    <a href="#" class="confirm-btn cancel">Hủy</a>
+                                    <form th:action="@{'/manager/articles/delete/' + ${article.id}}" method="post">
+                                        <button type="submit" class="confirm-btn danger">Xóa</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -118,40 +133,42 @@
         <!-- Phân trang -->
         <div th:if="${totalPages > 1}" class="article-pagination">
             <span class="pagination-info"
-                  th:text="'Trang ' + ${currentPage + 1} + ' / ' + ${totalPages}"></span>
+                  th:text="'Trang ' + ${currentPage} + ' / ' + ${totalPages}"></span>
 
-            <a th:if="${currentPage > 0}"
-               th:href="@{/manager/articles(keyword=${keyword}, category=${category}, status=${status}, page=${currentPage - 1})}"
-               class="pager-button">
+            <!-- Nút lùi một trang, đang ở trang đầu thì để mờ và không bấm được -->
+            <a th:if="${currentPage > 1}" class="pager-button"
+               th:href="@{/manager/articles(keyword=${keyword}, category=${category}, status=${status}, page=${currentPage - 1})}">
                 <i class="bi bi-chevron-left"></i> Trước
             </a>
-            <span th:if="${currentPage == 0}" class="pager-button disabled">
+            <span th:unless="${currentPage > 1}" class="pager-button disabled">
                 <i class="bi bi-chevron-left"></i> Trước
             </span>
 
             <!-- Luôn hiện trang đầu -->
-            <a th:if="${totalPages >= 1}" class="pager-button" th:classappend="${currentPage == 0} ? 'active' : ''" th:text="1" th:href="@{/manager/articles(keyword=${keyword}, category=${category}, status=${status}, page=0)}">1</a>
+            <a class="pager-button" th:classappend="${currentPage == 1} ? 'active' : ''"
+               th:href="@{/manager/articles(keyword=${keyword}, category=${category}, status=${status}, page=1)}">1</a>
 
             <!-- Dấu ba chấm bên trái -->
-            <span th:if="${currentPage > 2}" style="padding: 0 8px; color: #64748b; align-self: center;">...</span>
+            <span th:if="${showLeftDots}" class="pager-dots">...</span>
 
-            <!-- Các trang quanh trang hiện tại, currentPage đếm từ 0 -->
-            <th:block th:if="${totalPages > 2}" th:each="i : ${#numbers.sequence(currentPage - 1 > 0 ? currentPage - 1 : 1, currentPage + 1 < totalPages - 1 ? currentPage + 1 : totalPages - 2)}">
-                <a th:if="${i >= 1 and i < totalPages - 1}" class="pager-button" th:classappend="${currentPage == i} ? 'active' : ''" th:text="${i + 1}" th:href="@{/manager/articles(keyword=${keyword}, category=${category}, status=${status}, page=${i})}"></a>
-            </th:block>
+            <!-- Các trang quanh trang hiện tại, danh sách do controller tính sẵn -->
+            <a th:each="page : ${middlePages}" class="pager-button"
+               th:classappend="${currentPage == page} ? 'active' : ''" th:text="${page}"
+               th:href="@{/manager/articles(keyword=${keyword}, category=${category}, status=${status}, page=${page})}"></a>
 
             <!-- Dấu ba chấm bên phải -->
-            <span th:if="${currentPage < totalPages - 3}" style="padding: 0 8px; color: #64748b; align-self: center;">...</span>
+            <span th:if="${showRightDots}" class="pager-dots">...</span>
 
             <!-- Luôn hiện trang cuối -->
-            <a th:if="${totalPages > 1}" class="pager-button" th:classappend="${currentPage == totalPages - 1} ? 'active' : ''" th:text="${totalPages}" th:href="@{/manager/articles(keyword=${keyword}, category=${category}, status=${status}, page=${totalPages - 1})}"></a>
+            <a class="pager-button" th:classappend="${currentPage == totalPages} ? 'active' : ''" th:text="${totalPages}"
+               th:href="@{/manager/articles(keyword=${keyword}, category=${category}, status=${status}, page=${totalPages})}"></a>
 
-            <a th:if="${currentPage < totalPages - 1}"
-               th:href="@{/manager/articles(keyword=${keyword}, category=${category}, status=${status}, page=${currentPage + 1})}"
-               class="pager-button">
+            <!-- Nút tiến một trang -->
+            <a th:if="${currentPage < totalPages}" class="pager-button"
+               th:href="@{/manager/articles(keyword=${keyword}, category=${category}, status=${status}, page=${currentPage + 1})}">
                 Sau <i class="bi bi-chevron-right"></i>
             </a>
-            <span th:if="${currentPage >= totalPages - 1}" class="pager-button disabled">
+            <span th:unless="${currentPage < totalPages}" class="pager-button disabled">
                 Sau <i class="bi bi-chevron-right"></i>
             </span>
         </div>

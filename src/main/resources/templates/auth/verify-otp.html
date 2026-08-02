@@ -20,7 +20,7 @@
         <div class="auth-left">
             <div class="auth-card">
                 <h2 class="auth-card-title" th:text="${otpChannel == 'sms'} ? 'Xác thực SMS' : 'Xác thực Email'">Xác thực Email</h2>
-                <p style="color: #6b7280; font-size: 0.95rem; margin-bottom: 20px; line-height: 1.5;"
+                <p class="auth-card-desc"
                    th:text="${otpChannel == 'sms'} ? 'Hệ thống đã gửi một mã xác thực OTP gồm 6 chữ số đến số điện thoại của bạn. Vui lòng kiểm tra và nhập mã vào ô bên dưới để hoàn tất đăng ký.' : 'Hệ thống đã gửi một mã xác thực OTP gồm 6 chữ số đến Gmail của bạn. Vui lòng kiểm tra và nhập mã vào ô bên dưới để hoàn tất đăng ký.'">
                     Hệ thống đã gửi một mã xác thực OTP gồm 6 chữ số đến Gmail của bạn. Vui lòng kiểm tra và nhập mã vào ô bên dưới để hoàn tất đăng ký.
                 </p>
@@ -35,12 +35,12 @@
                     <!-- Ô nhập mã OTP -->
                     <div class="input-group">
                         <label class="input-label" for="otp">Mã xác thực OTP</label>
-                        <input type="text" id="otp" name="otp" class="auth-input" placeholder="Nhập mã 6 chữ số" required autofocus maxlength="6" pattern="\d{6}" style="text-align: center; font-size: 1.3rem; letter-spacing: 5px;">
+                        <input type="text" id="otp" name="otp" class="auth-input otp-input" placeholder="Nhập mã 6 chữ số" required autofocus maxlength="6" pattern="\d{6}">
                     </div>
                     
                     <!-- Nút xác nhận -->
                     <div class="auth-footer-actions">
-                        <button type="submit" class="auth-btn" style="width: 100%;">Xác nhận</button>
+                        <button type="submit" class="auth-btn auth-btn-block">Xác nhận</button>
                     </div>
                 </form>
                 

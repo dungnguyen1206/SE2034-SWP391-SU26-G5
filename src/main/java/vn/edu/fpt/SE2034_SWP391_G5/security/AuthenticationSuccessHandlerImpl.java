@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+// Đưa người dùng về trang chủ tương ứng với vai trò sau khi đăng nhập thành công
 @Component
 public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHandler {
 
@@ -28,8 +29,6 @@ public class AuthenticationSuccessHandlerImpl implements AuthenticationSuccessHa
         // Không có vai trò nào nhận diện được thì về trang chủ
         response.sendRedirect("/");
     }
-
-
 
     // Trang chủ tương ứng với từng vai trò
     private String getHomeUrl(String role) {

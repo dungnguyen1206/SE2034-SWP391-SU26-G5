@@ -20,6 +20,9 @@ import vn.edu.fpt.SE2034_SWP391_G5.security.CustomUserDetails;
 import vn.edu.fpt.SE2034_SWP391_G5.service.ArticleService;
 import vn.edu.fpt.SE2034_SWP391_G5.service.UserService;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 
 // Quản lý bài viết phía Hospital Manager
@@ -39,21 +42,45 @@ public class ManagerArticleController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String status,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             Model model) {
 
-        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
+        // Giao diện đếm trang từ 1, Spring Data JPA đếm từ 0
+        Pageable pageable = PageRequest.of(Math.max(0, page - 1), PAGE_SIZE);
         Page<ArticleResponse> articlePage = articleService.getArticlesByFilters(keyword, category, status, pageable);
 
+        int totalPages = articlePage.getTotalPages();
+
         model.addAttribute("articleList", articlePage.getContent());
-        model.addAttribute("currentPage", articlePage.getNumber());
-        model.addAttribute("totalPages", articlePage.getTotalPages());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", totalPages);
         model.addAttribute("totalItems", articlePage.getTotalElements());
+
+        // Dữ liệu cho thanh phân trang, tính sẵn để template chỉ việc hiển thị
+        model.addAttribute("middlePages", buildMiddlePages(page, totalPages));
+        model.addAttribute("showLeftDots", page > 3);
+        model.addAttribute("showRightDots", page < totalPages - 2);
+
         model.addAttribute("keyword", keyword);
         model.addAttribute("category", category);
         model.addAttribute("status", status);
         model.addAttribute("categories", ArticleCategory.getAllDisplayNames());
         return "manager/articles/list";
+    }
+
+    // Các số trang hiện ở giữa thanh phân trang.
+    // Trang đầu và trang cuối luôn hiện riêng nên không tính vào đây.
+    private List<Integer> buildMiddlePages(int currentPage, int totalPages) {
+        List<Integer> pages = new ArrayList<>();
+
+        // Lấy 2 trang trước và 2 trang sau trang hiện tại, không vượt ra ngoài khoảng giữa
+        int from = Math.max(currentPage - 2, 2);
+        int to = Math.min(currentPage + 2, totalPages - 1);
+
+        for (int page = from; page <= to; page++) {
+            pages.add(page);
+        }
+        return pages;
     }
 
     // Xem chi tiết bài viết

@@ -162,6 +162,16 @@ public class ArticleServiceImpl implements ArticleService {
     // Thêm bình luận vào bài viết đã xuất bản
     @Override
     public void addComment(Long articleId, String content, String username) {
+        // Kiểm tra nội dung trước để dữ liệu sai thì khỏi phải truy vấn database
+        if (content == null || content.trim().isEmpty()) {
+            throw new BadRequestException("Nội dung bình luận không được để trống.");
+        }
+
+        String trimmedContent = content.trim();
+        if (trimmedContent.length() > 1000) {
+            throw new BadRequestException("Bình luận không được vượt quá 1000 ký tự.");
+        }
+
         Article article = findActiveArticle(articleId);
         if (article == null || !ArticleStatus.PUBLISHED.name().equals(article.getStatus())) {
             throw new BadRequestException("Bài viết không tồn tại hoặc chưa được xuất bản.");
@@ -170,16 +180,6 @@ public class ArticleServiceImpl implements ArticleService {
         User user = userRepository.findByUsername(username).orElse(null);
         if (user == null) {
             throw new BadRequestException("Không tìm thấy người dùng.");
-        }
-
-        // Nội dung bình luận không được trống và tối đa 1000 ký tự
-        if (content == null || content.trim().isEmpty()) {
-            throw new BadRequestException("Nội dung bình luận không được để trống.");
-        }
-
-        String trimmedContent = content.trim();
-        if (trimmedContent.length() > 1000) {
-            throw new BadRequestException("Bình luận không được vượt quá 1000 ký tự.");
         }
 
         ArticleComment comment = new ArticleComment();

@@ -36,15 +36,16 @@ public class PublicArticleController {
     @GetMapping
     public String listArticles(
             @RequestParam(required = false) String category,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             Model model) {
 
-        Pageable pageable = PageRequest.of(page, PAGE_SIZE);
+        // Giao diện đếm trang từ 1, Spring Data JPA đếm từ 0
+        Pageable pageable = PageRequest.of(Math.max(0, page - 1), PAGE_SIZE);
         // Chỉ lấy bài viết đã xuất bản
         Page<ArticleResponse> articlePage = articleService.getArticlesByFilters(null, category, ArticleStatus.PUBLISHED.name(), pageable);
 
         model.addAttribute("articleList", articlePage.getContent());
-        model.addAttribute("currentPage", articlePage.getNumber());
+        model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", articlePage.getTotalPages());
         model.addAttribute("category", category);
         model.addAttribute("categories", ArticleCategory.getAllDisplayNames());
@@ -56,8 +57,9 @@ public class PublicArticleController {
     @GetMapping("/{id}")
     public String detailArticle(@PathVariable Long id, Model model, Principal principal) {
         ArticleResponse article = articleService.getArticleById(id);
+        // Bài chưa xuất bản hoặc không tồn tại thì đưa khách về danh sách, không báo lỗi
         if (article == null || !ArticleStatus.PUBLISHED.name().equals(article.getStatus())) {
-            return "redirect:/articles"; // Hoặc trang 404
+            return "redirect:/articles";
         }
 
         // Tăng lượt xem

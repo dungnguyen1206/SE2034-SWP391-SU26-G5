@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.ArrayList;
 import java.util.List;
 
+// Lớp bọc User của hệ thống để Spring Security hiểu được
 public class CustomUserDetails implements UserDetails {
 
     private final User user;
@@ -31,6 +32,11 @@ public class CustomUserDetails implements UserDetails {
         }
         List<GrantedAuthority> authorities = new ArrayList<>();
         for (UserRole userRole : user.getUserRoles()) {
+            // Bỏ qua dòng dữ liệu thiếu vai trò để không làm hỏng cả lần đăng nhập
+            if (userRole.getRole() == null) {
+                continue;
+            }
+
             String roleName = userRole.getRole().getName();
             // Đảm bảo luôn có prefix ROLE_ để Spring Security nhận diện đúng
             if (!roleName.startsWith("ROLE_")) {
@@ -46,10 +52,10 @@ public class CustomUserDetails implements UserDetails {
         return user.getPasswordHash();
     }
 
+    // Dù đăng nhập bằng số điện thoại thì vẫn trả về username để định danh phiên
     @Override
-    // Trả về username để Spring Security xác thực
     public String getUsername() {
-        return user.getUsername(); // Đăng nhập sử dụng Username
+        return user.getUsername();
     }
 
     @Override
